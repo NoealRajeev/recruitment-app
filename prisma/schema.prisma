@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  RECRUITMENT_ADMIN
+  CLIENT_ADMIN
+  RECRUITMENT_AGENCY
+}
+
+enum Permission {
+  // Labour Requests
+  REQUEST_CREATE
+  REQUEST_READ
+  REQUEST_UPDATE
+  REQUEST_DELETE
+  REQUEST_MANAGE_ALL
+  
+  // Candidates
+  CANDIDATE_CREATE
+  CANDIDATE_READ
+  CANDIDATE_UPDATE
+  CANDIDATE_DELETE
+  CANDIDATE_MANAGE_ALL
+  
+  // Procedures
+  PROCEDURE_CREATE
+  PROCEDURE_READ
+  PROCEDURE_UPDATE
+  PROCEDURE_DELETE
+  
+  // Agencies
+  AGENCY_CREATE
+  AGENCY_READ
+  AGENCY_UPDATE
+  AGENCY_DELETE
+  
+  // Users
+  USER_CREATE
+  USER_READ
+  USER_UPDATE
+  USER_DELETE
+  
+  // Dashboard
+  DASHBOARD_ACCESS
+}
+
+model RolePermission {
+  id         String    @id @default(uuid())
+  role       UserRole
+  permission Permission
+  createdAt  DateTime  @default(now())
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id])
+  
+  @@unique([role, permission])
+}
+
+model LabourRequest {
+  id          String     @id @default(uuid())
+  jobTitle    String
+  nationality String
+  salary      Float
+  quantity    Int
+  requirements String
+  status      String     @default("DRAFT") // DRAFT, SUBMITTED, IN_PROGRESS, COMPLETED
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
+  candidates  Candidate[]
+  procedures  Procedure[]
+}
+
+model Agency {
+  id          String     @id @default(uuid())
+  name        String
+  contact     String
+  email       String     @unique
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+model User {
+  id          String     @id @default(uuid())
+  email       String     @unique
+  password    String
+  role        UserRole
+  name        String?
+  company     String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  permissions RolePermission[]
+  labourRequests LabourRequest[]
+  agencies       Agency[]
+}
+
+model Candidate {
+  id             String   @id @default(uuid())
+  name           String
+  code           String   @unique
+  cvUrl          String?
+  status         String   @default("SUBMITTED") // SUBMITTED, APPROVED, REJECTED
+  labourRequestId String
+  labourRequest  LabourRequest @relation(fields: [labourRequestId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Procedure {
+  id              String   @id @default(uuid())
+  name            String
+  description     String?
+  status          String   @default("NOT_STARTED") // NOT_STARTED, PENDING, COMPLETE
+  dueDate         DateTime?
+  completedDate   DateTime?
+  labourRequestId String
+  labourRequest   LabourRequest @relation(fields: [labourRequestId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}

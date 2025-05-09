@@ -1,84 +1,66 @@
-import { Star, StarHalf } from "lucide-react";
-export interface Testimonial {
-  id: number;
-  name: string;
-  role: string;
-  avatar: string;
-  content: string;
-  rating: number;
-}
-export const testimonials: Testimonial[] = [
+import { FaStar } from "react-icons/fa";
+
+const testimonials = [
   {
-    id: 1,
-    name: "Emily Rodriguez",
-    role: "Front-end Developer",
-    avatar: "https://randomuser.me/api/portraits/women/42.jpg",
-    content:
-      "The project-based learning approach was exactly what I needed. I completed three projects on CodeBreak, added them to my portfolio, and landed my first developer job within two months!",
-    rating: 5,
+    name: "Kyle Roberts DVM",
+    title: "Customer Web Consultant",
+    text: "Findly helped us hire 150+ workers across 3 countries in just 30 days. Seamless and efficient!",
+    image: "/images/kyle.jpg",
   },
   {
-    id: 2,
-    name: "Jason Kim",
-    role: "Full-stack Developer",
-    avatar: "https://randomuser.me/api/portraits/men/55.jpg",
-    content:
-      "The structured roadmaps and mentor feedback helped me transition from basic coding knowledge to building complex applications. The AI assistant was incredibly helpful when I got stuck!",
-    rating: 5,
+    name: "Sophia Anderson",
+    title: "Internal Implementation Officer",
+    text: "We’ve worked with multiple agencies, but Findly stands out. Fast communication and quality.",
+    image: "/images/sophia.jpg",
   },
   {
-    id: 3,
-    name: "Michelle Thompson",
-    role: "Data Scientist",
-    avatar: "https://randomuser.me/api/portraits/women/28.jpg",
-    content:
-      "I was struggling to find practical machine learning projects beyond tutorials. CodeBreak provided real-world ML projects with clean datasets and guided implementation. Exactly what I needed!",
-    rating: 4.5,
+    name: "Stephen Brekke",
+    title: "Legacy Integration Producer",
+    text: "From CV shortlisting to deployment, Findly owns the process. We just say yes!",
+    image: "/images/stephen.jpg",
   },
 ];
-// components/TestimonialsSection.tsx
-export default function TestimonialsSection() {
+
+export default function Testimonials() {
   return (
-    <section className="py-16 bg-[#2C0053] text-white " id="contact">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-poppins font-bold mb-4 text-white/70">
-            Hear from our Users,
-          </h2>
-        </div>
+    <section className="bg-[#2C0053] text-[#BFB2CB] py-3 px-6 text-left">
+      {/* Header */}
+      <h2 className="text-[50] sm:text-3xl font-bold">Hear from our</h2>
+      <h1 className="text-7xl sm:text-5xl font-bold mb-12 mr-13.5">Users,</h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {testimonials.map((testimonial) => (
-            <div key={testimonial.id} className="bg-[#101d3d] rounded-lg p-6">
-              <div className="flex items-center mb-4">
-                {
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={testimonial.avatar}
-                    alt={`${testimonial.name} avatar`}
-                    className="w-12 h-12 rounded-full mr-4"
-                  />
-                }
-                <div>
-                  <h4 className="font-medium">{testimonial.name}</h4>
-                  <p className="text-sm text-gray-400">{testimonial.role}</p>
-                </div>
-              </div>
+      {/* Testimonials Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto items-start">
+        {testimonials.map((t, index) => (
+          <div key={index} className="flex flex-col items-center text-left space-y-4 relative px-4">
+            <img
+              src={t.image}
+              alt={t.name}
+              className="w-16 h-16 rounded-full object-cover"
+            />
 
-              <p className="text-gray-300 mb-4">
-                &quot;{testimonial.content}&quot;
-              </p>
-              <div className="flex text-yellow-400">
-                {Array.from({ length: Math.floor(testimonial.rating) }).map(
-                  (_, i) => (
-                    <Star key={i} />
-                  )
-                )}
-                {testimonial.rating % 1 !== 0 && <StarHalf />}
-              </div>
+            {/* Stars */}
+            <div className="flex space-x-1 text-yellow-400">
+              {[...Array(5)].map((_, i) => (
+                <FaStar key={i} />
+              ))}
+          </div>
+            <div className="text-left max-w-xs">
+            {/* Testimonial Text */}
+            <p className="text-sm sm:text-base font-light text-left mb-4">“{t.text}”</p>
+
+            {/* Name & Title */}
+            <div className="text-[20] ">
+              <p className="font-regular text-white">{t.name}</p>
+              <p className="text-sm text-[#B6A7C7]">{t.title}</p>
             </div>
-          ))}
-        </div>
+          </div>
+
+            {/* Divider */}
+            {index < testimonials.length - 1 && (
+              <div className="hidden md:block absolute right-[-1.5rem] top-1/2 transform -translate-y-1/2 h-24 w-[1px] bg-[#70528A]" />
+            )}
+          </div>
+        ))}
       </div>
     </section>
   );

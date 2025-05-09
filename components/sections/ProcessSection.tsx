@@ -50,7 +50,7 @@ export default function ProcessSection() {
           <h2 className="text-3xl md:text-4xl font-poppins font-bold mb-4 text-[#2C0053]">
             End-to-End Recruitment Steps
           </h2>
-          <p className="max-w-2xl mx-auto text-[#2C0053]font-light">
+          <p className="max-w-2xl mx-auto text-[#2C0053] font-light">
             From Job Request to Arrival—All in One Flow
           </p>
         </div>
@@ -106,60 +106,35 @@ export default function ProcessSection() {
               })}
             </div>
           </div>
-          {/* Right Side - New Design */}
-          <div className="flex flex-col">
-            {/* Image + Rectangle Card */}
-            <div className="relative h-[300px] w-full rounded-2xl overflow-hidden shadow-lg mb-12">
-              {/* World Map Image (1/3 of card) */}
-              <div className="absolute left-0 top-0 bottom-0 w-2/3">
-                <Image
-                  src="/assets/our-process.png"
-                  alt="Global recruitment"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-
-              {/* Colored Rectangle (2/3 of card) */}
-              <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[#2C0053]/20 flex flex-col justify-center pl-12 pr-8">
-                {/* Logo (replace with your actual logo) */}
-                <div className="mb-4">
-                  <div className="w-16 h-16 bg-[#2C0053] rounded-full flex items-center justify-center text-white text-xl font-bold">
-                    Logo
-                  </div>
-                </div>
-                <p className="text-[#2C0053] font-normal text-3xl">
-                  Finds You Well !
-                </p>
-              </div>
+          <div className="lg:w-1/2 flex flex-col gap-8">
+            {/* Main Image with Overlay Text */}
+            <div className="relative h-full w-full rounded-2xl">
+              <Image
+                src="/assets/our-process.png" // Make sure this image matches the one in the reference
+                alt="Global recruitment process"
+                fill
+                className="object-cover"
+              />
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-4">
+            {/* Stats Section - Updated to match reference */}
+            <div className="grid grid-cols-3 text-[#410651]/40">
               {/* Workers Stat */}
-              <div className="bg-white rounded-2xl p-6 shadow-md flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-[#2C0053]/10 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-2xl font-bold text-[#2C0053]">5K+</span>
-                </div>
-                <p className="text-[#2C0053] font-medium">Workers</p>
+              <div className="flex flex-col items-center text-center">
+                <span className="text-3xl font-bold">5k+</span>
+                <p className="mt-2">Workers</p>
               </div>
 
               {/* Countries Stat */}
-              <div className="bg-white rounded-2xl p-6 shadow-md flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-[#2C0053]/10 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-2xl font-bold text-[#2C0053]">15+</span>
-                </div>
-                <p className="text-[#2C0053] font-medium">Countries</p>
+              <div className="flex flex-col items-center text-center">
+                <span className="text-3xl font-bold">15+</span>
+                <p className="mt-2">Countries</p>
               </div>
 
               {/* Clients Stat */}
-              <div className="bg-white rounded-2xl p-6 shadow-md flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-[#2C0053]/10 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-2xl font-bold text-[#2C0053]">
-                    100+
-                  </span>
-                </div>
-                <p className="text-[#2C0053] font-medium">Trusted Clients</p>
+              <div className="flex flex-col items-center text-center">
+                <span className="text-3xl font-bold">100+</span>
+                <p className=" mt-2">Clients</p>
               </div>
             </div>
           </div>

@@ -31,11 +31,6 @@ export default function HeroSection() {
             Delivered.
           </h1>
 
-          <p className="text-lg md:text-xl mb-8 opacity-90">
-            We provide end-to-end manpower solutions for construction and other
-            labor-intensive industries.
-          </p>
-
           <div className="flex flex-col sm:flex-row gap-4">
             <Link href="/submit-requirement">
               <Button className="text-sm font-medium bg-gradient-to-r from-[#6914A8] to-[#290842] hover:from-[#6914A8] hover:to-[#290842] hover:scale-105 transition-all duration-300 px-8 py-3">
@@ -43,6 +38,11 @@ export default function HeroSection() {
               </Button>
             </Link>
           </div>
+
+          <p className="text-lg md:text-xl mb-8 opacity-90 mt-5">
+            We provide end-to-end manpower solutions for construction and other
+            labor-intensive industries.
+          </p>
         </div>
       </div>
     </section>

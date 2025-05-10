@@ -34,37 +34,65 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <form onSubmit={handleSubmit} className="max-w-md w-full space-y-4">
-        {error && <div className="text-red-500">{error}</div>}
+    <div className="min-h-screen flex items-center justify-center bg-white">
+    <div className="bg-gradient-to-r from-[#FFFFFF] to-[#E4D7FF] rounded-[10] w-[582px] h-[600px] p-10 sm:p-14 max-w-md ">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Error Message */}
+        {error && <div className="text-red-500 text-sm text-center">{error}</div>}
+
+        {/* Email Input */}
         <div>
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email" className="block text-[#797979] mb-1">
+            <p className=" text-[10] font-light">
+            Email Address</p>
+          </label>
           <input
             id="email"
             name="email"
             type="email"
             required
-            className="w-full p-2 border rounded"
+            className="w-full px-4 py-2 border-[0.5] rounded-[5] focus:outline-none "
           />
         </div>
+
+        {/* Password Input */}
         <div>
-          <label htmlFor="password">Password</label>
+          <label htmlFor="password" className="block text-[#797979] mb-1">
+          <p className=" text-[10] font-light">
+            Password</p>
+          </label>
           <input
             id="password"
             name="password"
             type="password"
             required
-            className="w-full p-2 border rounded"
+            className="w-full px-4 py-2 border-[0.5] rounded-[5] focus:outline-none"
           />
+          <div className="text-right mt-1 text-[#797979] cursor-pointer hover:underline">
+          <p className=" text-[10] font-light">
+            Forgot Password</p>
+          </div>
         </div>
+
+        {/* Sign In Button */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-500 text-white p-2 rounded disabled:opacity-50"
+          className="w-full py-3 rounded-[40] bg-gradient-to-r from-purple-600 to-black text-white font-semibold hover:opacity-90 transition disabled:opacity-50"
         >
-          {loading ? "Signing in..." : "Sign in"}
+          {loading ? "Signing in..." : "Sign Up"}
+        </button>
+
+        {/* Secondary Action */}
+        <button
+          type="button"
+          className="w-full py-3 rounded-[40] border border-black text-black font-semibold hover:bg-black hover:text-white transition"
+          onClick={() => router.push("/auth/signup")}
+        >
+          Get Started
         </button>
       </form>
     </div>
+  </div>
   );
 }

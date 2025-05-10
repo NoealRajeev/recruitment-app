@@ -40,6 +40,29 @@ export const benefits: Benefit[] = [
   },
 ];
 
+function splitTitle(title: string): { floating: string; remaining: string } {
+  if (title.includes("&")) {
+    const [beforeAmp, ...afterAmp] = title.split("&");
+    return {
+      floating: [...beforeAmp, "&"].join("").trim(),
+      remaining: [...afterAmp].join("").trim(),
+    };
+  }
+
+  const words = title.split(" ");
+  if (words.length >= 3) {
+    return {
+      floating: words.slice(0, 2).join(" "),
+      remaining: words.slice(2).join(" "),
+    };
+  }
+
+  return {
+    floating: words[0],
+    remaining: words.slice(1).join(" "),
+  };
+}
+
 export default function ServicesSection() {
   return (
     <section id="services" className="py-16 lg:py-24 bg-gray-50 text-[#2C0053]">
@@ -52,33 +75,35 @@ export default function ServicesSection() {
 
         <div className="flex flex-wrap justify-center gap-8">
           {benefits.map((benefit, index) => {
-            // Calculate opacity based on position (5 items total)
-            const opacityMap = {
-              0: "bg-[#2C0053]/20", // First card
-              1: "bg-[#2C0053]/35", // Second card
-              2: "bg-[#2C0053]/50", // Middle card
-              3: "bg-[#2C0053]/35", // Fourth card
-              4: "bg-[#2C0053]/20", // Fifth card
-            };
-            const opacityClass =
-              opacityMap[index as keyof typeof opacityMap] || "bg-[#2C0053]/60";
+            const { floating, remaining } = splitTitle(benefit.title);
 
             return (
               <div
                 key={index}
-                className={`relative flex flex-col w-full sm:w-[400px] h-[250px] ${opacityClass} rounded-2xl p-8 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 overflow-hidden`}
+                className="relative w-full sm:w-[400px] h-[200px] shadow-md transition-all duration-300 hover:-translate-y-1 m-6"
               >
-                {/* Icon circle positioned top-right but contained within card */}
-                <div className="absolute top-0 right-0 w-16 h-16 bg-[#2C0053] text-white rounded-full flex items-center justify-center shadow-lg transform translate-x-2 -translate-y-2">
-                  <benefit.icon className="text-2xl" />
+                {/* Floating title part (outside card visually) */}
+                <div className="absolute -top-6 left-6 bg-transparent text-[#2C0053] font-bold text-2xl font-poppins z-10">
+                  {floating}
                 </div>
 
-                <h3 className="text-xl font-poppins font-semibold mb-3">
-                  {benefit.title}
-                </h3>
-                <p className="font-normal mt-2 mb-4 max-w-[calc(100%-50px)]">
-                  {benefit.description}
-                </p>
+                {/* Card container with overflow-hidden */}
+                <div className="relative flex flex-col h-full rounded-2xl px-6 pb-6 mt-1 bg-gradient-to-br from-white/20 to-[#6914a8]/20 overflow-hidden">
+                  {/* Remaining title */}
+                  <h3 className="text-2xl font-poppins font-semibold text-[#2C0053]">
+                    {remaining}
+                  </h3>
+
+                  {/* Description */}
+                  <p className="font-normal text-base text-[#2C0053] mt-3 pr-12">
+                    {benefit.description}
+                  </p>
+
+                  {/* Icon */}
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-[#2C0053] text-white rounded-full flex items-center justify-center shadow-lg transform translate-x-2 -translate-y-2 z-10">
+                    <benefit.icon size={30} />
+                  </div>
+                </div>
               </div>
             );
           })}

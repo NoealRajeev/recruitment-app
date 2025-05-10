@@ -9,86 +9,38 @@ export default function WhyUsSection() {
     "24/7 support and emergency response",
     "Compliance with all safety regulations",
   ];
+
   return (
-    <section id="why us" className="py-16 lg:py-24">
+    <section id="why us" className="py-20 bg-white min-h-screen">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-poppins font-bold mb-4 text-[#2C0053]">
-            Why companies trust us ?
+        {/* Heading */}
+        <div className="text-center my-24">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-[#2C0053]">
+            Why companies trust us <span className="text-5xl">?</span>
           </h2>
         </div>
-        <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-36">
-          {/* Reasons Column */}
-          <div className="lg:w-1/2 relative">
-            <div className="relative h-full">
-              {/* Reasons cards */}
-              <div className="space-y-8 pl-12 pr-12">
-                {reasons.map((reason, index) => {
-                  const opacity = 0.9 - index * 0.1;
-                  const bgColor = `rgba(44, 0, 83, ${opacity})`;
-                  const isEven = index % 2 === 0;
 
-                  return (
-                    <div
-                      key={index}
-                      className={`relative ${isEven ? "mr-auto" : "ml-auto"}`}
-                      style={{
-                        width: "calc(100% - 80px)",
-                        marginLeft: isEven ? "0" : "240px",
-                        marginRight: isEven ? "240px" : "0",
-                      }}
-                    >
-                      <div
-                        className="rounded-4xl shadow-xl p-6 my-16 text-white transition-all duration-300 hover:shadow-lg hover:scale-[1.02]"
-                        style={{ backgroundColor: bgColor }}
-                      >
-                        <div className="flex items-center gap-4">
-                          <CircleCheckBig
-                            className="flex-shrink-0 text-white"
-                            size={24}
-                          />
-                          <p className="text-lg font-medium">{reason}</p>
-                        </div>
-                      </div>
-                      {index < reasons.length - 1 && (
-                        <div
-                          className="absolute top-full mt-6 flex items-center"
-                          style={{
-                            left: isEven ? "calc(100% - 40px)" : undefined,
-                            right: !isEven ? "calc(100% - 40px)" : undefined,
-                          }}
-                        >
-                          {isEven ? (
-                            <>
-                              <div className="h-[3px] w-40 bg-black" />
-                              <div className="w-3 h-3 rounded-full bg-black" />
-                            </>
-                          ) : (
-                            <>
-                              <div className="w-3 h-3 rounded-full bg-black" />
-                              <div className="h-[3px] w-40 bg-black" />
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+        {/* Main Content */}
+        <div className="flex flex-col lg:flex-row items-center justify-center px-4 lg:px-20">
+          {/* Left: Reasons List */}
+          <div className="flex flex-col items-start gap-6 lg:w-1/2">
+            {reasons.map((reason, index) => (
+              <div key={index} className="flex items-center gap-4 text-left">
+                <CircleCheckBig className="text-[#2C0053]" size={45} />
+                <p className="text-2xl text-[#2C0053] font-medium">{reason}</p>
               </div>
-            </div>
+            ))}
           </div>
 
-          {/* Image Column */}
+          {/* Right: Illustration */}
           <div className="lg:w-1/2 flex justify-center">
-            <div className="relative w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] lg:w-[600px] lg:h-[600px]">
-              <div className="absolute inset-0 rounded-full border-4 border-white shadow-xl overflow-hidden">
-                <Image
-                  src="/assets/process.png"
-                  alt="Our process"
-                  fill
-                  className="object-cover"
-                />
-              </div>
+            <div className="w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] relative">
+              <Image
+                src="/assets/why-choose-us-illustration.svg"
+                alt="Why companies trust us"
+                fill
+                className="object-contain"
+              />
             </div>
           </div>
         </div>

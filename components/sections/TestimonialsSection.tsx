@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { FaStar } from "react-icons/fa";
 
 const testimonials = [
@@ -5,19 +6,19 @@ const testimonials = [
     name: "Kyle Roberts DVM",
     title: "Customer Web Consultant",
     text: "Findly helped us hire 150+ workers across 3 countries in just 30 days. Seamless and efficient!",
-    image: "/images/kyle.jpg",
+    image: "/assets/kyle.png",
   },
   {
     name: "Sophia Anderson",
     title: "Internal Implementation Officer",
     text: "We’ve worked with multiple agencies, but Findly stands out. Fast communication and quality.",
-    image: "/images/sophia.jpg",
+    image: "/assets/kyle.png",
   },
   {
     name: "Stephen Brekke",
     title: "Legacy Integration Producer",
     text: "From CV shortlisting to deployment, Findly owns the process. We just say yes!",
-    image: "/images/stephen.jpg",
+    image: "/assets/kyle.png",
   },
 ];
 
@@ -31,8 +32,13 @@ export default function Testimonials() {
       {/* Testimonials Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto items-start">
         {testimonials.map((t, index) => (
-          <div key={index} className="flex flex-col items-center text-left space-y-4 relative px-4">
-            <img
+          <div
+            key={index}
+            className="flex flex-col items-center text-left space-y-4 relative px-4"
+          >
+            <Image
+              width={64}
+              height={64}
               src={t.image}
               alt={t.name}
               className="w-16 h-16 rounded-full object-cover"
@@ -43,17 +49,19 @@ export default function Testimonials() {
               {[...Array(5)].map((_, i) => (
                 <FaStar key={i} />
               ))}
-          </div>
-            <div className="text-left max-w-xs">
-            {/* Testimonial Text */}
-            <p className="text-sm sm:text-base font-light text-left mb-4">“{t.text}”</p>
-
-            {/* Name & Title */}
-            <div className="text-[20] ">
-              <p className="font-regular text-white">{t.name}</p>
-              <p className="text-sm text-[#B6A7C7]">{t.title}</p>
             </div>
-          </div>
+            <div className="text-left max-w-xs">
+              {/* Testimonial Text */}
+              <p className="text-sm sm:text-base font-light text-left mb-4">
+                “{t.text}”
+              </p>
+
+              {/* Name & Title */}
+              <div className="text-[20] ">
+                <p className="font-regular text-white">{t.name}</p>
+                <p className="text-sm text-[#B6A7C7]">{t.title}</p>
+              </div>
+            </div>
 
             {/* Divider */}
             {index < testimonials.length - 1 && (

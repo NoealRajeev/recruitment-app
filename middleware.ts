@@ -9,7 +9,7 @@ const publicRoutes = new Set([
   "/",
   "/about",
   "/contact",
-  "/process",
+  "/submit-requirement",
   "/auth/login",
   "/auth/register",
 ]);

@@ -147,7 +147,7 @@ export default function Header() {
 
         {/* Action Buttons */}
         <div className="flex items-center space-x-4">
-          <Link href="/auth">
+          <Link href="/submit-requirement">
             <div className="hidden sm:block text-sm font-medium py-2 px-3 rounded hover:bg-gradient-to-r hover:from-[#6914A8] hover:to-[#290842] hover:text-white">
               Submit Requirement
             </div>
@@ -201,12 +201,12 @@ export default function Header() {
                   </ul>
                 </nav>
                 <div className="mt-auto p-4 border-t border-[#101d3d]">
-                  <Link href="/auth">
+                  <Link href="/submit-requirement">
                     <Button
                       variant="outline"
                       className="w-full text-white border-white hover:bg-[#101d3d]"
                     >
-                      Sign In
+                      Submit Requirement
                     </Button>
                   </Link>
                   <Link href="/auth">

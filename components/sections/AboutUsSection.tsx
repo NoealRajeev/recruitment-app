@@ -4,15 +4,15 @@ export default function AboutUsSection() {
   return (
     <section
       id="about us"
-      className="relative w-full h-fit md:h-screen flex flex-col items-center justify-center text-center px-6 animate-fade-in-bg text-[#2C0053]"
+      className="relative w-full h-fit flex flex-col items-center justify-center text-center px-6 animate-fade-in-bg text-[#2C0053]"
     >
       {/* Heading */}
-      <h2 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-wide leading-tight mt-0 md:mt-40">
+      <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-wide leading-tight mt-0 md:mt-40">
         Know more About Us
       </h2>
 
       {/* Description */}
-      <p className="mt-6 sm:mt-10 max-w-4xl text-base sm:text-lg md:text-xl leading-relaxed px-4 sm:px-6">
+      <p className="m-6 sm:m-10 max-w-4xl text-base leading-relaxed px-4 sm:px-6">
         Discover who we are and how we operate as a trusted partner in
         blue-collar workforce solutions. Our organization is committed to
         delivering skilled and verified manpower through a meticulously managed
@@ -24,7 +24,7 @@ export default function AboutUsSection() {
       </p>
 
       {/* Buttons */}
-      <div className="mt-12 flex flex-wrap justify-center gap-4">
+      <div className="m-10 flex flex-wrap justify-center gap-4 ">
         <Link href="/team">
           <button className="text-sm font-medium bg-gradient-to-r from-[#6914A8] to-[#290842] hover:from-[#6914A8] hover:to-[#290842] hover:scale-105 transition-all duration-300 px-8 py-3 text-white rounded-xl">
             Learn More About Us

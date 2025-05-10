@@ -110,31 +110,31 @@ export default function ProcessSection() {
             {/* Main Image with Overlay Text */}
             <div className="relative h-full w-full rounded-2xl">
               <Image
-                src="/assets/our-process.png" // Make sure this image matches the one in the reference
+                src="/assets/our-process.png"
                 alt="Global recruitment process"
                 fill
                 className="object-cover"
               />
             </div>
 
-            {/* Stats Section - Updated to match reference */}
-            <div className="grid grid-cols-3 text-[#410651]/40">
+            {/* Stats Section - With reduced gap and dividers */}
+            <div className="grid grid-cols-3 text-[#410651]/40 divide-x-2 divide-[#410651]/40 max-w-md mx-auto">
               {/* Workers Stat */}
-              <div className="flex flex-col items-center text-center">
+              <div className="flex flex-col items-center text-center px-16">
                 <span className="text-3xl font-bold">5k+</span>
-                <p className="mt-2">Workers</p>
+                <p className="mt-1">Workers</p>
               </div>
 
               {/* Countries Stat */}
-              <div className="flex flex-col items-center text-center">
+              <div className="flex flex-col items-center text-center px-16">
                 <span className="text-3xl font-bold">15+</span>
-                <p className="mt-2">Countries</p>
+                <p className="mt-1">Countries</p>
               </div>
 
               {/* Clients Stat */}
-              <div className="flex flex-col items-center text-center">
+              <div className="flex flex-col items-center text-center px-16">
                 <span className="text-3xl font-bold">100+</span>
-                <p className=" mt-2">Clients</p>
+                <p className="mt-1">Clients</p>
               </div>
             </div>
           </div>

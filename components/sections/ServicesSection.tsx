@@ -67,13 +67,13 @@ export default function ServicesSection() {
   return (
     <section id="services" className="py-16 lg:py-24 bg-gray-50 text-[#2C0053]">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
+        <div className="text-center m-16">
           <h2 className="text-3xl md:text-4xl font-poppins font-bold mb-4 text-[#2C0053]">
             Our Workforce Specialties
           </h2>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-8">
+        <div className="flex flex-wrap justify-center gap-8 mt-28">
           {benefits.map((benefit, index) => {
             const { floating, remaining } = splitTitle(benefit.title);
 

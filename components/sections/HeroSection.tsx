@@ -7,7 +7,7 @@ export default function HeroSection() {
   return (
     <section
       id="home"
-      className="relative py-16 lg:py-24 min-h-[calc(100vh-80px)] flex items-center"
+      className="relative py-16 lg:py-24 min-h-screen flex items-center"
     >
       {/* Background Image */}
       <div className="absolute inset-0 -z-10">

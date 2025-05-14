@@ -38,6 +38,7 @@ export async function middleware(request: NextRequest) {
   // Ignore static files, image optimization, and API routes
   if (
     pathname.startsWith("/_next") ||
+    pathname.startsWith("/fonts") ||
     pathname.startsWith("/api") ||
     pathname.startsWith("/favicon.ico") ||
     pathname.startsWith("/sitemap.xml") ||

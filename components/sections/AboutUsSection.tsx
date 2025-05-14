@@ -25,7 +25,7 @@ export default function AboutUsSection() {
 
       {/* Buttons */}
       <div className="m-10 flex flex-wrap justify-center gap-4 ">
-        <Link href="/team">
+        <Link href="/about">
           <button className="text-sm font-medium bg-gradient-to-r from-[#6914A8] to-[#290842] hover:from-[#6914A8] hover:to-[#290842] hover:scale-105 transition-all duration-300 px-8 py-3 text-white rounded-xl">
             Learn More About Us
           </button>

@@ -26,7 +26,7 @@ export default function SubmitRequirement() {
         title: "",
         quantity: 1,
         experience: "",
-        languages: [], // Ensure this is initialized as empty array
+        languages: [],
       },
     ],
     projectLocation: "",
@@ -60,7 +60,7 @@ export default function SubmitRequirement() {
       companyDetails: "Company Details",
       contactPerson: "Contact Person",
       jobDetails: "Position Requirements",
-      positionsNeeded: "Let’s match the right talent to your roles.",
+      positionsNeeded: "Let's match the right talent to your roles.",
       workerRequirements: "Employment Terms",
       specifySkills: "Define the working conditions",
       reviewTitle: "Submission & Review",
@@ -73,7 +73,91 @@ export default function SubmitRequirement() {
       addAnotherRole: "+ Add Another Role",
       accommodations: "Accommodation provided",
       transportation: "Transportation provided",
-      // Add more translations as needed
+      companyName: "Company Name",
+      companyNamePlaceholder: "Enter company name",
+      registrationNumber: "Company Registration Number",
+      registrationNumberPlaceholder: "Enter registration number",
+      invalidRegistration: "Invalid registration number format",
+      sector: "Sector",
+      companySize: "Company Size",
+      website: "Company Website (optional)",
+      websitePlaceholder: "Website link",
+      fullName: "Full Name",
+      fullNamePlaceholder: "Enter your full name",
+      jobTitle: "Job Title",
+      jobTitlePlaceholder: "Enter your job title",
+      email: "Email Address",
+      emailPlaceholder: "Enter your email address",
+      invalidEmail: "Invalid email format",
+      emailInUse: "Email is already in use",
+      emailCheckError: "Error verifying email",
+      phone: "Phone Number",
+      phonePlaceholder: "Enter your phone number",
+      invalidPhone: "Invalid phone number",
+      altContact: "Alternative Contact (optional)",
+      altContactPlaceholder: "Enter alternate contact",
+      jobRoles: "Job Roles",
+      jobRole: "Job role",
+      quantity: "Quantity",
+      experience: "Experience",
+      languages: "Languages",
+      actions: "Actions",
+      selectOption: "Select",
+      workingHours: "Working Hours / Day",
+      projectLocation: "Project Location",
+      projectLocationPlaceholder: "Enter project location",
+      startDate: "Start Date",
+      specialRequirements: "Special Requirements (optional)",
+      specialRequirementsPlaceholder: "Special requirements if any",
+      qualifications: "Qualifications",
+      experienceLevel: "Experience Level",
+      languageRequirements: "Language Requirements",
+      certificationRequirements: "Certification Requirements",
+      certificationPlaceholder: "e.g., OSHA, CPR, etc.",
+      medicalRequirements: "Medical Requirements",
+      medicalPlaceholder: "e.g., Drug-free, Vaccinations, etc.",
+      additionalRequirements: "Additional Requirements",
+      companyInformation: "Company Information",
+      notProvided: "Not provided",
+      benefits: "Benefits",
+      noneSpecified: "None specified",
+      languagesRequired: "Languages Required",
+      certifications: "Certifications",
+      sectionNoteCompany:
+        "*This section collects essential information about the company requesting foreign labour.",
+      sectionNoteJob:
+        "*This section specifies about the job positions and worker qualifications needed.",
+      sectionNoteRequirements:
+        "*This section helps us match the best candidates to your needs.",
+      jobPositions: [
+        "Carpenter",
+        "Electrician",
+        "Plumber",
+        "Welder",
+        "Driver",
+        "Cleaner",
+        "Cook",
+      ],
+      experienceOptions: ["0-2 years", "2-5 years", "5+ years"],
+      languageOptions: ["English", "Arabic", "Hindi", "Urdu", "Tagalog"],
+      sectorOptions: [
+        "Construction",
+        "Manufacturing",
+        "Hospitality",
+        "Healthcare",
+        "Other",
+      ],
+      companySizeOptions: [
+        "1-50 employees",
+        "51-200 employees",
+        "201-500 employees",
+        "500+ employees",
+      ],
+      experienceLevelOptions: [
+        "Entry Level (0-2 years)",
+        "Mid Level (2-5 years)",
+        "Senior Level (5+ years)",
+      ],
     },
     ar: {
       formTitle: "تقديم متطلباتك",
@@ -83,7 +167,108 @@ export default function SubmitRequirement() {
         { id: 3, label: "المتطلبات" },
         { id: 4, label: "مراجعة" },
       ],
-      // Add more Arabic translations
+      companyProfile: "ملف الشركة",
+      knowMore: "أخبرنا المزيد عنك.",
+      companyDetails: "تفاصيل الشركة",
+      contactPerson: "الشخص المسؤول",
+      jobDetails: "متطلبات الوظيفة",
+      positionsNeeded: "لنطابق بين الوظيفة والمهارات المناسبة.",
+      workerRequirements: "شروط التوظيف",
+      specifySkills: "حدد شروط العمل",
+      reviewTitle: "المراجعة والتقديم",
+      verifyInfo: "يرجى التحقق من جميع المعلومات قبل الإرسال.",
+      back: "رجوع",
+      continue: "متابعة",
+      submit: "إرسال",
+      processing: "جارٍ المعالجة...",
+      required: "مطلوب",
+      addAnotherRole: "+ أضف دورًا آخر",
+      accommodations: "الإقامة متوفرة",
+      transportation: "المواصلات متوفرة",
+      companyName: "اسم الشركة",
+      companyNamePlaceholder: "أدخل اسم الشركة",
+      registrationNumber: "رقم تسجيل الشركة",
+      registrationNumberPlaceholder: "أدخل رقم التسجيل",
+      invalidRegistration: "تنسيق رقم تسجيل غير صالح",
+      sector: "القطاع",
+      companySize: "حجم الشركة",
+      website: "موقع الويب للشركة (اختياري)",
+      websitePlaceholder: "رابط الموقع",
+      fullName: "الاسم الكامل",
+      fullNamePlaceholder: "أدخل اسمك الكامل",
+      jobTitle: "المسمى الوظيفي",
+      jobTitlePlaceholder: "أدخل المسمى الوظيفي",
+      email: "عنوان البريد الإلكتروني",
+      emailPlaceholder: "أدخل عنوان بريدك الإلكتروني",
+      invalidEmail: "تنسيق بريد إلكتروني غير صالح",
+      emailInUse: "البريد الإلكتروني مستخدم بالفعل",
+      emailCheckError: "خطأ في التحقق من البريد الإلكتروني",
+      phone: "رقم الهاتف",
+      phonePlaceholder: "أدخل رقم هاتفك",
+      invalidPhone: "رقم هاتف غير صالح",
+      altContact: "جهة اتصال بديلة (اختياري)",
+      altContactPlaceholder: "أدخل جهة اتصال بديلة",
+      jobRoles: "الأدوار الوظيفية",
+      jobRole: "الدور الوظيفي",
+      quantity: "الكمية",
+      experience: "الخبرة",
+      languages: "اللغات",
+      actions: "الإجراءات",
+      selectOption: "اختر",
+      workingHours: "ساعات العمل / اليوم",
+      projectLocation: "موقع المشروع",
+      projectLocationPlaceholder: "أدخل موقع المشروع",
+      startDate: "تاريخ البدء",
+      specialRequirements: "متطلبات خاصة (اختياري)",
+      specialRequirementsPlaceholder: "أي متطلبات خاصة إن وجدت",
+      qualifications: "المؤهلات",
+      experienceLevel: "مستوى الخبرة",
+      languageRequirements: "متطلبات اللغة",
+      certificationRequirements: "متطلبات الشهادة",
+      certificationPlaceholder: "مثل OSHA، CPR، إلخ.",
+      medicalRequirements: "المتطلبات الطبية",
+      medicalPlaceholder: "مثل خالي من المخدرات، التطعيمات، إلخ.",
+      additionalRequirements: "متطلبات إضافية",
+      companyInformation: "معلومات الشركة",
+      notProvided: "غير متوفر",
+      benefits: "المزايا",
+      noneSpecified: "غير محدد",
+      languagesRequired: "اللغات المطلوبة",
+      certifications: "الشهادات",
+      sectionNoteCompany:
+        "*يجمع هذا القسم المعلومات الأساسية عن الشركة التي تطلب عمالة أجنبية.",
+      sectionNoteJob: "*يحدد هذا القسم الوظائف والمؤهلات المطلوبة للعمال.",
+      sectionNoteRequirements:
+        "*يساعدنا هذا القسم في مطابقة أفضل المرشحين لاحتياجاتك.",
+      jobPositions: [
+        "نجار",
+        "كهربائي",
+        "سباك",
+        "لحام",
+        "سائق",
+        "عامل نظافة",
+        "طباخ",
+      ],
+      experienceOptions: ["0-2 سنوات", "2-5 سنوات", "5+ سنوات"],
+      languageOptions: [
+        "الإنجليزية",
+        "العربية",
+        "الهندية",
+        "الأردية",
+        "التاغالوغية",
+      ],
+      sectorOptions: ["البناء", "التصنيع", "الضيافة", "الرعاية الصحية", "أخرى"],
+      companySizeOptions: [
+        "1-50 موظف",
+        "51-200 موظف",
+        "201-500 موظف",
+        "500+ موظف",
+      ],
+      experienceLevelOptions: [
+        "مبتدئ (0-2 سنوات)",
+        "متوسط (2-5 سنوات)",
+        "خبير (5+ سنوات)",
+      ],
     },
   };
 
@@ -99,13 +284,11 @@ export default function SubmitRequirement() {
 
   // Enhanced validation functions
   const validateRegistrationNumber = (value) => {
-    // Basic example - adjust based on your country's format
     const regex = /^[A-Za-z0-9]{8,15}$/;
     return regex.test(value);
   };
 
   const checkEmailAvailability = async (email) => {
-    // Mock implementation - replace with actual API call
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(!["taken@example.com", "used@example.com"].includes(email));
@@ -120,7 +303,7 @@ export default function SubmitRequirement() {
     if (!formData.registrationNumber) {
       newErrors.registrationNumber = t.required;
     } else if (!validateRegistrationNumber(formData.registrationNumber)) {
-      newErrors.registrationNumber = "Invalid registration number format";
+      newErrors.registrationNumber = t.invalidRegistration;
     }
     if (!formData.sector) newErrors.sector = t.required;
     if (!formData.companySize) newErrors.companySize = t.required;
@@ -130,14 +313,14 @@ export default function SubmitRequirement() {
     if (!formData.email) {
       newErrors.email = t.required;
     } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
+      newErrors.email = t.invalidEmail;
     } else {
       try {
         setEmailCheckInProgress(true);
         const isAvailable = await checkEmailAvailability(formData.email);
-        if (!isAvailable) newErrors.email = "Email is already in use";
+        if (!isAvailable) newErrors.email = t.emailInUse;
       } catch (error) {
-        newErrors.email = "Error verifying email";
+        newErrors.email = t.emailCheckError;
       } finally {
         setEmailCheckInProgress(false);
       }
@@ -150,7 +333,7 @@ export default function SubmitRequirement() {
         formData.phone
       )
     ) {
-      newErrors.phone = "Invalid phone number";
+      newErrors.phone = t.invalidPhone;
     }
 
     setErrors(newErrors);
@@ -161,7 +344,7 @@ export default function SubmitRequirement() {
     const newErrors = {};
     if (!formData.jobCategory) newErrors.jobCategory = t.required;
     if (formData.jobRoles.some((role) => !role.title))
-      newErrors.jobRoles = "All roles must have a title";
+      newErrors.jobRoles = t.required;
     if (!formData.projectLocation) newErrors.projectLocation = t.required;
     if (!formData.contractType) newErrors.contractType = t.required;
     if (!formData.startDate) newErrors.startDate = t.required;
@@ -174,7 +357,7 @@ export default function SubmitRequirement() {
     const newErrors = {};
     if (!formData.experienceLevel) newErrors.experienceLevel = t.required;
     if (formData.languageRequirements.length === 0)
-      newErrors.languageRequirements = "At least one language required";
+      newErrors.languageRequirements = t.required;
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -217,7 +400,6 @@ export default function SubmitRequirement() {
   const handleJobRoleChange = (index, e) => {
     const { name, value } = e.target;
 
-    // Special handling for languages array
     if (name.includes("languages")) {
       setFormData((prev) => {
         const updatedJobRoles = [...prev.jobRoles];
@@ -225,15 +407,12 @@ export default function SubmitRequirement() {
           ? updatedJobRoles[index].languages
           : [];
 
-        // Handle adding new language
         if (value && !currentLanguages.includes(value)) {
           updatedJobRoles[index] = {
             ...updatedJobRoles[index],
             languages: [...currentLanguages, value],
           };
-        }
-        // Handle removing language (when value is an array from the remove action)
-        else if (Array.isArray(value)) {
+        } else if (Array.isArray(value)) {
           updatedJobRoles[index] = {
             ...updatedJobRoles[index],
             languages: value,
@@ -243,7 +422,6 @@ export default function SubmitRequirement() {
         return { ...prev, jobRoles: updatedJobRoles };
       });
     } else {
-      // Normal handling for other fields
       setFormData((prev) => {
         const updatedJobRoles = [...prev.jobRoles];
         updatedJobRoles[index] = {
@@ -298,7 +476,7 @@ export default function SubmitRequirement() {
   // Render current step content
   const renderStepContent = () => {
     switch (currentStep) {
-      case 1: // Company Info
+      case 1:
         return (
           <>
             <div className="text-center mb-2">
@@ -307,147 +485,132 @@ export default function SubmitRequirement() {
               </h1>
               <p className="text-base text-gray-700 mb-2">{t.knowMore}</p>
               <p className="text-xs text-gray-500 italic text-left">
-                *This section collects essential information about the company
-                requesting foreign labour.
+                {t.sectionNoteCompany}
               </p>
             </div>
 
             <div className="grid grid-cols-12 gap-8 mt-6">
-              {/* Left Column */}
               <div className="col-span-5 space-y-4">
                 <h2 className="text-lg font-semibold mb-2">
                   {t.companyDetails}
                 </h2>
                 <InputField
-                  label="Company Name"
+                  label={t.companyName}
                   name="companyName"
                   value={formData.companyName}
                   onChange={handleChange}
                   error={errors.companyName}
                   required
-                  placeholder="Enter company name"
+                  placeholder={t.companyNamePlaceholder}
                   id="companyName"
                   t={t}
                 />
                 <InputField
-                  label="Company Registration Number"
+                  label={t.registrationNumber}
                   name="registrationNumber"
                   value={formData.registrationNumber}
                   onChange={handleChange}
                   error={errors.registrationNumber}
                   required
-                  placeholder="Enter registration number"
+                  placeholder={t.registrationNumberPlaceholder}
                   id="registrationNumber"
                   t={t}
                 />
                 <SelectField
-                  label="Sector"
+                  label={t.sector}
                   name="sector"
                   value={formData.sector}
                   onChange={handleChange}
                   error={errors.sector}
                   required
-                  options={[
-                    "Construction",
-                    "Manufacturing",
-                    "Hospitality",
-                    "Healthcare",
-                    "Other",
-                  ]}
+                  options={t.sectorOptions}
                   id="sector"
                   t={t}
                 />
                 <SelectField
-                  label="Company Size"
+                  label={t.companySize}
                   name="companySize"
                   value={formData.companySize}
                   onChange={handleChange}
                   error={errors.companySize}
                   required
-                  options={[
-                    "1-50 employees",
-                    "51-200 employees",
-                    "201-500 employees",
-                    "500+ employees",
-                  ]}
+                  options={t.companySizeOptions}
                   id="companySize"
                   t={t}
                 />
                 <InputField
-                  label="Company Website (optional)"
+                  label={t.website}
                   name="website"
                   value={formData.website}
                   onChange={handleChange}
-                  placeholder="Website link"
+                  placeholder={t.websitePlaceholder}
                   type="url"
                   id="website"
                   t={t}
                 />
               </div>
 
-              {/* Divider */}
               <div className="col-span-2 flex justify-center items-center">
                 <div className="w-[4px] h-2/3 bg-gray-300 rounded-full"></div>
               </div>
 
-              {/* Right Column */}
               <div className="col-span-5 space-y-4">
                 <h2 className="text-lg font-semibold mb-2">
                   {t.contactPerson}
                 </h2>
                 <InputField
-                  label="Full Name"
+                  label={t.fullName}
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleChange}
                   error={errors.fullName}
                   required
-                  placeholder="Enter your full name"
+                  placeholder={t.fullNamePlaceholder}
                   id="fullName"
                   t={t}
                 />
                 <InputField
-                  label="Job Title"
+                  label={t.jobTitle}
                   name="jobTitle"
                   value={formData.jobTitle}
                   onChange={handleChange}
                   error={errors.jobTitle}
                   required
-                  placeholder="Enter your job title"
+                  placeholder={t.jobTitlePlaceholder}
                   id="jobTitle"
                   t={t}
                 />
                 <InputField
-                  label="Email Address"
+                  label={t.email}
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
                   error={errors.email}
                   required
-                  placeholder="Enter your email address"
+                  placeholder={t.emailPlaceholder}
                   type="email"
                   id="email"
                   loading={emailCheckInProgress}
                   t={t}
                 />
                 <InputField
-                  label="Phone Number"
+                  label={t.phone}
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
                   error={errors.phone}
                   required
-                  placeholder="Enter your phone number"
+                  placeholder={t.phonePlaceholder}
                   type="tel"
                   id="phone"
                   t={t}
                 />
                 <InputField
-                  label="Alternative Contact (optional)"
+                  label={t.altContact}
                   name="altContact"
                   value={formData.altContact}
                   onChange={handleChange}
-                  placeholder="Enter alternate contact"
+                  placeholder={t.altContactPlaceholder}
                   type="tel"
                   id="altContact"
                   t={t}
@@ -457,7 +620,7 @@ export default function SubmitRequirement() {
           </>
         );
 
-      case 2: // Job Details
+      case 2:
         return (
           <>
             <div className="text-center mb-2">
@@ -466,37 +629,31 @@ export default function SubmitRequirement() {
                 {t.positionsNeeded}
               </p>
               <p className="text-xs text-gray-500 italic text-left">
-                *This section specifies about the job positions and worker
-                qualifications needed.
+                {t.sectionNoteJob}
               </p>
             </div>
 
             <div className="grid grid-cols-12 gap-8 mt-6">
-              {/* Left Column - Job Roles Table */}
               <div className="col-span-6">
-                <h2 className="text-lg font-semibold mb-4">Job Roles</h2>
+                <h2 className="text-lg font-semibold mb-4">{t.jobRoles}</h2>
                 <div className="rounded-lg shadow-sm overflow-hidden">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-2/5">
-                          {" "}
-                          {/* Increased width */}
-                          Job role
+                          {t.jobRole}
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-1/6">
-                          {" "}
-                          {/* Reduced width */}
-                          Quantity
+                          {t.quantity}
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Experience
+                          {t.experience}
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Languages
+                          {t.languages}
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
+                          {t.actions}
                         </th>
                       </tr>
                     </thead>
@@ -510,20 +667,12 @@ export default function SubmitRequirement() {
                               onChange={(e) => handleJobRoleChange(index, e)}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                             >
-                              <option value="">Select</option>
-                              {[
-                                "Carpenter",
-                                "Electrician",
-                                "Plumber",
-                                "Welder",
-                                "Driver",
-                                "Cleaner",
-                                "Cook",
-                              ]
+                              <option value="">{t.selectOption}</option>
+                              {t.jobPositions
                                 .filter(
                                   (job) =>
                                     !formData.jobRoles.some(
-                                      (r, i) => r.title === job && i !== index // Fixed filtering to exclude current role
+                                      (r, i) => r.title === job && i !== index
                                     )
                                 )
                                 .map((job) => (
@@ -550,16 +699,18 @@ export default function SubmitRequirement() {
                               onChange={(e) => handleJobRoleChange(index, e)}
                               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
                             >
-                              <option value="">Select</option>
-                              <option value="0-2 years">0-2 years</option>
-                              <option value="2-5 years">2-5 years</option>
-                              <option value="5+ years">5+ years</option>
+                              <option value="">{t.selectOption}</option>
+                              {t.experienceOptions.map((exp) => (
+                                <option key={exp} value={exp}>
+                                  {exp}
+                                </option>
+                              ))}
                             </select>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <input
                               type="text"
-                              placeholder="Type language and press Enter"
+                              placeholder={t.languageRequirements}
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") {
                                   e.preventDefault();
@@ -613,7 +764,7 @@ export default function SubmitRequirement() {
                               onClick={() => removeJobRole(index)}
                               className="text-purple-600 hover:text-purple-900"
                             >
-                              Remove
+                              {t.back}
                             </button>
                           </td>
                         </tr>
@@ -627,21 +778,19 @@ export default function SubmitRequirement() {
                     onClick={addJobRole}
                     className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
                   >
-                    + Add Role
+                    {t.addAnotherRole}
                   </button>
                 </div>
               </div>
 
-              {/* Divider */}
               <div className="col-span-2 flex justify-center items-center">
                 <div className="w-[4px] h-2/3 bg-gray-300 rounded-full"></div>
               </div>
 
-              {/* Right Column - Job Details */}
               <div className="col-span-4 space-y-6">
                 <div>
                   <h3 className="text-md font-medium text-gray-700 mb-3">
-                    Working Hours / Day*
+                    {t.workingHours}*
                   </h3>
                   <InputField
                     name="workingHours"
@@ -650,26 +799,28 @@ export default function SubmitRequirement() {
                     type="time"
                     required
                     className="w-full"
+                    t={t}
                   />
                 </div>
 
                 <div>
                   <h3 className="text-md font-medium text-gray-700 mb-3">
-                    Project Location*
+                    {t.projectLocation}*
                   </h3>
                   <InputField
                     name="projectLocation"
                     value={formData.projectLocation}
                     onChange={handleChange}
-                    placeholder="Enter project location"
+                    placeholder={t.projectLocationPlaceholder}
                     required
                     className="w-full"
+                    t={t}
                   />
                 </div>
 
                 <div>
                   <h3 className="text-md font-medium text-gray-700 mb-3">
-                    Start Date*
+                    {t.startDate}*
                   </h3>
                   <InputField
                     name="startDate"
@@ -678,12 +829,13 @@ export default function SubmitRequirement() {
                     type="date"
                     required
                     className="w-full"
+                    t={t}
                   />
                 </div>
 
                 <div>
                   <h3 className="text-md font-medium text-gray-700 mb-3">
-                    Special Requirements (optional)
+                    {t.specialRequirements}
                   </h3>
                   <textarea
                     name="specialRequirements"
@@ -691,7 +843,7 @@ export default function SubmitRequirement() {
                     onChange={handleChange}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                    placeholder="Special requirements if any"
+                    placeholder={t.specialRequirementsPlaceholder}
                   />
                 </div>
               </div>
@@ -699,7 +851,7 @@ export default function SubmitRequirement() {
           </>
         );
 
-      case 3: // Requirements
+      case 3:
         return (
           <>
             <div className="text-center mb-2">
@@ -708,34 +860,31 @@ export default function SubmitRequirement() {
               </h1>
               <p className="text-base text-gray-700 mb-2">{t.specifySkills}</p>
               <p className="text-xs text-gray-500 italic text-left">
-                *This section helps us match the best candidates to your needs.
+                {t.sectionNoteRequirements}
               </p>
             </div>
 
             <div className="grid grid-cols-12 gap-8 mt-6">
-              {/* Left Column */}
               <div className="col-span-5 space-y-4">
-                <h2 className="text-lg font-semibold mb-2">Qualifications</h2>
+                <h2 className="text-lg font-semibold mb-2">
+                  {t.qualifications}
+                </h2>
 
                 <SelectField
-                  label="Experience Level"
+                  label={t.experienceLevel}
                   name="experienceLevel"
                   value={formData.experienceLevel}
                   onChange={handleChange}
                   error={errors.experienceLevel}
                   required
-                  options={[
-                    "Entry Level (0-2 years)",
-                    "Mid Level (2-5 years)",
-                    "Senior Level (5+ years)",
-                  ]}
+                  options={t.experienceLevelOptions}
                   id="experienceLevel"
                   t={t}
                 />
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Language Requirements
+                    {t.languageRequirements}
                     <span className="text-red-500 ml-1">*</span>
                   </label>
                   {errors.languageRequirements && (
@@ -744,60 +893,56 @@ export default function SubmitRequirement() {
                     </p>
                   )}
                   <div className="space-y-2">
-                    {["English", "Arabic", "Hindi", "Urdu", "Tagalog"].map(
-                      (language) => (
-                        <div key={language} className="flex items-center">
-                          <input
-                            type="checkbox"
-                            id={`lang-${language}`}
-                            checked={formData.languageRequirements.includes(
-                              language
-                            )}
-                            onChange={() => toggleLanguageRequirement(language)}
-                            className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
-                          />
-                          <label
-                            htmlFor={`lang-${language}`}
-                            className="ml-2 text-sm text-gray-700"
-                          >
-                            {language}
-                          </label>
-                        </div>
-                      )
-                    )}
+                    {t.languageOptions.map((language) => (
+                      <div key={language} className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id={`lang-${language}`}
+                          checked={formData.languageRequirements.includes(
+                            language
+                          )}
+                          onChange={() => toggleLanguageRequirement(language)}
+                          className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                        />
+                        <label
+                          htmlFor={`lang-${language}`}
+                          className="ml-2 text-sm text-gray-700"
+                        >
+                          {language}
+                        </label>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
                 <InputField
-                  label="Certification Requirements"
+                  label={t.certificationRequirements}
                   name="certificationRequirements"
                   value={formData.certificationRequirements}
                   onChange={handleChange}
-                  placeholder="e.g., OSHA, CPR, etc."
+                  placeholder={t.certificationPlaceholder}
                   id="certificationRequirements"
                   t={t}
                 />
 
                 <InputField
-                  label="Medical Requirements"
+                  label={t.medicalRequirements}
                   name="medicalRequirements"
                   value={formData.medicalRequirements}
                   onChange={handleChange}
-                  placeholder="e.g., Drug-free, Vaccinations, etc."
+                  placeholder={t.medicalPlaceholder}
                   id="medicalRequirements"
                   t={t}
                 />
               </div>
 
-              {/* Divider */}
               <div className="col-span-2 flex justify-center items-center">
                 <div className="w-[4px] h-2/3 bg-gray-300 rounded-full"></div>
               </div>
 
-              {/* Right Column */}
               <div className="col-span-5 space-y-4">
                 <h2 className="text-lg font-semibold mb-2">
-                  Additional Requirements
+                  {t.additionalRequirements}
                 </h2>
 
                 <div>
@@ -805,7 +950,7 @@ export default function SubmitRequirement() {
                     htmlFor="specialRequirements"
                     className="block text-sm font-medium text-gray-700 mb-1"
                   >
-                    Special Requirements
+                    {t.specialRequirements}
                   </label>
                   <textarea
                     id="specialRequirements"
@@ -814,7 +959,7 @@ export default function SubmitRequirement() {
                     onChange={handleChange}
                     rows={5}
                     className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white"
-                    placeholder="Any specific skills, tools knowledge, or other special requirements"
+                    placeholder={t.specialRequirementsPlaceholder}
                   />
                 </div>
               </div>
@@ -822,7 +967,7 @@ export default function SubmitRequirement() {
           </>
         );
 
-      case 4: // Review
+      case 4:
         return (
           <>
             <div className="text-center mb-2">
@@ -831,125 +976,124 @@ export default function SubmitRequirement() {
             </div>
 
             <div className="grid grid-cols-12 gap-8 mt-6">
-              {/* Left Column */}
               <div className="col-span-6 space-y-6">
                 <div className="bg-white p-6 rounded-lg shadow-sm">
                   <h2 className="text-lg font-semibold mb-4 border-b pb-2">
-                    Company Information
+                    {t.companyInformation}
                   </h2>
                   <ReviewField
-                    label="Company Name"
+                    label={t.companyName}
                     value={formData.companyName}
                   />
                   <ReviewField
-                    label="Registration Number"
+                    label={t.registrationNumber}
                     value={formData.registrationNumber}
                   />
-                  <ReviewField label="Sector" value={formData.sector} />
+                  <ReviewField label={t.sector} value={formData.sector} />
                   <ReviewField
-                    label="Company Size"
+                    label={t.companySize}
                     value={formData.companySize}
                   />
                   <ReviewField
-                    label="Website"
-                    value={formData.website || "Not provided"}
+                    label={t.website}
+                    value={formData.website || t.notProvided}
                   />
                 </div>
 
                 <div className="bg-white p-6 rounded-lg shadow-sm">
                   <h2 className="text-lg font-semibold mb-4 border-b pb-2">
-                    Contact Person
+                    {t.contactPerson}
                   </h2>
-                  <ReviewField label="Full Name" value={formData.fullName} />
-                  <ReviewField label="Job Title" value={formData.jobTitle} />
-                  <ReviewField label="Email" value={formData.email} />
-                  <ReviewField label="Phone" value={formData.phone} />
+                  <ReviewField label={t.fullName} value={formData.fullName} />
+                  <ReviewField label={t.jobTitle} value={formData.jobTitle} />
+                  <ReviewField label={t.email} value={formData.email} />
+                  <ReviewField label={t.phone} value={formData.phone} />
                   <ReviewField
-                    label="Alternative Contact"
-                    value={formData.altContact || "Not provided"}
+                    label={t.altContact}
+                    value={formData.altContact || t.notProvided}
                   />
                 </div>
               </div>
 
-              {/* Divider */}
               <div className="col-span-2 flex justify-center items-center">
                 <div className="w-[4px] h-full bg-gray-300 rounded-full"></div>
               </div>
 
-              {/* Right Column */}
               <div className="col-span-4 space-y-6">
                 <div className="bg-white p-6 rounded-lg shadow-sm">
                   <h2 className="text-lg font-semibold mb-4 border-b pb-2">
-                    Job Details
+                    {t.jobDetails}
                   </h2>
                   <ReviewField
-                    label="Job Category"
+                    label={t.jobCategory}
                     value={formData.jobCategory}
                   />
 
                   <div className="mb-2">
                     <p className="text-sm font-medium text-gray-700">
-                      Job Roles:
+                      {t.jobRoles}:
                     </p>
                     <ul className="list-disc list-inside text-sm text-gray-600 mt-1">
                       {formData.jobRoles.map((role, index) => (
                         <li key={index}>
-                          {role.title} (Qty: {role.quantity})
+                          {role.title} ({t.quantity}: {role.quantity})
                         </li>
                       ))}
                     </ul>
                   </div>
 
                   <ReviewField
-                    label="Project Location"
+                    label={t.projectLocation}
                     value={formData.projectLocation}
                   />
                   <ReviewField
-                    label="Contract Type"
+                    label={t.contractType}
                     value={formData.contractType}
                   />
-                  <ReviewField label="Start Date" value={formData.startDate} />
-                  <ReviewField label="Duration" value={formData.duration} />
+                  <ReviewField label={t.startDate} value={formData.startDate} />
+                  <ReviewField label={t.duration} value={formData.duration} />
                   <ReviewField
-                    label="Benefits"
+                    label={t.benefits}
                     value={
                       [
-                        formData.accommodationProvided ? "Accommodation" : null,
+                        formData.accommodationProvided
+                          ? t.accommodations
+                          : null,
                         formData.transportationProvided
-                          ? "Transportation"
+                          ? t.transportation
                           : null,
                       ]
                         .filter(Boolean)
-                        .join(", ") || "None specified"
+                        .join(", ") || t.noneSpecified
                     }
                   />
                 </div>
 
                 <div className="bg-white p-6 rounded-lg shadow-sm">
                   <h2 className="text-lg font-semibold mb-4 border-b pb-2">
-                    Requirements
+                    {t.requirements}
                   </h2>
                   <ReviewField
-                    label="Experience Level"
+                    label={t.experienceLevel}
                     value={formData.experienceLevel}
                   />
                   <ReviewField
-                    label="Languages Required"
+                    label={t.languagesRequired}
                     value={formData.languageRequirements.join(", ")}
                   />
                   <ReviewField
-                    label="Certifications"
+                    label={t.certifications}
                     value={
-                      formData.certificationRequirements || "None specified"
+                      formData.certificationRequirements || t.noneSpecified
                     }
                   />
                   <ReviewField
-                    label="Medical Requirements"
-                    value={formData.medicalRequirements || "None specified"}
+                    label={t.medicalRequirements}
+                    value={formData.medicalRequirements || t.noneSpecified}
                   />
                   <ReviewField
-                    label="Special Requirements"
-                    value={formData.specialRequirements || "None specified"}
+                    label={t.specialRequirements}
+                    value={formData.specialRequirements || t.noneSpecified}
                   />
                 </div>
               </div>
@@ -965,7 +1109,6 @@ export default function SubmitRequirement() {
   return (
     <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
       <div className="w-[1500px] h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
-        {/* Language Selector */}
         <div className="absolute top-4 right-4 z-20">
           <select
             value={language}
@@ -978,13 +1121,9 @@ export default function SubmitRequirement() {
           </select>
         </div>
 
-        {/* Progress Steps with Connecting Line */}
         <div className="relative px-16 pt-10 pb-6">
-          {/* Full width container for the line */}
           <div className="absolute inset-x-0 top-1/2 h-0.5 z-0">
-            {/* Main progress line with extended start */}
             <div className="absolute -left-44 right-0 h-full flex w-full max-w-[1380px] mx-auto">
-              {/* Solid portion */}
               <div
                 className="h-full bg-purple-600 transition-all duration-300"
                 style={{
@@ -995,7 +1134,6 @@ export default function SubmitRequirement() {
                 }}
               />
 
-              {/* Dotted portion */}
               <div
                 className="h-full border-t-2 border-dotted border-gray-300 transition-all duration-300"
                 style={{
@@ -1010,14 +1148,12 @@ export default function SubmitRequirement() {
             </div>
           </div>
 
-          {/* Step Circles */}
           <div className="flex justify-between relative z-10 mt-4">
             {steps.map((step) => (
               <div
                 key={step.id}
                 className="text-center flex-1 max-w-[200px] relative"
               >
-                {/* Step circle */}
                 <div
                   className={`w-12 h-12 mx-auto rounded-full text-lg font-bold mb-3 flex items-center justify-center ${
                     currentStep >= step.id
@@ -1040,10 +1176,8 @@ export default function SubmitRequirement() {
           </div>
         </div>
 
-        {/* Form Content */}
         <div className="flex-1 mx-16 rounded-lg py-8 flex flex-col justify-between">
           {renderStepContent()}
-          {/* Navigation Buttons - Moved inside the grid */}
           <div className="col-span-12 mt-6 flex justify-start">
             <button
               type="button"
@@ -1098,7 +1232,6 @@ export default function SubmitRequirement() {
   );
 }
 
-// Reusable Components
 function InputField({
   label,
   required = false,

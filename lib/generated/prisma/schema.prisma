@@ -14,116 +14,280 @@ enum UserRole {
   RECRUITMENT_AGENCY
 }
 
-enum Permission {
-  // Labour Requests
-  REQUEST_CREATE
-  REQUEST_READ
-  REQUEST_UPDATE
-  REQUEST_DELETE
-  REQUEST_MANAGE_ALL
-
-  // Candidates
-  CANDIDATE_CREATE
-  CANDIDATE_READ
-  CANDIDATE_UPDATE
-  CANDIDATE_DELETE
-  CANDIDATE_MANAGE_ALL
-
-  // Procedures
-  PROCEDURE_CREATE
-  PROCEDURE_READ
-  PROCEDURE_UPDATE
-  PROCEDURE_DELETE
-
-  // Agencies
-  AGENCY_CREATE
-  AGENCY_READ
-  AGENCY_UPDATE
-  AGENCY_DELETE
-
-  // Users
-  USER_CREATE
-  USER_READ
-  USER_UPDATE
-  USER_DELETE
-
-  // Dashboard
-  DASHBOARD_ACCESS
+enum AccountStatus {
+  PENDING_REVIEW
+  VERIFIED
+  REJECTED
+  NOT_VERIFIED
+  SUSPENDED
 }
 
-model RolePermission {
-  id         String     @id @default(uuid())
-  role       UserRole
-  permission Permission
-  createdAt  DateTime   @default(now())
-  userId     String?
-  user       User?      @relation(fields: [userId], references: [id])
-
-  @@unique([role, permission])
+enum RequirementStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  FULFILLED
+  CLOSED
 }
 
-model LabourRequest {
-  id           String      @id @default(uuid())
-  jobTitle     String
-  nationality  String
-  salary       Float
-  quantity     Int
-  requirements String
-  status       String      @default("DRAFT") // DRAFT, SUBMITTED, IN_PROGRESS, COMPLETED
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  userId       String
-  user         User        @relation(fields: [userId], references: [id])
-  candidates   Candidate[]
-  procedures   Procedure[]
+enum LabourStatus {
+  RECEIVED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  SHORTLISTED
+  DEPLOYED
 }
 
-model Agency {
-  id        String   @id @default(uuid())
-  name      String
-  contact   String
-  email     String   @unique
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
+enum DocumentType {
+  LICENSE
+  INSURANCE
+  ID_PROOF
+  ADDRESS_PROOF
+  OTHER
+}
+
+model User {
+  id            String        @id @default(uuid())
+  name          String
+  email         String        @unique
+  password      String
+  role          UserRole
+  status        AccountStatus @default(NOT_VERIFIED)
+  resetRequired Boolean       @default(true)
+  lastLogin     DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Profile relations
+  client Client?
+  agency Agency?
+  admin  Admin?
+
+  // Audit
+  createdBy           User?                 @relation("CreatedUsers", fields: [createdById], references: [id])
+  createdById         String?
+  createdUsers        User[]                @relation("CreatedUsers")
+  auditLogs           AuditLog[]
+  LabourStatusLog     LabourStatusLog[]
+  ClientDocument      ClientDocument[]
+  AgencyDocument      AgencyDocument[]
+  RequirementDocument RequirementDocument[]
+  Notification        Notification[]
+
+  @@index([email, status])
+}
+
+model Client {
+  id              String           @id @default(uuid())
+  userId          String           @unique
+  user            User             @relation(fields: [userId], references: [id])
+  companyName     String
+  contactPerson   String
+  phone           String
+  address         String
+  businessLicense String?
+  website         String?
+  requirements    Requirement[]
+  documents       ClientDocument[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model User {
+model Agency {
   id             String           @id @default(uuid())
-  email          String           @unique
-  password       String
-  role           UserRole
-  name           String?
-  company        String?
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  permissions    RolePermission[]
-  labourRequests LabourRequest[]
-  agencies       Agency[]
+  userId         String           @unique
+  user           User             @relation(fields: [userId], references: [id])
+  agencyName     String
+  licenseNumber  String
+  licenseExpiry  DateTime
+  country        String
+  regions        String[]
+  contactPerson  String
+  phone          String
+  documents      AgencyDocument[]
+  labourProfiles LabourProfile[]
+  requirements   Requirement[]    @relation("AgencyRequirements")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model Candidate {
-  id              String        @id @default(uuid())
+model Admin {
+  id             String  @id @default(uuid())
+  userId         String  @unique
+  user           User    @relation(fields: [userId], references: [id])
+  name           String
+  department     String?
+  canCreateUsers Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Requirement {
+  id          String            @id @default(uuid())
+  title       String
+  description String
+  nationality String
+  salaryRange String
+  quantity    Int
+  skills      String[]
+  status      RequirementStatus @default(DRAFT)
+  deadline    DateTime?
+
+  // Relationships
+  clientId       String
+  client         Client                @relation(fields: [clientId], references: [id])
+  assignedTo     Agency?               @relation("AgencyRequirements", fields: [assignedToId], references: [id])
+  assignedToId   String?
+  labourProfiles LabourProfile[]
+  procedures     Procedure[]
+  documents      RequirementDocument[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LabourProfile {
+  id              String       @id @default(uuid())
   name            String
-  code            String        @unique
-  cvUrl           String?
-  status          String        @default("SUBMITTED") // SUBMITTED, APPROVED, REJECTED
-  labourRequestId String
-  labourRequest   LabourRequest @relation(fields: [labourRequestId], references: [id])
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  age             Int
+  gender          String
+  nationality     String
+  skills          String[]
+  experienceYears Int
+  education       String?
+  language        String[]
+  status          LabourStatus @default(RECEIVED)
+  cvUrl           String
+  passportCopy    String?
+  otherDocs       String[]
+
+  // Relationships
+  requirementId String
+  requirement   Requirement @relation(fields: [requirementId], references: [id])
+  agencyId      String
+  agency        Agency      @relation(fields: [agencyId], references: [id])
+
+  statusLogs LabourStatusLog[]
+  procedures Procedure[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Procedure {
-  id              String        @id @default(uuid())
-  name            String
-  description     String?
-  status          String        @default("NOT_STARTED") // NOT_STARTED, PENDING, COMPLETE
-  dueDate         DateTime?
-  completedDate   DateTime?
-  labourRequestId String
-  labourRequest   LabourRequest @relation(fields: [labourRequestId], references: [id])
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id            String    @id @default(uuid())
+  name          String
+  description   String
+  status        String    @default("PENDING")
+  dueDate       DateTime?
+  completedDate DateTime?
+  comments      String?
+
+  // Relationships
+  requirementId   String?
+  requirement     Requirement?   @relation(fields: [requirementId], references: [id])
+  labourProfileId String?
+  labourProfile   LabourProfile? @relation(fields: [labourProfileId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LabourStatusLog {
+  id       String       @id @default(uuid())
+  status   LabourStatus
+  comments String?
+
+  // Relationships
+  labourProfileId String
+  labourProfile   LabourProfile @relation(fields: [labourProfileId], references: [id])
+  changedById     String
+  changedBy       User          @relation(fields: [changedById], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+// Document models for different entities
+model ClientDocument {
+  id       String       @id @default(uuid())
+  type     DocumentType
+  url      String
+  verified Boolean      @default(false)
+  comments String?
+
+  clientId String
+  client   Client @relation(fields: [clientId], references: [id])
+
+  verifiedById String?
+  verifiedBy   User?   @relation(fields: [verifiedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AgencyDocument {
+  id       String       @id @default(uuid())
+  type     DocumentType
+  url      String
+  verified Boolean      @default(false)
+  comments String?
+
+  agencyId String
+  agency   Agency @relation(fields: [agencyId], references: [id])
+
+  verifiedById String?
+  verifiedBy   User?   @relation(fields: [verifiedById], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RequirementDocument {
+  id          String       @id @default(uuid())
+  type        DocumentType
+  url         String
+  description String?
+
+  requirementId String
+  requirement   Requirement @relation(fields: [requirementId], references: [id])
+
+  uploadedById String
+  uploadedBy   User   @relation(fields: [uploadedById], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id         String @id @default(uuid())
+  action     String
+  entityType String
+  entityId   String
+  oldData    Json?
+  newData    Json?
+
+  performedById String
+  performedBy   User   @relation(fields: [performedById], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String  @id @default(uuid())
+  title     String
+  message   String
+  read      Boolean @default(false)
+  type      String
+  actionUrl String?
+
+  recipientId String
+  recipient   User   @relation(fields: [recipientId], references: [id])
+
+  createdAt DateTime  @default(now())
+  readAt    DateTime?
 }

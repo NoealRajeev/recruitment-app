@@ -152,9 +152,9 @@ export default function Header() {
               Submit Requirement
             </div>
           </Link>
-          <Link href="/auth">
+          <Link href="/auth/register">
             <Button className="text-sm font-medium text-white transition-all duration-200 bg-gradient-to-r from-[#6914A8] to-[#290842] hover:from-[#6914A8] hover:to-[#290842] hover:scale-105 hover:shadow-lg hover:shadow-[#6914A8]/30">
-              Get Started
+              Sign Up
             </Button>
           </Link>
 

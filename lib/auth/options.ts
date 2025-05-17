@@ -1,12 +1,13 @@
 // lib/auth/options.ts
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { NextAuthOptions } from "next-auth";
+import { PrismaClient } from "@prisma/client";
+import NextAuth, { type AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import prisma from "@/lib/prisma";
 import { compare } from "bcryptjs";
-import { UserRole } from "@prisma/client";
 
-export const authOptions: NextAuthOptions = {
+const prisma = new PrismaClient();
+
+export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
@@ -24,11 +25,16 @@ export const authOptions: NextAuthOptions = {
           where: { email: credentials.email },
         });
 
-        if (!user || !user.password) {
+        if (!user) {
           throw new Error("Invalid credentials");
         }
 
+        if (user.status !== "VERIFIED") {
+          throw new Error("Account not verified");
+        }
+
         const isValid = await compare(credentials.password, user.password);
+
         if (!isValid) {
           throw new Error("Invalid credentials");
         }
@@ -37,7 +43,9 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role as UserRole, // Explicit type assertion
+          role: user.role,
+          status: user.status,
+          resetRequired: user.resetRequired,
         };
       },
     }),
@@ -46,14 +54,24 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role as UserRole; // Explicit type assertion
+        token.email = user.email;
+        token.name = user.name;
+        token.role = user.role;
+        token.status = user.status;
+        token.resetRequired = user.resetRequired;
       }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as UserRole; // Explicit type assertion
+      if (token) {
+        session.user = {
+          id: token.id,
+          name: token.name,
+          email: token.email,
+          role: token.role,
+          status: token.status,
+          resetRequired: token.resetRequired,
+        };
       }
       return session;
     },
@@ -67,3 +85,5 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
+
+export default NextAuth(authOptions);

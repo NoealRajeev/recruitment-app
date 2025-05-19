@@ -1,12 +1,14 @@
 // lib/auth/options.ts
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { NextAuthOptions } from "next-auth";
+import { PrismaClient } from "@prisma/client";
+import NextAuth, { type AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import prisma from "@/lib/prisma";
 import { compare } from "bcryptjs";
-import { UserRole } from "@prisma/client";
+import { refreshSession } from "./session";
 
-export const authOptions: NextAuthOptions = {
+const prisma = new PrismaClient();
+
+export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     CredentialsProvider({
@@ -24,38 +26,77 @@ export const authOptions: NextAuthOptions = {
           where: { email: credentials.email },
         });
 
-        if (!user || !user.password) {
+        if (!user) {
           throw new Error("Invalid credentials");
         }
 
+        if (user.status !== "VERIFIED") {
+          throw new Error("Account not verified");
+        }
+
         const isValid = await compare(credentials.password, user.password);
+
         if (!isValid) {
           throw new Error("Invalid credentials");
         }
+
+        // Update lastLogin and isFirstLogin
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            lastLogin: new Date(),
+          },
+        });
 
         return {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role as UserRole, // Explicit type assertion
+          role: user.role,
+          status: user.status,
+          resetRequired: user.resetRequired,
+          // image: user.image || null,
         };
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      // Handle session updates from client
+      if (trigger === "update") {
+        return { ...token, ...session };
+      }
+
       if (user) {
         token.id = user.id;
-        token.role = user.role as UserRole; // Explicit type assertion
+        token.email = user.email;
+        token.name = user.name;
+        token.role = user.role;
+        token.status = user.status;
+        token.resetRequired = user.resetRequired;
       }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as UserRole; // Explicit type assertion
+      if (token) {
+        session.user = {
+          id: token.id,
+          name: token.name,
+          email: token.email,
+          role: token.role,
+          status: token.status,
+          resetRequired: token.resetRequired,
+        };
       }
       return session;
+    },
+  },
+  events: {
+    async signIn({ user }) {
+      await refreshSession(user.id);
+    },
+    async updateUser({ user }) {
+      await refreshSession(user.id);
     },
   },
   pages: {
@@ -67,3 +108,11 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
 };
+
+export default NextAuth(authOptions);
+
+export const { auth } = NextAuth(authOptions);
+
+export async function getCurrentAuth() {
+  return await auth();
+}

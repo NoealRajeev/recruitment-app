@@ -121,12 +121,13 @@ export default function AboutPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center">
             {/* Right Column - Circles Only */}
-            <div className="lg:w-1/2 relative h-96 lg:h-[700px]">
+            <div className="relative w-[600px] h-[863px] overflow-visible z-10 mr-32">
               <Image
                 src="/assets/about-element.png"
                 alt="Mission Alt"
-                fill
-                className=""
+                width={600}
+                height={863}
+                className="object-contain"
                 priority
               />
             </div>

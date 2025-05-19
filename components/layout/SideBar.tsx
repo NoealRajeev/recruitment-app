@@ -4,38 +4,49 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserRole } from "@prisma/client";
 import Image from "next/image";
+import {
+  Home,
+  Building2,
+  Users,
+  User,
+  Settings,
+  FileText,
+  BarChart2,
+  File,
+  HelpCircle,
+} from "lucide-react";
 
 const navItems = {
   RECRUITMENT_ADMIN: [
-    { href: "/dashboard/admin", label: "Dashboard", icon: "🏠", exact: true },
+    { href: "/dashboard/admin", label: "Dashboard", icon: Home, exact: true },
     {
       href: "/dashboard/admin/company",
       label: "Company",
-      icon: "📋",
+      icon: Building2,
       exact: false,
     },
     {
       href: "/dashboard/admin/agencies",
       label: "Agencies",
-      icon: "🏢",
+      icon: Building2,
       exact: false,
     },
     {
       href: "/dashboard/admin/candidates",
       label: "Candidates",
-      icon: "👥",
+      icon: Users,
       exact: false,
     },
     {
       href: "/dashboard/admin/users",
       label: "Users",
-      icon: "👤",
+      icon: User,
       exact: false,
     },
     {
       href: "/dashboard/admin/settings",
       label: "Settings",
-      icon: "⚙️",
+      icon: Settings,
       exact: false,
     },
   ],
@@ -43,25 +54,25 @@ const navItems = {
     {
       href: "/dashboard/client/requirements",
       label: "My Requirements",
-      icon: "📋",
+      icon: FileText,
       exact: false,
     },
     {
       href: "/dashboard/client/trackers",
       label: "Recruitment Trackers",
-      icon: "📊",
+      icon: BarChart2,
       exact: false,
     },
     {
       href: "/dashboard/client/documents",
       label: "Documents",
-      icon: "📄",
+      icon: File,
       exact: false,
     },
     {
       href: "/dashboard/client/settings",
       label: "Settings",
-      icon: "⚙️",
+      icon: Settings,
       exact: false,
     },
   ],
@@ -69,25 +80,25 @@ const navItems = {
     {
       href: "/dashboard/agency/requirements",
       label: "Assigned Requirements",
-      icon: "📋",
+      icon: FileText,
       exact: false,
     },
     {
       href: "/dashboard/agency/candidates",
       label: "Candidate Pool",
-      icon: "👥",
+      icon: Users,
       exact: false,
     },
     {
       href: "/dashboard/agency/documents",
       label: "My Documents",
-      icon: "📄",
+      icon: File,
       exact: false,
     },
     {
       href: "/dashboard/agency/settings",
       label: "Settings",
-      icon: "⚙️",
+      icon: Settings,
       exact: false,
     },
   ],
@@ -117,7 +128,6 @@ export default function SideBar({
       {isExpanded && (
         <div className="flex justify-center mb-16">
           <div className="relative h-15 w-[180px]">
-            {/* Replace with your actual logo */}
             <Image
               src="/assets/Logo-white.png"
               alt="Logo"
@@ -130,30 +140,40 @@ export default function SideBar({
 
       {/* Menu Items */}
       <div className="flex-1">
-        {items.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`flex items-center my-2 px-4 py-3 rounded-3xl transition-all ${
-              isActive(item.href, item.exact ?? false)
-                ? "bg-white text-primary shadow-md"
-                : "text-white hover:bg-gray-800"
-            }`}
-          >
-            <span className={`${isExpanded ? "mr-5" : "mx-auto"}`}>
-              {item.icon}
-            </span>
-            {isExpanded && (
-              <span
-                className={`${
-                  pathname.startsWith(item.href) ? "font-bold" : ""
-                }`}
-              >
-                {item.label}
+        {items.map((item) => {
+          const IconComponent = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center my-2 px-4 py-3 rounded-3xl transition-all ${
+                isActive(item.href, item.exact ?? false)
+                  ? "bg-white text-primary shadow-md"
+                  : "text-white hover:bg-gray-800"
+              }`}
+            >
+              <span className={`${isExpanded ? "mr-5" : "mx-auto"}`}>
+                <IconComponent
+                  size={20}
+                  className={
+                    isActive(item.href, item.exact ?? false)
+                      ? "text-primary"
+                      : "text-white"
+                  }
+                />
               </span>
-            )}
-          </Link>
-        ))}
+              {isExpanded && (
+                <span
+                  className={`${
+                    isActive(item.href, item.exact ?? false) ? "font-bold" : ""
+                  }`}
+                >
+                  {item.label}
+                </span>
+              )}
+            </Link>
+          );
+        })}
       </div>
 
       {/* Footer */}
@@ -163,7 +183,7 @@ export default function SideBar({
             className="w-11 h-11 rounded-full bg-[#BA3B0A] flex items-center justify-center"
             onClick={() => console.log("Help clicked")}
           >
-            <span className="text-white">?</span>
+            <HelpCircle className="text-white" size={20} />
           </button>
         </div>
       )}

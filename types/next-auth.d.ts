@@ -9,6 +9,7 @@ declare module "next-auth" {
     role: UserRole;
     status: AccountStatus;
     resetRequired?: boolean;
+    image?: string | null;
   }
 
   interface Session {
@@ -20,6 +21,7 @@ declare module "next-auth" {
       role: UserRole;
       status: AccountStatus;
       resetRequired?: boolean;
+      image?: string | null;
     };
   }
 }

@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import NextAuth, { type AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
+import { refreshSession } from "./session";
 
 const prisma = new PrismaClient();
 
@@ -39,6 +40,14 @@ export const authOptions: AuthOptions = {
           throw new Error("Invalid credentials");
         }
 
+        // Update lastLogin and isFirstLogin
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            lastLogin: new Date(),
+          },
+        });
+
         return {
           id: user.id,
           email: user.email,
@@ -46,12 +55,18 @@ export const authOptions: AuthOptions = {
           role: user.role,
           status: user.status,
           resetRequired: user.resetRequired,
+          // image: user.image || null,
         };
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      // Handle session updates from client
+      if (trigger === "update") {
+        return { ...token, ...session };
+      }
+
       if (user) {
         token.id = user.id;
         token.email = user.email;
@@ -76,6 +91,14 @@ export const authOptions: AuthOptions = {
       return session;
     },
   },
+  events: {
+    async signIn({ user }) {
+      await refreshSession(user.id);
+    },
+    async updateUser({ user }) {
+      await refreshSession(user.id);
+    },
+  },
   pages: {
     signIn: "/auth/login",
     error: "/auth/login",
@@ -87,3 +110,9 @@ export const authOptions: AuthOptions = {
 };
 
 export default NextAuth(authOptions);
+
+export const { auth } = NextAuth(authOptions);
+
+export async function getCurrentAuth() {
+  return await auth();
+}

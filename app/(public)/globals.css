@@ -28,6 +28,49 @@
   }
 }
 
+@layer components {
+  /* Custom button styles */
+  .btn-primary {
+    @apply bg-[#2C0053] text-white hover:bg-[#3C006F] focus:ring-4 focus:ring-[#2C0053]/50;
+  }
+
+  .btn-secondary {
+    @apply bg-[#EFEBF2] text-[#2C0053] hover:bg-[#E0D6E9] focus:ring-4 focus:ring-[#EFEBF2]/50;
+  }
+
+  .btn-outline {
+    @apply border border-[#2C0053] text-[#2C0053] hover:bg-[#EFEBF2] focus:ring-4 focus:ring-[#EFEBF2]/50;
+  }
+
+  /* Custom background colors */
+  .bg-primary {
+    @apply bg-[#2C0053];
+  }
+
+  .bg-secondary {
+    @apply bg-[#EFEBF2];
+  }
+
+  /* Custom text colors */
+  .text-primary {
+    @apply text-[#2C0053];
+  }
+
+  .text-secondary {
+    @apply text-[#EFEBF2];
+  }
+
+  /* Custom border colors */
+  .border-primary {
+    @apply border-[#2C0053];
+  }
+
+  /* Custom shadows */
+  .shadow-purple {
+    @apply shadow-[0_4px_6px_-1px_rgba(44,0,83,0.1),0_2px_4px_-1px_rgba(44,0,83,0.06)];
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

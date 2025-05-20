@@ -60,17 +60,17 @@ export async function middleware(request: NextRequest) {
   }
 
   // Session validation and expiration check
-  try {
-    await refreshSession(token.id);
+  // try {
+  //   await refreshSession(token.id);
 
-    // Type-safe expiration check
-    if (typeof token.exp === "number" && isSessionExpired(token.exp)) {
-      return redirectToLogin(request, pathname, "SessionExpired");
-    }
-  } catch (error) {
-    console.error("Session validation failed:", error);
-    return redirectToLogin(request, pathname, "SessionError");
-  }
+  //   // Type-safe expiration check
+  //   if (typeof token.exp === "number" && isSessionExpired(token.exp)) {
+  //     return redirectToLogin(request, pathname, "SessionExpired");
+  //   }
+  // } catch (error) {
+  //   console.error("Session validation failed:", error);
+  //   return redirectToLogin(request, pathname, "SessionError");
+  // }
 
   // Handle unverified accounts
   if (token.status !== "VERIFIED") {

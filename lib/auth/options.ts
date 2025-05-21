@@ -1,12 +1,10 @@
 // lib/auth/options.ts
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
-import NextAuth, { type AuthOptions } from "next-auth";
+import NextAuth, { getServerSession, type AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { refreshSession } from "./session";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -111,8 +109,6 @@ export const authOptions: AuthOptions = {
 
 export default NextAuth(authOptions);
 
-export const { auth } = NextAuth(authOptions);
-
-export async function getCurrentAuth() {
-  return await auth();
+export async function getCurrentAuth(req, res) {
+  return await getServerSession(req, res, authOptions);
 }

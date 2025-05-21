@@ -72,20 +72,25 @@ export default function LoginPage() {
     setLoading(true);
     setErrors({});
 
-    const redirectTo = searchParams.get("from") || "/dashboard";
+    // Use callbackUrl, not from
+    const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
 
     try {
       const result = await signIn("credentials", {
         email: formData.email,
         password: formData.password,
         redirect: false,
+        callbackUrl, // Pass it here!
       });
 
       if (result?.error) {
         throw new Error(result.error);
       }
 
-      router.push(redirectTo);
+      // Redirect to result.url (provided by NextAuth)
+      if (result?.url) {
+        router.push(result.url);
+      }
     } catch (error) {
       setErrors({
         form: error instanceof Error ? error.message : t.loginFailed,

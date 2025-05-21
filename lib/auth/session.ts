@@ -3,7 +3,7 @@
 
 import { User } from "@prisma/client";
 import prisma from "@/lib/prisma";
-import { auth, getCurrentAuth } from "./options";
+import { getCurrentAuth } from "./options";
 
 /**
  * Updates both database and session atomically
@@ -38,17 +38,6 @@ export async function refreshSession(userId: string) {
   });
 
   if (!user) return null;
-
-  await auth()?.update({
-    user: {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      status: user.status,
-      resetRequired: user.resetRequired,
-    },
-  });
 
   return user;
 }

@@ -1,10 +1,9 @@
-// lib/auth/actions.ts
 "use server";
 
 import { getServerSession } from "next-auth";
 import { authOptions } from "./options";
 import { hash } from "bcryptjs";
-import { updateAuthSession } from "./session";
+import prisma from "@/lib/prisma";
 
 export async function resetPassword(newPassword: string) {
   const session = await getServerSession(authOptions);
@@ -16,9 +15,12 @@ export async function resetPassword(newPassword: string) {
   try {
     const hashedPassword = await hash(newPassword, 12);
 
-    await updateAuthSession(session.user.id, {
-      password: hashedPassword,
-      resetRequired: false,
+    await prisma.user.update({
+      where: { email: session.user.email },
+      data: {
+        password: hashedPassword,
+        resetRequired: false,
+      },
     });
 
     return { success: true };

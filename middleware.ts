@@ -1,10 +1,7 @@
-// middleware.ts
 import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import type { UserRole } from "@prisma/client";
-// import { refreshSession } from "@/lib/auth/session";
 import { validateCsrfToken } from "@/lib/auth/csrf";
-import { refreshSession } from "./lib/auth/session";
 
 const publicRoutes = new Set([
   "/",
@@ -18,7 +15,6 @@ const publicRoutes = new Set([
   "/auth/reset-password",
 ]);
 
-const authRoutes = new Set(["/auth/login", "/auth/register"]);
 const sensitiveRoutes = new Set([
   "/dashboard/admin",
   "/dashboard/client",
@@ -34,24 +30,46 @@ const roleRoutes: Record<UserRole, string> = {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip middleware for public and static routes
   if (shouldSkipMiddleware(pathname)) {
     return NextResponse.next();
   }
 
-  const token = await getToken({ req: request });
+  let token;
+  try {
+    token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET,
+    });
+  } catch (error) {
+    console.error("Token validation error:", error);
+    return redirectToLogin(request, "TokenError");
+  }
 
-  // Handle authenticated users trying to access auth routes
-  if (token && authRoutes.has(pathname)) {
+  if (!token) {
+    return redirectToLogin(request, "NoSession");
+  }
+
+  if (!token.sub) {
+    return redirectToLogin(request, "InvalidSession");
+  }
+
+  // Prevent authenticated users from accessing login/register
+  if (isAuthRoute(pathname) && token) {
     return redirectToRoleDashboard(token.role as UserRole, request);
   }
 
-  // Handle unauthenticated users
-  if (!token) {
-    return redirectToLogin(request, pathname);
+  if (typeof token.exp === "number" && isSessionExpired(token.exp)) {
+    return redirectToLogin(request, "SessionExpired");
   }
 
-  // CSRF protection for sensitive POST requests
+  if (token.status !== "VERIFIED") {
+    return redirectToVerification(request);
+  }
+
+  if (token.resetRequired && pathname !== "/auth/reset-password") {
+    return redirectToPasswordReset(request);
+  }
+
   if (request.method === "POST" && sensitiveRoutes.has(pathname)) {
     const csrfValid = await validateCsrfToken(request);
     if (!csrfValid) {
@@ -59,34 +77,11 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Session validation and expiration check
-  // try {
-  //   await refreshSession(token.id);
-
-  //   // Type-safe expiration check
-  //   if (typeof token.exp === "number" && isSessionExpired(token.exp)) {
-  //     return redirectToLogin(request, pathname, "SessionExpired");
-  //   }
-  // } catch (error) {
-  //   console.error("Session validation failed:", error);
-  //   return redirectToLogin(request, pathname, "SessionError");
-  // }
-
-  // Handle unverified accounts
-  if (token.status !== "VERIFIED") {
-    return redirectToVerification(request, pathname);
-  }
-
-  // Handle password reset requirement
-  if (token.resetRequired && pathname !== "/auth/reset-password") {
-    return redirectToPasswordReset(request, pathname);
-  }
-
-  // Role-based routing
   return handleRoleBasedRouting(token.role as UserRole, pathname, request);
 }
 
 // Helper functions
+
 function shouldSkipMiddleware(pathname: string): boolean {
   return (
     pathname.startsWith("/_next") ||
@@ -95,12 +90,22 @@ function shouldSkipMiddleware(pathname: string): boolean {
     pathname.startsWith("/favicon.ico") ||
     pathname.startsWith("/sitemap.xml") ||
     pathname.startsWith("/robots.txt") ||
+    pathname.startsWith("/.well-known") ||
     publicRoutes.has(pathname)
   );
 }
 
 function isSessionExpired(expiration: number): boolean {
   return Date.now() > expiration * 1000;
+}
+
+function isAuthRoute(pathname: string): boolean {
+  return (
+    pathname === "/auth/login" ||
+    pathname.startsWith("/auth/login/") ||
+    pathname === "/auth/register" ||
+    pathname.startsWith("/auth/register/")
+  );
 }
 
 function redirectToRoleDashboard(
@@ -111,32 +116,22 @@ function redirectToRoleDashboard(
   return NextResponse.redirect(new URL(roleBasePath, request.url));
 }
 
-function redirectToLogin(
-  request: NextRequest,
-  pathname: string,
-  error?: string
-): NextResponse {
+function redirectToLogin(request: NextRequest, error?: string): NextResponse {
   const loginUrl = new URL("/auth/login", request.url);
-  loginUrl.searchParams.set("callbackUrl", pathname);
+  loginUrl.searchParams.set("callbackUrl", request.nextUrl.href);
   if (error) loginUrl.searchParams.set("error", error);
   return NextResponse.redirect(loginUrl);
 }
 
-function redirectToVerification(
-  request: NextRequest,
-  pathname: string
-): NextResponse {
+function redirectToVerification(request: NextRequest): NextResponse {
   const verifyUrl = new URL("/auth/verify-account", request.url);
-  verifyUrl.searchParams.set("callbackUrl", pathname);
+  verifyUrl.searchParams.set("callbackUrl", request.nextUrl.href);
   return NextResponse.redirect(verifyUrl);
 }
 
-function redirectToPasswordReset(
-  request: NextRequest,
-  pathname: string
-): NextResponse {
+function redirectToPasswordReset(request: NextRequest): NextResponse {
   const resetUrl = new URL("/auth/reset-password", request.url);
-  resetUrl.searchParams.set("callbackUrl", pathname);
+  resetUrl.searchParams.set("callbackUrl", request.nextUrl.href);
   return NextResponse.redirect(resetUrl);
 }
 

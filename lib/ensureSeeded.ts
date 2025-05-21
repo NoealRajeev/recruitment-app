@@ -1,8 +1,6 @@
 // lib/ensureSeeded.ts
-import { PrismaClient } from "@prisma/client";
 import { seedDatabase } from "./seed";
-
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export async function ensureDatabaseSeeded() {
   try {

@@ -8,13 +8,16 @@ import {
   Home,
   Building2,
   Users,
-  User,
   Settings,
   FileText,
   BarChart2,
   File,
   HelpCircle,
   UserPlus,
+  ClipboardList,
+  User,
+  MapPin,
+  ScrollText,
 } from "lucide-react";
 
 const navItems = {
@@ -33,21 +36,27 @@ const navItems = {
       exact: false,
     },
     {
-      href: "/dashboard/admin/candidates",
-      label: "Candidates",
-      icon: Users,
+      href: "/dashboard/admin/requirements",
+      label: "Requirements",
+      icon: ClipboardList,
       exact: false,
     },
     {
-      href: "/dashboard/admin/users",
-      label: "Users",
+      href: "/dashboard/admin/labour",
+      label: "Labour Profiles",
       icon: User,
       exact: false,
     },
     {
-      href: "/dashboard/admin/settings",
-      label: "Settings",
-      icon: Settings,
+      href: "/dashboard/admin/recruitment",
+      label: "Recruitment Tracker",
+      icon: MapPin,
+      exact: false,
+    },
+    {
+      href: "/dashboard/admin/audit",
+      label: "Audit Logs",
+      icon: ScrollText,
       exact: false,
     },
   ],
@@ -140,7 +149,7 @@ export default function SideBar({
       )}
 
       {/* Menu Items */}
-      <div className="flex-1">
+      <div className={` flex-1 ${isExpanded ? "" : "mt-30 "}`}>
         {items.map((item) => {
           const IconComponent = item.icon;
           return (
@@ -153,14 +162,22 @@ export default function SideBar({
                   : "text-white hover:bg-gray-800"
               }`}
             >
-              <span className={`${isExpanded ? "mr-5" : "mx-auto"}`}>
+              <span
+                className={`flex items-center justify-center  ${
+                  isExpanded
+                    ? "mr-5"
+                    : "mx-auto w-11 h-11 rounded-full bg-white"
+                }`}
+              >
                 <IconComponent
                   size={20}
-                  className={
-                    isActive(item.href, item.exact ?? false)
-                      ? "text-primary"
-                      : "text-white"
-                  }
+                  className={`${
+                    isExpanded
+                      ? isActive(item.href, item.exact ?? false)
+                        ? "text-primary"
+                        : "text-white"
+                      : "text-[#0B0016]"
+                  }`}
                 />
               </span>
               {isExpanded && (

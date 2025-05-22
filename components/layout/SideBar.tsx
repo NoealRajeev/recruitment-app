@@ -14,6 +14,7 @@ import {
   BarChart2,
   File,
   HelpCircle,
+  UserPlus,
 } from "lucide-react";
 
 const navItems = {
@@ -28,7 +29,7 @@ const navItems = {
     {
       href: "/dashboard/admin/agencies",
       label: "Agencies",
-      icon: Building2,
+      icon: UserPlus,
       exact: false,
     },
     {

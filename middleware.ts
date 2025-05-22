@@ -8,12 +8,12 @@ const publicRoutes = new Set([
   "/about",
   "/contact",
   "/submit-requirement",
-  "/auth/login",
-  "/auth/register",
   "/auth/verify-account",
   "/auth/forgot-password",
   "/auth/reset-password",
 ]);
+
+const authRoutes = new Set(["/auth/login", "/auth/register"]);
 
 const sensitiveRoutes = new Set([
   "/dashboard/admin",
@@ -43,6 +43,10 @@ export async function middleware(request: NextRequest) {
   } catch (error) {
     console.error("Token validation error:", error);
     return redirectToLogin(request, "TokenError");
+  }
+
+  if (!token && (publicRoutes.has(pathname) || authRoutes.has(pathname))) {
+    return NextResponse.next(); // Public access for unauthenticated users
   }
 
   if (!token) {
@@ -90,8 +94,7 @@ function shouldSkipMiddleware(pathname: string): boolean {
     pathname.startsWith("/favicon.ico") ||
     pathname.startsWith("/sitemap.xml") ||
     pathname.startsWith("/robots.txt") ||
-    pathname.startsWith("/.well-known") ||
-    publicRoutes.has(pathname)
+    pathname.startsWith("/.well-known")
   );
 }
 
@@ -100,11 +103,8 @@ function isSessionExpired(expiration: number): boolean {
 }
 
 function isAuthRoute(pathname: string): boolean {
-  return (
-    pathname === "/auth/login" ||
-    pathname.startsWith("/auth/login/") ||
-    pathname === "/auth/register" ||
-    pathname.startsWith("/auth/register/")
+  return [...authRoutes].some(
+    (route) => pathname === route || pathname.startsWith(route + "/")
   );
 }
 

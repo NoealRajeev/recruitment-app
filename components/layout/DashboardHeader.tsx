@@ -41,10 +41,10 @@ export default function DashboardHeader({
     const pageTitles: Record<string, string> = {
       company: "Company",
       agencies: "Agencies",
-      candidates: "Candidates",
-      users: "Users",
-      settings: "Settings",
-      trackers: "Recruitment Trackers",
+      requirements: "Requirements",
+      labour: "Labour Profiles",
+      recruitment: "Recruitment Tracker",
+      audit: "Audit Logs",
       documents: "Documents",
       // Add more mappings as needed
     };
@@ -114,7 +114,7 @@ export default function DashboardHeader({
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={toggleDropdown}
-                className="h-14 px-4 py-2 bg-white rounded-3xl shadow-sm flex items-center gap-2"
+                className="h-14 px-4 py-2 bg-[#0B0016] rounded-3xl shadow-sm flex items-center gap-2"
               >
                 <div className="w-10 h-10 rounded-full bg-gray-300 overflow-hidden">
                   {avatarUrl ? (
@@ -132,14 +132,12 @@ export default function DashboardHeader({
                   )}
                 </div>
                 <div className="hidden md:block text-left">
-                  <p className="text-sm font-medium text-[#0B0016]">
-                    {userName}
-                  </p>
-                  <p className="text-xs text-gray-500 capitalize">
+                  <p className="text-sm font-medium text-white">{userName}</p>
+                  <p className="text-xs text-gray-400 capitalize">
                     {role.toLowerCase().replace(/_/g, " ")}
                   </p>
                 </div>
-                <ChevronDown className="hidden md:inline text-[#0B0016] h-4 w-4" />
+                <ChevronDown className="hidden md:inline text-white h-4 w-4" />
               </button>
 
               {/* Dropdown Menu */}

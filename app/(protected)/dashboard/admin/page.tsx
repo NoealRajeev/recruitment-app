@@ -1,3 +1,4 @@
+// app/(protected)/dashboard/admin/page.tsx
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import ProjectSummary from "@/components/dashboard/ProjectSummary";
 import StatsOverview from "@/components/dashboard/StatsOverview";

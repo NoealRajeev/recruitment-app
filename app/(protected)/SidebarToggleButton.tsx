@@ -18,7 +18,7 @@ export default function SidebarToggleButton() {
   return (
     <button
       onClick={toggleSidebar}
-      className={`absolute top-[65px] z-50 w-9 h-9 flex items-center justify-center rounded-full bg-white shadow-md transition-all duration-350 ${
+      className={`absolute top-[65px] z-40 w-9 h-9 flex items-center justify-center rounded-full bg-white shadow-md transition-all duration-350 ${
         isExpanded ? "left-[284px]" : "left-[64px]"
       }`}
       aria-label={isExpanded ? "Collapse Sidebar" : "Expand Sidebar"}

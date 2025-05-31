@@ -4,9 +4,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { redirect } from "next/navigation";
 import "../(public)/globals.css";
-import DashboardLayoutClient from "./dashboardLayoutClient";
-import { SidebarProvider } from "@/context/SidebarContext";
-
+import ProvidersWrapper from "@/context/ProvidersWrapper";
+import { UserRole } from "@/lib/generated/prisma";
 export default async function DashboardLayout({
   children,
 }: {
@@ -21,15 +20,14 @@ export default async function DashboardLayout({
   return (
     <html lang="en" className="h-full">
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <SidebarProvider>
-          <DashboardLayoutClient
-            role={session.user.role}
-            avatarUrl={session.user.image || ""}
-            userName={session.user.name || ""}
-          >
-            {children}
-          </DashboardLayoutClient>
-        </SidebarProvider>
+        <ProvidersWrapper
+          session={session}
+          role={session.user.role as UserRole}
+          avatarUrl={session.user.image || ""}
+          userName={session.user.name || ""}
+        >
+          {children}
+        </ProvidersWrapper>
       </body>
     </html>
   );

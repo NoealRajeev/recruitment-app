@@ -4,14 +4,38 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
+import {
+  getSectorEnumMapping,
+  getCompanySizeEnumMapping,
+} from "@/lib/utils/enum-mappings";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/shared/Card";
+import { z } from "zod";
+import { useToast } from "@/context/toast-provider";
+
+const RegistrationSchema = z.object({
+  companyName: z.string().min(2, "Company name must be at least 2 characters"),
+  registrationNumber: z
+    .string()
+    .regex(/^[A-Za-z0-9]{8,15}$/, "Invalid registration number format"),
+  sector: z.string().min(1, "Sector is required"),
+  companySize: z.string().min(1, "Company size is required"),
+  website: z.string().url("Invalid website URL").optional().or(z.literal("")),
+  fullName: z.string().min(2, "Full name must be at least 2 characters"),
+  jobTitle: z.string().min(2, "Job title must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(6, "Phone number must be at least 6 digits"),
+  altContact: z.string().optional(),
+});
 
 export default function RegisterPage() {
   const { language, setLanguage, t } = useLanguage();
+  const sectorMapping = getSectorEnumMapping(language);
+  const companySizeMapping = getCompanySizeEnumMapping(language);
   const router = useRouter();
+  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailCheckInProgress, setEmailCheckInProgress] = useState(false);
   const [formData, setFormData] = useState({
@@ -25,74 +49,59 @@ export default function RegisterPage() {
     email: "",
     phone: "",
     altContact: "",
-    password: "",
-    confirmPassword: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const validateRegistrationNumber = (value: string) => {
-    const regex = /^[A-Za-z0-9]{8,15}$/;
-    return regex.test(value);
-  };
-
   const checkEmailAvailability = async (email: string) => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(!["taken@example.com", "used@example.com"].includes(email));
-      }, 500);
-    });
+    try {
+      const response = await fetch("/api/auth/check-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to check email");
+      }
+
+      const data = await response.json();
+      return data.available;
+    } catch (error) {
+      console.error("Email check error:", error);
+      return false;
+    }
   };
 
   const validateForm = async () => {
-    const newErrors: Record<string, string> = {};
+    try {
+      const result = RegistrationSchema.safeParse(formData);
 
-    if (!formData.companyName) newErrors.companyName = t.required;
-    if (!formData.registrationNumber) {
-      newErrors.registrationNumber = t.required;
-    } else if (!validateRegistrationNumber(formData.registrationNumber)) {
-      newErrors.registrationNumber = t.invalidRegistration;
-    }
-    if (!formData.sector) newErrors.sector = t.required;
-    if (!formData.companySize) newErrors.companySize = t.required;
-    if (!formData.fullName) newErrors.fullName = t.required;
-    if (!formData.jobTitle) newErrors.jobTitle = t.required;
-
-    if (!formData.email) {
-      newErrors.email = t.required;
-    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      newErrors.email = t.invalidEmail;
-    } else {
-      try {
-        setEmailCheckInProgress(true);
-        const isAvailable = await checkEmailAvailability(formData.email);
-        if (!isAvailable) newErrors.email = t.emailInUse;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
-        newErrors.email = t.emailCheckError;
-      } finally {
-        setEmailCheckInProgress(false);
+      if (!result.success) {
+        const newErrors: Record<string, string> = {};
+        result.error.errors.forEach((err) => {
+          newErrors[err.path[0]] = err.message;
+        });
+        setErrors(newErrors);
+        return false;
       }
-    }
 
-    if (!formData.phone) {
-      newErrors.phone = t.required;
-    } else if (
-      !/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/.test(
-        formData.phone
-      )
-    ) {
-      newErrors.phone = t.invalidPhone;
-    }
+      // Check email availability
+      setEmailCheckInProgress(true);
+      const isAvailable = await checkEmailAvailability(formData.email);
+      if (!isAvailable) {
+        setErrors((prev) => ({ ...prev, email: "Email is already in use" }));
+        return false;
+      }
 
-    if (!formData.password) newErrors.password = t.required;
-    if (formData.password.length < 8)
-      newErrors.password = "Password must be at least 8 characters";
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
+      return true;
+    } catch (error) {
+      console.error("Validation error:", error);
+      return false;
+    } finally {
+      setEmailCheckInProgress(false);
     }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (
@@ -111,17 +120,44 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const isValid = await validateForm();
     if (!isValid) return;
 
     setIsSubmitting(true);
+
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      router.push("/dashboard");
+      const response = await fetch("/api/auth/register/client", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+          sector: sectorMapping[formData.sector],
+          companySize: companySizeMapping[formData.companySize],
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Registration failed");
+      }
+
+      // Registration successful
+      toast({
+        type: "success",
+        message: "Registration Successful",
+      });
+
+      // Redirect to pending review page
+      router.push("/auth/verify-account");
     } catch (error) {
       console.error("Registration failed:", error);
-      setErrors({ submit: "Registration failed. Please try again." });
+      toast({
+        type: "error",
+        message: `Registration Failed ${error instanceof Error ? error.message : "An error occurred"}`,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -189,14 +225,13 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   error={errors.sector}
                   required
-                  options={
-                    t.sectorOptions?.map((opt) => ({
-                      value: opt.toLowerCase().replace(/\s+/g, "-"),
-                      label: opt,
-                    })) || []
-                  }
+                  options={t.sectorOptions.map((opt) => ({
+                    value: opt,
+                    label: opt,
+                  }))}
                   id="sector"
                 />
+
                 <Select
                   label={t.companySize}
                   name="companySize"
@@ -204,12 +239,10 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   error={errors.companySize}
                   required
-                  options={
-                    t.companySizeOptions?.map((opt) => ({
-                      value: opt.toLowerCase().replace(/\s+/g, "-"),
-                      label: opt,
-                    })) || []
-                  }
+                  options={t.companySizeOptions.map((opt) => ({
+                    value: opt,
+                    label: opt,
+                  }))}
                   id="companySize"
                 />
                 <Input

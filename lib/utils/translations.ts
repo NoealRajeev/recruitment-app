@@ -9,6 +9,8 @@ export const translations = {
       { id: 4, label: "Review" },
     ],
     companyProfile: "Company Profile",
+    address: "Address",
+    addressPlaceholder: "Enter company address",
     knowMore: "Let us know more about you.",
     companyDetails: "Company Details",
     contactPerson: "Contact Person",
@@ -76,6 +78,28 @@ export const translations = {
     noneSpecified: "None specified",
     languagesRequired: "Languages Required",
     certifications: "Certifications",
+    completeYourRegistration: "Complete Your Registration",
+    uploadRequiredDocuments:
+      "Please upload the required documents to complete your agency registration for",
+    businessLicense: "Business License",
+    insuranceCertificate: "Insurance Certificate",
+    idProof: "ID Proof",
+    addressProof: "Address Proof",
+    otherDocuments: "Other Supporting Documents",
+    submitDocuments: "Submit Documents",
+    submitting: "Submitting...",
+    documentsSubmitted: "Documents Submitted",
+    documentsSubmittedMessage:
+      "Your documents have been received. Our team will review them and notify you via email once your account is approved.",
+    registrationSubmitted: "Registration Submitted",
+    registrationUnderReview:
+      "Your company registration is under review. Our team will verify your details and notify you via email once your account is approved.",
+    reviewProcessTime: "This process typically takes 1-2 business days.",
+    returnToHome: "Return to Home",
+    errorFetchingUserData: "Error fetching user data. Please try again.",
+    errorSubmittingDocuments: "Error submitting documents. Please try again.",
+    sectionNoteVerification:
+      "*This section collects verification documents for your agency registration.",
     sectionNoteCompany:
       "*This section collects essential information about the company requesting foreign labour.",
     sectionNoteJob:
@@ -115,6 +139,14 @@ export const translations = {
     passwordResetSuccess: "Password reset successfully",
     errorOccurred: "An error occurred. Please try again.",
     backToLogin: "Back to Login",
+    contractDurationOptions: ["1 Year", "2 Years", "Unlimited"],
+    ticketDetailsOptions: ["One Year", "Two Years"],
+    previousExperienceOptions: [
+      "Fresh",
+      "GCC Experience",
+      "Local Experience",
+      "Any",
+    ],
     jobPositions: [
       "Carpenter",
       "Electrician",
@@ -377,10 +409,14 @@ export const translations = {
     ],
     languageOptions: ["English", "Arabic", "Hindi", "Urdu", "Tagalog"],
     sectorOptions: [
-      "Construction",
+      "IT",
+      "Real Estate",
+      "Health Care",
+      "Finance",
       "Manufacturing",
-      "Hospitality",
-      "Healthcare",
+      "Retail",
+      "Construction",
+      "Education",
       "Other",
     ],
     companySizeOptions: [
@@ -397,6 +433,8 @@ export const translations = {
   },
   ar: {
     formTitle: "تقديم متطلباتك",
+    address: "Address",
+    addressPlaceholder: "Enter company address",
     steps: [
       { id: 1, label: "معلومات الشركة" },
       { id: 2, label: "تفاصيل الوظيفة" },
@@ -471,6 +509,28 @@ export const translations = {
     noneSpecified: "غير محدد",
     languagesRequired: "اللغات المطلوبة",
     certifications: "الشهادات",
+    completeYourRegistration: "إكمال تسجيلك",
+    uploadRequiredDocuments:
+      "يرجى تحميل المستندات المطلوبة لإكمال تسجيل وكالتك لـ",
+    businessLicense: "رخصة العمل",
+    insuranceCertificate: "شهادة التأمين",
+    idProof: "إثبات الهوية",
+    addressProof: "إثبات العنوان",
+    otherDocuments: "مستندات داعمة أخرى",
+    submitDocuments: "إرسال المستندات",
+    submitting: "جارٍ الإرسال...",
+    documentsSubmitted: "تم تقديم المستندات",
+    documentsSubmittedMessage:
+      "لقد تم استلام مستنداتك. سيقوم فريقنا بمراجعتها وإعلامك عبر البريد الإلكتروني بمجرد الموافقة على حسابك.",
+    registrationSubmitted: "تم تقديم التسجيل",
+    registrationUnderReview:
+      "تسجيل شركتك قيد المراجعة. سيقوم فريقنا بالتحقق من تفاصيلك وإعلامك عبر البريد الإلكتروني بمجرد الموافقة على حسابك.",
+    reviewProcessTime: "تستغرق هذه العملية عادةً من يوم إلى يومي عمل.",
+    returnToHome: "العودة إلى الصفحة الرئيسية",
+    errorFetchingUserData:
+      "خطأ في جلب بيانات المستخدم. يرجى المحاولة مرة أخرى.",
+    errorSubmittingDocuments: "خطأ في إرسال المستندات. يرجى المحاولة مرة أخرى.",
+    sectionNoteVerification: "*يجمع هذا القسم مستندات التحقق لتسجيل وكالتك.",
     sectionNoteCompany:
       "*يجمع هذا القسم المعلومات الأساسية عن الشركة التي تطلب عمالة أجنبية.",
     sectionNoteJob: "*يحدد هذا القسم الوظائف والمؤهلات المطلوبة للعمال.",
@@ -509,6 +569,9 @@ export const translations = {
     passwordResetSuccess: "تم إعادة تعيين كلمة المرور بنجاح",
     errorOccurred: "حدث خطأ. يرجى المحاولة مرة أخرى.",
     backToLogin: "العودة لتسجيل الدخول",
+    contractDurationOptions: ["سنة واحدة", "سنتين", "غير محدود"],
+    ticketDetailsOptions: ["سنة واحدة", "سنتين"],
+    previousExperienceOptions: ["جديد", "خليجى", "محلي", "أي"],
     jobPositions: [
       "نجار",
       "كهربائي",

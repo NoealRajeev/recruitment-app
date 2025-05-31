@@ -15,9 +15,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
           "rounded-lg border bg-card text-card-foreground transition-shadow",
           variant === "default" && "bg-transparent border-none",
           variant === "outline" && "border border-gray-200",
-          variant === "agency" && "bg-[#F0DAF4] border-none p-4",
-          variant === "company" && "bg-[#9514B4] text-white border-none p-4",
-          variant === "request" && "bg-[#9514B4] text-white border-none p-4",
+          variant === "agency" && "bg-[#EDDDF3]/50 border-none p-4",
+          variant === "company" && "bg-[#EDDDF3]/50 border-none p-4",
+          variant === "request" && "bg-[#EDDDF3]/50 border-none p-4",
           className
         )}
         {...props}

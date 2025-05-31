@@ -22,7 +22,7 @@ const stats = [
   {
     icon: <Users className="text-white w-6 h-6" />,
     label: "Clients Registered",
-    value: "1022 /1300 Hrs",
+    value: "102",
     footer: "8% increase from last month",
     trend: "up",
     bg: "bg-blue-300",
@@ -30,7 +30,7 @@ const stats = [
   {
     icon: <Briefcase className="text-white w-6 h-6" />,
     label: "Agencies Active",
-    value: "101 /120",
+    value: "101",
     footer: "2% increase from last month",
     trend: "up",
     bg: "bg-yellow-300",

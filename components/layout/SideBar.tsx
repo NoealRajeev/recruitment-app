@@ -61,6 +61,7 @@ const navItems = {
     },
   ],
   CLIENT_ADMIN: [
+    { href: "/dashboard/client", label: "Dashboard", icon: Home, exact: true },
     {
       href: "/dashboard/client/requirements",
       label: "My Requirements",
@@ -87,6 +88,7 @@ const navItems = {
     },
   ],
   RECRUITMENT_AGENCY: [
+    { href: "/dashboard/agency", label: "Dashboard", icon: Home, exact: true },
     {
       href: "/dashboard/agency/requirements",
       label: "Assigned Requirements",

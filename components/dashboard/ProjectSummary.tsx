@@ -137,21 +137,11 @@ export default function ProjectSummary() {
   return (
     <div className="bg-purple-100 p-6 rounded-xl shadow mt-9">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Project summary</h2>
+        <h2 className="text-lg font-semibold">Recent Requests</h2>
         <div className="flex gap-2">
           <Select
-            label="Project"
-            name="project"
-            showLabelAsPlaceholder
-            options={[
-              { value: "project1", label: "Project 1" },
-              { value: "project2", label: "Project 2" },
-            ]}
-            className="rounded-md p-1 text-sm border !h-8"
-          />
-          <Select
-            label="Project Manager"
-            name="projectManager"
+            label="Time"
+            name="time"
             showLabelAsPlaceholder
             options={[
               { value: "manager1", label: "Manager 1" },
@@ -175,11 +165,10 @@ export default function ProjectSummary() {
         <table className="w-full text-sm text-left">
           <thead>
             <tr className="text-gray-600 border-b">
-              <th className="py-2">Name</th>
-              <th>Project manager</th>
-              <th>Due date</th>
+              <th className="py-2">Company Name</th>
+              <th>Email</th>
+              <th>Date</th>
               <th>Status</th>
-              <th>Progress</th>
             </tr>
           </thead>
           <tbody>
@@ -200,42 +189,6 @@ export default function ProjectSummary() {
                   >
                     {p.status}
                   </span>
-                </td>
-                <td>
-                  <div className="relative w-12 h-12">
-                    <svg className="w-full h-full">
-                      <circle
-                        className="text-gray-300"
-                        strokeWidth="5"
-                        stroke="currentColor"
-                        fill="transparent"
-                        r="18"
-                        cx="24"
-                        cy="24"
-                      />
-                      <circle
-                        className={`${
-                          p.color === "green"
-                            ? "text-green-500"
-                            : p.color === "yellow"
-                            ? "text-yellow-500"
-                            : "text-red-500"
-                        }`}
-                        strokeWidth="5"
-                        strokeDasharray="113"
-                        strokeDashoffset={(113 * (100 - p.progress)) / 100}
-                        strokeLinecap="round"
-                        stroke="currentColor"
-                        fill="transparent"
-                        r="18"
-                        cx="24"
-                        cy="24"
-                      />
-                    </svg>
-                    <div className="absolute inset-0 flex items-center justify-center text-xs font-semibold">
-                      {p.progress}%
-                    </div>
-                  </div>
                 </td>
               </tr>
             ))}

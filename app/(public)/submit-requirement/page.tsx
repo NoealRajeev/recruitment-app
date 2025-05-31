@@ -1,49 +1,70 @@
 "use client";
 import { useLanguage } from "@/context/LanguageContext";
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Select } from "@/components/ui/select";
 import { Card } from "@/components/shared/Card";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { AutocompleteInput } from "@/components/ui/AutocompleteInput";
 import { Trash2 } from "lucide-react";
+import { useToast } from "@/context/toast-provider";
+import {
+  CompanySector,
+  CompanySize,
+  ContractDuration,
+  PreviousExperience,
+  TicketDetails,
+} from "@/lib/generated/prisma";
+import {
+  getSectorEnumMapping,
+  getCompanySizeEnumMapping,
+  getDisplaySectorMapping,
+  getDisplayCompanySizeMapping,
+  getContractDurationEnumMapping,
+  getDisplayContractDurationMapping,
+  getDisplayPreviousExperienceMapping,
+  getDisplayTicketDetailsMapping,
+  getPreviousExperienceEnumMapping,
+  getTicketDetailsEnumMapping,
+} from "@/lib/utils/enum-mappings";
 
 interface JobRole {
   title: string;
   quantity: number;
   nationality: string;
-  languages: string[];
+  salary: string;
 }
 
 interface FormData {
   companyName: string;
   registrationNumber: string;
-  sector: string;
-  companySize: string;
+  sector: CompanySector | "";
+  companySize: CompanySize | "";
   website: string;
+  address: string;
   fullName: string;
   jobTitle: string;
   email: string;
   phone: string;
   altContact: string;
-  jobCategory: string;
   jobRoles: JobRole[];
   projectLocation: string;
-  contractType: string;
   startDate: string;
-  duration: string;
-  workingHours?: string;
-  accommodationProvided: boolean;
-  transportationProvided: boolean;
-  experienceLevel: string;
+  contractDuration: ContractDuration | "";
   languageRequirements: string[];
-  certificationRequirements: string;
+  previousExperience: PreviousExperience | "";
+  ticketDetails: TicketDetails | "";
+  totalExperienceYears?: number;
+  preferredAge?: number;
   specialRequirements: string;
-  medicalRequirements: string;
 }
 
 interface Errors {
   [key: string]: string;
+}
+interface ReviewFieldProps {
+  label: string;
+  value: string;
 }
 
 export default function SubmitRequirement() {
@@ -55,197 +76,282 @@ export default function SubmitRequirement() {
     t.languageOptions || []
   );
   const [newLanguage, setNewLanguage] = useState("");
+  const { toast } = useToast();
 
-  const [formData, setFormData] = useState<FormData>({
-    companyName: "",
-    registrationNumber: "",
-    sector: "",
-    companySize: "",
-    website: "",
-    fullName: "",
-    jobTitle: "",
-    email: "",
-    phone: "",
-    altContact: "",
-    jobCategory: "",
-    jobRoles: [
-      {
-        title: "",
-        quantity: 1,
-        nationality: "",
-        languages: [],
-      },
-    ],
-    projectLocation: "",
-    contractType: "",
-    startDate: "",
-    duration: "",
-    accommodationProvided: false,
-    transportationProvided: false,
-    experienceLevel: "",
-    languageRequirements: [],
-    certificationRequirements: "",
-    specialRequirements: "",
-    medicalRequirements: "",
-  });
+  // Memoize enum mappings based on language
+  const sectorMapping = useMemo(
+    () => getSectorEnumMapping(language),
+    [language]
+  );
+  const companySizeMapping = useMemo(
+    () => getCompanySizeEnumMapping(language),
+    [language]
+  );
+  const displaySectorMapping = useMemo(
+    () => getDisplaySectorMapping(language),
+    [language]
+  );
+  const displayCompanySizeMapping = useMemo(
+    () => getDisplayCompanySizeMapping(language),
+    [language]
+  );
+  const contractDurationMapping = useMemo(
+    () => getContractDurationEnumMapping(language),
+    [language]
+  );
+  const ticketDetailsMapping = useMemo(
+    () => getTicketDetailsEnumMapping(language),
+    [language]
+  );
+  const previousExperienceMapping = useMemo(
+    () => getPreviousExperienceEnumMapping(language),
+    [language]
+  );
 
+  const displayContractDurationMapping = useMemo(
+    () => getDisplayContractDurationMapping(language),
+    [language]
+  );
+  const displayTicketDetailsMapping = useMemo(
+    () => getDisplayTicketDetailsMapping(language),
+    [language]
+  );
+  const displayPreviousExperienceMapping = useMemo(
+    () => getDisplayPreviousExperienceMapping(language),
+    [language]
+  );
+
+  // Update your options
+  const contractDurationOptions = useMemo(
+    () =>
+      t.contractDurationOptions?.map((opt) => ({
+        value:
+          contractDurationMapping[opt] ||
+          opt.toLowerCase().replace(/\s+/g, "-"),
+        label: opt,
+      })) || [],
+    [t.contractDurationOptions, contractDurationMapping]
+  );
+
+  const ticketDetailsOptions = useMemo(
+    () =>
+      t.ticketDetailsOptions?.map((opt) => ({
+        value:
+          ticketDetailsMapping[opt] || opt.toLowerCase().replace(/\s+/g, "-"),
+        label: opt,
+      })) || [],
+    [t.ticketDetailsOptions, ticketDetailsMapping]
+  );
+
+  const previousExperienceOptions = useMemo(
+    () =>
+      t.previousExperienceOptions?.map((opt) => ({
+        value:
+          previousExperienceMapping[opt] ||
+          opt.toLowerCase().replace(/\s+/g, "-"),
+        label: opt,
+      })) || [],
+    [t.previousExperienceOptions, previousExperienceMapping]
+  );
+
+  const initialFormData: FormData = useMemo(
+    () => ({
+      companyName: "",
+      registrationNumber: "",
+      sector: "",
+      companySize: "",
+      website: "",
+      address: "",
+      fullName: "",
+      jobTitle: "",
+      email: "",
+      phone: "",
+      altContact: "",
+      contractDuration: "",
+      jobRoles: [
+        {
+          title: "",
+          quantity: 1,
+          nationality: "",
+          salary: "",
+        },
+      ],
+      projectLocation: "",
+      startDate: "",
+      languageRequirements: [],
+      previousExperience: "",
+      ticketDetails: "",
+      specialRequirements: "",
+    }),
+    []
+  );
+
+  const [formData, setFormData] = useState<FormData>(initialFormData);
   const [errors, setErrors] = useState<Errors>({});
 
   const steps = t.steps;
 
+  // Solid widths for progress bar
   const solidWidths: Record<number, string> = {
     2: "calc(33.33% + 220px)",
     3: "calc(66.66% + 260px)",
     4: "2800px",
   };
 
-  const validateRegistrationNumber = (value: string): boolean => {
+  // Validation functions
+  const validateRegistrationNumber = useCallback((value: string): boolean => {
     const regex = /^[A-Za-z0-9]{8,15}$/;
     return regex.test(value);
-  };
+  }, []);
 
-  const checkEmailAvailability = async (email: string): Promise<boolean> => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(!["taken@example.com", "used@example.com"].includes(email));
-      }, 500);
-    });
-  };
+  const checkEmailAvailability = useCallback(
+    async (email: string): Promise<boolean> => {
+      try {
+        const response = await fetch("/api/auth/check-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        });
+        const data = await response.json();
+        return data.available;
+      } catch (error) {
+        console.error("Email check failed:", error);
+        return false;
+      }
+    },
+    []
+  );
 
-  const validateStep1 = async (): Promise<boolean> => {
+  // Step validation functions
+  const validateStep1 = useCallback(async (): Promise<boolean> => {
     const newErrors: Errors = {};
+    const requiredFields = {
+      companyName: t.required,
+      registrationNumber: validateRegistrationNumber(
+        formData.registrationNumber
+      )
+        ? ""
+        : t.invalidRegistration,
+      sector: t.required,
+      companySize: t.required,
+      address: "Address is required",
+      fullName: t.required,
+      jobTitle: t.required,
+      email: /^\S+@\S+\.\S+$/.test(formData.email) ? "" : t.invalidEmail,
+      phone: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/.test(
+        formData.phone
+      )
+        ? ""
+        : t.invalidPhone,
+    };
 
-    if (!formData.companyName) newErrors.companyName = t.required;
-    if (!formData.registrationNumber) {
-      newErrors.registrationNumber = t.required;
-    } else if (!validateRegistrationNumber(formData.registrationNumber)) {
-      newErrors.registrationNumber = t.invalidRegistration;
-    }
-    if (!formData.sector) newErrors.sector = t.required;
-    if (!formData.companySize) newErrors.companySize = t.required;
-    if (!formData.fullName) newErrors.fullName = t.required;
-    if (!formData.jobTitle) newErrors.jobTitle = t.required;
+    Object.entries(requiredFields).forEach(([field, message]) => {
+      if (!formData[field as keyof FormData]) {
+        newErrors[field] = message || t.required;
+      }
+    });
 
-    if (!formData.email) {
-      newErrors.email = t.required;
-    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      newErrors.email = t.invalidEmail;
-    } else {
+    if (!newErrors.email && formData.email) {
       try {
         setEmailCheckInProgress(true);
         const isAvailable = await checkEmailAvailability(formData.email);
         if (!isAvailable) newErrors.email = t.emailInUse;
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        newErrors.email = t.emailCheckError;
+        toast({
+          type: "error",
+          message: error instanceof Error ? error.message : "Submission failed",
+        });
       } finally {
         setEmailCheckInProgress(false);
       }
     }
 
-    if (!formData.phone) {
-      newErrors.phone = t.required;
-    } else if (
-      !/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/.test(
-        formData.phone
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [formData, t, validateRegistrationNumber, checkEmailAvailability, toast]);
+
+  const validateStep2 = useCallback((): boolean => {
+    const newErrors: Errors = {};
+    if (
+      formData.jobRoles.some(
+        (role) => !role.title.trim() || !role.salary.trim()
       )
     ) {
-      newErrors.phone = t.invalidPhone;
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const validateStep2 = (): boolean => {
-    const newErrors: Errors = {};
-    if (!formData.jobCategory) newErrors.jobCategory = t.required;
-    if (formData.jobRoles.some((role) => !role.title))
       newErrors.jobRoles = t.required;
-    if (!formData.projectLocation) newErrors.projectLocation = t.required;
-    if (!formData.contractType) newErrors.contractType = t.required;
+    }
+    if (!formData.projectLocation.trim())
+      newErrors.projectLocation = t.required;
     if (!formData.startDate) newErrors.startDate = t.required;
+    if (!formData.contractDuration) newErrors.contractDuration = t.required;
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData, t]);
 
-  const validateStep3 = (): boolean => {
+  const validateStep3 = useCallback((): boolean => {
     const newErrors: Errors = {};
-    if (!formData.experienceLevel) newErrors.experienceLevel = t.required;
     if (formData.languageRequirements.length === 0)
       newErrors.languageRequirements = t.required;
+    if (!formData.previousExperience) newErrors.previousExperience = t.required;
+    if (!formData.ticketDetails) newErrors.ticketDetails = t.required;
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
+  }, [formData, t]);
 
-  const handleNext = async () => {
-    let isValid = true;
+  // Navigation handlers
+  const handleNext = useCallback(async () => {
+    let isValid = false;
 
     if (currentStep === 1) isValid = await validateStep1();
-    if (currentStep === 2) isValid = validateStep2();
-    if (currentStep === 3) isValid = validateStep3();
+    else if (currentStep === 2) isValid = validateStep2();
+    else if (currentStep === 3) isValid = validateStep3();
 
-    if (!isValid) return;
+    if (!isValid) {
+      const firstError = Object.values(errors)[0];
+      toast({ type: "error", message: firstError || "Please fix the errors." });
+      return;
+    }
 
     setIsSubmitting(true);
     setTimeout(() => {
       setCurrentStep((prev) => Math.min(prev + 1, steps.length));
       setIsSubmitting(false);
     }, 800);
-  };
+  }, [
+    currentStep,
+    validateStep1,
+    validateStep2,
+    validateStep3,
+    errors,
+    toast,
+    steps.length,
+  ]);
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
-  };
+  }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
-    const { name, value, type } = e.target;
-    const checked = (e.target as HTMLInputElement).checked;
+  // Form change handlers
+  const handleChange = useCallback(
+    (
+      e: React.ChangeEvent<
+        HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+      >
+    ) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({ ...prev, [name]: value }));
+      if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
+    },
+    [errors]
+  );
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  };
-
-  const handleJobRoleChange = (
-    index: number,
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-
-    if (name.includes("languages")) {
-      setFormData((prev) => {
-        const updatedJobRoles = [...prev.jobRoles];
-        const currentLanguages = Array.isArray(updatedJobRoles[index].languages)
-          ? updatedJobRoles[index].languages
-          : [];
-
-        if (value && !currentLanguages.includes(value)) {
-          updatedJobRoles[index] = {
-            ...updatedJobRoles[index],
-            languages: [...currentLanguages, value],
-          };
-        } else if (Array.isArray(value)) {
-          updatedJobRoles[index] = {
-            ...updatedJobRoles[index],
-            languages: value,
-          };
-        }
-
-        return { ...prev, jobRoles: updatedJobRoles };
-      });
-    } else {
+  const handleJobRoleChange = useCallback(
+    (
+      index: number,
+      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
+      const { name, value } = e.target;
       setFormData((prev) => {
         const updatedJobRoles = [...prev.jobRoles];
         updatedJobRoles[index] = {
@@ -254,32 +360,37 @@ export default function SubmitRequirement() {
         };
         return { ...prev, jobRoles: updatedJobRoles };
       });
-    }
-  };
+    },
+    []
+  );
 
-  const addJobRole = () => {
+  // Job role management
+  const addJobRole = useCallback(() => {
     setFormData((prev) => ({
       ...prev,
       jobRoles: [
         ...prev.jobRoles,
-        {
-          title: "",
-          quantity: 1,
-          nationality: "",
-          languages: [],
-        },
+        { title: "", quantity: 1, nationality: "", salary: "" },
       ],
     }));
-  };
+  }, []);
 
-  const removeJobRole = (index: number) => {
-    setFormData((prev) => ({
-      ...prev,
-      jobRoles: prev.jobRoles.filter((_, i) => i !== index),
-    }));
-  };
+  const removeJobRole = useCallback(
+    (index: number) => {
+      if (formData.jobRoles.length <= 1) {
+        toast({ type: "error", message: "At least one job role is required" });
+        return;
+      }
+      setFormData((prev) => ({
+        ...prev,
+        jobRoles: prev.jobRoles.filter((_, i) => i !== index),
+      }));
+    },
+    [formData.jobRoles.length, toast]
+  );
 
-  const toggleLanguageRequirement = (language: string) => {
+  // Language requirements management
+  const toggleLanguageRequirement = useCallback((language: string) => {
     setFormData((prev) => {
       const exists = prev.languageRequirements.includes(language);
       const updated = exists
@@ -287,40 +398,128 @@ export default function SubmitRequirement() {
         : [...prev.languageRequirements, language];
       return { ...prev, languageRequirements: updated };
     });
-  };
+  }, []);
 
-  const handleAddLanguage = () => {
+  const handleAddLanguage = useCallback(() => {
     const trimmedLang = newLanguage.trim();
     if (!trimmedLang) return;
 
-    setLanguageOptions((prev) => {
-      if (!prev.includes(trimmedLang)) {
-        return [...prev, trimmedLang];
-      }
-      return prev;
-    });
+    if (!languageOptions.includes(trimmedLang)) {
+      setLanguageOptions((prev) => [...prev, trimmedLang]);
+    }
 
-    setFormData((prev) => {
-      if (!prev.languageRequirements.includes(trimmedLang)) {
-        return {
-          ...prev,
-          languageRequirements: [...prev.languageRequirements, trimmedLang],
-        };
-      }
-      return prev;
-    });
+    if (!formData.languageRequirements.includes(trimmedLang)) {
+      setFormData((prev) => ({
+        ...prev,
+        languageRequirements: [...prev.languageRequirements, trimmedLang],
+      }));
+    }
 
     setNewLanguage("");
-  };
+  }, [newLanguage, languageOptions, formData.languageRequirements]);
 
-  const handleSubmit = () => {
+  // Form submission
+  const handleSubmit = useCallback(async () => {
+    if (currentStep !== steps.length) return;
+
     console.log("Form submitted:", formData);
     setIsSubmitting(true);
-    setTimeout(() => {
-      setCurrentStep((prev) => (prev < steps.length ? prev + 1 : prev));
+
+    try {
+      // Step 1: Create client account
+      const accountResponse = await fetch("/api/auth/register/client", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          companyName: formData.companyName.trim(),
+          registrationNumber: formData.registrationNumber.trim(),
+          address: formData.address.trim(),
+          fullName: formData.fullName.trim(),
+          jobTitle: formData.jobTitle.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          altContact: formData.altContact?.trim() || "",
+          website: formData.website?.trim() || "",
+        }),
+      });
+
+      if (!accountResponse.ok) {
+        const errorData = await accountResponse.json();
+        throw new Error(errorData.message || "Account creation failed");
+      }
+
+      const accountData = await accountResponse.json();
+      const clientId = accountData.clientId;
+
+      // Step 2: Create requirement with all job roles
+      const requirementResponse = await fetch("/api/requirements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          projectLocation: formData.projectLocation.trim(),
+          startDate: formData.startDate,
+          specialNotes: formData.specialRequirements.trim(),
+          status: "SUBMITTED",
+          clientId: clientId,
+          jobRoles: formData.jobRoles.map((role) => ({
+            title: role.title.trim(),
+            quantity: Number(role.quantity),
+            nationality: role.nationality.trim(),
+            salary: role.salary.trim(),
+          })),
+          // Convert display values to enum values where needed
+          contractDuration: formData.contractDuration,
+          previousExperience: formData.previousExperience,
+          ticketDetails: formData.ticketDetails,
+          totalExperienceYears: formData.totalExperienceYears || null,
+          preferredAge: formData.preferredAge || null,
+        }),
+      });
+
+      if (!requirementResponse.ok) {
+        const errorData = await requirementResponse.json();
+        throw new Error(errorData.error || "Requirement submission failed");
+      }
+
+      toast({
+        type: "success",
+        message: "Account created and requirement submitted successfully!",
+      });
+
+      setFormData(initialFormData);
+      setCurrentStep(1);
+    } catch (error) {
+      console.error("Submission error:", error);
+      toast({
+        type: "error",
+        message: error instanceof Error ? error.message : "Submission failed",
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
-  };
+    }
+  }, [currentStep, steps.length, formData, toast, initialFormData]);
+
+  // Select options with enum mapping
+  const sectorOptions = useMemo(
+    () =>
+      t.sectorOptions?.map((opt) => ({
+        value: sectorMapping[opt] || opt.toLowerCase().replace(/\s+/g, "-"),
+        label: opt,
+      })) || [],
+    [t.sectorOptions, sectorMapping]
+  );
+
+  const companySizeOptions = useMemo(
+    () =>
+      t.companySizeOptions?.map((opt) => ({
+        value:
+          companySizeMapping[opt] || opt.toLowerCase().replace(/\s+/g, "-"),
+        label: opt,
+      })) || [],
+    [t.companySizeOptions, companySizeMapping]
+  );
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -369,12 +568,7 @@ export default function SubmitRequirement() {
                   onChange={handleChange}
                   error={errors.sector}
                   required
-                  options={
-                    t.sectorOptions?.map((opt) => ({
-                      value: opt.toLowerCase().replace(/\s+/g, "-"),
-                      label: opt,
-                    })) || []
-                  }
+                  options={sectorOptions}
                   id="sector"
                 />
                 <Select
@@ -384,13 +578,18 @@ export default function SubmitRequirement() {
                   onChange={handleChange}
                   error={errors.companySize}
                   required
-                  options={
-                    t.companySizeOptions?.map((opt) => ({
-                      value: opt.toLowerCase().replace(/\s+/g, "-"),
-                      label: opt,
-                    })) || []
-                  }
+                  options={companySizeOptions}
                   id="companySize"
+                />
+                <Input
+                  label={t.address || "Company Address"}
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  error={errors.address}
+                  required
+                  placeholder={t.addressPlaceholder || "Enter company address"}
+                  id="address"
                 />
                 <Input
                   label={t.website}
@@ -500,6 +699,9 @@ export default function SubmitRequirement() {
                           {t.nationality}
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                          Salary/Month
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                           {t.actions}
                         </th>
                       </tr>
@@ -556,6 +758,16 @@ export default function SubmitRequirement() {
                               className="w-full"
                             />
                           </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <input
+                              type="text"
+                              name={`jobRoles[${index}].salary`}
+                              value={role.salary || ""}
+                              onChange={(e) => handleJobRoleChange(index, e)}
+                              placeholder="Salary amount"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                            />
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <button onClick={() => removeJobRole(index)}>
                               <Trash2 />
@@ -570,13 +782,8 @@ export default function SubmitRequirement() {
                   <Button
                     type="button"
                     variant="default"
-                    disabled={formData.jobRoles.length === 0}
                     onClick={addJobRole}
-                    className={
-                      formData.jobRoles.length === 0
-                        ? "opacity-50 cursor-not-allowed"
-                        : ""
-                    }
+                    className="mr-4"
                   >
                     {t.addAnotherRole}
                   </Button>
@@ -589,23 +796,18 @@ export default function SubmitRequirement() {
 
               <div className="col-span-4 space-y-6">
                 <div>
-                  <h3 className="text-md font-medium text-gray-700 mb-3">
-                    {t.workingHours}*
-                  </h3>
-                  <Input
-                    name="workingHours"
-                    value={formData.workingHours || ""}
+                  <Select
+                    name="contractDuration"
+                    value={formData.contractDuration}
                     onChange={handleChange}
-                    type="time"
                     required
                     className="w-full"
+                    label="Contract Duration"
+                    error={errors.contractDuration}
+                    options={contractDurationOptions}
                   />
                 </div>
-
                 <div>
-                  <h3 className="text-md font-medium text-gray-700 mb-3">
-                    {t.projectLocation}*
-                  </h3>
                   <Input
                     name="projectLocation"
                     value={formData.projectLocation}
@@ -613,13 +815,12 @@ export default function SubmitRequirement() {
                     placeholder={t.projectLocationPlaceholder}
                     required
                     className="w-full"
+                    label={t.projectLocation}
+                    error={errors.projectLocation}
+                    id="location"
                   />
                 </div>
-
                 <div>
-                  <h3 className="text-md font-medium text-gray-700 mb-3">
-                    {t.startDate}*
-                  </h3>
                   <Input
                     name="startDate"
                     value={formData.startDate}
@@ -627,6 +828,9 @@ export default function SubmitRequirement() {
                     type="date"
                     required
                     className="w-full"
+                    label={t.startDate}
+                    error={errors.startDate}
+                    id="date"
                   />
                 </div>
               </div>
@@ -699,23 +903,23 @@ export default function SubmitRequirement() {
                     />
                   </div>
                 </div>
-
-                <Input
-                  label={t.certificationRequirements}
-                  name="certificationRequirements"
-                  value={formData.certificationRequirements}
+                <Select
+                  label="Previous Experience"
+                  name="previousExperience"
+                  value={formData.previousExperience}
                   onChange={handleChange}
-                  placeholder={t.certificationPlaceholder}
-                  id="certificationRequirements"
+                  error={errors.previousExperience}
+                  required
+                  options={previousExperienceOptions}
                 />
-
                 <Input
-                  label={t.medicalRequirements}
-                  name="medicalRequirements"
-                  value={formData.medicalRequirements}
+                  label="Total Experience Years (optional)"
+                  name="totalExperienceYears"
+                  value={formData.totalExperienceYears || ""}
                   onChange={handleChange}
-                  placeholder={t.medicalPlaceholder}
-                  id="medicalRequirements"
+                  type="number"
+                  min="0"
+                  placeholder="e.g., 5 Years"
                 />
               </div>
 
@@ -727,6 +931,27 @@ export default function SubmitRequirement() {
                 <h2 className="text-lg font-semibold mb-2">
                   {t.additionalRequirements}
                 </h2>
+
+                <Input
+                  label="Preferred Age (optional)"
+                  name="preferredAge"
+                  value={formData.preferredAge || ""}
+                  onChange={handleChange}
+                  type="number"
+                  min="18"
+                  placeholder="e.g., 30 Years old"
+                  // description="±5 years will be considered"
+                />
+
+                <Select
+                  label="Ticket Details"
+                  name="ticketDetails"
+                  value={formData.ticketDetails}
+                  onChange={handleChange}
+                  error={errors.ticketDetails}
+                  required
+                  options={ticketDetailsOptions}
+                />
 
                 <div>
                   <label
@@ -772,10 +997,20 @@ export default function SubmitRequirement() {
                     label={t.registrationNumber}
                     value={formData.registrationNumber}
                   />
-                  <ReviewField label={t.sector} value={formData.sector} />
+                  <ReviewField
+                    label={t.sector}
+                    value={
+                      displaySectorMapping[formData.sector as CompanySector] ||
+                      formData.sector
+                    }
+                  />
                   <ReviewField
                     label={t.companySize}
-                    value={formData.companySize}
+                    value={
+                      displayCompanySizeMapping[
+                        formData.companySize as CompanySize
+                      ] || formData.companySize
+                    }
                   />
                   <ReviewField
                     label={t.website}
@@ -807,11 +1042,6 @@ export default function SubmitRequirement() {
                   <h2 className="text-lg font-semibold mb-4 border-b pb-2">
                     {t.jobDetails}
                   </h2>
-                  <ReviewField
-                    label={t.jobCategory}
-                    value={formData.jobCategory}
-                  />
-
                   <div className="mb-2">
                     <p className="text-sm font-medium text-gray-700">
                       {t.jobRoles}:
@@ -819,7 +1049,8 @@ export default function SubmitRequirement() {
                     <ul className="list-disc list-inside text-sm text-gray-600 mt-1">
                       {formData.jobRoles.map((role, index) => (
                         <li key={index}>
-                          {role.title} ({t.quantity}: {role.quantity})
+                          {role.title} ({t.quantity}: {role.quantity}, Salary:{" "}
+                          {role.salary})
                         </li>
                       ))}
                     </ul>
@@ -829,25 +1060,13 @@ export default function SubmitRequirement() {
                     label={t.projectLocation}
                     value={formData.projectLocation}
                   />
-                  <ReviewField
-                    label={t.contractType}
-                    value={formData.contractType}
-                  />
                   <ReviewField label={t.startDate} value={formData.startDate} />
-                  <ReviewField label={t.duration} value={formData.duration} />
                   <ReviewField
-                    label={t.benefits}
+                    label="Contract Duration"
                     value={
-                      [
-                        formData.accommodationProvided
-                          ? t.accommodations
-                          : null,
-                        formData.transportationProvided
-                          ? t.transportation
-                          : null,
-                      ]
-                        .filter(Boolean)
-                        .join(", ") || t.noneSpecified
+                      displayContractDurationMapping[
+                        formData.contractDuration as ContractDuration
+                      ] || formData.contractDuration
                     }
                   />
                 </div>
@@ -857,22 +1076,40 @@ export default function SubmitRequirement() {
                     {t.requirements}
                   </h2>
                   <ReviewField
-                    label={t.experienceLevel}
-                    value={formData.experienceLevel}
-                  />
-                  <ReviewField
                     label={t.languagesRequired}
                     value={formData.languageRequirements.join(", ")}
                   />
                   <ReviewField
-                    label={t.certifications}
+                    label="Previous Experience"
+                    value={formData.previousExperience}
+                  />
+                  <ReviewField
+                    label="Ticket Details"
                     value={
-                      formData.certificationRequirements || t.noneSpecified
+                      displayTicketDetailsMapping[
+                        formData.ticketDetails as TicketDetails
+                      ] || formData.ticketDetails
+                    }
+                  />
+
+                  <ReviewField
+                    label="Previous Experience"
+                    value={
+                      displayPreviousExperienceMapping[
+                        formData.previousExperience as PreviousExperience
+                      ] || formData.previousExperience
                     }
                   />
                   <ReviewField
-                    label={t.medicalRequirements}
-                    value={formData.medicalRequirements || t.noneSpecified}
+                    label="Total Experience Years"
+                    value={
+                      formData.totalExperienceYears?.toString() ||
+                      t.noneSpecified
+                    }
+                  />
+                  <ReviewField
+                    label="Preferred Age"
+                    value={formData.preferredAge?.toString() || t.noneSpecified}
                   />
                   <ReviewField
                     label={t.specialRequirements}
@@ -1015,12 +1252,6 @@ export default function SubmitRequirement() {
     </div>
   );
 }
-
-interface ReviewFieldProps {
-  label: string;
-  value: string;
-}
-
 function ReviewField({ label, value }: ReviewFieldProps) {
   return (
     <div className="mb-3">

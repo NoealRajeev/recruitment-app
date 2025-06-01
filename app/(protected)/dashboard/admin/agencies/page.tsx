@@ -9,7 +9,7 @@ import AgencyCardContent from "@/components/shared/Cards/AgencyCardContent";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
-import { Trash2 } from "lucide-react";
+import { Trash2, Undo2 } from "lucide-react";
 import { AccountStatus, UserRole } from "@prisma/client";
 import { useToast } from "@/context/toast-provider";
 import { DocumentViewer } from "@/components/shared/DocumentViewer";
@@ -32,6 +32,7 @@ interface Agency {
   contactPerson: string;
   phone: string;
   logoUrl?: string;
+  createdAt: Date;
   status: AccountStatus;
   user: {
     id: string;
@@ -134,40 +135,73 @@ export default function Agencies() {
     fetchAgencies();
   }, [status, session, router, toast]);
 
-  const handleRowClick = (agency: Agency) => {
-    if (agency.user.status === AccountStatus.PENDING_REVIEW) {
-      setSelectedAgency(agency);
-      setIsModalOpen(true);
-    }
+  const isOlderThan12Hours = (date: Date) => {
+    const now = new Date();
+    const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+    return date < twelveHoursAgo;
+  };
+  // Update the getRemainingTime function to always return a string
+  const getRemainingTime = (deleteAt?: Date): string => {
+    if (!deleteAt) return "No deletion scheduled";
+
+    const now = new Date();
+    const diffInMs = deleteAt.getTime() - now.getTime();
+
+    if (diffInMs <= 0) return "Pending deletion";
+
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInMinutes = Math.floor(
+      (diffInMs % (1000 * 60 * 60)) / (1000 * 60)
+    );
+
+    return `${diffInHours}h ${diffInMinutes}m remaining`;
   };
 
-  const handleDeleteAccount = async (agencyId: string) => {
+  const formatTimeAgo = (date: Date) => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return `${diffInSeconds} sec ago`;
+    if (diffInSeconds < 3600)
+      return `${Math.floor(diffInSeconds / 60)} min ago`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)} hrs ago`;
+    return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  };
+
+  const filteredAgencies = agencies.filter((agency) => {
+    if (
+      agency.user.status === AccountStatus.VERIFIED &&
+      isOlderThan12Hours(new Date(agency.createdAt))
+    ) {
+      return false;
+    }
+
+    if (activeTab === "all") return true;
+    return agency.user.status === (activeTab.toUpperCase() as AccountStatus);
+  });
+
+  // Handle immediate deletion (1 hour window)
+  const handleImmediateDelete = async (agencyId: string) => {
     try {
-      const response = await fetch(`/api/agencies/${agencyId}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to mark account for deletion");
-      }
-
-      const updatedAgency = await response.json();
-
-      setAgencies((prev) =>
-        prev.map((agency) =>
-          agency.id === updatedAgency.id
-            ? { ...agency, user: updatedAgency.user }
-            : agency
-        )
+      const response = await fetch(
+        `/api/agencies/${agencyId}/delete-immediate`,
+        {
+          method: "DELETE",
+        }
       );
 
+      if (!response.ok) {
+        throw new Error("Failed to delete account");
+      }
+
+      setAgencies(agencies.filter((agency) => agency.id !== agencyId));
       setIsDeleteModalOpen(false);
       setAgencyToDelete(null);
 
       toast({
         type: "success",
-        message:
-          "Account marked for deletion. It will be removed within 24 hours.",
+        message: "Account will be permanently deleted in 1 hour",
       });
     } catch (error) {
       console.error("Error deleting account:", error);
@@ -176,6 +210,13 @@ export default function Agencies() {
         message:
           error instanceof Error ? error.message : "Failed to delete account",
       });
+    }
+  };
+
+  const handleRowClick = (agency: Agency) => {
+    if (agency.user.status === AccountStatus.PENDING_REVIEW) {
+      setSelectedAgency(agency);
+      setIsModalOpen(true);
     }
   };
 
@@ -239,7 +280,12 @@ export default function Agencies() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status: newStatus, reason }),
+        body: JSON.stringify({
+          status: newStatus,
+          reason,
+          deletionType:
+            newStatus === AccountStatus.REJECTED ? "SCHEDULED" : undefined,
+        }),
       });
 
       if (!response.ok) {
@@ -272,6 +318,37 @@ export default function Agencies() {
     }
   };
 
+  const handleRecoverAccount = async (agencyId: string) => {
+    try {
+      const response = await fetch(`/api/agencies/${agencyId}/recover`, {
+        method: "PUT",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to recover account");
+      }
+
+      const updatedAgency = await response.json();
+      setAgencies(
+        agencies.map((agency) =>
+          agency.id === updatedAgency.id ? updatedAgency : agency
+        )
+      );
+
+      toast({
+        type: "success",
+        message: "Account recovery successful",
+      });
+    } catch (error) {
+      console.error("Error recovering account:", error);
+      toast({
+        type: "error",
+        message:
+          error instanceof Error ? error.message : "Failed to recover account",
+      });
+    }
+  };
+
   const getStatusColor = (status: AccountStatus) => {
     switch (status) {
       case AccountStatus.PENDING_REVIEW:
@@ -286,12 +363,6 @@ export default function Agencies() {
         return "text-[#150B3D]/70";
     }
   };
-
-  // Filter agencies based on active tab
-  const filteredAgencies = agencies.filter((agency) => {
-    if (activeTab === "all") return true;
-    return agency.user.status === (activeTab.toUpperCase() as AccountStatus);
-  });
 
   if (status === "loading" || isLoading) {
     return (
@@ -546,6 +617,19 @@ export default function Agencies() {
                           <Trash2 className="h-4 w-4" />
                         </button>
                       )}
+                      {agency.user.status === AccountStatus.VERIFIED && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setAgencyToDelete(agency);
+                            setIsDeleteModalOpen(true);
+                          }}
+                          className="text-red-500 hover:text-red-700"
+                          title="Delete account"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -655,25 +739,57 @@ export default function Agencies() {
         title={`Delete Account - ${agencyToDelete?.agencyName || ""}`}
         size="md"
         showFooter={true}
-        onConfirm={() => {
-          if (agencyToDelete) {
-            handleDeleteAccount(agencyToDelete.id);
-          }
-        }}
-        confirmText="Delete Account"
-        confirmVariant="destructive"
+        footerContent={
+          <div className="flex justify-end space-x-4">
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              onClick={() => {
+                if (agencyToDelete) {
+                  handleImmediateDelete(agencyToDelete.id);
+                }
+              }}
+            >
+              Delete Account (1h window)
+            </Button>
+          </div>
+        }
       >
         <p className="text-gray-600">
-          Are you sure you want to delete this account? The account will be
-          permanently removed after 24 hours.
+          This account will be permanently deleted after 1 hour. You can recover
+          it within this window.
         </p>
+        {agencyToDelete?.user.deleteAt && (
+          <div className="mt-4 flex items-center space-x-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => handleRecoverAccount(agencyToDelete.id)}
+            >
+              <Undo2 className="h-4 w-4 mr-2" />
+              Recover Account
+            </Button>
+            <span className="text-sm text-gray-500">
+              Scheduled for deletion
+            </span>
+          </div>
+        )}
       </Modal>
       {/* Bottom Section - Agency Cards Grid */}
       <div className="mt-6">
-        <h2 className="text-xl font-semibold mb-3">Verified Agencies</h2>
+        <h2 className="text-xl font-semibold mb-3">Agencies</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {agencies
-            .filter((agency) => agency.user.status === AccountStatus.VERIFIED)
+            .filter(
+              (agency) =>
+                agency.user.status === AccountStatus.VERIFIED ||
+                agency.user.status === AccountStatus.REJECTED
+            )
             .map((agency) => (
               <div key={agency.id} className="relative">
                 <AgencyCardContent
@@ -682,11 +798,44 @@ export default function Agencies() {
                   logoUrl={agency.logoUrl || "/api/placeholder/48/48"}
                   email={agency.email}
                   registerNo={agency.registrationNo}
-                  time={new Date(agency.licenseExpiry).toLocaleDateString()}
+                  time={
+                    agency.user.status === AccountStatus.REJECTED &&
+                    agency.user.deleteAt
+                      ? getRemainingTime(new Date(agency.user.deleteAt))
+                      : formatTimeAgo(new Date(agency.createdAt))
+                  }
                   onClick={() =>
                     router.push(`/dashboard/admin/agencies/${agency.id}`)
                   }
                 />
+                {agency.user.status === AccountStatus.REJECTED && (
+                  <div className="absolute top-2 right-2">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      Rejected
+                    </span>
+                  </div>
+                )}
+                {agency.user.deleteAt && (
+                  <div className="absolute top-2 left-2">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      {getRemainingTime(new Date(agency.user.deleteAt))}
+                    </span>
+                  </div>
+                )}
+                {agency.user.status === AccountStatus.REJECTED && (
+                  <div className="absolute bottom-2 right-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRecoverAccount(agency.id);
+                      }}
+                      className="text-green-600 hover:text-green-800"
+                      title="Recover account"
+                    >
+                      <Undo2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
         </div>

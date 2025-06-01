@@ -40,7 +40,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           )}
           {...props}
         >
-          <option value="" disabled selected={showLabelAsPlaceholder}>
+          <option value="" disabled>
             {showLabelAsPlaceholder ? label : t.selectOption || "Select..."}
           </option>
           {options.map((option) => (

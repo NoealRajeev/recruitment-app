@@ -43,9 +43,7 @@ export default function AgencyCardContent({
           <p className="text-[12px] text-[#524B6B] mt-[2px] leading-snug">
             {location}
           </p>
-          <p className="text-[11px] text-[#AAA6B9] mt-1 leading-snug">
-            {time} minutes ago
-          </p>
+          <p className="text-[11px] text-[#AAA6B9] mt-1 leading-snug">{time}</p>
         </div>
         {/* Menu Icon */}
         <div className="mt-0.5">

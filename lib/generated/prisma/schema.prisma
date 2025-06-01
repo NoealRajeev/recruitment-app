@@ -49,6 +49,65 @@ enum DocumentType {
   OTHER
 }
 
+enum CompanySector {
+  IT
+  REAL_ESTATE
+  HEALTHCARE
+  FINANCE
+  MANUFACTURING
+  RETAIL
+  CONSTRUCTION
+  EDUCATION
+  OTHER
+}
+
+enum CompanySize {
+  SMALL
+  MEDIUM
+  LARGE
+  ENTERPRISE
+}
+
+enum ContractDuration {
+  ONE_YEAR
+  TWO_YEARS
+  UNLIMITED
+}
+
+enum TicketDetails {
+  ONE_YEAR
+  TWO_YEARS
+}
+
+enum PreviousExperience {
+  FRESH
+  GCC_EXPERIENCE
+  LOCAL_EXPERIENCE
+  ANY
+}
+
+enum AuditAction {
+  COMPANY_VERIFIED
+  COMPANY_REJECTED
+  COMPANY_SUSPENDED
+  COMPANY_UPDATED
+  USER_CREATED
+  USER_UPDATED
+  USER_DELETED
+  ACCOUNT_DELETION_REQUESTED
+  ACCOUNT_DELETED
+  ACCOUNT_RECOVERED
+  DRAFT_CREATED
+  REQUIREMENT_CREATED
+  REQUIREMENT_UPDATED
+  REQUIREMENT_DELETED
+}
+
+enum DeletionType {
+  SCHEDULED
+  IMMEDIATE
+}
+
 model User {
   id            String        @id @default(uuid())
   name          String
@@ -60,6 +119,10 @@ model User {
   lastLogin     DateTime?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+
+  deleteAt            DateTime?     @map("delete_at")
+  deletionType        DeletionType?
+  deletionRequestedBy String?
 
   // Profile relations
   client Client?
@@ -85,11 +148,17 @@ model Client {
   userId          String           @unique
   user            User             @relation(fields: [userId], references: [id])
   companyName     String
-  contactPerson   String
-  phone           String
-  address         String
-  businessLicense String?
+  contactPerson   String?
+  registrationNo  String?
+  companySector   CompanySector?
+  companySize     CompanySize?
   website         String?
+  designation     String?
+  phone           String?
+  address         String
+  altContact      String?
+  businessLicense String?
+  image           String?
   requirements    Requirement[]
   documents       ClientDocument[]
 
@@ -98,22 +167,34 @@ model Client {
 }
 
 model Agency {
-  id             String           @id @default(uuid())
-  userId         String           @unique
-  user           User             @relation(fields: [userId], references: [id])
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Agency Information
   agencyName     String
+  registrationNo String?  @unique
   licenseNumber  String
   licenseExpiry  DateTime
   country        String
   regions        String[]
-  contactPerson  String
-  phone          String
+
+  // Contact Information
+  contactPerson String
+  phone         String
+  email         String?
+  website       String?
+
+  // Relations
   documents      AgencyDocument[]
   labourProfiles LabourProfile[]
   requirements   Requirement[]    @relation("AgencyRequirements")
 
+  // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([licenseNumber, registrationNo])
 }
 
 model Admin {
@@ -128,18 +209,34 @@ model Admin {
   updatedAt DateTime @updatedAt
 }
 
+model JobRole {
+  id            String      @id @default(uuid())
+  title         String
+  quantity      Int
+  nationality   String
+  salary        String
+  requirement   Requirement @relation(fields: [requirementId], references: [id])
+  requirementId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Requirement {
-  id          String            @id @default(uuid())
-  title       String
-  description String
-  nationality String
-  salaryRange String
-  quantity    Int
-  skills      String[]
-  status      RequirementStatus @default(DRAFT)
-  deadline    DateTime?
+  id                   String              @id @default(uuid())
+  projectLocation      String?
+  startDate            DateTime?
+  contractDuration     ContractDuration?
+  previousExperience   PreviousExperience?
+  ticketDetails        TicketDetails?
+  totalExperienceYears Int?
+  preferredAge         Int?
+  specialNotes         String?
+  status               RequirementStatus   @default(DRAFT)
 
   // Relationships
+  jobRoles       JobRole[]
+  languages      String[]
   clientId       String
   client         Client                @relation(fields: [clientId], references: [id])
   assignedTo     Agency?               @relation("AgencyRequirements", fields: [assignedToId], references: [id])
@@ -213,7 +310,6 @@ model LabourStatusLog {
   createdAt DateTime @default(now())
 }
 
-// Document models for different entities
 model ClientDocument {
   id       String       @id @default(uuid())
   type     DocumentType
@@ -264,30 +360,44 @@ model RequirementDocument {
 }
 
 model AuditLog {
-  id         String @id @default(uuid())
-  action     String
-  entityType String
-  entityId   String
-  oldData    Json?
-  newData    Json?
+  id             String      @id @default(uuid())
+  action         AuditAction
+  entityType     String
+  entityId       String
+  description    String?
+  oldData        Json?
+  newData        Json?
+  affectedFields String[]
+  ipAddress      String?
+  userAgent      String?
 
+  performedBy   User     @relation(fields: [performedById], references: [id])
+  performedAt   DateTime @default(now())
   performedById String
-  performedBy   User   @relation(fields: [performedById], references: [id])
 
   createdAt DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([performedById])
+  @@index([createdAt])
 }
 
 model Notification {
   id        String  @id @default(uuid())
   title     String
   message   String
-  read      Boolean @default(false)
   type      String
+  read      Boolean @default(false)
   actionUrl String?
+  metadata  Json?
 
-  recipientId String
   recipient   User   @relation(fields: [recipientId], references: [id])
+  recipientId String
 
   createdAt DateTime  @default(now())
   readAt    DateTime?
+
+  @@index([recipientId])
+  @@index([createdAt])
+  @@index([type])
 }

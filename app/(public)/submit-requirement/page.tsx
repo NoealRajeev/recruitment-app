@@ -1,6 +1,6 @@
 "use client";
 import { useLanguage } from "@/context/LanguageContext";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { Select } from "@/components/ui/select";
 import { Card } from "@/components/shared/Card";
 import { Input } from "@/components/ui/Input";
@@ -12,8 +12,6 @@ import {
   CompanySector,
   CompanySize,
   ContractDuration,
-  PreviousExperience,
-  TicketDetails,
 } from "@/lib/generated/prisma";
 import {
   getSectorEnumMapping,
@@ -22,10 +20,6 @@ import {
   getDisplayCompanySizeMapping,
   getContractDurationEnumMapping,
   getDisplayContractDurationMapping,
-  getDisplayPreviousExperienceMapping,
-  getDisplayTicketDetailsMapping,
-  getPreviousExperienceEnumMapping,
-  getTicketDetailsEnumMapping,
 } from "@/lib/utils/enum-mappings";
 
 interface JobRole {
@@ -33,6 +27,7 @@ interface JobRole {
   quantity: number;
   nationality: string;
   salary: string;
+  contractDuration: ContractDuration | "";
 }
 
 interface FormData {
@@ -46,36 +41,51 @@ interface FormData {
   jobTitle: string;
   email: string;
   phone: string;
+  countryCode: string;
   altContact: string;
+  altCountryCode: string;
   jobRoles: JobRole[];
-  projectLocation: string;
-  startDate: string;
-  contractDuration: ContractDuration | "";
-  languageRequirements: string[];
-  previousExperience: PreviousExperience | "";
-  ticketDetails: TicketDetails | "";
-  totalExperienceYears?: number;
-  preferredAge?: number;
-  specialRequirements: string;
+  emailVerified: boolean;
+  phoneVerified: boolean;
+  emailOtp: string;
+  phoneOtp: string;
 }
 
 interface Errors {
   [key: string]: string;
 }
+
 interface ReviewFieldProps {
   label: string;
   value: string;
 }
+
+const countryCodes = [
+  { code: "+974", name: "Qatar" },
+  { code: "+971", name: "UAE" },
+  { code: "+966", name: "Saudi Arabia" },
+  { code: "+965", name: "Kuwait" },
+  { code: "+973", name: "Bahrain" },
+  { code: "+968", name: "Oman" },
+  { code: "+20", name: "Egypt" },
+  { code: "+91", name: "India" },
+  { code: "+92", name: "Pakistan" },
+  { code: "+94", name: "Sri Lanka" },
+  { code: "+880", name: "Bangladesh" },
+  { code: "+95", name: "Myanmar" },
+  { code: "+977", name: "Nepal" },
+];
 
 export default function SubmitRequirement() {
   const { language, setLanguage, t } = useLanguage();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [emailCheckInProgress, setEmailCheckInProgress] = useState(false);
-  const [languageOptions, setLanguageOptions] = useState<string[]>(
-    t.languageOptions || []
-  );
-  const [newLanguage, setNewLanguage] = useState("");
+  const [phoneCheckInProgress, setPhoneCheckInProgress] = useState(false);
+  const [emailOtpSent, setEmailOtpSent] = useState(false);
+  const [phoneOtpSent, setPhoneOtpSent] = useState(false);
+  const [emailOtpResendTime, setEmailOtpResendTime] = useState(0);
+  const [phoneOtpResendTime, setPhoneOtpResendTime] = useState(0);
   const { toast } = useToast();
 
   // Memoize enum mappings based on language
@@ -99,29 +109,11 @@ export default function SubmitRequirement() {
     () => getContractDurationEnumMapping(language),
     [language]
   );
-  const ticketDetailsMapping = useMemo(
-    () => getTicketDetailsEnumMapping(language),
-    [language]
-  );
-  const previousExperienceMapping = useMemo(
-    () => getPreviousExperienceEnumMapping(language),
-    [language]
-  );
-
   const displayContractDurationMapping = useMemo(
     () => getDisplayContractDurationMapping(language),
     [language]
   );
-  const displayTicketDetailsMapping = useMemo(
-    () => getDisplayTicketDetailsMapping(language),
-    [language]
-  );
-  const displayPreviousExperienceMapping = useMemo(
-    () => getDisplayPreviousExperienceMapping(language),
-    [language]
-  );
 
-  // Update your options
   const contractDurationOptions = useMemo(
     () =>
       t.contractDurationOptions?.map((opt) => ({
@@ -131,27 +123,6 @@ export default function SubmitRequirement() {
         label: opt,
       })) || [],
     [t.contractDurationOptions, contractDurationMapping]
-  );
-
-  const ticketDetailsOptions = useMemo(
-    () =>
-      t.ticketDetailsOptions?.map((opt) => ({
-        value:
-          ticketDetailsMapping[opt] || opt.toLowerCase().replace(/\s+/g, "-"),
-        label: opt,
-      })) || [],
-    [t.ticketDetailsOptions, ticketDetailsMapping]
-  );
-
-  const previousExperienceOptions = useMemo(
-    () =>
-      t.previousExperienceOptions?.map((opt) => ({
-        value:
-          previousExperienceMapping[opt] ||
-          opt.toLowerCase().replace(/\s+/g, "-"),
-        label: opt,
-      })) || [],
-    [t.previousExperienceOptions, previousExperienceMapping]
   );
 
   const initialFormData: FormData = useMemo(
@@ -166,22 +137,22 @@ export default function SubmitRequirement() {
       jobTitle: "",
       email: "",
       phone: "",
+      countryCode: "+974",
       altContact: "",
-      contractDuration: "",
+      altCountryCode: "+974",
       jobRoles: [
         {
           title: "",
           quantity: 1,
           nationality: "",
           salary: "",
+          contractDuration: "",
         },
       ],
-      projectLocation: "",
-      startDate: "",
-      languageRequirements: [],
-      previousExperience: "",
-      ticketDetails: "",
-      specialRequirements: "",
+      emailVerified: false,
+      phoneVerified: false,
+      emailOtp: "",
+      phoneOtp: "",
     }),
     []
   );
@@ -193,10 +164,28 @@ export default function SubmitRequirement() {
 
   // Solid widths for progress bar
   const solidWidths: Record<number, string> = {
-    2: "calc(33.33% + 220px)",
-    3: "calc(66.66% + 260px)",
-    4: "2800px",
+    2: "calc(50% + 100px)",
+    3: "100%",
   };
+
+  // OTP countdown timers
+  useEffect(() => {
+    if (emailOtpResendTime > 0) {
+      const timer = setTimeout(() => {
+        setEmailOtpResendTime(emailOtpResendTime - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [emailOtpResendTime]);
+
+  useEffect(() => {
+    if (phoneOtpResendTime > 0) {
+      const timer = setTimeout(() => {
+        setPhoneOtpResendTime(phoneOtpResendTime - 1);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [phoneOtpResendTime]);
 
   // Validation functions
   const validateRegistrationNumber = useCallback((value: string): boolean => {
@@ -222,6 +211,82 @@ export default function SubmitRequirement() {
     []
   );
 
+  const checkPhoneAvailability = useCallback(
+    async (phone: string): Promise<boolean> => {
+      try {
+        const response = await fetch("/api/auth/check-phone", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone }),
+        });
+        const data = await response.json();
+        return data.available;
+      } catch (error) {
+        console.error("Phone check failed:", error);
+        return false;
+      }
+    },
+    []
+  );
+
+  const sendOtp = useCallback(
+    async (type: "email" | "phone", value: string): Promise<boolean> => {
+      try {
+        const response = await fetch("/api/auth/send-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type, value }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          toast({ type: "success", message: data.message });
+          return true;
+        } else {
+          throw new Error(data.message || "Failed to send OTP");
+        }
+      } catch (error) {
+        toast({
+          type: "error",
+          message:
+            error instanceof Error ? error.message : "Failed to send OTP",
+        });
+        return false;
+      }
+    },
+    [toast]
+  );
+
+  const verifyOtp = useCallback(
+    async (
+      type: "email" | "phone",
+      value: string,
+      otp: string
+    ): Promise<boolean> => {
+      try {
+        const response = await fetch("/api/auth/verify-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ type, value, otp }),
+        });
+        const data = await response.json();
+        if (response.ok) {
+          toast({ type: "success", message: data.message });
+          return true;
+        } else {
+          throw new Error(data.message || "OTP verification failed");
+        }
+      } catch (error) {
+        toast({
+          type: "error",
+          message:
+            error instanceof Error ? error.message : "OTP verification failed",
+        });
+        return false;
+      }
+    },
+    [toast]
+  );
+
   // Step validation functions
   const validateStep1 = useCallback(async (): Promise<boolean> => {
     const newErrors: Errors = {};
@@ -238,11 +303,7 @@ export default function SubmitRequirement() {
       fullName: t.required,
       jobTitle: t.required,
       email: /^\S+@\S+\.\S+$/.test(formData.email) ? "" : t.invalidEmail,
-      phone: /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/.test(
-        formData.phone
-      )
-        ? ""
-        : t.invalidPhone,
+      phone: /^[0-9]{8,15}$/.test(formData.phone) ? "" : t.invalidPhone,
     };
 
     Object.entries(requiredFields).forEach(([field, message]) => {
@@ -251,7 +312,8 @@ export default function SubmitRequirement() {
       }
     });
 
-    if (!newErrors.email && formData.email) {
+    // Check email availability if not verified
+    if (!newErrors.email && formData.email && !formData.emailVerified) {
       try {
         setEmailCheckInProgress(true);
         const isAvailable = await checkEmailAvailability(formData.email);
@@ -259,41 +321,70 @@ export default function SubmitRequirement() {
       } catch (error) {
         toast({
           type: "error",
-          message: error instanceof Error ? error.message : "Submission failed",
+          message:
+            error instanceof Error ? error.message : "Email check failed",
         });
       } finally {
         setEmailCheckInProgress(false);
       }
     }
 
+    // Check phone availability if not verified
+    if (!newErrors.phone && formData.phone && !formData.phoneVerified) {
+      try {
+        setPhoneCheckInProgress(true);
+        const isAvailable = await checkPhoneAvailability(
+          `${formData.countryCode}${formData.phone}`
+        );
+        if (!isAvailable) newErrors.phone = t.phoneInUse;
+      } catch (error) {
+        toast({
+          type: "error",
+          message:
+            error instanceof Error ? error.message : "Phone check failed",
+        });
+      } finally {
+        setPhoneCheckInProgress(false);
+      }
+    }
+
+    // Require email verification
+    if (!formData.emailVerified) {
+      newErrors.emailVerification = "Please verify your email with OTP";
+    }
+
+    // Require phone verification
+    if (!formData.phoneVerified) {
+      newErrors.phoneVerification = "Please verify your phone with OTP";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [formData, t, validateRegistrationNumber, checkEmailAvailability, toast]);
+  }, [
+    formData,
+    t,
+    validateRegistrationNumber,
+    checkEmailAvailability,
+    checkPhoneAvailability,
+    toast,
+  ]);
 
   const validateStep2 = useCallback((): boolean => {
     const newErrors: Errors = {};
-    if (
-      formData.jobRoles.some(
-        (role) => !role.title.trim() || !role.salary.trim()
-      )
-    ) {
-      newErrors.jobRoles = t.required;
-    }
-    if (!formData.projectLocation.trim())
-      newErrors.projectLocation = t.required;
-    if (!formData.startDate) newErrors.startDate = t.required;
-    if (!formData.contractDuration) newErrors.contractDuration = t.required;
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }, [formData, t]);
-
-  const validateStep3 = useCallback((): boolean => {
-    const newErrors: Errors = {};
-    if (formData.languageRequirements.length === 0)
-      newErrors.languageRequirements = t.required;
-    if (!formData.previousExperience) newErrors.previousExperience = t.required;
-    if (!formData.ticketDetails) newErrors.ticketDetails = t.required;
+    // Check each job role
+    formData.jobRoles.forEach((role, index) => {
+      if (!role.title.trim()) {
+        newErrors[`jobRoles[${index}].title`] = t.required;
+      }
+      if (!role.salary.trim()) {
+        newErrors[`jobRoles[${index}].salary`] = "Salary is required";
+      }
+      if (!role.contractDuration) {
+        newErrors[`jobRoles[${index}].contractDuration`] =
+          "Contract duration is required";
+      }
+    });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -305,7 +396,6 @@ export default function SubmitRequirement() {
 
     if (currentStep === 1) isValid = await validateStep1();
     else if (currentStep === 2) isValid = validateStep2();
-    else if (currentStep === 3) isValid = validateStep3();
 
     if (!isValid) {
       const firstError = Object.values(errors)[0];
@@ -318,15 +408,7 @@ export default function SubmitRequirement() {
       setCurrentStep((prev) => Math.min(prev + 1, steps.length));
       setIsSubmitting(false);
     }, 800);
-  }, [
-    currentStep,
-    validateStep1,
-    validateStep2,
-    validateStep3,
-    errors,
-    toast,
-    steps.length,
-  ]);
+  }, [currentStep, validateStep1, validateStep2, errors, toast, steps.length]);
 
   const handleBack = useCallback(() => {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
@@ -370,7 +452,13 @@ export default function SubmitRequirement() {
       ...prev,
       jobRoles: [
         ...prev.jobRoles,
-        { title: "", quantity: 1, nationality: "", salary: "" },
+        {
+          title: "",
+          quantity: 1,
+          nationality: "",
+          salary: "",
+          contractDuration: "",
+        },
       ],
     }));
   }, []);
@@ -389,117 +477,89 @@ export default function SubmitRequirement() {
     [formData.jobRoles.length, toast]
   );
 
-  // Language requirements management
-  const toggleLanguageRequirement = useCallback((language: string) => {
-    setFormData((prev) => {
-      const exists = prev.languageRequirements.includes(language);
-      const updated = exists
-        ? prev.languageRequirements.filter((l) => l !== language)
-        : [...prev.languageRequirements, language];
-      return { ...prev, languageRequirements: updated };
-    });
-  }, []);
-
-  const handleAddLanguage = useCallback(() => {
-    const trimmedLang = newLanguage.trim();
-    if (!trimmedLang) return;
-
-    if (!languageOptions.includes(trimmedLang)) {
-      setLanguageOptions((prev) => [...prev, trimmedLang]);
+  // OTP handlers
+  const handleSendEmailOtp = useCallback(async () => {
+    if (!formData.email || !/^\S+@\S+\.\S+$/.test(formData.email)) {
+      toast({ type: "error", message: "Please enter a valid email first" });
+      return;
     }
 
-    if (!formData.languageRequirements.includes(trimmedLang)) {
-      setFormData((prev) => ({
-        ...prev,
-        languageRequirements: [...prev.languageRequirements, trimmedLang],
-      }));
+    const isAvailable = await checkEmailAvailability(formData.email);
+    if (!isAvailable) {
+      toast({ type: "error", message: "Email is already in use" });
+      return;
     }
 
-    setNewLanguage("");
-  }, [newLanguage, languageOptions, formData.languageRequirements]);
+    const success = await sendOtp("email", formData.email);
+    if (success) {
+      setEmailOtpSent(true);
+      setEmailOtpResendTime(60); // 60 seconds countdown
+    }
+  }, [formData.email, checkEmailAvailability, sendOtp, toast]);
 
-  // Form submission
-  const handleSubmit = useCallback(async () => {
-    if (currentStep !== steps.length) return;
+  const handleVerifyEmailOtp = useCallback(async () => {
+    if (!formData.emailOtp || formData.emailOtp.length !== 6) {
+      toast({ type: "error", message: "Please enter a valid 6-digit OTP" });
+      return;
+    }
 
-    console.log("Form submitted:", formData);
-    setIsSubmitting(true);
+    const verified = await verifyOtp(
+      "email",
+      formData.email,
+      formData.emailOtp
+    );
+    if (verified) {
+      setFormData((prev) => ({ ...prev, emailVerified: true }));
+    }
+  }, [formData.email, formData.emailOtp, verifyOtp, toast]);
 
-    try {
-      // Step 1: Create client account
-      const accountResponse = await fetch("/api/auth/register/client", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          companyName: formData.companyName.trim(),
-          registrationNumber: formData.registrationNumber.trim(),
-          address: formData.address.trim(),
-          fullName: formData.fullName.trim(),
-          jobTitle: formData.jobTitle.trim(),
-          email: formData.email.trim(),
-          phone: formData.phone.trim(),
-          altContact: formData.altContact?.trim() || "",
-          website: formData.website?.trim() || "",
-        }),
-      });
-
-      if (!accountResponse.ok) {
-        const errorData = await accountResponse.json();
-        throw new Error(errorData.message || "Account creation failed");
-      }
-
-      const accountData = await accountResponse.json();
-      const clientId = accountData.clientId;
-
-      // Step 2: Create requirement with all job roles
-      const requirementResponse = await fetch("/api/requirements", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          projectLocation: formData.projectLocation.trim(),
-          startDate: formData.startDate,
-          specialNotes: formData.specialRequirements.trim(),
-          status: "SUBMITTED",
-          clientId: clientId,
-          jobRoles: formData.jobRoles.map((role) => ({
-            title: role.title.trim(),
-            quantity: Number(role.quantity),
-            nationality: role.nationality.trim(),
-            salary: role.salary.trim(),
-          })),
-          // Convert display values to enum values where needed
-          contractDuration: formData.contractDuration,
-          previousExperience: formData.previousExperience,
-          ticketDetails: formData.ticketDetails,
-          totalExperienceYears: formData.totalExperienceYears || null,
-          preferredAge: formData.preferredAge || null,
-        }),
-      });
-
-      if (!requirementResponse.ok) {
-        const errorData = await requirementResponse.json();
-        throw new Error(errorData.error || "Requirement submission failed");
-      }
-
-      toast({
-        type: "success",
-        message: "Account created and requirement submitted successfully!",
-      });
-
-      setFormData(initialFormData);
-      setCurrentStep(1);
-    } catch (error) {
-      console.error("Submission error:", error);
+  const handleSendPhoneOtp = useCallback(async () => {
+    if (!formData.phone || !/^[0-9]{8,15}$/.test(formData.phone)) {
       toast({
         type: "error",
-        message: error instanceof Error ? error.message : "Submission failed",
+        message: "Please enter a valid phone number first",
       });
-    } finally {
-      setIsSubmitting(false);
+      return;
     }
-  }, [currentStep, steps.length, formData, toast, initialFormData]);
+
+    const fullPhone = `${formData.countryCode}${formData.phone}`;
+    const isAvailable = await checkPhoneAvailability(fullPhone);
+    if (!isAvailable) {
+      toast({ type: "error", message: "Phone number is already in use" });
+      return;
+    }
+
+    const success = await sendOtp("phone", fullPhone);
+    if (success) {
+      setPhoneOtpSent(true);
+      setPhoneOtpResendTime(60); // 60 seconds countdown
+    }
+  }, [
+    formData.countryCode,
+    formData.phone,
+    checkPhoneAvailability,
+    sendOtp,
+    toast,
+  ]);
+
+  const handleVerifyPhoneOtp = useCallback(async () => {
+    if (!formData.phoneOtp || formData.phoneOtp.length !== 6) {
+      toast({ type: "error", message: "Please enter a valid 6-digit OTP" });
+      return;
+    }
+
+    const fullPhone = `${formData.countryCode}${formData.phone}`;
+    const verified = await verifyOtp("phone", fullPhone, formData.phoneOtp);
+    if (verified) {
+      setFormData((prev) => ({ ...prev, phoneVerified: true }));
+    }
+  }, [
+    formData.countryCode,
+    formData.phone,
+    formData.phoneOtp,
+    verifyOtp,
+    toast,
+  ]);
 
   // Select options with enum mapping
   const sectorOptions = useMemo(
@@ -630,38 +690,188 @@ export default function SubmitRequirement() {
                   placeholder={t.jobTitlePlaceholder}
                   id="jobTitle"
                 />
-                <Input
-                  label={t.email}
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  error={errors.email}
-                  required
-                  placeholder={t.emailPlaceholder}
-                  type="email"
-                  id="email"
-                  loading={emailCheckInProgress}
-                />
-                <Input
-                  label={t.phone}
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  error={errors.phone}
-                  required
-                  placeholder={t.phonePlaceholder}
-                  type="tel"
-                  id="phone"
-                />
-                <Input
-                  label={t.altContact}
-                  name="altContact"
-                  value={formData.altContact}
-                  onChange={handleChange}
-                  placeholder={t.altContactPlaceholder}
-                  type="tel"
-                  id="altContact"
-                />
+
+                {/* Email with OTP verification */}
+                <div>
+                  <Input
+                    label={t.email}
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    error={errors.email}
+                    required
+                    placeholder={t.emailPlaceholder}
+                    type="email"
+                    id="email"
+                    loading={emailCheckInProgress}
+                    disabled={formData.emailVerified}
+                  />
+                  {formData.email && !formData.emailVerified && (
+                    <div className="mt-2">
+                      {!emailOtpSent ? (
+                        <Button
+                          type="button"
+                          onClick={handleSendEmailOtp}
+                          variant="outline"
+                          size="sm"
+                          disabled={emailCheckInProgress}
+                        >
+                          Send OTP
+                        </Button>
+                      ) : (
+                        <div className="flex gap-2 items-center">
+                          <Input
+                            name="emailOtp"
+                            value={formData.emailOtp}
+                            onChange={handleChange}
+                            placeholder="Enter 6-digit OTP"
+                            className="w-32"
+                            maxLength={6}
+                          />
+                          <Button
+                            type="button"
+                            onClick={handleVerifyEmailOtp}
+                            variant="outline"
+                            size="sm"
+                          >
+                            Verify
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={handleSendEmailOtp}
+                            variant="ghost"
+                            size="sm"
+                            disabled={emailOtpResendTime > 0}
+                          >
+                            Resend{" "}
+                            {emailOtpResendTime > 0 &&
+                              `(${emailOtpResendTime}s)`}
+                          </Button>
+                        </div>
+                      )}
+                      {errors.emailVerification && (
+                        <p className="text-sm text-red-500 mt-1">
+                          {errors.emailVerification}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {formData.emailVerified && (
+                    <p className="text-sm text-green-600 mt-1">
+                      Email verified successfully
+                    </p>
+                  )}
+                </div>
+
+                {/* Phone with country code and OTP verification */}
+                <div>
+                  <div className="flex gap-2">
+                    <Select
+                      name="countryCode"
+                      value={formData.countryCode}
+                      onChange={handleChange}
+                      options={countryCodes.map((cc) => ({
+                        value: cc.code,
+                        label: `${cc.code} (${cc.name})`,
+                      }))}
+                      className="w-32"
+                      disabled={formData.phoneVerified}
+                    />
+                    <Input
+                      label={t.phone}
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      error={errors.phone}
+                      required
+                      placeholder={t.phonePlaceholder}
+                      type="tel"
+                      id="phone"
+                      loading={phoneCheckInProgress}
+                      disabled={formData.phoneVerified}
+                      className="flex-1"
+                    />
+                  </div>
+                  {formData.phone && !formData.phoneVerified && (
+                    <div className="mt-2">
+                      {!phoneOtpSent ? (
+                        <Button
+                          type="button"
+                          onClick={handleSendPhoneOtp}
+                          variant="outline"
+                          size="sm"
+                          disabled={phoneCheckInProgress}
+                        >
+                          Send OTP
+                        </Button>
+                      ) : (
+                        <div className="flex gap-2 items-center">
+                          <Input
+                            name="phoneOtp"
+                            value={formData.phoneOtp}
+                            onChange={handleChange}
+                            placeholder="Enter 6-digit OTP"
+                            className="w-32"
+                            maxLength={6}
+                          />
+                          <Button
+                            type="button"
+                            onClick={handleVerifyPhoneOtp}
+                            variant="outline"
+                            size="sm"
+                          >
+                            Verify
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={handleSendPhoneOtp}
+                            variant="ghost"
+                            size="sm"
+                            disabled={phoneOtpResendTime > 0}
+                          >
+                            Resend{" "}
+                            {phoneOtpResendTime > 0 &&
+                              `(${phoneOtpResendTime}s)`}
+                          </Button>
+                        </div>
+                      )}
+                      {errors.phoneVerification && (
+                        <p className="text-sm text-red-500 mt-1">
+                          {errors.phoneVerification}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  {formData.phoneVerified && (
+                    <p className="text-sm text-green-600 mt-1">
+                      Phone verified successfully
+                    </p>
+                  )}
+                </div>
+
+                {/* Alternate contact */}
+                <div className="flex gap-2">
+                  <Select
+                    name="altCountryCode"
+                    value={formData.altCountryCode}
+                    onChange={handleChange}
+                    options={countryCodes.map((cc) => ({
+                      value: cc.code,
+                      label: `${cc.code} (${cc.name})`,
+                    }))}
+                    className="w-32"
+                  />
+                  <Input
+                    label={t.altContact}
+                    name="altContact"
+                    value={formData.altContact}
+                    onChange={handleChange}
+                    placeholder={t.altContactPlaceholder}
+                    type="tel"
+                    id="altContact"
+                    className="flex-1"
+                  />
+                </div>
               </div>
             </div>
           </Card>
@@ -680,302 +890,151 @@ export default function SubmitRequirement() {
               </p>
             </div>
 
-            <div className="grid grid-cols-12 gap-8 mt-6">
-              <div className="col-span-6">
-                <h2 className="text-3xl font-semibold mb-4 text-center">
-                  {t.jobRoles}
-                </h2>
-                <div className="rounded-lg shadow-sm overflow-hidden">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-[#4C187A]/85">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-2/5">
-                          {t.jobRole}
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/6">
-                          {t.quantity}
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                          {t.nationality}
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                          Salary/Month
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                          {t.actions}
-                        </th>
+            <div className="mt-6">
+              <h2 className="text-3xl font-semibold mb-4 text-center">
+                {t.jobRoles}
+              </h2>
+              <div className="rounded-lg shadow-sm overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-[#4C187A]/85">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-2/5">
+                        {t.jobRole}
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/6">
+                        {t.quantity}
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        {t.nationality}
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        Salary/Month
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        Contract Duration
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        {t.actions}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-[#2C0053]/10 divide-y divide-gray-200">
+                    {formData.jobRoles.map((role, index) => (
+                      <tr key={index}>
+                        <td className="px-6 py-4 w-2/5 whitespace-nowrap">
+                          <select
+                            name={`jobRoles[${index}].title`}
+                            value={role.title}
+                            onChange={(e) => handleJobRoleChange(index, e)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                          >
+                            <option value="">{t.selectOption}</option>
+                            {t.jobPositions
+                              ?.filter(
+                                (job) =>
+                                  !formData.jobRoles.some(
+                                    (r, i) => r.title === job && i !== index
+                                  )
+                              )
+                              .map((job) => (
+                                <option key={job} value={job}>
+                                  {job}
+                                </option>
+                              ))}
+                          </select>
+                          {errors[`jobRoles[${index}].title`] && (
+                            <p className="text-xs text-red-500 mt-1">
+                              {errors[`jobRoles[${index}].title`]}
+                            </p>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 w-1/6 whitespace-nowrap">
+                          <input
+                            type="number"
+                            min="1"
+                            name={`jobRoles[${index}].quantity`}
+                            value={role.quantity}
+                            onChange={(e) => handleJobRoleChange(index, e)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <AutocompleteInput
+                            name={`jobRoles[${index}].nationality`}
+                            value={role.nationality || ""}
+                            onChangeValue={(val: string) =>
+                              handleJobRoleChange(index, {
+                                target: {
+                                  name: `jobRoles[${index}].nationality`,
+                                  value: val,
+                                },
+                              } as React.ChangeEvent<HTMLInputElement>)
+                            }
+                            options={t.nationalityOptions || []}
+                            placeholder="Type nationality..."
+                            className="w-full"
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <input
+                            type="text"
+                            name={`jobRoles[${index}].salary`}
+                            value={role.salary || ""}
+                            onChange={(e) => handleJobRoleChange(index, e)}
+                            placeholder="Salary amount"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                          />
+                          {errors[`jobRoles[${index}].salary`] && (
+                            <p className="text-xs text-red-500 mt-1">
+                              {errors[`jobRoles[${index}].salary`]}
+                            </p>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <select
+                            name={`jobRoles[${index}].contractDuration`}
+                            value={role.contractDuration}
+                            onChange={(e) => handleJobRoleChange(index, e)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                          >
+                            <option value="">Select duration</option>
+                            {contractDurationOptions.map((opt) => (
+                              <option key={opt.value} value={opt.value}>
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                          {errors[`jobRoles[${index}].contractDuration`] && (
+                            <p className="text-xs text-red-500 mt-1">
+                              {errors[`jobRoles[${index}].contractDuration`]}
+                            </p>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button onClick={() => removeJobRole(index)}>
+                            <Trash2 className="text-red-500" />
+                          </button>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody className="bg-[#2C0053]/10 divide-y divide-gray-200">
-                      {formData.jobRoles.map((role, index) => (
-                        <tr key={index}>
-                          <td className="px-6 py-4 w-2/5 whitespace-nowrap">
-                            <select
-                              name={`jobRoles[${index}].title`}
-                              value={role.title}
-                              onChange={(e) => handleJobRoleChange(index, e)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                            >
-                              <option value="">{t.selectOption}</option>
-                              {t.jobPositions
-                                ?.filter(
-                                  (job) =>
-                                    !formData.jobRoles.some(
-                                      (r, i) => r.title === job && i !== index
-                                    )
-                                )
-                                .map((job) => (
-                                  <option key={job} value={job}>
-                                    {job}
-                                  </option>
-                                ))}
-                            </select>
-                          </td>
-                          <td className="px-6 py-4 w-1/6 whitespace-nowrap">
-                            <input
-                              type="number"
-                              min="1"
-                              name={`jobRoles[${index}].quantity`}
-                              value={role.quantity}
-                              onChange={(e) => handleJobRoleChange(index, e)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                            />
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <AutocompleteInput
-                              name={`jobRoles[${index}].nationality`}
-                              value={role.nationality || ""}
-                              onChangeValue={(val: string) =>
-                                handleJobRoleChange(index, {
-                                  target: {
-                                    name: `jobRoles[${index}].nationality`,
-                                    value: val,
-                                  },
-                                } as React.ChangeEvent<HTMLInputElement>)
-                              }
-                              options={t.nationalityOptions || []}
-                              placeholder="Type nationality..."
-                              className="w-full"
-                            />
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <input
-                              type="text"
-                              name={`jobRoles[${index}].salary`}
-                              value={role.salary || ""}
-                              onChange={(e) => handleJobRoleChange(index, e)}
-                              placeholder="Salary amount"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                            />
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button onClick={() => removeJobRole(index)}>
-                              <Trash2 />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <div className="px-6 py-3 text-left">
-                  <Button
-                    type="button"
-                    variant="default"
-                    onClick={addJobRole}
-                    className="mr-4"
-                  >
-                    {t.addAnotherRole}
-                  </Button>
-                </div>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-
-              <div className="col-span-2 flex justify-center items-center">
-                <div className="w-[2px] h-2/3 bg-[#2C0053]/30 rounded-full"></div>
-              </div>
-
-              <div className="col-span-4 space-y-6">
-                <div>
-                  <Select
-                    name="contractDuration"
-                    value={formData.contractDuration}
-                    onChange={handleChange}
-                    required
-                    className="w-full"
-                    label="Contract Duration"
-                    error={errors.contractDuration}
-                    options={contractDurationOptions}
-                  />
-                </div>
-                <div>
-                  <Input
-                    name="projectLocation"
-                    value={formData.projectLocation}
-                    onChange={handleChange}
-                    placeholder={t.projectLocationPlaceholder}
-                    required
-                    className="w-full"
-                    label={t.projectLocation}
-                    error={errors.projectLocation}
-                    id="location"
-                  />
-                </div>
-                <div>
-                  <Input
-                    name="startDate"
-                    value={formData.startDate}
-                    onChange={handleChange}
-                    type="date"
-                    required
-                    className="w-full"
-                    label={t.startDate}
-                    error={errors.startDate}
-                    id="date"
-                  />
-                </div>
+              <div className="px-6 py-3 text-left">
+                <Button
+                  type="button"
+                  variant="default"
+                  onClick={addJobRole}
+                  className="mr-4"
+                >
+                  {t.addAnotherRole}
+                </Button>
               </div>
             </div>
           </Card>
         );
 
       case 3:
-        return (
-          <Card className="p-6">
-            <div className="text-center mb-2">
-              <h1 className="text-2xl font-semibold mb-1">
-                {t.workerRequirements}
-              </h1>
-              <p className="text-base text-gray-700 mb-2">{t.specifySkills}</p>
-              <p className="text-xs text-gray-500 italic text-left">
-                {t.sectionNoteRequirements}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-12 gap-8 mt-6">
-              <div className="col-span-5 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t.languageRequirements}
-                    <span className="text-[#FF0404] ml-1">*</span>
-                  </label>
-
-                  {errors.languageRequirements && (
-                    <p className="text-sm text-[#FF0404] mb-2">
-                      {errors.languageRequirements}
-                    </p>
-                  )}
-
-                  <div className="space-y-2 mb-3">
-                    {languageOptions.map((language) => (
-                      <div key={language} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id={`lang-${language}`}
-                          checked={formData.languageRequirements.includes(
-                            language
-                          )}
-                          onChange={() => toggleLanguageRequirement(language)}
-                          className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
-                        />
-                        <label
-                          htmlFor={`lang-${language}`}
-                          className="ml-2 text-sm text-gray-700"
-                        >
-                          {language}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="text"
-                      value={newLanguage}
-                      onChange={(e) => setNewLanguage(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          handleAddLanguage();
-                        }
-                      }}
-                      placeholder="Add another language"
-                      className="w-full"
-                    />
-                  </div>
-                </div>
-                <Select
-                  label="Previous Experience"
-                  name="previousExperience"
-                  value={formData.previousExperience}
-                  onChange={handleChange}
-                  error={errors.previousExperience}
-                  required
-                  options={previousExperienceOptions}
-                />
-                <Input
-                  label="Total Experience Years (optional)"
-                  name="totalExperienceYears"
-                  value={formData.totalExperienceYears || ""}
-                  onChange={handleChange}
-                  type="number"
-                  min="0"
-                  placeholder="e.g., 5 Years"
-                />
-              </div>
-
-              <div className="col-span-2 flex justify-center items-center">
-                <div className="w-[2px] h-2/3 bg-[#2C0053]/30 rounded-full"></div>
-              </div>
-
-              <div className="col-span-5 space-y-4">
-                <h2 className="text-lg font-semibold mb-2">
-                  {t.additionalRequirements}
-                </h2>
-
-                <Input
-                  label="Preferred Age (optional)"
-                  name="preferredAge"
-                  value={formData.preferredAge || ""}
-                  onChange={handleChange}
-                  type="number"
-                  min="18"
-                  placeholder="e.g., 30 Years old"
-                  // description="±5 years will be considered"
-                />
-
-                <Select
-                  label="Ticket Details"
-                  name="ticketDetails"
-                  value={formData.ticketDetails}
-                  onChange={handleChange}
-                  error={errors.ticketDetails}
-                  required
-                  options={ticketDetailsOptions}
-                />
-
-                <div>
-                  <label
-                    htmlFor="specialRequirements"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    {t.specialRequirements}
-                  </label>
-                  <textarea
-                    id="specialRequirements"
-                    name="specialRequirements"
-                    value={formData.specialRequirements}
-                    onChange={handleChange}
-                    rows={5}
-                    className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C0053] focus:border-[#2C0053] bg-white"
-                    placeholder={t.specialRequirementsPlaceholder}
-                  />
-                </div>
-              </div>
-            </div>
-          </Card>
-        );
-
-      case 4:
         return (
           <Card className="p-6">
             <div className="text-center mb-2">
@@ -1016,6 +1075,7 @@ export default function SubmitRequirement() {
                     label={t.website}
                     value={formData.website || t.notProvided}
                   />
+                  <ReviewField label={t.address} value={formData.address} />
                 </div>
 
                 <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -1024,97 +1084,81 @@ export default function SubmitRequirement() {
                   </h2>
                   <ReviewField label={t.fullName} value={formData.fullName} />
                   <ReviewField label={t.jobTitle} value={formData.jobTitle} />
-                  <ReviewField label={t.email} value={formData.email} />
-                  <ReviewField label={t.phone} value={formData.phone} />
+                  <ReviewField
+                    label={t.email}
+                    value={`${formData.email} ${formData.emailVerified ? "(Verified)" : ""}`}
+                  />
+                  <ReviewField
+                    label={t.phone}
+                    value={`${formData.countryCode}${formData.phone} ${formData.phoneVerified ? "(Verified)" : ""}`}
+                  />
                   <ReviewField
                     label={t.altContact}
-                    value={formData.altContact || t.notProvided}
+                    value={
+                      formData.altContact
+                        ? `${formData.altCountryCode}${formData.altContact}`
+                        : t.notProvided
+                    }
                   />
                 </div>
               </div>
 
-              <div className="col-span-2 flex justify-center items-center">
-                <div className="w-[2px] h-2/3 bg-[#2C0053]/30 rounded-full"></div>
-              </div>
-
-              <div className="col-span-4 space-y-6">
+              <div className="col-span-6 space-y-6">
                 <div className="bg-white p-6 rounded-lg shadow-sm">
                   <h2 className="text-lg font-semibold mb-4 border-b pb-2">
                     {t.jobDetails}
                   </h2>
-                  <div className="mb-2">
-                    <p className="text-sm font-medium text-gray-700">
+                  <div className="mb-4">
+                    <p className="text-sm font-medium text-gray-700 mb-2">
                       {t.jobRoles}:
                     </p>
-                    <ul className="list-disc list-inside text-sm text-gray-600 mt-1">
-                      {formData.jobRoles.map((role, index) => (
-                        <li key={index}>
-                          {role.title} ({t.quantity}: {role.quantity}, Salary:{" "}
-                          {role.salary})
-                        </li>
-                      ))}
-                    </ul>
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Role
+                            </th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Qty
+                            </th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Nationality
+                            </th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Salary
+                            </th>
+                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                              Duration
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {formData.jobRoles.map((role, index) => (
+                            <tr key={index}>
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                {role.title}
+                              </td>
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                {role.quantity}
+                              </td>
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                {role.nationality || "-"}
+                              </td>
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                {role.salary}
+                              </td>
+                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                                {displayContractDurationMapping[
+                                  role.contractDuration as ContractDuration
+                                ] || role.contractDuration}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-
-                  <ReviewField
-                    label={t.projectLocation}
-                    value={formData.projectLocation}
-                  />
-                  <ReviewField label={t.startDate} value={formData.startDate} />
-                  <ReviewField
-                    label="Contract Duration"
-                    value={
-                      displayContractDurationMapping[
-                        formData.contractDuration as ContractDuration
-                      ] || formData.contractDuration
-                    }
-                  />
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h2 className="text-lg font-semibold mb-4 border-b pb-2">
-                    {t.requirements}
-                  </h2>
-                  <ReviewField
-                    label={t.languagesRequired}
-                    value={formData.languageRequirements.join(", ")}
-                  />
-                  <ReviewField
-                    label="Previous Experience"
-                    value={formData.previousExperience}
-                  />
-                  <ReviewField
-                    label="Ticket Details"
-                    value={
-                      displayTicketDetailsMapping[
-                        formData.ticketDetails as TicketDetails
-                      ] || formData.ticketDetails
-                    }
-                  />
-
-                  <ReviewField
-                    label="Previous Experience"
-                    value={
-                      displayPreviousExperienceMapping[
-                        formData.previousExperience as PreviousExperience
-                      ] || formData.previousExperience
-                    }
-                  />
-                  <ReviewField
-                    label="Total Experience Years"
-                    value={
-                      formData.totalExperienceYears?.toString() ||
-                      t.noneSpecified
-                    }
-                  />
-                  <ReviewField
-                    label="Preferred Age"
-                    value={formData.preferredAge?.toString() || t.noneSpecified}
-                  />
-                  <ReviewField
-                    label={t.specialRequirements}
-                    value={formData.specialRequirements || t.noneSpecified}
-                  />
                 </div>
               </div>
             </div>
@@ -1149,7 +1193,7 @@ export default function SubmitRequirement() {
                 style={{
                   width:
                     currentStep === 1
-                      ? "calc(20% - 35px)"
+                      ? "calc(33.33% - 35px)"
                       : solidWidths[currentStep as keyof typeof solidWidths] ||
                         "100%",
                 }}
@@ -1242,6 +1286,8 @@ export default function SubmitRequirement() {
                   </svg>
                   {t.processing}
                 </>
+              ) : currentStep === steps.length ? (
+                t.submit
               ) : (
                 t.continue
               )}
@@ -1252,11 +1298,12 @@ export default function SubmitRequirement() {
     </div>
   );
 }
+
 function ReviewField({ label, value }: ReviewFieldProps) {
   return (
     <div className="mb-3">
       <p className="text-sm font-medium text-gray-700">{label}</p>
-      <p className="text-sm text-gray-600 mt-1">{value}</p>
+      <p className="text-sm text-gray-600 mt-1">{value || "-"}</p>
     </div>
   );
 }

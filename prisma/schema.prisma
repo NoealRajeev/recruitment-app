@@ -113,6 +113,7 @@ model User {
   name            String
   email           String          @unique
   password        String
+  phone           String?         @unique
   role            UserRole
   status          AccountStatus   @default(NOT_VERIFIED)
   resetRequired   Boolean         @default(true)
@@ -154,7 +155,6 @@ model Client {
   companySize       CompanySize?       
   website           String?
   designation       String?
-  phone             String?
   address           String
   altContact        String?
   businessLicense   String?

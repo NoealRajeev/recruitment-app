@@ -5,8 +5,7 @@ export const translations = {
     steps: [
       { id: 1, label: "Company Info" },
       { id: 2, label: "Job Details" },
-      { id: 3, label: "Requirements" },
-      { id: 4, label: "Review" },
+      { id: 3, label: "Review" },
     ],
     companyProfile: "Company Profile",
     address: "Address",
@@ -438,8 +437,7 @@ export const translations = {
     steps: [
       { id: 1, label: "معلومات الشركة" },
       { id: 2, label: "تفاصيل الوظيفة" },
-      { id: 3, label: "المتطلبات" },
-      { id: 4, label: "مراجعة" },
+      { id: 3, label: "مراجعة" },
     ],
     companyProfile: "ملف الشركة",
     knowMore: "أخبرنا المزيد عنك.",

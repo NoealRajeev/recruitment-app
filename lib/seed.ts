@@ -8,10 +8,10 @@ interface SeedUser {
   role: UserRole;
   name: string;
   status: AccountStatus;
+  phone?: string;
   profile: {
     // Shared fields
     contactPerson?: string;
-    phone?: string;
 
     // Admin-specific fields
     admin?: {
@@ -54,6 +54,7 @@ async function seedBaseData() {
   const usersToSeed: SeedUser[] = [
     {
       email: "admin@findly.com",
+      phone: "+1234567899",
       password: "SecureAdmin@123",
       role: UserRole.RECRUITMENT_ADMIN,
       name: "System Admin",
@@ -67,13 +68,13 @@ async function seedBaseData() {
     },
     {
       email: "client@example.com",
+      phone: "+1234567890",
       password: "Client@123",
       role: UserRole.CLIENT_ADMIN,
       name: "Demo Client",
       status: AccountStatus.PENDING_REVIEW,
       profile: {
         contactPerson: "John Doe",
-        phone: "+1234567890",
         client: {
           companyName: "Demo Client Inc",
           address: "123 Business St",
@@ -82,13 +83,13 @@ async function seedBaseData() {
     },
     {
       email: "agency@example.com",
+      phone: "+1987654321",
       password: "Agency@123",
       role: UserRole.RECRUITMENT_AGENCY,
       name: "Demo Agency",
       status: AccountStatus.NOT_VERIFIED,
       profile: {
         contactPerson: "Jane Smith",
-        phone: "+1987654321",
         agency: {
           agencyName: "Global Recruiters",
           licenseNumber: "LIC-12345",

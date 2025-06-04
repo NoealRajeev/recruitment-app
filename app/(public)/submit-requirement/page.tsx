@@ -764,7 +764,15 @@ export default function SubmitRequirement() {
                 </div>
 
                 {/* Phone with country code and OTP verification */}
-                <div>
+                <div className="space-y-1">
+                  <label
+                    htmlFor="phone"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    {t.phone}
+                    {true && <span className="text-[#FF0404] ml-1">*</span>}
+                  </label>
+
                   <div className="flex gap-2">
                     <Select
                       name="countryCode"
@@ -778,7 +786,6 @@ export default function SubmitRequirement() {
                       disabled={formData.phoneVerified}
                     />
                     <Input
-                      label={t.phone}
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
@@ -792,6 +799,13 @@ export default function SubmitRequirement() {
                       className="flex-1"
                     />
                   </div>
+
+                  {errors.phone && (
+                    <p className="text-sm text-[#FF0404]" role="alert">
+                      {errors.phone}
+                    </p>
+                  )}
+
                   {formData.phone && !formData.phoneVerified && (
                     <div className="mt-2">
                       {!phoneOtpSent ? (

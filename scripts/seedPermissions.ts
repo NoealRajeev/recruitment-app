@@ -1,9 +1,14 @@
 // scripts/seedPermissions.ts
-import { seedDatabase } from "../lib/seed";
+import { applyExtras } from "@/lib/seed/seedExtras";
+import { seedDatabase } from "../lib/seed/seed";
 
-seedDatabase()
-  .then(() => process.exit(0))
-  .catch((e) => {
-    console.error(e);
+(async () => {
+  try {
+    await seedDatabase();
+    await applyExtras();
+    process.exit(0);
+  } catch (e) {
+    console.error("❌ Seed failed:", e);
     process.exit(1);
-  });
+  }
+})();

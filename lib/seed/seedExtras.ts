@@ -41,7 +41,7 @@ async function createFullTextSearch() {
   await prisma.$executeRaw`CREATE INDEX IF NOT EXISTS agencies_search_idx ON agencies USING gin(search_vector)`;
 
   await prisma.$executeRaw`ALTER TABLE requirements ADD COLUMN IF NOT EXISTS search_vector tsvector`;
-  await prisma.$executeRaw`UPDATE requirements SET search_vector = to_tsvector('english', coalesce(title, '') || ' ' || coalesce(description, '') || ' ' || coalesce("projectLocation", '') || ' ' || coalesce("specialNotes", ''))`;
+  await prisma.$executeRaw`UPDATE requirements SET search_vector = to_tsvector('english', coalesce("projectLocation", '') || ' ' || coalesce("specialNotes", ''))`;
   await prisma.$executeRaw`CREATE INDEX IF NOT EXISTS requirements_search_idx ON requirements USING gin(search_vector)`;
 
   await prisma.$executeRaw`ALTER TABLE labour_profiles ADD COLUMN IF NOT EXISTS search_vector tsvector`;

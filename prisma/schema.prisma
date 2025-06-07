@@ -8,6 +8,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ========== ENUMS ==========
 enum UserRole {
   RECRUITMENT_ADMIN
   CLIENT_ADMIN
@@ -32,13 +33,17 @@ enum RequirementStatus {
   CLOSED
 }
 
-enum LabourStatus {
+enum LabourProfileStatus {
   RECEIVED
   UNDER_REVIEW
   APPROVED
   REJECTED
   SHORTLISTED
   DEPLOYED
+  QVC_PROCESS
+  MEDICAL_PROCESS
+  VISA_PROCESS
+  READY_FOR_DEPLOYMENT
 }
 
 enum DocumentType {
@@ -46,6 +51,9 @@ enum DocumentType {
   INSURANCE
   ID_PROOF
   ADDRESS_PROOF
+  COMPANY_REGISTRATION
+  PASSPORT
+  CV
   OTHER
 }
 
@@ -58,6 +66,9 @@ enum CompanySector {
   RETAIL
   CONSTRUCTION
   EDUCATION
+  HOSPITALITY
+  OIL_GAS
+  TRANSPORTATION
   OTHER
 }
 
@@ -71,36 +82,89 @@ enum CompanySize {
 enum ContractDuration {
   ONE_YEAR
   TWO_YEARS
+  THREE_YEARS
   UNLIMITED
 }
 
-enum TicketDetails {
-  ONE_YEAR
-  TWO_YEARS
+enum TicketType {
+  ONE_WAY
+  TWO_WAY
+  NONE
 }
 
-enum PreviousExperience {
+enum ExperienceLevel {
   FRESH
-  GCC_EXPERIENCE
-  LOCAL_EXPERIENCE
-  ANY
+  ONE_YEAR
+  TWO_YEARS
+  THREE_YEARS
+  FOUR_YEARS
+  FIVE_PLUS_YEARS
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
 }
 
 enum AuditAction {
-  COMPANY_VERIFIED
-  COMPANY_REJECTED
-  COMPANY_SUSPENDED
-  COMPANY_UPDATED
+  // User related
   USER_CREATED
   USER_UPDATED
   USER_DELETED
-  ACCOUNT_DELETION_REQUESTED
-  ACCOUNT_DELETED
-  ACCOUNT_RECOVERED
-  DRAFT_CREATED
+  USER_STATUS_CHANGED
+  USER_PASSWORD_RESET
+  
+  // Client related
+  CLIENT_CREATED
+  CLIENT_UPDATED
+  CLIENT_VERIFIED
+  CLIENT_REJECTED
+  
+  // Agency related
+  AGENCY_CREATED
+  AGENCY_UPDATED
+  AGENCY_VERIFIED
+  AGENCY_REJECTED
+  
+  // Requirement related
   REQUIREMENT_CREATED
   REQUIREMENT_UPDATED
-  REQUIREMENT_DELETED
+  REQUIREMENT_STATUS_CHANGED
+  REQUIREMENT_ASSIGNED
+  
+  // Labour related
+  LABOUR_PROFILE_CREATED
+  LABOUR_PROFILE_UPDATED
+  LABOUR_STATUS_CHANGED
+  
+  // Document related
+  DOCUMENT_UPLOADED
+  DOCUMENT_VERIFIED
+  DOCUMENT_REJECTED
+  
+  // System
+  LOGIN
+  LOGOUT
+  PASSWORD_CHANGE
+  ACCOUNT_RECOVERY
+}
+
+enum ProcedureStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  FAILED
+}
+
+enum NotificationType {
+  SYSTEM
+  REQUIREMENT
+  LABOUR
+  DOCUMENT
+  ACCOUNT
+  GENERAL
 }
 
 enum DeletionType {
@@ -108,12 +172,15 @@ enum DeletionType {
   IMMEDIATE
 }
 
+// ========== MODELS ==========
 model User {
   id              String          @id @default(uuid())
   name            String
-  email           String          @unique
+  email           String          @unique @db.VarChar(255)
   password        String
-  phone           String?         @unique
+  phone           String?         @unique @db.VarChar(20)
+  altContact      String?         @db.VarChar(20)
+  profilePicture  String?
   role            UserRole
   status          AccountStatus   @default(NOT_VERIFIED)
   resetRequired   Boolean         @default(true)
@@ -121,284 +188,455 @@ model User {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   
-  deleteAt        DateTime?       @map("delete_at")
+  // Soft delete fields
+  deleteAt        DateTime?
   deletionType    DeletionType?
+  deletionReason  String?
   deletionRequestedBy String?
 
-  // Profile relations
-  client          Client?
-  agency          Agency?
-  admin           Admin?
+  // Profile relations (mutually exclusive)
+  clientProfile   Client?
+  agencyProfile   Agency?
+  adminProfile    Admin?
 
-  // Audit
-  createdBy       User?           @relation("CreatedUsers", fields: [createdById], references: [id])
+  // Relations
+  createdBy       User?           @relation("UserCreation", fields: [createdById], references: [id])
   createdById     String?
-  createdUsers    User[]          @relation("CreatedUsers")
+  createdUsers    User[]          @relation("UserCreation")
   auditLogs       AuditLog[]
-
+  notifications   Notification[]
+  statusLogs      LabourStatusLog[]
+  clientDocuments ClientDocument[]
+  agencyDocuments AgencyDocument[]
+  requirementDocuments RequirementDocument[]
+  
+  // Indexes
+  @@index([email])
+  @@index([status])
+  @@index([role])
+  @@index([createdAt])
   @@index([email, status])
-  LabourStatusLog LabourStatusLog[]
-  ClientDocument ClientDocument[]
-  AgencyDocument AgencyDocument[]
-  RequirementDocument RequirementDocument[]
-  Notification Notification[]
+  
+  @@map("users")
 }
 
 model Client {
-  id                String          @id @default(uuid())
-  userId            String          @unique
-  user              User            @relation(fields: [userId], references: [id])
-  companyName       String
-  contactPerson     String?
-  registrationNo    String?
-  companySector     CompanySector?
-  companySize       CompanySize?       
-  website           String?
-  designation       String?
-  address           String
-  altContact        String?
-  businessLicense   String?
-  image             String?          
-  requirements      Requirement[]
-  documents         ClientDocument[]
-
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
+  id              String          @id @default(uuid())
+  userId          String          @unique
+  user            User            @relation(fields: [userId], references: [id])
+  
+  // Company Info
+  companyName     String          @db.VarChar(255)
+  registrationNo  String?         @unique @db.VarChar(50)
+  companySector   CompanySector
+  companySize     CompanySize
+  website         String?         @db.VarChar(255)
+  address         String
+  city            String          @db.VarChar(100)
+  country         String          @db.VarChar(100)
+  postalCode      String?         @db.VarChar(20)
+  
+  // Contact Info
+  designation     String          @db.VarChar(100)
+  
+  // Relations
+  requirements    Requirement[]
+  documents       ClientDocument[]
+  
+  // Timestamps
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  // Indexes
+  @@index([companyName])
+  @@index([registrationNo])
+  @@index([companySector])
+  
+  @@map("clients")
 }
 
 model Agency {
-  id                String          @id @default(uuid())
-  userId            String          @unique
-  user              User            @relation(fields: [userId], references: [id])
+  id              String          @id @default(uuid())
+  userId          String          @unique
+  user            User            @relation(fields: [userId], references: [id])
   
-  // Agency Information
-  agencyName        String
-  registrationNo    String?          @unique
-  licenseNumber     String
-  licenseExpiry     DateTime
-  country           String
-  regions           String[]        
+  // Agency Info
+  agencyName      String          @db.VarChar(255)
+  registrationNo  String?         @unique @db.VarChar(50)
+  licenseNumber   String          @db.VarChar(50)
+  licenseExpiry   DateTime
+  country         String          @db.VarChar(100)
+  regions         String[]
   
-  // Contact Information
-  contactPerson     String
-  phone             String
-  email             String?         
-  website           String?         
+  // Contact Info
+  website         String?         @db.VarChar(255)
+  address         String
+  city            String          @db.VarChar(100)
+  postalCode      String?         @db.VarChar(20)
   
   // Relations
-  documents         AgencyDocument[]
-  labourProfiles    LabourProfile[]
-  requirements      Requirement[]   @relation("AgencyRequirements")
-
+  labourProfiles  LabourProfile[]
+  requirements    Requirement[]   @relation("AgencyRequirements")
+  documents       AgencyDocument[]
+  
   // Timestamps
-  createdAt         DateTime        @default(now())
-  updatedAt         DateTime        @updatedAt
-
-  @@index([licenseNumber, registrationNo])
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  // Indexes
+  @@index([agencyName])
+  @@index([licenseNumber])
+  @@index([registrationNo])
+  
+  @@map("agencies")
 }
 
 model Admin {
   id              String          @id @default(uuid())
   userId          String          @unique
   user            User            @relation(fields: [userId], references: [id])
-  name            String
-  department      String?
-  canCreateUsers  Boolean         @default(true)
-
+  name            String          @db.VarChar(255)
+  department      String?         @db.VarChar(100)
+  permissions     Json?
+  
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+  
+  @@map("admins")
+}
+
+model Requirement {
+  id              String          @id @default(uuid())
+  projectLocation String
+  startDate       DateTime
+  contractDuration ContractDuration
+  specialNotes    String?
+  status          RequirementStatus @default(DRAFT)
+  
+  // Language requirements
+  languages       String[]
+  
+  // Experience
+  minExperience   ExperienceLevel
+  maxAge          Int?
+  
+  // Ticket details
+  ticketType      TicketType?
+  ticketProvided  Boolean         @default(false)
+  
+  // Relationships
+  clientId        String
+  client          Client          @relation(fields: [clientId], references: [id])
+  assignedAgency  Agency?         @relation("AgencyRequirements", fields: [assignedAgencyId], references: [id])
+  assignedAgencyId String?
+  jobRoles        JobRole[]
+  labourProfiles  LabourProfile[]
+  procedures      Procedure[]
+  documents       RequirementDocument[]
+  
+  // Timestamps
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  submittedAt     DateTime?
+  reviewedAt      DateTime?
+  
+  // Indexes
+  @@index([clientId])
+  @@index([status])
+  @@index([startDate])
+  @@index([createdAt])
+  @@index([clientId, status])
+  @@index([assignedAgencyId, status])
+  @@index([startDate, contractDuration])
+  
+  @@map("requirements")
 }
 
 model JobRole {
   id              String          @id @default(uuid())
-  title           String
-  quantity        Int
-  nationality     String
-  salary          String
-  requirement     Requirement     @relation(fields: [requirementId], references: [id])
-  requirementId   String
-
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
-}
-
-
-model Requirement {
-  id              String          @id @default(uuid())
-  projectLocation String?
-  startDate       DateTime?
-  contractDuration ContractDuration?
-  previousExperience PreviousExperience?
-  ticketDetails TicketDetails?
-  totalExperienceYears Int?
-  preferredAge    Int?
-  specialNotes    String?
-  status          RequirementStatus @default(DRAFT)
+  title           String          @db.VarChar(255)
+  description     String?
+  quantity        Int             @default(1)
+  nationality     String          @db.VarChar(100)
+  salary          Float
+  salaryCurrency  String          @default("QAR") @db.VarChar(3)
   
   // Relationships
-  jobRoles        JobRole[]
-  languages       String[]
-  clientId        String
-  client          Client          @relation(fields: [clientId], references: [id])
-  assignedTo      Agency?         @relation("AgencyRequirements", fields: [assignedToId], references: [id])
-  assignedToId    String?
-  labourProfiles  LabourProfile[]
-  procedures      Procedure[]
-  documents       RequirementDocument[]
-
+  requirementId   String
+  requirement     Requirement     @relation(fields: [requirementId], references: [id])
+  
+  // Timestamps
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+  
+  // Indexes
+  @@index([requirementId])
+  @@index([nationality])
+  @@index([salary])
+  
+  @@map("job_roles")
 }
 
 model LabourProfile {
   id              String          @id @default(uuid())
-  name            String
+  // Personal Info
+  name            String          @db.VarChar(255)
   age             Int
-  gender          String
-  nationality     String
+  gender          Gender
+  nationality     String          @db.VarChar(100)
+  maritalStatus   String?         @db.VarChar(50)
+  
+  // Professional Info
   skills          String[]
   experienceYears Int
   education       String?
-  language        String[]
-  status          LabourStatus    @default(RECEIVED)
+  currentPosition String?         @db.VarChar(100)
+  currentCompany  String?         @db.VarChar(100)
+  
+  // Language
+  languages       String[]
+  englishProficiency String?      @db.VarChar(50)
+  
+  // Contact Info
+  email           String?         @db.VarChar(255)
+  phone           String          @db.VarChar(20)
+  address         String?
+  city            String?         @db.VarChar(100)
+  country         String?         @db.VarChar(100)
+  
+  // Documents
   cvUrl           String
-  passportCopy    String?
+  passportNumber  String?         @db.VarChar(50)
+  passportExpiry  DateTime?
+  visaType        String?         @db.VarChar(50)
+  visaExpiry      DateTime?
+  medicalStatus   String?         @db.VarChar(50)
+  medicalExpiry   DateTime?
+  photo           String?
   otherDocs       String[]
-
+  
+  // Status
+  status          LabourProfileStatus @default(RECEIVED)
+  statusReason    String?
+  
   // Relationships
   requirementId   String
   requirement     Requirement     @relation(fields: [requirementId], references: [id])
   agencyId        String
   agency          Agency          @relation(fields: [agencyId], references: [id])
-
   statusLogs      LabourStatusLog[]
   procedures      Procedure[]
 
+  // For tracking deployment
+  deploymentDate    DateTime?
+  contractStartDate DateTime?
+  contractEndDate   DateTime?
+  
+  // Timestamps
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+  
+  // Indexes
+  @@index([agencyId])
+  @@index([requirementId])
+  @@index([status])
+  @@index([nationality])
+  @@index([agencyId, status])
+  @@index([nationality, gender])
+  @@index([status, createdAt])
+  
+  @@map("labour_profiles")
 }
 
 model Procedure {
   id              String          @id @default(uuid())
-  name            String
+  name            String          @db.VarChar(255)
   description     String
-  status          String          @default("PENDING")
+  status          ProcedureStatus @default(PENDING)
   dueDate         DateTime?
   completedDate   DateTime?
   comments        String?
-
+  metadata        Json?
+  
   // Relationships
   requirementId   String?
   requirement     Requirement?    @relation(fields: [requirementId], references: [id])
   labourProfileId String?
   labourProfile   LabourProfile?  @relation(fields: [labourProfileId], references: [id])
-
+  
+  // Timestamps
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+  
+  // Indexes
+  @@index([requirementId])
+  @@index([labourProfileId])
+  @@index([status])
+  @@index([dueDate])
+  
+  @@map("procedures")
 }
 
 model LabourStatusLog {
   id              String          @id @default(uuid())
-  status          LabourStatus
+  status          LabourProfileStatus
   comments        String?
-
+  metadata        Json?
+  
   // Relationships
   labourProfileId String
   labourProfile   LabourProfile   @relation(fields: [labourProfileId], references: [id])
   changedById     String
   changedBy       User            @relation(fields: [changedById], references: [id])
-
+  
+  // Timestamps
   createdAt       DateTime        @default(now())
+  
+  // Indexes
+  @@index([labourProfileId])
+  @@index([changedById])
+  @@index([createdAt])
+  @@index([status, createdAt])
+  
+  @@map("labour_status_logs")
 }
 
 model ClientDocument {
   id              String          @id @default(uuid())
   type            DocumentType
   url             String
+  name            String?         @db.VarChar(255)
+  description     String?
   verified        Boolean         @default(false)
   comments        String?
-
+  expiryDate      DateTime?
+  
+  // Relationships
   clientId        String
   client          Client          @relation(fields: [clientId], references: [id])
-
   verifiedById    String?
   verifiedBy      User?           @relation(fields: [verifiedById], references: [id])
-
+  
+  // Timestamps
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+  
+  // Indexes
+  @@index([clientId])
+  @@index([type])
+  @@index([verified])
+  @@index([expiryDate])
+  
+  @@map("client_documents")
 }
 
 model AgencyDocument {
   id              String          @id @default(uuid())
   type            DocumentType
   url             String
+  name            String?         @db.VarChar(255)
+  description     String?
   verified        Boolean         @default(false)
   comments        String?
-
+  expiryDate      DateTime?
+  
+  // Relationships
   agencyId        String
   agency          Agency          @relation(fields: [agencyId], references: [id])
-
   verifiedById    String?
   verifiedBy      User?           @relation(fields: [verifiedById], references: [id])
-
+  
+  // Timestamps
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
+  
+  // Indexes
+  @@index([agencyId])
+  @@index([type])
+  @@index([verified])
+  @@index([expiryDate])
+  
+  @@map("agency_documents")
 }
 
 model RequirementDocument {
   id              String          @id @default(uuid())
   type            DocumentType
   url             String
+  name            String?         @db.VarChar(255)
   description     String?
-
+  
+  // Relationships
   requirementId   String
   requirement     Requirement     @relation(fields: [requirementId], references: [id])
-
   uploadedById    String
   uploadedBy      User            @relation(fields: [uploadedById], references: [id])
-
+  
+  // Timestamps
   createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  
+  // Indexes
+  @@index([requirementId])
+  @@index([type])
+  @@index([createdAt])
+  
+  @@map("requirement_documents")
 }
 
 model AuditLog {
-  id              String      @id @default(uuid())
+  id              String          @id @default(uuid())
   action          AuditAction
-  entityType      String
+  entityType      String          @db.VarChar(50)
   entityId        String
   description     String?
   oldData         Json?
   newData         Json?
   affectedFields  String[]
-  ipAddress       String?
+  ipAddress       String?         @db.VarChar(45)
   userAgent       String?
   
-  performedBy     User        @relation(fields: [performedById], references: [id])
-  performedAt     DateTime    @default(now())
+  // Relationships
+  performedBy     User            @relation(fields: [performedById], references: [id])
   performedById   String
+  performedAt     DateTime        @default(now())
   
-  createdAt       DateTime    @default(now())
+  // Timestamps
+  createdAt       DateTime        @default(now())
   
+  // Indexes
   @@index([entityType, entityId])
   @@index([performedById])
+  @@index([action])
   @@index([createdAt])
+  @@index([entityType, action])
+  
+  @@map("audit_logs")
 }
 
 model Notification {
-  id           String     @id @default(uuid())
-  title        String
-  message      String
-  type         String
-  read         Boolean    @default(false)
-  actionUrl    String?
-  metadata     Json?
+  id              String          @id @default(uuid())
+  title           String          @db.VarChar(255)
+  message         String
+  type            NotificationType
+  read            Boolean         @default(false)
+  actionUrl       String?
+  metadata        Json?
   
-  recipient    User       @relation(fields: [recipientId], references: [id])
-  recipientId  String
+  // Relationships
+  recipient       User            @relation(fields: [recipientId], references: [id])
+  recipientId     String
   
-  createdAt    DateTime   @default(now())
-  readAt      DateTime?
-
+  // Timestamps
+  createdAt       DateTime        @default(now())
+  readAt          DateTime?
+  
+  // Indexes
   @@index([recipientId])
-  @@index([createdAt])
   @@index([type])
+  @@index([read])
+  @@index([createdAt])
+  @@index([recipientId, read])
+  
+  @@map("notifications")
 }

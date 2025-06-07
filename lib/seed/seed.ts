@@ -5,10 +5,7 @@ import {
   AccountStatus,
   CompanySector,
   CompanySize,
-  DocumentType,
   RequirementStatus,
-  LabourProfileStatus,
-  Gender,
   ExperienceLevel,
   ContractDuration,
   TicketType,
@@ -64,8 +61,6 @@ interface SeedUser {
 }
 
 interface SeedRequirement {
-  title: string;
-  description?: string;
   projectLocation: string;
   startDate: Date;
   contractDuration: ContractDuration;
@@ -84,41 +79,10 @@ interface SeedRequirement {
   }[];
 }
 
-interface SeedLabourProfile {
-  name: string;
-  age: number;
-  gender: Gender;
-  nationality: string;
-  maritalStatus?: string;
-  skills: string[];
-  experienceYears: number;
-  education?: string;
-  currentPosition?: string;
-  currentCompany?: string;
-  languages: string[];
-  englishProficiency?: string;
-  email?: string;
-  phone: string;
-  address?: string;
-  city?: string;
-  country?: string;
-  cvUrl: string;
-  passportNumber?: string;
-  passportExpiry?: Date;
-  visaType?: string;
-  visaExpiry?: Date;
-  medicalStatus?: string;
-  medicalExpiry?: Date;
-  photo?: string;
-  status: LabourProfileStatus;
-}
-
 export async function seedDatabase() {
   try {
     await seedBaseData();
     await seedRequirements();
-    await seedLabourProfiles();
-    await seedDocuments();
     console.log("🌱 Database seeding completed successfully!");
   } catch (error) {
     console.error("❌ Database seeding failed:", error);
@@ -306,8 +270,6 @@ async function seedRequirements() {
 
   const requirementsToSeed: SeedRequirement[] = [
     {
-      title: "Construction Workers Needed",
-      description: "Need skilled construction workers for high-rise project",
       projectLocation: "Downtown Doha",
       startDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
       contractDuration: ContractDuration.TWO_YEARS,
@@ -334,7 +296,6 @@ async function seedRequirements() {
       ],
     },
     {
-      title: "Hotel Staff Recruitment",
       projectLocation: "Lusail City",
       startDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000), // 45 days from now
       contractDuration: ContractDuration.ONE_YEAR,
@@ -361,8 +322,6 @@ async function seedRequirements() {
   for (const reqData of requirementsToSeed) {
     await prisma.requirement.create({
       data: {
-        title: reqData.title,
-        description: reqData.description,
         projectLocation: reqData.projectLocation,
         startDate: reqData.startDate,
         contractDuration: reqData.contractDuration,
@@ -380,156 +339,6 @@ async function seedRequirements() {
         },
       },
     });
-    console.log(`✅ Created requirement: ${reqData.title}`);
+    console.log(`✅ Created requirement:`);
   }
-}
-
-async function seedLabourProfiles() {
-  const agency = await prisma.agency.findFirst({
-    where: { agencyName: "Global Recruiters" },
-  });
-
-  const requirement = await prisma.requirement.findFirst({
-    where: { title: "Construction Workers Needed" },
-  });
-
-  if (!agency || !requirement) {
-    console.log("ℹ️ No agency or requirement found to create labour profiles");
-    return;
-  }
-
-  const profilesToSeed: SeedLabourProfile[] = [
-    {
-      name: "Rajesh Kumar",
-      age: 32,
-      gender: Gender.MALE,
-      nationality: "India",
-      maritalStatus: "Married",
-      skills: ["Masonry", "Concrete Work", "Block Laying"],
-      experienceYears: 8,
-      education: "High School",
-      currentPosition: "Senior Mason",
-      currentCompany: "BuildRight Constructions",
-      languages: ["Hindi", "English"],
-      englishProficiency: "Intermediate",
-      phone: "+919876543210",
-      address: "123 Worker Street, Mumbai",
-      city: "Mumbai",
-      country: "India",
-      cvUrl: "https://example.com/cvs/rajesh_kumar.pdf",
-      passportNumber: "P12345678",
-      passportExpiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000 * 3), // 3 years from now
-      status: LabourProfileStatus.APPROVED,
-    },
-    {
-      name: "Nirmal Gurung",
-      age: 28,
-      gender: Gender.MALE,
-      nationality: "Nepal",
-      skills: ["Carpentry", "Formwork", "Furniture Making"],
-      experienceYears: 5,
-      languages: ["Nepali", "Hindi"],
-      englishProficiency: "Basic",
-      phone: "+977987654321",
-      cvUrl: "https://example.com/cvs/nirmal_gurung.pdf",
-      status: LabourProfileStatus.UNDER_REVIEW,
-    },
-    {
-      name: "Maria Santos",
-      age: 25,
-      gender: Gender.FEMALE,
-      nationality: "Philippines",
-      skills: ["Housekeeping", "Laundry", "Customer Service"],
-      experienceYears: 3,
-      languages: ["English", "Tagalog"],
-      englishProficiency: "Fluent",
-      phone: "+639123456789",
-      cvUrl: "https://example.com/cvs/maria_santos.pdf",
-      status: LabourProfileStatus.READY_FOR_DEPLOYMENT,
-    },
-  ];
-
-  for (const profileData of profilesToSeed) {
-    await prisma.labourProfile.create({
-      data: {
-        ...profileData,
-        agencyId: agency.id,
-        requirementId: requirement.id,
-      },
-    });
-    console.log(`✅ Created labour profile: ${profileData.name}`);
-  }
-}
-
-async function seedDocuments() {
-  const client = await prisma.client.findFirst();
-  const agency = await prisma.agency.findFirst();
-  const admin = await prisma.admin.findFirst();
-  const requirement = await prisma.requirement.findFirst();
-
-  if (!client || !agency || !admin || !requirement) {
-    console.log("ℹ️ Missing required entities to create documents");
-    return;
-  }
-
-  // Client documents
-  await prisma.clientDocument.create({
-    data: {
-      type: DocumentType.COMPANY_REGISTRATION,
-      url: "https://example.com/docs/client_cr.pdf",
-      name: "Company Registration",
-      description: "Official company registration document",
-      verified: true,
-      clientId: client.id,
-      verifiedById: admin.userId,
-    },
-  });
-
-  await prisma.clientDocument.create({
-    data: {
-      type: DocumentType.LICENSE,
-      url: "https://example.com/docs/client_license.pdf",
-      name: "Business License",
-      verified: false,
-      clientId: client.id,
-    },
-  });
-
-  // Agency documents
-  await prisma.agencyDocument.create({
-    data: {
-      type: DocumentType.LICENSE,
-      url: "https://example.com/docs/agency_license.pdf",
-      name: "Recruitment License",
-      description: "Official recruitment agency license",
-      verified: true,
-      expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
-      agencyId: agency.id,
-      verifiedById: admin.userId,
-    },
-  });
-
-  await prisma.agencyDocument.create({
-    data: {
-      type: DocumentType.INSURANCE,
-      url: "https://example.com/docs/agency_insurance.pdf",
-      name: "Professional Liability Insurance",
-      verified: false,
-      agencyId: agency.id,
-    },
-  });
-
-  // Requirement documents
-  await prisma.requirementDocument.create({
-    data: {
-      type: DocumentType.OTHER,
-      url: "https://example.com/docs/project_specs.pdf",
-      name: "Project Specifications",
-      description: "Detailed project requirements and specifications",
-      requirementId: requirement.id,
-      uploadedById: client.userId,
-    },
-  });
-
-  console.log("✅ Created sample documents");
 }

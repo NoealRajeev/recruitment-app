@@ -173,7 +173,7 @@ export const AutocompleteInput = React.forwardRef<
                 className={cn(
                   "cursor-pointer select-none py-2 px-4",
                   highlightIndex === i
-                    ? "bg-purple-600 text-white"
+                    ? "bg-[#4C187A]/85 text-white"
                     : "text-gray-900"
                 )}
               >

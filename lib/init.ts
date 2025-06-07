@@ -1,4 +1,4 @@
-import { seedDatabase } from "./seed";
+import { seedDatabase } from "./seed/seed";
 
 export async function initializeApp() {
   if (process.env.NODE_ENV !== "development") return;

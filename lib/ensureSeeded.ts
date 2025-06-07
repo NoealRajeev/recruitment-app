@@ -1,5 +1,5 @@
 // lib/ensureSeeded.ts
-import { seedDatabase } from "./seed";
+import { seedDatabase } from "./seed/seed";
 import prisma from "@/lib/prisma";
 
 export async function ensureDatabaseSeeded() {

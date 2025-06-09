@@ -53,7 +53,7 @@ export const authOptions: AuthOptions = {
           role: user.role,
           status: user.status,
           resetRequired: user.resetRequired,
-          // image: user.image || null,
+          image: user.profilePicture || null,
         };
       },
     }),

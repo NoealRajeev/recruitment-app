@@ -1,6 +1,6 @@
 // app/api/init/route.ts
 import { NextResponse } from "next/server";
-import { seedDatabase } from "@/lib/seed";
+import { seedDatabase } from "@/lib/seed/seed";
 
 export async function GET() {
   if (process.env.NODE_ENV !== "development") {

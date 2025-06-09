@@ -11,23 +11,19 @@ import { useToast } from "@/context/toast-provider";
 import {
   CompanySector,
   CompanySize,
-  ContractDuration,
+  RequirementStatus,
 } from "@/lib/generated/prisma";
 import {
   getSectorEnumMapping,
   getCompanySizeEnumMapping,
   getDisplaySectorMapping,
   getDisplayCompanySizeMapping,
-  getContractDurationEnumMapping,
-  getDisplayContractDurationMapping,
 } from "@/lib/utils/enum-mappings";
 
 interface JobRole {
   title: string;
   quantity: number;
   nationality: string;
-  salary: string;
-  contractDuration: ContractDuration | "";
 }
 
 interface FormData {
@@ -37,6 +33,9 @@ interface FormData {
   companySize: CompanySize | "";
   website: string;
   address: string;
+  city: string;
+  country: string;
+  postcode: string;
   fullName: string;
   jobTitle: string;
   email: string;
@@ -84,6 +83,7 @@ export default function SubmitRequirement() {
   const [phoneCheckInProgress, setPhoneCheckInProgress] = useState(false);
   const [emailOtpSent, setEmailOtpSent] = useState(false);
   const [phoneOtpSent, setPhoneOtpSent] = useState(false);
+  const [autoFillingCity, setAutoFillingCity] = useState(false);
   const [emailOtpResendTime, setEmailOtpResendTime] = useState(0);
   const [phoneOtpResendTime, setPhoneOtpResendTime] = useState(0);
   const { toast } = useToast();
@@ -105,25 +105,6 @@ export default function SubmitRequirement() {
     () => getDisplayCompanySizeMapping(language),
     [language]
   );
-  const contractDurationMapping = useMemo(
-    () => getContractDurationEnumMapping(language),
-    [language]
-  );
-  const displayContractDurationMapping = useMemo(
-    () => getDisplayContractDurationMapping(language),
-    [language]
-  );
-
-  const contractDurationOptions = useMemo(
-    () =>
-      t.contractDurationOptions?.map((opt) => ({
-        value:
-          contractDurationMapping[opt] ||
-          opt.toLowerCase().replace(/\s+/g, "-"),
-        label: opt,
-      })) || [],
-    [t.contractDurationOptions, contractDurationMapping]
-  );
 
   const initialFormData: FormData = useMemo(
     () => ({
@@ -133,6 +114,9 @@ export default function SubmitRequirement() {
       companySize: "",
       website: "",
       address: "",
+      city: "",
+      country: "",
+      postcode: "",
       fullName: "",
       jobTitle: "",
       email: "",
@@ -145,8 +129,6 @@ export default function SubmitRequirement() {
           title: "",
           quantity: 1,
           nationality: "",
-          salary: "",
-          contractDuration: "",
         },
       ],
       emailVerified: false,
@@ -164,8 +146,8 @@ export default function SubmitRequirement() {
 
   // Solid widths for progress bar
   const solidWidths: Record<number, string> = {
-    2: "calc(50% + 100px)",
-    3: "100%",
+    2: "calc(50% + 340px)",
+    3: "2800px",
   };
 
   // OTP countdown timers
@@ -193,14 +175,37 @@ export default function SubmitRequirement() {
     return regex.test(value);
   }, []);
 
+  const countryOptions = useMemo(
+    () =>
+      t.nationalityOptions?.map((nat) => ({
+        value: nat,
+        label: nat,
+      })) || [],
+    [t.nationalityOptions]
+  );
+
+  const handlePostcodeChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { value } = e.target;
+      setFormData((prev) => ({ ...prev, postcode: value }));
+      if (errors.postcode) setErrors((prev) => ({ ...prev, postcode: "" }));
+    },
+    [errors.postcode]
+  );
+
   const checkEmailAvailability = useCallback(
     async (email: string): Promise<boolean> => {
       try {
-        const response = await fetch("/api/auth/check-email", {
+        const response = await fetch("/api/auth/check-identifier", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
+          body: JSON.stringify({ type: "email", value: email }),
         });
+
+        if (!response.ok) {
+          throw new Error("Failed to check email availability");
+        }
+
         const data = await response.json();
         return data.available;
       } catch (error) {
@@ -214,11 +219,16 @@ export default function SubmitRequirement() {
   const checkPhoneAvailability = useCallback(
     async (phone: string): Promise<boolean> => {
       try {
-        const response = await fetch("/api/auth/check-phone", {
+        const response = await fetch("/api/auth/check-identifier", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ phone }),
+          body: JSON.stringify({ type: "phone", value: phone }),
         });
+
+        if (!response.ok) {
+          throw new Error("Failed to check phone availability");
+        }
+
         const data = await response.json();
         return data.available;
       } catch (error) {
@@ -268,19 +278,34 @@ export default function SubmitRequirement() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ type, value, otp }),
         });
-        const data = await response.json();
-        if (response.ok) {
-          toast({ type: "success", message: data.message });
-          return true;
-        } else {
+
+        if (!response.ok) {
+          const data = await response.json();
+          if (response.status === 401) {
+            const errorField = type === "email" ? "emailOtp" : "phoneOtp";
+            setErrors((prev) => ({
+              ...prev,
+              [errorField]: data.message || "Invalid OTP",
+            }));
+            setFormData((prev) => ({ ...prev, [errorField]: "" }));
+            return false;
+          }
           throw new Error(data.message || "OTP verification failed");
         }
+
+        const data = await response.json();
+        toast({ type: "success", message: data.message });
+        return true;
       } catch (error) {
-        toast({
-          type: "error",
-          message:
-            error instanceof Error ? error.message : "OTP verification failed",
-        });
+        if (!(error instanceof Error && error.message.includes("OTP"))) {
+          toast({
+            type: "error",
+            message:
+              error instanceof Error
+                ? error.message
+                : "OTP verification failed",
+          });
+        }
         return false;
       }
     },
@@ -299,7 +324,12 @@ export default function SubmitRequirement() {
         : t.invalidRegistration,
       sector: t.required,
       companySize: t.required,
-      address: "Address is required",
+      address: t.required,
+      city: t.required,
+      postcode: /^[0-9A-Za-z\s\-]{3,10}$/.test(formData.postcode)
+        ? ""
+        : t.invalidPostcode || "Invalid postcode",
+      country: t.required,
       fullName: t.required,
       jobTitle: t.required,
       email: /^\S+@\S+\.\S+$/.test(formData.email) ? "" : t.invalidEmail,
@@ -336,7 +366,7 @@ export default function SubmitRequirement() {
         const isAvailable = await checkPhoneAvailability(
           `${formData.countryCode}${formData.phone}`
         );
-        if (!isAvailable) newErrors.phone = t.phoneInUse;
+        if (!isAvailable) newErrors.phone = t.invalidPhone;
       } catch (error) {
         toast({
           type: "error",
@@ -375,31 +405,38 @@ export default function SubmitRequirement() {
     // Check each job role
     formData.jobRoles.forEach((role, index) => {
       if (!role.title.trim()) {
-        newErrors[`jobRoles[${index}].title`] = t.required;
+        newErrors[`jobRoles[${index}].title`] = "Job role is required";
       }
-      if (!role.salary.trim()) {
-        newErrors[`jobRoles[${index}].salary`] = "Salary is required";
+      if (role.quantity < 1) {
+        newErrors[`jobRoles[${index}].quantity`] =
+          "Quantity must be at least 1";
       }
-      if (!role.contractDuration) {
-        newErrors[`jobRoles[${index}].contractDuration`] =
-          "Contract duration is required";
+      if (!role.nationality.trim()) {
+        newErrors[`jobRoles[${index}].nationality`] = "Nationality is required";
       }
     });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [formData, t]);
+  }, [formData]);
 
   // Navigation handlers
   const handleNext = useCallback(async () => {
     let isValid = false;
 
-    if (currentStep === 1) isValid = await validateStep1();
-    else if (currentStep === 2) isValid = validateStep2();
+    if (currentStep === 1) {
+      isValid = await validateStep1();
+    } else if (currentStep === 2) {
+      isValid = validateStep2();
+    } else {
+      isValid = true;
+    }
 
     if (!isValid) {
-      const firstError = Object.values(errors)[0];
-      toast({ type: "error", message: firstError || "Please fix the errors." });
+      toast({
+        type: "error",
+        message: "Please fix all errors before proceeding",
+      });
       return;
     }
 
@@ -408,7 +445,7 @@ export default function SubmitRequirement() {
       setCurrentStep((prev) => Math.min(prev + 1, steps.length));
       setIsSubmitting(false);
     }, 800);
-  }, [currentStep, validateStep1, validateStep2, errors, toast, steps.length]);
+  }, [currentStep, validateStep1, validateStep2, toast, steps.length]);
 
   const handleBack = useCallback(() => {
     setCurrentStep((prev) => Math.max(prev - 1, 1));
@@ -438,7 +475,9 @@ export default function SubmitRequirement() {
         const updatedJobRoles = [...prev.jobRoles];
         updatedJobRoles[index] = {
           ...updatedJobRoles[index],
-          [name.replace(`jobRoles[${index}].`, "")]: value,
+          [name.replace(`jobRoles[${index}].`, "")]: name.includes("quantity")
+            ? parseInt(value) || 0
+            : value,
         };
         return { ...prev, jobRoles: updatedJobRoles };
       });
@@ -456,8 +495,6 @@ export default function SubmitRequirement() {
           title: "",
           quantity: 1,
           nationality: "",
-          salary: "",
-          contractDuration: "",
         },
       ],
     }));
@@ -581,6 +618,105 @@ export default function SubmitRequirement() {
     [t.companySizeOptions, companySizeMapping]
   );
 
+  const handleSubmit = useCallback(async () => {
+    setIsSubmitting(true);
+    try {
+      const clientPayload = {
+        companyName: formData.companyName,
+        registrationNumber: formData.registrationNumber,
+        sector: formData.sector as CompanySector,
+        companySize: formData.companySize as CompanySize,
+        website: formData.website,
+        address: formData.address,
+        city: formData.city,
+        country: formData.country,
+        postalCode: formData.postcode,
+        fullName: formData.fullName,
+        jobTitle: formData.jobTitle,
+        email: formData.email,
+        phone: formData.phone,
+        countryCode: formData.countryCode,
+        altContact: formData.altContact,
+        altCountryCode: formData.altCountryCode,
+      };
+
+      const requirementPayload = {
+        status: RequirementStatus.SUBMITTED,
+        languages: [],
+        jobRoles: formData.jobRoles.map((role) => ({
+          title: role.title,
+          quantity: role.quantity,
+          nationality: role.nationality,
+        })),
+      };
+
+      const clientResponse = await fetch("/api/auth/register/client", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(clientPayload),
+      });
+
+      if (!clientResponse.ok) {
+        const errorData = await clientResponse.json();
+        throw new Error(errorData.error || "Client registration failed");
+      }
+
+      const clientData = await clientResponse.json();
+
+      if (!clientData.clientId || !clientData.userId) {
+        throw new Error("Missing client or user ID in registration response");
+      }
+      const requirementResponse = await fetch("/api/requirements", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...requirementPayload,
+          clientId: clientData.clientId,
+          userId: clientData.userId,
+        }),
+      });
+
+      if (!requirementResponse.ok) {
+        const errorData = await requirementResponse.json();
+        throw new Error(errorData.error || "Requirement creation failed");
+      }
+
+      toast({
+        type: "success",
+        message:
+          "Registration successful! Please check your email for temporary password.",
+      });
+
+      setFormData(initialFormData);
+      setCurrentStep(1);
+    } catch (error) {
+      let errorMessage = "Registration failed";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        if (error.message.includes("Email already in use")) {
+          setErrors((prev) => ({ ...prev, email: "Email already in use" }));
+        }
+        if (error.message.includes("Phone number already in use")) {
+          setErrors((prev) => ({
+            ...prev,
+            phone: "Phone number already in use",
+          }));
+        }
+      }
+
+      toast({
+        type: "error",
+        message: errorMessage,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [toast, initialFormData, formData]);
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -651,6 +787,39 @@ export default function SubmitRequirement() {
                   placeholder={t.addressPlaceholder || "Enter company address"}
                   id="address"
                 />
+                <Select
+                  label={t.country || "Country"}
+                  name="country"
+                  value={formData.country}
+                  onChange={handleChange}
+                  error={errors.country}
+                  required
+                  options={countryOptions}
+                  id="country"
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    label={t.city || "City"}
+                    name="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    error={errors.city}
+                    required
+                    placeholder="Enter city"
+                    id="city"
+                    disabled={autoFillingCity}
+                  />
+                  <Input
+                    label={t.postcode || "Postcode"}
+                    name="postcode"
+                    value={formData.postcode}
+                    onChange={handlePostcodeChange}
+                    error={errors.postcode}
+                    required
+                    placeholder="Enter postcode"
+                    id="postcode"
+                  />
+                </div>
                 <Input
                   label={t.website}
                   name="website"
@@ -727,6 +896,7 @@ export default function SubmitRequirement() {
                             placeholder="Enter 6-digit OTP"
                             className="w-32"
                             maxLength={6}
+                            error={errors.emailOtp}
                           />
                           <Button
                             type="button"
@@ -773,7 +943,7 @@ export default function SubmitRequirement() {
                     {true && <span className="text-[#FF0404] ml-1">*</span>}
                   </label>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 w-full">
                     <Select
                       name="countryCode"
                       value={formData.countryCode}
@@ -785,19 +955,21 @@ export default function SubmitRequirement() {
                       className="w-32"
                       disabled={formData.phoneVerified}
                     />
-                    <Input
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      error={errors.phone}
-                      required
-                      placeholder={t.phonePlaceholder}
-                      type="tel"
-                      id="phone"
-                      loading={phoneCheckInProgress}
-                      disabled={formData.phoneVerified}
-                      className="flex-1"
-                    />
+                    <div className="flex-1">
+                      <Input
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        error={errors.phone}
+                        required
+                        placeholder={t.phonePlaceholder}
+                        type="tel"
+                        id="phone"
+                        loading={phoneCheckInProgress}
+                        disabled={formData.phoneVerified}
+                        className="w-full"
+                      />
+                    </div>
                   </div>
 
                   {errors.phone && (
@@ -827,6 +999,7 @@ export default function SubmitRequirement() {
                             placeholder="Enter 6-digit OTP"
                             className="w-32"
                             maxLength={6}
+                            error={errors.phoneOtp}
                           />
                           <Button
                             type="button"
@@ -864,7 +1037,16 @@ export default function SubmitRequirement() {
                 </div>
 
                 {/* Alternate contact */}
-                <div className="flex gap-2">
+
+                <label
+                  htmlFor="phone"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  {t.phone}
+                  {true && <span className="text-[#FF0404] ml-1">*</span>}
+                </label>
+
+                <div className="flex gap-2 w-full">
                   <Select
                     name="altCountryCode"
                     value={formData.altCountryCode}
@@ -875,16 +1057,17 @@ export default function SubmitRequirement() {
                     }))}
                     className="w-32"
                   />
-                  <Input
-                    label={t.altContact}
-                    name="altContact"
-                    value={formData.altContact}
-                    onChange={handleChange}
-                    placeholder={t.altContactPlaceholder}
-                    type="tel"
-                    id="altContact"
-                    className="flex-1"
-                  />
+                  <div className="flex-1">
+                    <Input
+                      name="altContact"
+                      value={formData.altContact}
+                      onChange={handleChange}
+                      placeholder={t.altContactPlaceholder}
+                      type="tel"
+                      id="altContact"
+                      className="w-full"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -912,20 +1095,14 @@ export default function SubmitRequirement() {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-[#4C187A]/85">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-2/5">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/2">
                         {t.jobRole}
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/6">
                         {t.quantity}
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/4">
                         {t.nationality}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                        Salary/Month
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                        Contract Duration
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                         {t.actions}
@@ -935,7 +1112,7 @@ export default function SubmitRequirement() {
                   <tbody className="bg-[#2C0053]/10 divide-y divide-gray-200">
                     {formData.jobRoles.map((role, index) => (
                       <tr key={index}>
-                        <td className="px-6 py-4 w-2/5 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap">
                           <select
                             name={`jobRoles[${index}].title`}
                             value={role.title}
@@ -962,7 +1139,7 @@ export default function SubmitRequirement() {
                             </p>
                           )}
                         </td>
-                        <td className="px-6 py-4 w-1/6 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap">
                           <input
                             type="number"
                             min="1"
@@ -971,6 +1148,11 @@ export default function SubmitRequirement() {
                             onChange={(e) => handleJobRoleChange(index, e)}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
                           />
+                          {errors[`jobRoles[${index}].quantity`] && (
+                            <p className="text-xs text-red-500 mt-1">
+                              {errors[`jobRoles[${index}].quantity`]}
+                            </p>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <AutocompleteInput
@@ -988,45 +1170,18 @@ export default function SubmitRequirement() {
                             placeholder="Type nationality..."
                             className="w-full"
                           />
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <input
-                            type="text"
-                            name={`jobRoles[${index}].salary`}
-                            value={role.salary || ""}
-                            onChange={(e) => handleJobRoleChange(index, e)}
-                            placeholder="Salary amount"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                          />
-                          {errors[`jobRoles[${index}].salary`] && (
+                          {errors[`jobRoles[${index}].nationality`] && (
                             <p className="text-xs text-red-500 mt-1">
-                              {errors[`jobRoles[${index}].salary`]}
-                            </p>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <select
-                            name={`jobRoles[${index}].contractDuration`}
-                            value={role.contractDuration}
-                            onChange={(e) => handleJobRoleChange(index, e)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                          >
-                            <option value="">Select duration</option>
-                            {contractDurationOptions.map((opt) => (
-                              <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                              </option>
-                            ))}
-                          </select>
-                          {errors[`jobRoles[${index}].contractDuration`] && (
-                            <p className="text-xs text-red-500 mt-1">
-                              {errors[`jobRoles[${index}].contractDuration`]}
+                              {errors[`jobRoles[${index}].nationality`]}
                             </p>
                           )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <button onClick={() => removeJobRole(index)}>
-                            <Trash2 className="text-red-500" />
+                          <button
+                            onClick={() => removeJobRole(index)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="w-5 h-5" />
                           </button>
                         </td>
                       </tr>
@@ -1139,12 +1294,6 @@ export default function SubmitRequirement() {
                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                               Nationality
                             </th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Salary
-                            </th>
-                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Duration
-                            </th>
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -1158,14 +1307,6 @@ export default function SubmitRequirement() {
                               </td>
                               <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                                 {role.nationality || "-"}
-                              </td>
-                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                                {role.salary}
-                              </td>
-                              <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                                {displayContractDurationMapping[
-                                  role.contractDuration as ContractDuration
-                                ] || role.contractDuration}
                               </td>
                             </tr>
                           ))}
@@ -1207,7 +1348,7 @@ export default function SubmitRequirement() {
                 style={{
                   width:
                     currentStep === 1
-                      ? "calc(33.33% - 35px)"
+                      ? "calc(20% - 75px)"
                       : solidWidths[currentStep as keyof typeof solidWidths] ||
                         "100%",
                 }}

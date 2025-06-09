@@ -1,210 +1,182 @@
 // app/api/requirements/route.ts
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth/options";
 import prisma from "@/lib/prisma";
 import {
+  RequirementStatus,
   AuditAction,
   ContractDuration,
-  PreviousExperience,
-  RequirementStatus,
-  TicketDetails,
-} from "@/lib/generated/prisma/client";
+  ExperienceLevel,
+  TicketType,
+} from "@/lib/generated/prisma";
+import { z } from "zod";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth/options";
 
-interface JobRoleInput {
-  title: string;
-  quantity: number;
-  nationality: string;
-  salary: string;
-}
+// Base schema with mandatory fields
+const BaseRequirementSchema = z.object({
+  jobRoles: z
+    .array(
+      z.object({
+        title: z.string().min(1, "Job title is required"),
+        quantity: z.number().min(1, "Quantity must be at least 1"),
+        nationality: z.string().min(1, "Nationality is required"),
+        salary: z.number().min(0).optional(),
+        salaryCurrency: z.string().optional(),
+      })
+    )
+    .min(1, "At least one job role is required"),
+});
 
-interface JobRoleResponse {
-  id: string;
-  title: string;
-  quantity: number;
-  nationality: string;
-  salary: string;
-  requirementId: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-export async function GET(request: Request) {
-  try {
-    const session = await getServerSession(authOptions);
-    const { searchParams } = new URL(request.url);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    // Handle admin view - get all requirements or filtered by clientId
-    if (session.user.role === "RECRUITMENT_ADMIN") {
-      const clientId = searchParams.get("clientId");
-      const status = searchParams.get("status");
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const where: any = {};
-      if (clientId) where.clientId = clientId;
-      if (status) where.status = status;
-
-      const requirements = await prisma.requirement.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        include: {
-          client: {
-            select: {
-              id: true,
-              companyName: true,
-              user: {
-                select: {
-                  status: true,
-                },
-              },
-            },
-          },
-          jobRoles: true,
-        },
-      });
-
-      return NextResponse.json(requirements);
-    }
-
-    // Existing client-specific logic
-    const client = await prisma.client.findUnique({
-      where: { userId: session.user.id },
-      select: { id: true },
-    });
-
-    if (!client) {
-      return NextResponse.json({ error: "Client not found" }, { status: 404 });
-    }
-
-    // Get all requirements for this client with job roles
-    const requirements = await prisma.requirement.findMany({
-      where: { clientId: client.id },
-      orderBy: { createdAt: "desc" },
-      include: {
-        client: {
-          select: {
-            companyName: true,
-          },
-        },
-        jobRoles: true,
-      },
-    });
-
-    return NextResponse.json(requirements);
-  } catch (error) {
-    console.error("Error fetching requirements:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
+// Extended schema for full requirement submission
+const FullRequirementSchema = BaseRequirementSchema.extend({
+  projectLocation: z.string().min(1, "Project location is required").optional(),
+  startDate: z.string().datetime().optional(),
+  contractDuration: z.nativeEnum(ContractDuration).optional(),
+  specialNotes: z.string().optional(),
+  status: z.nativeEnum(RequirementStatus).optional(),
+  languages: z.array(z.string()).optional(),
+  minExperience: z.nativeEnum(ExperienceLevel).optional(),
+  maxAge: z.number().min(18).max(70).optional(),
+  ticketType: z.nativeEnum(TicketType).optional(),
+  ticketProvided: z.boolean().optional(),
+});
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const {
-      projectLocation,
-      startDate,
-      contractDuration,
-      previousExperience,
-      totalExperienceYears,
-      preferredAge,
-      specialNotes,
-      status,
-      languages,
-      jobRoles,
-      ticketDetails, // For updates
-    } = body;
-
     const session = await getServerSession(authOptions);
 
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // First validate the base requirements
+    const baseValidation = BaseRequirementSchema.safeParse(body);
+    if (!baseValidation.success) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          details: baseValidation.error.errors.map((e) => ({
+            field: e.path.join("."),
+            message: e.message,
+          })),
+        },
+        { status: 400 }
+      );
     }
 
-    // Get client associated with current user
-    const client = await prisma.client.findUnique({
-      where: { userId: session.user.id },
-      select: { id: true, userId: true },
+    // Then validate extended fields if present
+    const fullValidation = FullRequirementSchema.safeParse(body);
+    const hasFullData =
+      fullValidation.success &&
+      Object.keys(fullValidation.data).length >
+        Object.keys(baseValidation.data).length;
+
+    let clientId = body.clientId;
+    let userId: string;
+    if (body.userId) {
+      userId = body.userId;
+    } else if (session?.user?.id) {
+      userId = session.user.id;
+    } else {
+      return NextResponse.json(
+        { error: "User ID is required for audit logging" },
+        { status: 400 }
+      );
+    }
+
+    // Verify the user exists
+    const userExists = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true },
     });
 
-    if (!client) {
-      return NextResponse.json({ error: "Client not found" }, { status: 404 });
+    if (!userExists) {
+      return NextResponse.json(
+        { error: "Specified user not found" },
+        { status: 404 }
+      );
     }
 
-    // For drafts, allow null values for required fields
-    const isDraft = status === "DRAFT";
+    // If clientId wasn't provided but we have a user, try to get their client profile
+    if (!clientId && userId) {
+      const client = await prisma.client.findUnique({
+        where: { userId },
+        select: { id: true },
+      });
 
-    // Validate required fields for non-drafts
-    if (!isDraft) {
-      if (!projectLocation || !startDate || !contractDuration) {
+      if (!client) {
         return NextResponse.json(
-          {
-            error: "Missing required fields",
-            details: {
-              projectLocation: !projectLocation,
-              startDate: !startDate,
-              contractDuration: !contractDuration,
-            },
-          },
-          { status: 400 }
+          { error: "Client not found for this user" },
+          { status: 404 }
         );
       }
+      clientId = client.id;
+    }
+
+    if (!clientId) {
+      return NextResponse.json(
+        { error: "Client ID is required" },
+        { status: 400 }
+      );
+    }
+
+    let status: RequirementStatus;
+    if (hasFullData && fullValidation.data.status) {
+      status = fullValidation.data.status as RequirementStatus;
+    } else if (hasFullData) {
+      status = RequirementStatus.SUBMITTED;
+    } else {
+      status = RequirementStatus.DRAFT;
     }
 
     const result = await prisma.$transaction(async (tx) => {
-      // Create the requirement
+      // Create the requirement with available data
       const requirement = await tx.requirement.create({
         data: {
-          projectLocation: projectLocation || null,
-          startDate: startDate ? new Date(startDate) : null,
-          contractDuration: (contractDuration as ContractDuration) || null,
-          previousExperience:
-            (previousExperience as PreviousExperience) || null,
-          totalExperienceYears: totalExperienceYears
-            ? Number(totalExperienceYears)
+          projectLocation: hasFullData
+            ? fullValidation.data.projectLocation
             : null,
-          preferredAge: preferredAge ? Number(preferredAge) : null,
-          specialNotes: specialNotes || null,
-          status: (status as RequirementStatus) || "DRAFT",
+          startDate:
+            hasFullData && fullValidation.data.startDate
+              ? new Date(fullValidation.data.startDate)
+              : null,
+          contractDuration: hasFullData
+            ? fullValidation.data.contractDuration
+            : null,
+          specialNotes: hasFullData ? fullValidation.data.specialNotes : null,
+          status,
+          languages: hasFullData ? fullValidation.data.languages || [] : [],
+          minExperience: hasFullData ? fullValidation.data.minExperience : null,
+          maxAge: hasFullData ? fullValidation.data.maxAge : null,
+          ticketType: hasFullData ? fullValidation.data.ticketType : null,
+          ticketProvided: hasFullData
+            ? (fullValidation.data.ticketProvided ?? false)
+            : false,
           client: {
             connect: {
-              id: client.id,
+              id: clientId,
             },
           },
-          languages: languages || [],
-          ticketDetails: (ticketDetails as TicketDetails) || null,
         },
       });
 
-      // Create job roles (empty array is fine for drafts)
-      let createdJobRoles: JobRoleResponse[] = [];
-      if (jobRoles && jobRoles.length > 0) {
-        createdJobRoles = await Promise.all(
-          jobRoles.map((role: JobRoleInput) =>
-            tx.jobRole.create({
-              data: {
-                title: role.title || "",
-                quantity: role.quantity ? Number(role.quantity) : 1,
-                nationality: role.nationality || "",
-                salary: role.salary || "",
-                requirement: {
-                  connect: {
-                    id: requirement.id,
-                  },
+      const createdJobRoles = await Promise.all(
+        baseValidation.data.jobRoles.map((role) =>
+          tx.jobRole.create({
+            data: {
+              title: role.title,
+              quantity: role.quantity,
+              nationality: role.nationality,
+              salary: role.salary ?? null,
+              salaryCurrency: role.salaryCurrency ?? "QAR",
+              requirement: {
+                connect: {
+                  id: requirement.id,
                 },
               },
-            })
-          )
-        );
-      }
+            },
+          })
+        )
+      );
 
-      // Create audit log
+      // Create audit log - now guaranteed to have a valid userId
       await tx.auditLog.create({
         data: {
           action:
@@ -213,14 +185,14 @@ export async function POST(request: Request) {
               : AuditAction.REQUIREMENT_CREATED,
           entityType: "REQUIREMENT",
           entityId: requirement.id,
-          description:
-            status === "DRAFT"
-              ? "Draft requirement created"
-              : "New requirement submitted",
-          performedById: client.userId,
+          description: hasFullData
+            ? "Full requirement submitted"
+            : "Minimal requirement created during registration",
+          performedById: userId,
           newData: {
-            projectLocation: requirement.projectLocation,
             status: requirement.status,
+            jobRoles: createdJobRoles.length,
+            hasFullData,
           },
         },
       });
@@ -235,233 +207,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error creating requirement:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function PUT(request: Request) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const { id, status, ...updateData } = body;
-
-    if (!id) {
-      return NextResponse.json(
-        { error: "Requirement ID is required" },
-        { status: 400 }
-      );
-    }
-
-    // Verify the requirement belongs to the user's client
-    const client = await prisma.client.findUnique({
-      where: { userId: session.user.id },
-      select: { id: true },
-    });
-
-    if (!client) {
-      return NextResponse.json({ error: "Client not found" }, { status: 404 });
-    }
-
-    const existingRequirement = await prisma.requirement.findUnique({
-      where: { id },
-    });
-
-    if (!existingRequirement || existingRequirement.clientId !== client.id) {
-      return NextResponse.json(
-        { error: "Requirement not found or not authorized" },
-        { status: 404 }
-      );
-    }
-
-    if (
-      status &&
-      status !== "DRAFT" &&
-      existingRequirement.status === "DRAFT"
-    ) {
-      if (
-        !updateData.projectLocation ||
-        !updateData.startDate ||
-        !updateData.contractDuration
-      ) {
-        return NextResponse.json(
-          {
-            error: "Missing required fields to submit requirement",
-            details: {
-              projectLocation: !updateData.projectLocation,
-              startDate: !updateData.startDate,
-              contractDuration: !updateData.contractDuration,
-            },
-          },
-          { status: 400 }
-        );
-      }
-    }
-
-    const result = await prisma.$transaction(async (tx) => {
-      const updatedRequirement = await tx.requirement.update({
-        where: { id },
-        data: {
-          projectLocation:
-            updateData.projectLocation || existingRequirement.projectLocation,
-          startDate: updateData.startDate
-            ? new Date(updateData.startDate)
-            : existingRequirement.startDate,
-          contractDuration:
-            (updateData.contractDuration as ContractDuration) ||
-            existingRequirement.contractDuration,
-          previousExperience:
-            (updateData.previousExperience as PreviousExperience) ||
-            existingRequirement.previousExperience,
-          totalExperienceYears:
-            updateData.totalExperienceYears ||
-            existingRequirement.totalExperienceYears,
-          preferredAge:
-            Number(updateData.preferredAge) ||
-            Number(existingRequirement.preferredAge),
-          specialNotes:
-            updateData.specialNotes || existingRequirement.specialNotes,
-          status: (status as RequirementStatus) || existingRequirement.status,
-          languages: updateData.languages || existingRequirement.languages,
-          ticketDetails:
-            (updateData.ticketDetails as TicketDetails) ||
-            existingRequirement.ticketDetails,
-        },
-      });
-
-      let updatedJobRoles: JobRoleResponse[] = [];
-      // Update job roles if provided
-      if (updateData.jobRoles) {
-        // First delete existing job roles
-        await tx.jobRole.deleteMany({
-          where: { requirementId: id },
-        });
-
-        // Then create new ones
-        updatedJobRoles = await Promise.all(
-          updateData.jobRoles.map((role: JobRoleInput) =>
-            tx.jobRole.create({
-              data: {
-                title: role.title,
-                quantity: Number(role.quantity),
-                nationality: role.nationality,
-                salary: role.salary,
-                requirementId: id,
-              },
-            })
-          )
-        );
-      } else {
-        // If job roles not provided, fetch existing ones
-        updatedJobRoles = await tx.jobRole.findMany({
-          where: { requirementId: id },
-        });
-      }
-
-      // Create audit log
-      await tx.auditLog.create({
-        data: {
-          action: AuditAction.REQUIREMENT_UPDATED,
-          entityType: "REQUIREMENT",
-          entityId: id,
-          description: "Requirement updated",
-          performedById: session.user.id,
-          newData: {
-            projectLocation: updatedRequirement.projectLocation,
-            status: updatedRequirement.status,
-          },
-        },
-      });
-
-      return {
-        ...updatedRequirement,
-        jobRoles: updatedJobRoles,
-      };
-    });
-
-    return NextResponse.json(result);
-  } catch (error) {
-    console.error("Error updating requirement:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function DELETE(request: Request) {
-  try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { id } = await request.json();
-    if (!id) {
-      return NextResponse.json(
-        { error: "Requirement ID is required" },
-        { status: 400 }
-      );
-    }
-
-    // Verify the requirement belongs to the user's client
-    const client = await prisma.client.findUnique({
-      where: { userId: session.user.id },
-      select: { id: true },
-    });
-
-    if (!client) {
-      return NextResponse.json({ error: "Client not found" }, { status: 404 });
-    }
-
-    const deletedRequirement = await prisma.$transaction(async (tx) => {
-      // First verify the requirement belongs to the user's client
-      const requirement = await tx.requirement.findUnique({
-        where: { id },
-      });
-
-      if (!requirement || requirement.clientId !== client.id) {
-        throw new Error("Requirement not found or not authorized");
-      }
-
-      // Delete associated job roles first
-      await tx.jobRole.deleteMany({
-        where: { requirementId: id },
-      });
-
-      // Then delete the requirement
-      const deleted = await tx.requirement.delete({
-        where: { id },
-      });
-
-      // Create audit log
-      await tx.auditLog.create({
-        data: {
-          action: AuditAction.REQUIREMENT_DELETED,
-          entityType: "REQUIREMENT",
-          entityId: id,
-          description: "Requirement deleted",
-          performedById: session.user.id,
-          oldData: {
-            projectLocation: deleted.projectLocation,
-            status: deleted.status,
-          },
-        },
-      });
-
-      return deleted;
-    });
-
-    return NextResponse.json(deletedRequirement);
-  } catch (error) {
-    console.error("Error deleting requirement:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        error: "Internal server error",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
       { status: 500 }
     );
   }

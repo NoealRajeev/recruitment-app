@@ -1,7 +1,7 @@
 // lib/api/client.ts
 export const updateCompanyStatus = async (
   id: string,
-  status: "VERIFIED" | "REJECTED",
+  status: "VERIFIED" | "REJECTED" | "PENDING_SUBMISSION",
   reason: string,
   toast: (props: { type: "success" | "error"; message: string }) => void
 ) => {

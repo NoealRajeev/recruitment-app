@@ -32,6 +32,7 @@ export const translations = {
     registrationNumber: "Company Registration Number",
     registrationNumberPlaceholder: "Enter registration number",
     invalidRegistration: "Invalid registration number format",
+    invalidPostcode: "Invalid postcode format",
     sector: "Sector",
     companySize: "Company Size",
     website: "Company Website (optional)",
@@ -429,6 +430,11 @@ export const translations = {
       "Mid Level (2-5 years)",
       "Senior Level (5+ years)",
     ],
+    // Newly added fields
+    city: "City",
+    postcode: "Postcode",
+    country: "Country",
+    autoFillingCity: "Auto-filling city...",
   },
   ar: {
     formTitle: "تقديم متطلباتك",
@@ -462,6 +468,7 @@ export const translations = {
     registrationNumber: "رقم تسجيل الشركة",
     registrationNumberPlaceholder: "أدخل رقم التسجيل",
     invalidRegistration: "تنسيق رقم تسجيل غير صالح",
+    invalidPostcode: "تنسيق الرمز البريدي غير صالح",
     sector: "القطاع",
     companySize: "حجم الشركة",
     website: "موقع الويب للشركة (اختياري)",
@@ -793,6 +800,11 @@ export const translations = {
       "متوسط (2-5 سنوات)",
       "خبير (5+ سنوات)",
     ],
+    // Newly added fields
+    city: "المدينة",
+    postcode: "الرمز البريدي",
+    country: "البلد",
+    autoFillingCity: "جاري تعبئة المدينة تلقائياً...",
   },
 };
 

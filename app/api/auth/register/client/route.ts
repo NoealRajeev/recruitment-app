@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 import { hash } from "bcryptjs";
 import { z } from "zod";
 import { randomBytes } from "crypto";
-import { CompanySector, CompanySize } from "@/types";
+import { CompanySector, CompanySize } from "@/lib/generated/prisma";
 
 const RegistrationSchema = z.object({
   companyName: z.string().min(2, "Company name is required"),
@@ -15,15 +15,20 @@ const RegistrationSchema = z.object({
       /^[a-zA-Z0-9\-]+$/,
       "Only alphanumeric characters and hyphens allowed"
     ),
-  sector: z.string().transform((val) => val as CompanySector),
-  companySize: z.string().transform((val) => val as CompanySize),
-  address: z.string().min(5, "Address is required"),
+  sector: z.nativeEnum(CompanySector),
+  companySize: z.nativeEnum(CompanySize),
   website: z.string().url().optional().or(z.literal("")),
+  address: z.string().min(5, "Address is required"),
+  city: z.string().min(2, "City is required"),
+  country: z.string().min(2, "Country is required"),
+  postalCode: z.string().optional(),
   fullName: z.string().min(2, "Full name is required"),
   jobTitle: z.string().min(2, "Job title is required"),
   email: z.string().email("Invalid email format"),
   phone: z.string().min(6, "Phone number is required"),
+  countryCode: z.string().min(1, "Country code is required"),
   altContact: z.string().optional().or(z.literal("")),
+  altCountryCode: z.string().optional(),
 });
 
 function generateRandomPassword(length = 12): string {
@@ -39,14 +44,12 @@ export async function POST(request: Request) {
     const validation = RegistrationSchema.safeParse(body);
 
     if (!validation.success) {
-      console.log("Validation errors:", validation.error); // Log full error
       return NextResponse.json(
         {
           error: "Validation failed",
           details: validation.error.errors.map((e) => ({
             field: e.path[0],
             message: e.message,
-            code: e.code,
           })),
         },
         { status: 400 }
@@ -58,19 +61,35 @@ export async function POST(request: Request) {
       registrationNumber,
       sector,
       companySize,
-      address,
       website,
+      address,
+      city,
+      country,
+      postalCode,
       fullName,
       jobTitle,
       email,
       phone,
+      countryCode,
       altContact,
+      altCountryCode,
     } = validation.data;
 
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [{ email }, { phone: `${countryCode}${phone}` }],
+      },
+    });
+
     if (existingUser) {
       return NextResponse.json(
-        { error: "Email already in use" },
+        {
+          error: "User already exists",
+          details:
+            existingUser.email === email
+              ? "Email already in use"
+              : "Phone number already in use",
+        },
         { status: 400 }
       );
     }
@@ -79,10 +98,15 @@ export async function POST(request: Request) {
     const hashedPassword = await hash(randomPassword, 12);
 
     const result = await prisma.$transaction(async (tx) => {
+      // Create User
       const user = await tx.user.create({
         data: {
           name: fullName,
           email,
+          phone: `${countryCode}${phone}`,
+          altContact: altContact
+            ? `${altCountryCode || countryCode}${altContact}`
+            : null,
           password: hashedPassword,
           role: "CLIENT_ADMIN",
           status: "PENDING_REVIEW",
@@ -90,6 +114,7 @@ export async function POST(request: Request) {
         },
       });
 
+      // Create Client
       const client = await tx.client.create({
         data: {
           userId: user.id,
@@ -97,23 +122,42 @@ export async function POST(request: Request) {
           registrationNo: registrationNumber,
           companySector: sector,
           companySize,
-          address,
           website: website || null,
+          address,
+          city,
+          country,
+          postalCode: postalCode || null,
           designation: jobTitle,
-          phone,
-          altContact: altContact || null,
+        },
+      });
+
+      // Create audit log
+      await tx.auditLog.create({
+        data: {
+          action: "CLIENT_CREATED",
+          entityType: "Client",
+          entityId: client.id,
+          performedById: user.id,
+          newData: {
+            companyName,
+            registrationNumber,
+            email,
+          },
         },
       });
 
       return { user, client, plainTextPassword: randomPassword };
     });
 
-    // In production, send email here instead of logging
+    // TODO: In production, send email with temporary password here
     console.log("Temporary password:", randomPassword);
 
     return NextResponse.json({
       success: true,
+      userId: result.user.id,
       clientId: result.client.id,
+      email: result.user.email,
+      status: result.user.status,
     });
   } catch (error) {
     console.error("Registration error:", error);

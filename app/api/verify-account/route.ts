@@ -2,7 +2,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { saveFileLocally } from "@/lib/local-storage";
-import { AuditAction } from "@prisma/client";
+import { AuditAction, NotificationType } from "@prisma/client";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
@@ -23,10 +23,10 @@ export async function POST(request: Request) {
       // 1. Get user and verify role
       const user = await tx.user.findUnique({
         where: { email },
-        include: { agency: true },
+        include: { agencyProfile: true },
       });
 
-      if (!user || !user.agency) {
+      if (!user || !user.agencyProfile) {
         throw new Error("User or agency not found");
       }
 
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               type: file!.type as any,
               url: file!.url,
-              agencyId: user.agency!.id,
+              agencyId: user.agencyProfile!.id,
             },
           })
         )
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
       // 5. Create audit log
       await tx.auditLog.create({
         data: {
-          action: AuditAction.COMPANY_VERIFIED,
+          action: AuditAction.CLIENT_VERIFIED,
           entityType: "USER",
           entityId: user.id,
           description: "Submitted verification documents",
@@ -102,11 +102,11 @@ export async function POST(request: Request) {
             data: {
               title: "New Verification Request",
               message: `${user.name} (${user.email}) has submitted verification documents`,
-              type: "VERIFICATION_SUBMITTED",
+              type: NotificationType.ACCOUNT,
               recipientId: admin.id,
               metadata: {
                 userId: user.id,
-                agencyId: user.agency!.id,
+                agencyId: user.agencyProfile!.id,
               },
             },
           })

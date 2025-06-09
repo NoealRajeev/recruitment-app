@@ -19,13 +19,13 @@ export async function GET(request: Request) {
         email: true,
         role: true,
         status: true,
-        agency: {
+        agencyProfile: {
           select: {
             id: true,
             agencyName: true,
           },
         },
-        client: {
+        clientProfile: {
           select: {
             id: true,
             companyName: true,

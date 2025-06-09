@@ -16,6 +16,7 @@ export const getSectorEnumMapping = (lang: Language) => ({
   [translations[lang].sectorOptions[8]]: "OTHER",
 });
 
+// Update the getDisplaySectorMapping function in lib/utils/enum-mappings.ts
 export const getDisplaySectorMapping = (lang: Language) => ({
   IT: translations[lang].sectorOptions[0],
   REAL_ESTATE: translations[lang].sectorOptions[1],
@@ -25,7 +26,10 @@ export const getDisplaySectorMapping = (lang: Language) => ({
   RETAIL: translations[lang].sectorOptions[5],
   CONSTRUCTION: translations[lang].sectorOptions[6],
   EDUCATION: translations[lang].sectorOptions[7],
-  OTHER: translations[lang].sectorOptions[8],
+  HOSPITALITY: translations[lang].sectorOptions[8],
+  OIL_GAS: translations[lang].sectorOptions[9], // Add this line
+  TRANSPORTATION: translations[lang].sectorOptions[10], // Add this line
+  OTHER: translations[lang].sectorOptions[11], // Update this line
 });
 
 // Company size mappings

@@ -56,7 +56,7 @@ export default function Company() {
 
   const handleUpdateStatus = async (
     clientId: string,
-    status: "VERIFIED" | "REJECTED"
+    status: "VERIFIED" | "REJECTED" | "PENDING_SUBMISSION"
   ) => {
     try {
       const reason =
@@ -110,13 +110,10 @@ export default function Company() {
 
   return (
     <div className="px-6 space-y-8">
-      {/* Header and Filter */}
+      {/* Header and Filter
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-[#2C0053]">
-          Company Management
-        </h1>
         <ListFilter className="text-[#3D1673] cursor-pointer" />
-      </div>
+      </div> */}
 
       {/* Pending Companies */}
       <section className="space-y-4">
@@ -179,7 +176,10 @@ function CompanyCard({
   onStatusUpdate,
 }: {
   company: ClientWithUser;
-  onStatusUpdate: (id: string, status: "VERIFIED" | "REJECTED") => void;
+  onStatusUpdate: (
+    id: string,
+    status: "PENDING_SUBMISSION" | "REJECTED"
+  ) => void;
 }) {
   return (
     <div className="flex w-full">
@@ -244,7 +244,7 @@ function CompanyCard({
       <div className="flex flex-col justify-evenly ml-4">
         <button
           className="bg-[#3D1673] text-white px-4 py-1.5 rounded-md hover:bg-[#2b0e54]"
-          onClick={() => onStatusUpdate(company.id, "VERIFIED")}
+          onClick={() => onStatusUpdate(company.id, "PENDING_SUBMISSION")}
         >
           Approve
         </button>

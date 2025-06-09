@@ -31,7 +31,6 @@ export default function VerifyAccount() {
     const emailParam = searchParams.get("email");
     if (emailParam) {
       setEmail(emailParam);
-      // Here you would fetch user data including role from your API
       fetchUserData(emailParam);
     }
   }, [searchParams]);
@@ -107,10 +106,7 @@ export default function VerifyAccount() {
   };
 
   // If documents have been submitted, show success message
-  if (
-    searchParams.get("status") === "submitted" ||
-    userStatus === "PENDING_REVIEW"
-  ) {
+  if (userStatus === "SUBMITTED") {
     return (
       <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
         <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">

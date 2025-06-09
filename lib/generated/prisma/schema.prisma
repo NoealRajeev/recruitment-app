@@ -17,6 +17,8 @@ enum UserRole {
 
 enum AccountStatus {
   PENDING_REVIEW
+  SUBMITTED
+  PENDING_SUBMISSION
   VERIFIED
   REJECTED
   NOT_VERIFIED
@@ -132,6 +134,8 @@ enum AuditAction {
   REQUIREMENT_UPDATED
   REQUIREMENT_STATUS_CHANGED
   REQUIREMENT_ASSIGNED
+  DRAFT_CREATED
+  DRAFT_UPDATED
 
   // Labour related
   LABOUR_PROFILE_CREATED
@@ -182,7 +186,7 @@ model User {
   altContact     String?       @db.VarChar(20)
   profilePicture String?
   role           UserRole
-  status         AccountStatus @default(NOT_VERIFIED)
+  status         AccountStatus @default(PENDING_REVIEW)
   resetRequired  Boolean       @default(true)
   lastLogin      DateTime?
   createdAt      DateTime      @default(now())
@@ -304,11 +308,9 @@ model Admin {
 
 model Requirement {
   id               String            @id @default(uuid())
-  title            String            @db.VarChar(255)
-  description      String?
-  projectLocation  String
-  startDate        DateTime
-  contractDuration ContractDuration
+  projectLocation  String?
+  startDate        DateTime?
+  contractDuration ContractDuration?
   specialNotes     String?
   status           RequirementStatus @default(DRAFT)
 
@@ -316,7 +318,7 @@ model Requirement {
   languages String[]
 
   // Experience
-  minExperience ExperienceLevel
+  minExperience ExperienceLevel?
   maxAge        Int?
 
   // Ticket details
@@ -351,13 +353,12 @@ model Requirement {
 }
 
 model JobRole {
-  id             String  @id @default(uuid())
-  title          String  @db.VarChar(255)
-  description    String?
-  quantity       Int     @default(1)
-  nationality    String  @db.VarChar(100)
-  salary         Float
-  salaryCurrency String  @default("QAR") @db.VarChar(3)
+  id             String @id @default(uuid())
+  title          String @db.VarChar(255)
+  quantity       Int    @default(1)
+  nationality    String @db.VarChar(100)
+  salary         Float?
+  salaryCurrency String @default("QAR") @db.VarChar(3)
 
   // Relationships
   requirementId String

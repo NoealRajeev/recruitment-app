@@ -34,15 +34,15 @@ export type Agency = $Result.DefaultSelection<Prisma.$AgencyPayload>
  */
 export type Admin = $Result.DefaultSelection<Prisma.$AdminPayload>
 /**
- * Model JobRole
- * 
- */
-export type JobRole = $Result.DefaultSelection<Prisma.$JobRolePayload>
-/**
  * Model Requirement
  * 
  */
 export type Requirement = $Result.DefaultSelection<Prisma.$RequirementPayload>
+/**
+ * Model JobRole
+ * 
+ */
+export type JobRole = $Result.DefaultSelection<Prisma.$JobRolePayload>
 /**
  * Model LabourProfile
  * 
@@ -99,6 +99,8 @@ export type UserRole = (typeof UserRole)[keyof typeof UserRole]
 
 export const AccountStatus: {
   PENDING_REVIEW: 'PENDING_REVIEW',
+  SUBMITTED: 'SUBMITTED',
+  PENDING_SUBMISSION: 'PENDING_SUBMISSION',
   VERIFIED: 'VERIFIED',
   REJECTED: 'REJECTED',
   NOT_VERIFIED: 'NOT_VERIFIED',
@@ -121,16 +123,20 @@ export const RequirementStatus: {
 export type RequirementStatus = (typeof RequirementStatus)[keyof typeof RequirementStatus]
 
 
-export const LabourStatus: {
+export const LabourProfileStatus: {
   RECEIVED: 'RECEIVED',
   UNDER_REVIEW: 'UNDER_REVIEW',
   APPROVED: 'APPROVED',
   REJECTED: 'REJECTED',
   SHORTLISTED: 'SHORTLISTED',
-  DEPLOYED: 'DEPLOYED'
+  DEPLOYED: 'DEPLOYED',
+  QVC_PROCESS: 'QVC_PROCESS',
+  MEDICAL_PROCESS: 'MEDICAL_PROCESS',
+  VISA_PROCESS: 'VISA_PROCESS',
+  READY_FOR_DEPLOYMENT: 'READY_FOR_DEPLOYMENT'
 };
 
-export type LabourStatus = (typeof LabourStatus)[keyof typeof LabourStatus]
+export type LabourProfileStatus = (typeof LabourProfileStatus)[keyof typeof LabourProfileStatus]
 
 
 export const DocumentType: {
@@ -138,6 +144,9 @@ export const DocumentType: {
   INSURANCE: 'INSURANCE',
   ID_PROOF: 'ID_PROOF',
   ADDRESS_PROOF: 'ADDRESS_PROOF',
+  COMPANY_REGISTRATION: 'COMPANY_REGISTRATION',
+  PASSPORT: 'PASSPORT',
+  CV: 'CV',
   OTHER: 'OTHER'
 };
 
@@ -153,6 +162,9 @@ export const CompanySector: {
   RETAIL: 'RETAIL',
   CONSTRUCTION: 'CONSTRUCTION',
   EDUCATION: 'EDUCATION',
+  HOSPITALITY: 'HOSPITALITY',
+  OIL_GAS: 'OIL_GAS',
+  TRANSPORTATION: 'TRANSPORTATION',
   OTHER: 'OTHER'
 };
 
@@ -172,48 +184,99 @@ export type CompanySize = (typeof CompanySize)[keyof typeof CompanySize]
 export const ContractDuration: {
   ONE_YEAR: 'ONE_YEAR',
   TWO_YEARS: 'TWO_YEARS',
+  THREE_YEARS: 'THREE_YEARS',
   UNLIMITED: 'UNLIMITED'
 };
 
 export type ContractDuration = (typeof ContractDuration)[keyof typeof ContractDuration]
 
 
-export const TicketDetails: {
-  ONE_YEAR: 'ONE_YEAR',
-  TWO_YEARS: 'TWO_YEARS'
+export const TicketType: {
+  ONE_WAY: 'ONE_WAY',
+  TWO_WAY: 'TWO_WAY',
+  NONE: 'NONE'
 };
 
-export type TicketDetails = (typeof TicketDetails)[keyof typeof TicketDetails]
+export type TicketType = (typeof TicketType)[keyof typeof TicketType]
 
 
-export const PreviousExperience: {
+export const ExperienceLevel: {
   FRESH: 'FRESH',
-  GCC_EXPERIENCE: 'GCC_EXPERIENCE',
-  LOCAL_EXPERIENCE: 'LOCAL_EXPERIENCE',
-  ANY: 'ANY'
+  ONE_YEAR: 'ONE_YEAR',
+  TWO_YEARS: 'TWO_YEARS',
+  THREE_YEARS: 'THREE_YEARS',
+  FOUR_YEARS: 'FOUR_YEARS',
+  FIVE_PLUS_YEARS: 'FIVE_PLUS_YEARS'
 };
 
-export type PreviousExperience = (typeof PreviousExperience)[keyof typeof PreviousExperience]
+export type ExperienceLevel = (typeof ExperienceLevel)[keyof typeof ExperienceLevel]
+
+
+export const Gender: {
+  MALE: 'MALE',
+  FEMALE: 'FEMALE',
+  OTHER: 'OTHER'
+};
+
+export type Gender = (typeof Gender)[keyof typeof Gender]
 
 
 export const AuditAction: {
-  COMPANY_VERIFIED: 'COMPANY_VERIFIED',
-  COMPANY_REJECTED: 'COMPANY_REJECTED',
-  COMPANY_SUSPENDED: 'COMPANY_SUSPENDED',
-  COMPANY_UPDATED: 'COMPANY_UPDATED',
   USER_CREATED: 'USER_CREATED',
   USER_UPDATED: 'USER_UPDATED',
   USER_DELETED: 'USER_DELETED',
-  ACCOUNT_DELETION_REQUESTED: 'ACCOUNT_DELETION_REQUESTED',
-  ACCOUNT_DELETED: 'ACCOUNT_DELETED',
-  ACCOUNT_RECOVERED: 'ACCOUNT_RECOVERED',
-  DRAFT_CREATED: 'DRAFT_CREATED',
+  USER_STATUS_CHANGED: 'USER_STATUS_CHANGED',
+  USER_PASSWORD_RESET: 'USER_PASSWORD_RESET',
+  CLIENT_CREATED: 'CLIENT_CREATED',
+  CLIENT_UPDATED: 'CLIENT_UPDATED',
+  CLIENT_VERIFIED: 'CLIENT_VERIFIED',
+  CLIENT_REJECTED: 'CLIENT_REJECTED',
+  AGENCY_CREATED: 'AGENCY_CREATED',
+  AGENCY_UPDATED: 'AGENCY_UPDATED',
+  AGENCY_VERIFIED: 'AGENCY_VERIFIED',
+  AGENCY_REJECTED: 'AGENCY_REJECTED',
   REQUIREMENT_CREATED: 'REQUIREMENT_CREATED',
   REQUIREMENT_UPDATED: 'REQUIREMENT_UPDATED',
-  REQUIREMENT_DELETED: 'REQUIREMENT_DELETED'
+  REQUIREMENT_STATUS_CHANGED: 'REQUIREMENT_STATUS_CHANGED',
+  REQUIREMENT_ASSIGNED: 'REQUIREMENT_ASSIGNED',
+  DRAFT_CREATED: 'DRAFT_CREATED',
+  DRAFT_UPDATED: 'DRAFT_UPDATED',
+  LABOUR_PROFILE_CREATED: 'LABOUR_PROFILE_CREATED',
+  LABOUR_PROFILE_UPDATED: 'LABOUR_PROFILE_UPDATED',
+  LABOUR_STATUS_CHANGED: 'LABOUR_STATUS_CHANGED',
+  DOCUMENT_UPLOADED: 'DOCUMENT_UPLOADED',
+  DOCUMENT_VERIFIED: 'DOCUMENT_VERIFIED',
+  DOCUMENT_REJECTED: 'DOCUMENT_REJECTED',
+  LOGIN: 'LOGIN',
+  LOGOUT: 'LOGOUT',
+  PASSWORD_CHANGE: 'PASSWORD_CHANGE',
+  ACCOUNT_RECOVERY: 'ACCOUNT_RECOVERY'
 };
 
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
+
+
+export const ProcedureStatus: {
+  PENDING: 'PENDING',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED',
+  FAILED: 'FAILED'
+};
+
+export type ProcedureStatus = (typeof ProcedureStatus)[keyof typeof ProcedureStatus]
+
+
+export const NotificationType: {
+  SYSTEM: 'SYSTEM',
+  REQUIREMENT: 'REQUIREMENT',
+  LABOUR: 'LABOUR',
+  DOCUMENT: 'DOCUMENT',
+  ACCOUNT: 'ACCOUNT',
+  GENERAL: 'GENERAL'
+};
+
+export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType]
 
 
 export const DeletionType: {
@@ -237,9 +300,9 @@ export type RequirementStatus = $Enums.RequirementStatus
 
 export const RequirementStatus: typeof $Enums.RequirementStatus
 
-export type LabourStatus = $Enums.LabourStatus
+export type LabourProfileStatus = $Enums.LabourProfileStatus
 
-export const LabourStatus: typeof $Enums.LabourStatus
+export const LabourProfileStatus: typeof $Enums.LabourProfileStatus
 
 export type DocumentType = $Enums.DocumentType
 
@@ -257,17 +320,29 @@ export type ContractDuration = $Enums.ContractDuration
 
 export const ContractDuration: typeof $Enums.ContractDuration
 
-export type TicketDetails = $Enums.TicketDetails
+export type TicketType = $Enums.TicketType
 
-export const TicketDetails: typeof $Enums.TicketDetails
+export const TicketType: typeof $Enums.TicketType
 
-export type PreviousExperience = $Enums.PreviousExperience
+export type ExperienceLevel = $Enums.ExperienceLevel
 
-export const PreviousExperience: typeof $Enums.PreviousExperience
+export const ExperienceLevel: typeof $Enums.ExperienceLevel
+
+export type Gender = $Enums.Gender
+
+export const Gender: typeof $Enums.Gender
 
 export type AuditAction = $Enums.AuditAction
 
 export const AuditAction: typeof $Enums.AuditAction
+
+export type ProcedureStatus = $Enums.ProcedureStatus
+
+export const ProcedureStatus: typeof $Enums.ProcedureStatus
+
+export type NotificationType = $Enums.NotificationType
+
+export const NotificationType: typeof $Enums.NotificationType
 
 export type DeletionType = $Enums.DeletionType
 
@@ -439,16 +514,6 @@ export class PrismaClient<
   get admin(): Prisma.AdminDelegate<ExtArgs, ClientOptions>;
 
   /**
-   * `prisma.jobRole`: Exposes CRUD operations for the **JobRole** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more JobRoles
-    * const jobRoles = await prisma.jobRole.findMany()
-    * ```
-    */
-  get jobRole(): Prisma.JobRoleDelegate<ExtArgs, ClientOptions>;
-
-  /**
    * `prisma.requirement`: Exposes CRUD operations for the **Requirement** model.
     * Example usage:
     * ```ts
@@ -457,6 +522,16 @@ export class PrismaClient<
     * ```
     */
   get requirement(): Prisma.RequirementDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.jobRole`: Exposes CRUD operations for the **JobRole** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more JobRoles
+    * const jobRoles = await prisma.jobRole.findMany()
+    * ```
+    */
+  get jobRole(): Prisma.JobRoleDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.labourProfile`: Exposes CRUD operations for the **LabourProfile** model.
@@ -595,8 +670,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.8.2
-   * Query Engine version: 2060c79ba17c6bb9f5823312b6f6b7f4a845738e
+   * Prisma Client JS version: 6.9.0
+   * Query Engine version: 81e4af48011447c3cc503a190e86995b66d2a28e
    */
   export type PrismaVersion = {
     client: string
@@ -981,8 +1056,8 @@ export namespace Prisma {
     Client: 'Client',
     Agency: 'Agency',
     Admin: 'Admin',
-    JobRole: 'JobRole',
     Requirement: 'Requirement',
+    JobRole: 'JobRole',
     LabourProfile: 'LabourProfile',
     Procedure: 'Procedure',
     LabourStatusLog: 'LabourStatusLog',
@@ -1009,7 +1084,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "client" | "agency" | "admin" | "jobRole" | "requirement" | "labourProfile" | "procedure" | "labourStatusLog" | "clientDocument" | "agencyDocument" | "requirementDocument" | "auditLog" | "notification"
+      modelProps: "user" | "client" | "agency" | "admin" | "requirement" | "jobRole" | "labourProfile" | "procedure" | "labourStatusLog" | "clientDocument" | "agencyDocument" | "requirementDocument" | "auditLog" | "notification"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1309,80 +1384,6 @@ export namespace Prisma {
           }
         }
       }
-      JobRole: {
-        payload: Prisma.$JobRolePayload<ExtArgs>
-        fields: Prisma.JobRoleFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.JobRoleFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobRolePayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.JobRoleFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>
-          }
-          findFirst: {
-            args: Prisma.JobRoleFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobRolePayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.JobRoleFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>
-          }
-          findMany: {
-            args: Prisma.JobRoleFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>[]
-          }
-          create: {
-            args: Prisma.JobRoleCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>
-          }
-          createMany: {
-            args: Prisma.JobRoleCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.JobRoleCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>[]
-          }
-          delete: {
-            args: Prisma.JobRoleDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>
-          }
-          update: {
-            args: Prisma.JobRoleUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>
-          }
-          deleteMany: {
-            args: Prisma.JobRoleDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.JobRoleUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.JobRoleUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>[]
-          }
-          upsert: {
-            args: Prisma.JobRoleUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>
-          }
-          aggregate: {
-            args: Prisma.JobRoleAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateJobRole>
-          }
-          groupBy: {
-            args: Prisma.JobRoleGroupByArgs<ExtArgs>
-            result: $Utils.Optional<JobRoleGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.JobRoleCountArgs<ExtArgs>
-            result: $Utils.Optional<JobRoleCountAggregateOutputType> | number
-          }
-        }
-      }
       Requirement: {
         payload: Prisma.$RequirementPayload<ExtArgs>
         fields: Prisma.RequirementFieldRefs
@@ -1454,6 +1455,80 @@ export namespace Prisma {
           count: {
             args: Prisma.RequirementCountArgs<ExtArgs>
             result: $Utils.Optional<RequirementCountAggregateOutputType> | number
+          }
+        }
+      }
+      JobRole: {
+        payload: Prisma.$JobRolePayload<ExtArgs>
+        fields: Prisma.JobRoleFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.JobRoleFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRolePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.JobRoleFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>
+          }
+          findFirst: {
+            args: Prisma.JobRoleFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRolePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.JobRoleFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>
+          }
+          findMany: {
+            args: Prisma.JobRoleFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>[]
+          }
+          create: {
+            args: Prisma.JobRoleCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>
+          }
+          createMany: {
+            args: Prisma.JobRoleCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.JobRoleCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>[]
+          }
+          delete: {
+            args: Prisma.JobRoleDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>
+          }
+          update: {
+            args: Prisma.JobRoleUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>
+          }
+          deleteMany: {
+            args: Prisma.JobRoleDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.JobRoleUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.JobRoleUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>[]
+          }
+          upsert: {
+            args: Prisma.JobRoleUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRolePayload>
+          }
+          aggregate: {
+            args: Prisma.JobRoleAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateJobRole>
+          }
+          groupBy: {
+            args: Prisma.JobRoleGroupByArgs<ExtArgs>
+            result: $Utils.Optional<JobRoleGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.JobRoleCountArgs<ExtArgs>
+            result: $Utils.Optional<JobRoleCountAggregateOutputType> | number
           }
         }
       }
@@ -2137,8 +2212,8 @@ export namespace Prisma {
     client?: ClientOmit
     agency?: AgencyOmit
     admin?: AdminOmit
-    jobRole?: JobRoleOmit
     requirement?: RequirementOmit
+    jobRole?: JobRoleOmit
     labourProfile?: LabourProfileOmit
     procedure?: ProcedureOmit
     labourStatusLog?: LabourStatusLogOmit
@@ -2243,21 +2318,21 @@ export namespace Prisma {
   export type UserCountOutputType = {
     createdUsers: number
     auditLogs: number
-    LabourStatusLog: number
-    ClientDocument: number
-    AgencyDocument: number
-    RequirementDocument: number
-    Notification: number
+    notifications: number
+    statusLogs: number
+    clientDocuments: number
+    agencyDocuments: number
+    requirementDocuments: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     createdUsers?: boolean | UserCountOutputTypeCountCreatedUsersArgs
     auditLogs?: boolean | UserCountOutputTypeCountAuditLogsArgs
-    LabourStatusLog?: boolean | UserCountOutputTypeCountLabourStatusLogArgs
-    ClientDocument?: boolean | UserCountOutputTypeCountClientDocumentArgs
-    AgencyDocument?: boolean | UserCountOutputTypeCountAgencyDocumentArgs
-    RequirementDocument?: boolean | UserCountOutputTypeCountRequirementDocumentArgs
-    Notification?: boolean | UserCountOutputTypeCountNotificationArgs
+    notifications?: boolean | UserCountOutputTypeCountNotificationsArgs
+    statusLogs?: boolean | UserCountOutputTypeCountStatusLogsArgs
+    clientDocuments?: boolean | UserCountOutputTypeCountClientDocumentsArgs
+    agencyDocuments?: boolean | UserCountOutputTypeCountAgencyDocumentsArgs
+    requirementDocuments?: boolean | UserCountOutputTypeCountRequirementDocumentsArgs
   }
 
   // Custom InputTypes
@@ -2288,36 +2363,36 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountLabourStatusLogArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type UserCountOutputTypeCountNotificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NotificationWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountStatusLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: LabourStatusLogWhereInput
   }
 
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountClientDocumentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type UserCountOutputTypeCountClientDocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ClientDocumentWhereInput
   }
 
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountAgencyDocumentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type UserCountOutputTypeCountAgencyDocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: AgencyDocumentWhereInput
   }
 
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountRequirementDocumentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type UserCountOutputTypeCountRequirementDocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: RequirementDocumentWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountNotificationArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: NotificationWhereInput
   }
 
 
@@ -2366,15 +2441,15 @@ export namespace Prisma {
    */
 
   export type AgencyCountOutputType = {
-    documents: number
     labourProfiles: number
     requirements: number
+    documents: number
   }
 
   export type AgencyCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    documents?: boolean | AgencyCountOutputTypeCountDocumentsArgs
     labourProfiles?: boolean | AgencyCountOutputTypeCountLabourProfilesArgs
     requirements?: boolean | AgencyCountOutputTypeCountRequirementsArgs
+    documents?: boolean | AgencyCountOutputTypeCountDocumentsArgs
   }
 
   // Custom InputTypes
@@ -2391,13 +2466,6 @@ export namespace Prisma {
   /**
    * AgencyCountOutputType without action
    */
-  export type AgencyCountOutputTypeCountDocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: AgencyDocumentWhereInput
-  }
-
-  /**
-   * AgencyCountOutputType without action
-   */
   export type AgencyCountOutputTypeCountLabourProfilesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: LabourProfileWhereInput
   }
@@ -2407,6 +2475,13 @@ export namespace Prisma {
    */
   export type AgencyCountOutputTypeCountRequirementsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: RequirementWhereInput
+  }
+
+  /**
+   * AgencyCountOutputType without action
+   */
+  export type AgencyCountOutputTypeCountDocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AgencyDocumentWhereInput
   }
 
 
@@ -2527,6 +2602,9 @@ export namespace Prisma {
     name: string | null
     email: string | null
     password: string | null
+    phone: string | null
+    altContact: string | null
+    profilePicture: string | null
     role: $Enums.UserRole | null
     status: $Enums.AccountStatus | null
     resetRequired: boolean | null
@@ -2535,6 +2613,7 @@ export namespace Prisma {
     updatedAt: Date | null
     deleteAt: Date | null
     deletionType: $Enums.DeletionType | null
+    deletionReason: string | null
     deletionRequestedBy: string | null
     createdById: string | null
   }
@@ -2544,6 +2623,9 @@ export namespace Prisma {
     name: string | null
     email: string | null
     password: string | null
+    phone: string | null
+    altContact: string | null
+    profilePicture: string | null
     role: $Enums.UserRole | null
     status: $Enums.AccountStatus | null
     resetRequired: boolean | null
@@ -2552,6 +2634,7 @@ export namespace Prisma {
     updatedAt: Date | null
     deleteAt: Date | null
     deletionType: $Enums.DeletionType | null
+    deletionReason: string | null
     deletionRequestedBy: string | null
     createdById: string | null
   }
@@ -2561,6 +2644,9 @@ export namespace Prisma {
     name: number
     email: number
     password: number
+    phone: number
+    altContact: number
+    profilePicture: number
     role: number
     status: number
     resetRequired: number
@@ -2569,6 +2655,7 @@ export namespace Prisma {
     updatedAt: number
     deleteAt: number
     deletionType: number
+    deletionReason: number
     deletionRequestedBy: number
     createdById: number
     _all: number
@@ -2580,6 +2667,9 @@ export namespace Prisma {
     name?: true
     email?: true
     password?: true
+    phone?: true
+    altContact?: true
+    profilePicture?: true
     role?: true
     status?: true
     resetRequired?: true
@@ -2588,6 +2678,7 @@ export namespace Prisma {
     updatedAt?: true
     deleteAt?: true
     deletionType?: true
+    deletionReason?: true
     deletionRequestedBy?: true
     createdById?: true
   }
@@ -2597,6 +2688,9 @@ export namespace Prisma {
     name?: true
     email?: true
     password?: true
+    phone?: true
+    altContact?: true
+    profilePicture?: true
     role?: true
     status?: true
     resetRequired?: true
@@ -2605,6 +2699,7 @@ export namespace Prisma {
     updatedAt?: true
     deleteAt?: true
     deletionType?: true
+    deletionReason?: true
     deletionRequestedBy?: true
     createdById?: true
   }
@@ -2614,6 +2709,9 @@ export namespace Prisma {
     name?: true
     email?: true
     password?: true
+    phone?: true
+    altContact?: true
+    profilePicture?: true
     role?: true
     status?: true
     resetRequired?: true
@@ -2622,6 +2720,7 @@ export namespace Prisma {
     updatedAt?: true
     deleteAt?: true
     deletionType?: true
+    deletionReason?: true
     deletionRequestedBy?: true
     createdById?: true
     _all?: true
@@ -2704,6 +2803,9 @@ export namespace Prisma {
     name: string
     email: string
     password: string
+    phone: string | null
+    altContact: string | null
+    profilePicture: string | null
     role: $Enums.UserRole
     status: $Enums.AccountStatus
     resetRequired: boolean
@@ -2712,6 +2814,7 @@ export namespace Prisma {
     updatedAt: Date
     deleteAt: Date | null
     deletionType: $Enums.DeletionType | null
+    deletionReason: string | null
     deletionRequestedBy: string | null
     createdById: string | null
     _count: UserCountAggregateOutputType | null
@@ -2738,6 +2841,9 @@ export namespace Prisma {
     name?: boolean
     email?: boolean
     password?: boolean
+    phone?: boolean
+    altContact?: boolean
+    profilePicture?: boolean
     role?: boolean
     status?: boolean
     resetRequired?: boolean
@@ -2746,19 +2852,20 @@ export namespace Prisma {
     updatedAt?: boolean
     deleteAt?: boolean
     deletionType?: boolean
+    deletionReason?: boolean
     deletionRequestedBy?: boolean
     createdById?: boolean
-    client?: boolean | User$clientArgs<ExtArgs>
-    agency?: boolean | User$agencyArgs<ExtArgs>
-    admin?: boolean | User$adminArgs<ExtArgs>
+    clientProfile?: boolean | User$clientProfileArgs<ExtArgs>
+    agencyProfile?: boolean | User$agencyProfileArgs<ExtArgs>
+    adminProfile?: boolean | User$adminProfileArgs<ExtArgs>
     createdBy?: boolean | User$createdByArgs<ExtArgs>
     createdUsers?: boolean | User$createdUsersArgs<ExtArgs>
     auditLogs?: boolean | User$auditLogsArgs<ExtArgs>
-    LabourStatusLog?: boolean | User$LabourStatusLogArgs<ExtArgs>
-    ClientDocument?: boolean | User$ClientDocumentArgs<ExtArgs>
-    AgencyDocument?: boolean | User$AgencyDocumentArgs<ExtArgs>
-    RequirementDocument?: boolean | User$RequirementDocumentArgs<ExtArgs>
-    Notification?: boolean | User$NotificationArgs<ExtArgs>
+    notifications?: boolean | User$notificationsArgs<ExtArgs>
+    statusLogs?: boolean | User$statusLogsArgs<ExtArgs>
+    clientDocuments?: boolean | User$clientDocumentsArgs<ExtArgs>
+    agencyDocuments?: boolean | User$agencyDocumentsArgs<ExtArgs>
+    requirementDocuments?: boolean | User$requirementDocumentsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -2767,6 +2874,9 @@ export namespace Prisma {
     name?: boolean
     email?: boolean
     password?: boolean
+    phone?: boolean
+    altContact?: boolean
+    profilePicture?: boolean
     role?: boolean
     status?: boolean
     resetRequired?: boolean
@@ -2775,6 +2885,7 @@ export namespace Prisma {
     updatedAt?: boolean
     deleteAt?: boolean
     deletionType?: boolean
+    deletionReason?: boolean
     deletionRequestedBy?: boolean
     createdById?: boolean
     createdBy?: boolean | User$createdByArgs<ExtArgs>
@@ -2785,6 +2896,9 @@ export namespace Prisma {
     name?: boolean
     email?: boolean
     password?: boolean
+    phone?: boolean
+    altContact?: boolean
+    profilePicture?: boolean
     role?: boolean
     status?: boolean
     resetRequired?: boolean
@@ -2793,6 +2907,7 @@ export namespace Prisma {
     updatedAt?: boolean
     deleteAt?: boolean
     deletionType?: boolean
+    deletionReason?: boolean
     deletionRequestedBy?: boolean
     createdById?: boolean
     createdBy?: boolean | User$createdByArgs<ExtArgs>
@@ -2803,6 +2918,9 @@ export namespace Prisma {
     name?: boolean
     email?: boolean
     password?: boolean
+    phone?: boolean
+    altContact?: boolean
+    profilePicture?: boolean
     role?: boolean
     status?: boolean
     resetRequired?: boolean
@@ -2811,23 +2929,24 @@ export namespace Prisma {
     updatedAt?: boolean
     deleteAt?: boolean
     deletionType?: boolean
+    deletionReason?: boolean
     deletionRequestedBy?: boolean
     createdById?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "password" | "role" | "status" | "resetRequired" | "lastLogin" | "createdAt" | "updatedAt" | "deleteAt" | "deletionType" | "deletionRequestedBy" | "createdById", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "password" | "phone" | "altContact" | "profilePicture" | "role" | "status" | "resetRequired" | "lastLogin" | "createdAt" | "updatedAt" | "deleteAt" | "deletionType" | "deletionReason" | "deletionRequestedBy" | "createdById", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    client?: boolean | User$clientArgs<ExtArgs>
-    agency?: boolean | User$agencyArgs<ExtArgs>
-    admin?: boolean | User$adminArgs<ExtArgs>
+    clientProfile?: boolean | User$clientProfileArgs<ExtArgs>
+    agencyProfile?: boolean | User$agencyProfileArgs<ExtArgs>
+    adminProfile?: boolean | User$adminProfileArgs<ExtArgs>
     createdBy?: boolean | User$createdByArgs<ExtArgs>
     createdUsers?: boolean | User$createdUsersArgs<ExtArgs>
     auditLogs?: boolean | User$auditLogsArgs<ExtArgs>
-    LabourStatusLog?: boolean | User$LabourStatusLogArgs<ExtArgs>
-    ClientDocument?: boolean | User$ClientDocumentArgs<ExtArgs>
-    AgencyDocument?: boolean | User$AgencyDocumentArgs<ExtArgs>
-    RequirementDocument?: boolean | User$RequirementDocumentArgs<ExtArgs>
-    Notification?: boolean | User$NotificationArgs<ExtArgs>
+    notifications?: boolean | User$notificationsArgs<ExtArgs>
+    statusLogs?: boolean | User$statusLogsArgs<ExtArgs>
+    clientDocuments?: boolean | User$clientDocumentsArgs<ExtArgs>
+    agencyDocuments?: boolean | User$agencyDocumentsArgs<ExtArgs>
+    requirementDocuments?: boolean | User$requirementDocumentsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2840,23 +2959,26 @@ export namespace Prisma {
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
     objects: {
-      client: Prisma.$ClientPayload<ExtArgs> | null
-      agency: Prisma.$AgencyPayload<ExtArgs> | null
-      admin: Prisma.$AdminPayload<ExtArgs> | null
+      clientProfile: Prisma.$ClientPayload<ExtArgs> | null
+      agencyProfile: Prisma.$AgencyPayload<ExtArgs> | null
+      adminProfile: Prisma.$AdminPayload<ExtArgs> | null
       createdBy: Prisma.$UserPayload<ExtArgs> | null
       createdUsers: Prisma.$UserPayload<ExtArgs>[]
       auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
-      LabourStatusLog: Prisma.$LabourStatusLogPayload<ExtArgs>[]
-      ClientDocument: Prisma.$ClientDocumentPayload<ExtArgs>[]
-      AgencyDocument: Prisma.$AgencyDocumentPayload<ExtArgs>[]
-      RequirementDocument: Prisma.$RequirementDocumentPayload<ExtArgs>[]
-      Notification: Prisma.$NotificationPayload<ExtArgs>[]
+      notifications: Prisma.$NotificationPayload<ExtArgs>[]
+      statusLogs: Prisma.$LabourStatusLogPayload<ExtArgs>[]
+      clientDocuments: Prisma.$ClientDocumentPayload<ExtArgs>[]
+      agencyDocuments: Prisma.$AgencyDocumentPayload<ExtArgs>[]
+      requirementDocuments: Prisma.$RequirementDocumentPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       name: string
       email: string
       password: string
+      phone: string | null
+      altContact: string | null
+      profilePicture: string | null
       role: $Enums.UserRole
       status: $Enums.AccountStatus
       resetRequired: boolean
@@ -2865,6 +2987,7 @@ export namespace Prisma {
       updatedAt: Date
       deleteAt: Date | null
       deletionType: $Enums.DeletionType | null
+      deletionReason: string | null
       deletionRequestedBy: string | null
       createdById: string | null
     }, ExtArgs["result"]["user"]>
@@ -3261,17 +3384,17 @@ export namespace Prisma {
    */
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    client<T extends User$clientArgs<ExtArgs> = {}>(args?: Subset<T, User$clientArgs<ExtArgs>>): Prisma__ClientClient<$Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    agency<T extends User$agencyArgs<ExtArgs> = {}>(args?: Subset<T, User$agencyArgs<ExtArgs>>): Prisma__AgencyClient<$Result.GetResult<Prisma.$AgencyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    admin<T extends User$adminArgs<ExtArgs> = {}>(args?: Subset<T, User$adminArgs<ExtArgs>>): Prisma__AdminClient<$Result.GetResult<Prisma.$AdminPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    clientProfile<T extends User$clientProfileArgs<ExtArgs> = {}>(args?: Subset<T, User$clientProfileArgs<ExtArgs>>): Prisma__ClientClient<$Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    agencyProfile<T extends User$agencyProfileArgs<ExtArgs> = {}>(args?: Subset<T, User$agencyProfileArgs<ExtArgs>>): Prisma__AgencyClient<$Result.GetResult<Prisma.$AgencyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    adminProfile<T extends User$adminProfileArgs<ExtArgs> = {}>(args?: Subset<T, User$adminProfileArgs<ExtArgs>>): Prisma__AdminClient<$Result.GetResult<Prisma.$AdminPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     createdBy<T extends User$createdByArgs<ExtArgs> = {}>(args?: Subset<T, User$createdByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     createdUsers<T extends User$createdUsersArgs<ExtArgs> = {}>(args?: Subset<T, User$createdUsersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     auditLogs<T extends User$auditLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    LabourStatusLog<T extends User$LabourStatusLogArgs<ExtArgs> = {}>(args?: Subset<T, User$LabourStatusLogArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LabourStatusLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    ClientDocument<T extends User$ClientDocumentArgs<ExtArgs> = {}>(args?: Subset<T, User$ClientDocumentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClientDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    AgencyDocument<T extends User$AgencyDocumentArgs<ExtArgs> = {}>(args?: Subset<T, User$AgencyDocumentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AgencyDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    RequirementDocument<T extends User$RequirementDocumentArgs<ExtArgs> = {}>(args?: Subset<T, User$RequirementDocumentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    Notification<T extends User$NotificationArgs<ExtArgs> = {}>(args?: Subset<T, User$NotificationArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    notifications<T extends User$notificationsArgs<ExtArgs> = {}>(args?: Subset<T, User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    statusLogs<T extends User$statusLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$statusLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LabourStatusLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    clientDocuments<T extends User$clientDocumentsArgs<ExtArgs> = {}>(args?: Subset<T, User$clientDocumentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClientDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    agencyDocuments<T extends User$agencyDocumentsArgs<ExtArgs> = {}>(args?: Subset<T, User$agencyDocumentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AgencyDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    requirementDocuments<T extends User$requirementDocumentsArgs<ExtArgs> = {}>(args?: Subset<T, User$requirementDocumentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3305,6 +3428,9 @@ export namespace Prisma {
     readonly name: FieldRef<"User", 'String'>
     readonly email: FieldRef<"User", 'String'>
     readonly password: FieldRef<"User", 'String'>
+    readonly phone: FieldRef<"User", 'String'>
+    readonly altContact: FieldRef<"User", 'String'>
+    readonly profilePicture: FieldRef<"User", 'String'>
     readonly role: FieldRef<"User", 'UserRole'>
     readonly status: FieldRef<"User", 'AccountStatus'>
     readonly resetRequired: FieldRef<"User", 'Boolean'>
@@ -3313,6 +3439,7 @@ export namespace Prisma {
     readonly updatedAt: FieldRef<"User", 'DateTime'>
     readonly deleteAt: FieldRef<"User", 'DateTime'>
     readonly deletionType: FieldRef<"User", 'DeletionType'>
+    readonly deletionReason: FieldRef<"User", 'String'>
     readonly deletionRequestedBy: FieldRef<"User", 'String'>
     readonly createdById: FieldRef<"User", 'String'>
   }
@@ -3711,9 +3838,9 @@ export namespace Prisma {
   }
 
   /**
-   * User.client
+   * User.clientProfile
    */
-  export type User$clientArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$clientProfileArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Client
      */
@@ -3730,9 +3857,9 @@ export namespace Prisma {
   }
 
   /**
-   * User.agency
+   * User.agencyProfile
    */
-  export type User$agencyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$agencyProfileArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Agency
      */
@@ -3749,9 +3876,9 @@ export namespace Prisma {
   }
 
   /**
-   * User.admin
+   * User.adminProfile
    */
-  export type User$adminArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$adminProfileArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Admin
      */
@@ -3835,9 +3962,33 @@ export namespace Prisma {
   }
 
   /**
-   * User.LabourStatusLog
+   * User.notifications
    */
-  export type User$LabourStatusLogArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$notificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Notification
+     */
+    select?: NotificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Notification
+     */
+    omit?: NotificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationInclude<ExtArgs> | null
+    where?: NotificationWhereInput
+    orderBy?: NotificationOrderByWithRelationInput | NotificationOrderByWithRelationInput[]
+    cursor?: NotificationWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: NotificationScalarFieldEnum | NotificationScalarFieldEnum[]
+  }
+
+  /**
+   * User.statusLogs
+   */
+  export type User$statusLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the LabourStatusLog
      */
@@ -3859,9 +4010,9 @@ export namespace Prisma {
   }
 
   /**
-   * User.ClientDocument
+   * User.clientDocuments
    */
-  export type User$ClientDocumentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$clientDocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the ClientDocument
      */
@@ -3883,9 +4034,9 @@ export namespace Prisma {
   }
 
   /**
-   * User.AgencyDocument
+   * User.agencyDocuments
    */
-  export type User$AgencyDocumentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$agencyDocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the AgencyDocument
      */
@@ -3907,9 +4058,9 @@ export namespace Prisma {
   }
 
   /**
-   * User.RequirementDocument
+   * User.requirementDocuments
    */
-  export type User$RequirementDocumentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$requirementDocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the RequirementDocument
      */
@@ -3928,30 +4079,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: RequirementDocumentScalarFieldEnum | RequirementDocumentScalarFieldEnum[]
-  }
-
-  /**
-   * User.Notification
-   */
-  export type User$NotificationArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Notification
-     */
-    select?: NotificationSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Notification
-     */
-    omit?: NotificationOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: NotificationInclude<ExtArgs> | null
-    where?: NotificationWhereInput
-    orderBy?: NotificationOrderByWithRelationInput | NotificationOrderByWithRelationInput[]
-    cursor?: NotificationWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: NotificationScalarFieldEnum | NotificationScalarFieldEnum[]
   }
 
   /**
@@ -3987,17 +4114,15 @@ export namespace Prisma {
     id: string | null
     userId: string | null
     companyName: string | null
-    contactPerson: string | null
     registrationNo: string | null
     companySector: $Enums.CompanySector | null
     companySize: $Enums.CompanySize | null
     website: string | null
-    designation: string | null
-    phone: string | null
     address: string | null
-    altContact: string | null
-    businessLicense: string | null
-    image: string | null
+    city: string | null
+    country: string | null
+    postalCode: string | null
+    designation: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4006,17 +4131,15 @@ export namespace Prisma {
     id: string | null
     userId: string | null
     companyName: string | null
-    contactPerson: string | null
     registrationNo: string | null
     companySector: $Enums.CompanySector | null
     companySize: $Enums.CompanySize | null
     website: string | null
-    designation: string | null
-    phone: string | null
     address: string | null
-    altContact: string | null
-    businessLicense: string | null
-    image: string | null
+    city: string | null
+    country: string | null
+    postalCode: string | null
+    designation: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -4025,17 +4148,15 @@ export namespace Prisma {
     id: number
     userId: number
     companyName: number
-    contactPerson: number
     registrationNo: number
     companySector: number
     companySize: number
     website: number
-    designation: number
-    phone: number
     address: number
-    altContact: number
-    businessLicense: number
-    image: number
+    city: number
+    country: number
+    postalCode: number
+    designation: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -4046,17 +4167,15 @@ export namespace Prisma {
     id?: true
     userId?: true
     companyName?: true
-    contactPerson?: true
     registrationNo?: true
     companySector?: true
     companySize?: true
     website?: true
-    designation?: true
-    phone?: true
     address?: true
-    altContact?: true
-    businessLicense?: true
-    image?: true
+    city?: true
+    country?: true
+    postalCode?: true
+    designation?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4065,17 +4184,15 @@ export namespace Prisma {
     id?: true
     userId?: true
     companyName?: true
-    contactPerson?: true
     registrationNo?: true
     companySector?: true
     companySize?: true
     website?: true
-    designation?: true
-    phone?: true
     address?: true
-    altContact?: true
-    businessLicense?: true
-    image?: true
+    city?: true
+    country?: true
+    postalCode?: true
+    designation?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -4084,17 +4201,15 @@ export namespace Prisma {
     id?: true
     userId?: true
     companyName?: true
-    contactPerson?: true
     registrationNo?: true
     companySector?: true
     companySize?: true
     website?: true
-    designation?: true
-    phone?: true
     address?: true
-    altContact?: true
-    businessLicense?: true
-    image?: true
+    city?: true
+    country?: true
+    postalCode?: true
+    designation?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -4176,17 +4291,15 @@ export namespace Prisma {
     id: string
     userId: string
     companyName: string
-    contactPerson: string | null
     registrationNo: string | null
-    companySector: $Enums.CompanySector | null
-    companySize: $Enums.CompanySize | null
+    companySector: $Enums.CompanySector
+    companySize: $Enums.CompanySize
     website: string | null
-    designation: string | null
-    phone: string | null
     address: string
-    altContact: string | null
-    businessLicense: string | null
-    image: string | null
+    city: string
+    country: string
+    postalCode: string | null
+    designation: string
     createdAt: Date
     updatedAt: Date
     _count: ClientCountAggregateOutputType | null
@@ -4212,17 +4325,15 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     companyName?: boolean
-    contactPerson?: boolean
     registrationNo?: boolean
     companySector?: boolean
     companySize?: boolean
     website?: boolean
-    designation?: boolean
-    phone?: boolean
     address?: boolean
-    altContact?: boolean
-    businessLicense?: boolean
-    image?: boolean
+    city?: boolean
+    country?: boolean
+    postalCode?: boolean
+    designation?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -4235,17 +4346,15 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     companyName?: boolean
-    contactPerson?: boolean
     registrationNo?: boolean
     companySector?: boolean
     companySize?: boolean
     website?: boolean
-    designation?: boolean
-    phone?: boolean
     address?: boolean
-    altContact?: boolean
-    businessLicense?: boolean
-    image?: boolean
+    city?: boolean
+    country?: boolean
+    postalCode?: boolean
+    designation?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -4255,17 +4364,15 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     companyName?: boolean
-    contactPerson?: boolean
     registrationNo?: boolean
     companySector?: boolean
     companySize?: boolean
     website?: boolean
-    designation?: boolean
-    phone?: boolean
     address?: boolean
-    altContact?: boolean
-    businessLicense?: boolean
-    image?: boolean
+    city?: boolean
+    country?: boolean
+    postalCode?: boolean
+    designation?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -4275,22 +4382,20 @@ export namespace Prisma {
     id?: boolean
     userId?: boolean
     companyName?: boolean
-    contactPerson?: boolean
     registrationNo?: boolean
     companySector?: boolean
     companySize?: boolean
     website?: boolean
-    designation?: boolean
-    phone?: boolean
     address?: boolean
-    altContact?: boolean
-    businessLicense?: boolean
-    image?: boolean
+    city?: boolean
+    country?: boolean
+    postalCode?: boolean
+    designation?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ClientOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "companyName" | "contactPerson" | "registrationNo" | "companySector" | "companySize" | "website" | "designation" | "phone" | "address" | "altContact" | "businessLicense" | "image" | "createdAt" | "updatedAt", ExtArgs["result"]["client"]>
+  export type ClientOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "companyName" | "registrationNo" | "companySector" | "companySize" | "website" | "address" | "city" | "country" | "postalCode" | "designation" | "createdAt" | "updatedAt", ExtArgs["result"]["client"]>
   export type ClientInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     requirements?: boolean | Client$requirementsArgs<ExtArgs>
@@ -4315,17 +4420,15 @@ export namespace Prisma {
       id: string
       userId: string
       companyName: string
-      contactPerson: string | null
       registrationNo: string | null
-      companySector: $Enums.CompanySector | null
-      companySize: $Enums.CompanySize | null
+      companySector: $Enums.CompanySector
+      companySize: $Enums.CompanySize
       website: string | null
-      designation: string | null
-      phone: string | null
       address: string
-      altContact: string | null
-      businessLicense: string | null
-      image: string | null
+      city: string
+      country: string
+      postalCode: string | null
+      designation: string
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["client"]>
@@ -4757,17 +4860,15 @@ export namespace Prisma {
     readonly id: FieldRef<"Client", 'String'>
     readonly userId: FieldRef<"Client", 'String'>
     readonly companyName: FieldRef<"Client", 'String'>
-    readonly contactPerson: FieldRef<"Client", 'String'>
     readonly registrationNo: FieldRef<"Client", 'String'>
     readonly companySector: FieldRef<"Client", 'CompanySector'>
     readonly companySize: FieldRef<"Client", 'CompanySize'>
     readonly website: FieldRef<"Client", 'String'>
-    readonly designation: FieldRef<"Client", 'String'>
-    readonly phone: FieldRef<"Client", 'String'>
     readonly address: FieldRef<"Client", 'String'>
-    readonly altContact: FieldRef<"Client", 'String'>
-    readonly businessLicense: FieldRef<"Client", 'String'>
-    readonly image: FieldRef<"Client", 'String'>
+    readonly city: FieldRef<"Client", 'String'>
+    readonly country: FieldRef<"Client", 'String'>
+    readonly postalCode: FieldRef<"Client", 'String'>
+    readonly designation: FieldRef<"Client", 'String'>
     readonly createdAt: FieldRef<"Client", 'DateTime'>
     readonly updatedAt: FieldRef<"Client", 'DateTime'>
   }
@@ -5250,10 +5351,10 @@ export namespace Prisma {
     licenseNumber: string | null
     licenseExpiry: Date | null
     country: string | null
-    contactPerson: string | null
-    phone: string | null
-    email: string | null
     website: string | null
+    address: string | null
+    city: string | null
+    postalCode: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -5266,10 +5367,10 @@ export namespace Prisma {
     licenseNumber: string | null
     licenseExpiry: Date | null
     country: string | null
-    contactPerson: string | null
-    phone: string | null
-    email: string | null
     website: string | null
+    address: string | null
+    city: string | null
+    postalCode: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -5283,10 +5384,10 @@ export namespace Prisma {
     licenseExpiry: number
     country: number
     regions: number
-    contactPerson: number
-    phone: number
-    email: number
     website: number
+    address: number
+    city: number
+    postalCode: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -5301,10 +5402,10 @@ export namespace Prisma {
     licenseNumber?: true
     licenseExpiry?: true
     country?: true
-    contactPerson?: true
-    phone?: true
-    email?: true
     website?: true
+    address?: true
+    city?: true
+    postalCode?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -5317,10 +5418,10 @@ export namespace Prisma {
     licenseNumber?: true
     licenseExpiry?: true
     country?: true
-    contactPerson?: true
-    phone?: true
-    email?: true
     website?: true
+    address?: true
+    city?: true
+    postalCode?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -5334,10 +5435,10 @@ export namespace Prisma {
     licenseExpiry?: true
     country?: true
     regions?: true
-    contactPerson?: true
-    phone?: true
-    email?: true
     website?: true
+    address?: true
+    city?: true
+    postalCode?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -5424,10 +5525,10 @@ export namespace Prisma {
     licenseExpiry: Date
     country: string
     regions: string[]
-    contactPerson: string
-    phone: string
-    email: string | null
     website: string | null
+    address: string
+    city: string
+    postalCode: string | null
     createdAt: Date
     updatedAt: Date
     _count: AgencyCountAggregateOutputType | null
@@ -5458,16 +5559,16 @@ export namespace Prisma {
     licenseExpiry?: boolean
     country?: boolean
     regions?: boolean
-    contactPerson?: boolean
-    phone?: boolean
-    email?: boolean
     website?: boolean
+    address?: boolean
+    city?: boolean
+    postalCode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
-    documents?: boolean | Agency$documentsArgs<ExtArgs>
     labourProfiles?: boolean | Agency$labourProfilesArgs<ExtArgs>
     requirements?: boolean | Agency$requirementsArgs<ExtArgs>
+    documents?: boolean | Agency$documentsArgs<ExtArgs>
     _count?: boolean | AgencyCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["agency"]>
 
@@ -5480,10 +5581,10 @@ export namespace Prisma {
     licenseExpiry?: boolean
     country?: boolean
     regions?: boolean
-    contactPerson?: boolean
-    phone?: boolean
-    email?: boolean
     website?: boolean
+    address?: boolean
+    city?: boolean
+    postalCode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -5498,10 +5599,10 @@ export namespace Prisma {
     licenseExpiry?: boolean
     country?: boolean
     regions?: boolean
-    contactPerson?: boolean
-    phone?: boolean
-    email?: boolean
     website?: boolean
+    address?: boolean
+    city?: boolean
+    postalCode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -5516,20 +5617,20 @@ export namespace Prisma {
     licenseExpiry?: boolean
     country?: boolean
     regions?: boolean
-    contactPerson?: boolean
-    phone?: boolean
-    email?: boolean
     website?: boolean
+    address?: boolean
+    city?: boolean
+    postalCode?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type AgencyOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "agencyName" | "registrationNo" | "licenseNumber" | "licenseExpiry" | "country" | "regions" | "contactPerson" | "phone" | "email" | "website" | "createdAt" | "updatedAt", ExtArgs["result"]["agency"]>
+  export type AgencyOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "agencyName" | "registrationNo" | "licenseNumber" | "licenseExpiry" | "country" | "regions" | "website" | "address" | "city" | "postalCode" | "createdAt" | "updatedAt", ExtArgs["result"]["agency"]>
   export type AgencyInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
-    documents?: boolean | Agency$documentsArgs<ExtArgs>
     labourProfiles?: boolean | Agency$labourProfilesArgs<ExtArgs>
     requirements?: boolean | Agency$requirementsArgs<ExtArgs>
+    documents?: boolean | Agency$documentsArgs<ExtArgs>
     _count?: boolean | AgencyCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type AgencyIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5543,9 +5644,9 @@ export namespace Prisma {
     name: "Agency"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
-      documents: Prisma.$AgencyDocumentPayload<ExtArgs>[]
       labourProfiles: Prisma.$LabourProfilePayload<ExtArgs>[]
       requirements: Prisma.$RequirementPayload<ExtArgs>[]
+      documents: Prisma.$AgencyDocumentPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -5556,10 +5657,10 @@ export namespace Prisma {
       licenseExpiry: Date
       country: string
       regions: string[]
-      contactPerson: string
-      phone: string
-      email: string | null
       website: string | null
+      address: string
+      city: string
+      postalCode: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["agency"]>
@@ -5957,9 +6058,9 @@ export namespace Prisma {
   export interface Prisma__AgencyClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    documents<T extends Agency$documentsArgs<ExtArgs> = {}>(args?: Subset<T, Agency$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AgencyDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     labourProfiles<T extends Agency$labourProfilesArgs<ExtArgs> = {}>(args?: Subset<T, Agency$labourProfilesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LabourProfilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     requirements<T extends Agency$requirementsArgs<ExtArgs> = {}>(args?: Subset<T, Agency$requirementsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    documents<T extends Agency$documentsArgs<ExtArgs> = {}>(args?: Subset<T, Agency$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AgencyDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5997,10 +6098,10 @@ export namespace Prisma {
     readonly licenseExpiry: FieldRef<"Agency", 'DateTime'>
     readonly country: FieldRef<"Agency", 'String'>
     readonly regions: FieldRef<"Agency", 'String[]'>
-    readonly contactPerson: FieldRef<"Agency", 'String'>
-    readonly phone: FieldRef<"Agency", 'String'>
-    readonly email: FieldRef<"Agency", 'String'>
     readonly website: FieldRef<"Agency", 'String'>
+    readonly address: FieldRef<"Agency", 'String'>
+    readonly city: FieldRef<"Agency", 'String'>
+    readonly postalCode: FieldRef<"Agency", 'String'>
     readonly createdAt: FieldRef<"Agency", 'DateTime'>
     readonly updatedAt: FieldRef<"Agency", 'DateTime'>
   }
@@ -6399,30 +6500,6 @@ export namespace Prisma {
   }
 
   /**
-   * Agency.documents
-   */
-  export type Agency$documentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the AgencyDocument
-     */
-    select?: AgencyDocumentSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the AgencyDocument
-     */
-    omit?: AgencyDocumentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AgencyDocumentInclude<ExtArgs> | null
-    where?: AgencyDocumentWhereInput
-    orderBy?: AgencyDocumentOrderByWithRelationInput | AgencyDocumentOrderByWithRelationInput[]
-    cursor?: AgencyDocumentWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: AgencyDocumentScalarFieldEnum | AgencyDocumentScalarFieldEnum[]
-  }
-
-  /**
    * Agency.labourProfiles
    */
   export type Agency$labourProfilesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6471,6 +6548,30 @@ export namespace Prisma {
   }
 
   /**
+   * Agency.documents
+   */
+  export type Agency$documentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AgencyDocument
+     */
+    select?: AgencyDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the AgencyDocument
+     */
+    omit?: AgencyDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AgencyDocumentInclude<ExtArgs> | null
+    where?: AgencyDocumentWhereInput
+    orderBy?: AgencyDocumentOrderByWithRelationInput | AgencyDocumentOrderByWithRelationInput[]
+    cursor?: AgencyDocumentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AgencyDocumentScalarFieldEnum | AgencyDocumentScalarFieldEnum[]
+  }
+
+  /**
    * Agency without action
    */
   export type AgencyDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6504,7 +6605,6 @@ export namespace Prisma {
     userId: string | null
     name: string | null
     department: string | null
-    canCreateUsers: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -6514,7 +6614,6 @@ export namespace Prisma {
     userId: string | null
     name: string | null
     department: string | null
-    canCreateUsers: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -6524,7 +6623,7 @@ export namespace Prisma {
     userId: number
     name: number
     department: number
-    canCreateUsers: number
+    permissions: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -6536,7 +6635,6 @@ export namespace Prisma {
     userId?: true
     name?: true
     department?: true
-    canCreateUsers?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -6546,7 +6644,6 @@ export namespace Prisma {
     userId?: true
     name?: true
     department?: true
-    canCreateUsers?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -6556,7 +6653,7 @@ export namespace Prisma {
     userId?: true
     name?: true
     department?: true
-    canCreateUsers?: true
+    permissions?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -6639,7 +6736,7 @@ export namespace Prisma {
     userId: string
     name: string
     department: string | null
-    canCreateUsers: boolean
+    permissions: JsonValue | null
     createdAt: Date
     updatedAt: Date
     _count: AdminCountAggregateOutputType | null
@@ -6666,7 +6763,7 @@ export namespace Prisma {
     userId?: boolean
     name?: boolean
     department?: boolean
-    canCreateUsers?: boolean
+    permissions?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -6677,7 +6774,7 @@ export namespace Prisma {
     userId?: boolean
     name?: boolean
     department?: boolean
-    canCreateUsers?: boolean
+    permissions?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -6688,7 +6785,7 @@ export namespace Prisma {
     userId?: boolean
     name?: boolean
     department?: boolean
-    canCreateUsers?: boolean
+    permissions?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -6699,12 +6796,12 @@ export namespace Prisma {
     userId?: boolean
     name?: boolean
     department?: boolean
-    canCreateUsers?: boolean
+    permissions?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type AdminOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "name" | "department" | "canCreateUsers" | "createdAt" | "updatedAt", ExtArgs["result"]["admin"]>
+  export type AdminOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "name" | "department" | "permissions" | "createdAt" | "updatedAt", ExtArgs["result"]["admin"]>
   export type AdminInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -6725,7 +6822,7 @@ export namespace Prisma {
       userId: string
       name: string
       department: string | null
-      canCreateUsers: boolean
+      permissions: Prisma.JsonValue | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["admin"]>
@@ -7156,7 +7253,7 @@ export namespace Prisma {
     readonly userId: FieldRef<"Admin", 'String'>
     readonly name: FieldRef<"Admin", 'String'>
     readonly department: FieldRef<"Admin", 'String'>
-    readonly canCreateUsers: FieldRef<"Admin", 'Boolean'>
+    readonly permissions: FieldRef<"Admin", 'Json'>
     readonly createdAt: FieldRef<"Admin", 'DateTime'>
     readonly updatedAt: FieldRef<"Admin", 'DateTime'>
   }
@@ -7574,6 +7671,1391 @@ export namespace Prisma {
 
 
   /**
+   * Model Requirement
+   */
+
+  export type AggregateRequirement = {
+    _count: RequirementCountAggregateOutputType | null
+    _avg: RequirementAvgAggregateOutputType | null
+    _sum: RequirementSumAggregateOutputType | null
+    _min: RequirementMinAggregateOutputType | null
+    _max: RequirementMaxAggregateOutputType | null
+  }
+
+  export type RequirementAvgAggregateOutputType = {
+    maxAge: number | null
+  }
+
+  export type RequirementSumAggregateOutputType = {
+    maxAge: number | null
+  }
+
+  export type RequirementMinAggregateOutputType = {
+    id: string | null
+    projectLocation: string | null
+    startDate: Date | null
+    contractDuration: $Enums.ContractDuration | null
+    specialNotes: string | null
+    status: $Enums.RequirementStatus | null
+    minExperience: $Enums.ExperienceLevel | null
+    maxAge: number | null
+    ticketType: $Enums.TicketType | null
+    ticketProvided: boolean | null
+    clientId: string | null
+    assignedAgencyId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    submittedAt: Date | null
+    reviewedAt: Date | null
+  }
+
+  export type RequirementMaxAggregateOutputType = {
+    id: string | null
+    projectLocation: string | null
+    startDate: Date | null
+    contractDuration: $Enums.ContractDuration | null
+    specialNotes: string | null
+    status: $Enums.RequirementStatus | null
+    minExperience: $Enums.ExperienceLevel | null
+    maxAge: number | null
+    ticketType: $Enums.TicketType | null
+    ticketProvided: boolean | null
+    clientId: string | null
+    assignedAgencyId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    submittedAt: Date | null
+    reviewedAt: Date | null
+  }
+
+  export type RequirementCountAggregateOutputType = {
+    id: number
+    projectLocation: number
+    startDate: number
+    contractDuration: number
+    specialNotes: number
+    status: number
+    languages: number
+    minExperience: number
+    maxAge: number
+    ticketType: number
+    ticketProvided: number
+    clientId: number
+    assignedAgencyId: number
+    createdAt: number
+    updatedAt: number
+    submittedAt: number
+    reviewedAt: number
+    _all: number
+  }
+
+
+  export type RequirementAvgAggregateInputType = {
+    maxAge?: true
+  }
+
+  export type RequirementSumAggregateInputType = {
+    maxAge?: true
+  }
+
+  export type RequirementMinAggregateInputType = {
+    id?: true
+    projectLocation?: true
+    startDate?: true
+    contractDuration?: true
+    specialNotes?: true
+    status?: true
+    minExperience?: true
+    maxAge?: true
+    ticketType?: true
+    ticketProvided?: true
+    clientId?: true
+    assignedAgencyId?: true
+    createdAt?: true
+    updatedAt?: true
+    submittedAt?: true
+    reviewedAt?: true
+  }
+
+  export type RequirementMaxAggregateInputType = {
+    id?: true
+    projectLocation?: true
+    startDate?: true
+    contractDuration?: true
+    specialNotes?: true
+    status?: true
+    minExperience?: true
+    maxAge?: true
+    ticketType?: true
+    ticketProvided?: true
+    clientId?: true
+    assignedAgencyId?: true
+    createdAt?: true
+    updatedAt?: true
+    submittedAt?: true
+    reviewedAt?: true
+  }
+
+  export type RequirementCountAggregateInputType = {
+    id?: true
+    projectLocation?: true
+    startDate?: true
+    contractDuration?: true
+    specialNotes?: true
+    status?: true
+    languages?: true
+    minExperience?: true
+    maxAge?: true
+    ticketType?: true
+    ticketProvided?: true
+    clientId?: true
+    assignedAgencyId?: true
+    createdAt?: true
+    updatedAt?: true
+    submittedAt?: true
+    reviewedAt?: true
+    _all?: true
+  }
+
+  export type RequirementAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Requirement to aggregate.
+     */
+    where?: RequirementWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Requirements to fetch.
+     */
+    orderBy?: RequirementOrderByWithRelationInput | RequirementOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RequirementWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Requirements from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Requirements.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Requirements
+    **/
+    _count?: true | RequirementCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: RequirementAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: RequirementSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RequirementMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RequirementMaxAggregateInputType
+  }
+
+  export type GetRequirementAggregateType<T extends RequirementAggregateArgs> = {
+        [P in keyof T & keyof AggregateRequirement]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRequirement[P]>
+      : GetScalarType<T[P], AggregateRequirement[P]>
+  }
+
+
+
+
+  export type RequirementGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RequirementWhereInput
+    orderBy?: RequirementOrderByWithAggregationInput | RequirementOrderByWithAggregationInput[]
+    by: RequirementScalarFieldEnum[] | RequirementScalarFieldEnum
+    having?: RequirementScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RequirementCountAggregateInputType | true
+    _avg?: RequirementAvgAggregateInputType
+    _sum?: RequirementSumAggregateInputType
+    _min?: RequirementMinAggregateInputType
+    _max?: RequirementMaxAggregateInputType
+  }
+
+  export type RequirementGroupByOutputType = {
+    id: string
+    projectLocation: string | null
+    startDate: Date | null
+    contractDuration: $Enums.ContractDuration | null
+    specialNotes: string | null
+    status: $Enums.RequirementStatus
+    languages: string[]
+    minExperience: $Enums.ExperienceLevel | null
+    maxAge: number | null
+    ticketType: $Enums.TicketType | null
+    ticketProvided: boolean
+    clientId: string
+    assignedAgencyId: string | null
+    createdAt: Date
+    updatedAt: Date
+    submittedAt: Date | null
+    reviewedAt: Date | null
+    _count: RequirementCountAggregateOutputType | null
+    _avg: RequirementAvgAggregateOutputType | null
+    _sum: RequirementSumAggregateOutputType | null
+    _min: RequirementMinAggregateOutputType | null
+    _max: RequirementMaxAggregateOutputType | null
+  }
+
+  type GetRequirementGroupByPayload<T extends RequirementGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RequirementGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RequirementGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RequirementGroupByOutputType[P]>
+            : GetScalarType<T[P], RequirementGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RequirementSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    projectLocation?: boolean
+    startDate?: boolean
+    contractDuration?: boolean
+    specialNotes?: boolean
+    status?: boolean
+    languages?: boolean
+    minExperience?: boolean
+    maxAge?: boolean
+    ticketType?: boolean
+    ticketProvided?: boolean
+    clientId?: boolean
+    assignedAgencyId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    submittedAt?: boolean
+    reviewedAt?: boolean
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    assignedAgency?: boolean | Requirement$assignedAgencyArgs<ExtArgs>
+    jobRoles?: boolean | Requirement$jobRolesArgs<ExtArgs>
+    labourProfiles?: boolean | Requirement$labourProfilesArgs<ExtArgs>
+    procedures?: boolean | Requirement$proceduresArgs<ExtArgs>
+    documents?: boolean | Requirement$documentsArgs<ExtArgs>
+    _count?: boolean | RequirementCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["requirement"]>
+
+  export type RequirementSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    projectLocation?: boolean
+    startDate?: boolean
+    contractDuration?: boolean
+    specialNotes?: boolean
+    status?: boolean
+    languages?: boolean
+    minExperience?: boolean
+    maxAge?: boolean
+    ticketType?: boolean
+    ticketProvided?: boolean
+    clientId?: boolean
+    assignedAgencyId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    submittedAt?: boolean
+    reviewedAt?: boolean
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    assignedAgency?: boolean | Requirement$assignedAgencyArgs<ExtArgs>
+  }, ExtArgs["result"]["requirement"]>
+
+  export type RequirementSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    projectLocation?: boolean
+    startDate?: boolean
+    contractDuration?: boolean
+    specialNotes?: boolean
+    status?: boolean
+    languages?: boolean
+    minExperience?: boolean
+    maxAge?: boolean
+    ticketType?: boolean
+    ticketProvided?: boolean
+    clientId?: boolean
+    assignedAgencyId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    submittedAt?: boolean
+    reviewedAt?: boolean
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    assignedAgency?: boolean | Requirement$assignedAgencyArgs<ExtArgs>
+  }, ExtArgs["result"]["requirement"]>
+
+  export type RequirementSelectScalar = {
+    id?: boolean
+    projectLocation?: boolean
+    startDate?: boolean
+    contractDuration?: boolean
+    specialNotes?: boolean
+    status?: boolean
+    languages?: boolean
+    minExperience?: boolean
+    maxAge?: boolean
+    ticketType?: boolean
+    ticketProvided?: boolean
+    clientId?: boolean
+    assignedAgencyId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    submittedAt?: boolean
+    reviewedAt?: boolean
+  }
+
+  export type RequirementOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "projectLocation" | "startDate" | "contractDuration" | "specialNotes" | "status" | "languages" | "minExperience" | "maxAge" | "ticketType" | "ticketProvided" | "clientId" | "assignedAgencyId" | "createdAt" | "updatedAt" | "submittedAt" | "reviewedAt", ExtArgs["result"]["requirement"]>
+  export type RequirementInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    assignedAgency?: boolean | Requirement$assignedAgencyArgs<ExtArgs>
+    jobRoles?: boolean | Requirement$jobRolesArgs<ExtArgs>
+    labourProfiles?: boolean | Requirement$labourProfilesArgs<ExtArgs>
+    procedures?: boolean | Requirement$proceduresArgs<ExtArgs>
+    documents?: boolean | Requirement$documentsArgs<ExtArgs>
+    _count?: boolean | RequirementCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type RequirementIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    assignedAgency?: boolean | Requirement$assignedAgencyArgs<ExtArgs>
+  }
+  export type RequirementIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    client?: boolean | ClientDefaultArgs<ExtArgs>
+    assignedAgency?: boolean | Requirement$assignedAgencyArgs<ExtArgs>
+  }
+
+  export type $RequirementPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Requirement"
+    objects: {
+      client: Prisma.$ClientPayload<ExtArgs>
+      assignedAgency: Prisma.$AgencyPayload<ExtArgs> | null
+      jobRoles: Prisma.$JobRolePayload<ExtArgs>[]
+      labourProfiles: Prisma.$LabourProfilePayload<ExtArgs>[]
+      procedures: Prisma.$ProcedurePayload<ExtArgs>[]
+      documents: Prisma.$RequirementDocumentPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      projectLocation: string | null
+      startDate: Date | null
+      contractDuration: $Enums.ContractDuration | null
+      specialNotes: string | null
+      status: $Enums.RequirementStatus
+      languages: string[]
+      minExperience: $Enums.ExperienceLevel | null
+      maxAge: number | null
+      ticketType: $Enums.TicketType | null
+      ticketProvided: boolean
+      clientId: string
+      assignedAgencyId: string | null
+      createdAt: Date
+      updatedAt: Date
+      submittedAt: Date | null
+      reviewedAt: Date | null
+    }, ExtArgs["result"]["requirement"]>
+    composites: {}
+  }
+
+  type RequirementGetPayload<S extends boolean | null | undefined | RequirementDefaultArgs> = $Result.GetResult<Prisma.$RequirementPayload, S>
+
+  type RequirementCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<RequirementFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: RequirementCountAggregateInputType | true
+    }
+
+  export interface RequirementDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Requirement'], meta: { name: 'Requirement' } }
+    /**
+     * Find zero or one Requirement that matches the filter.
+     * @param {RequirementFindUniqueArgs} args - Arguments to find a Requirement
+     * @example
+     * // Get one Requirement
+     * const requirement = await prisma.requirement.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RequirementFindUniqueArgs>(args: SelectSubset<T, RequirementFindUniqueArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Requirement that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {RequirementFindUniqueOrThrowArgs} args - Arguments to find a Requirement
+     * @example
+     * // Get one Requirement
+     * const requirement = await prisma.requirement.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RequirementFindUniqueOrThrowArgs>(args: SelectSubset<T, RequirementFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Requirement that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementFindFirstArgs} args - Arguments to find a Requirement
+     * @example
+     * // Get one Requirement
+     * const requirement = await prisma.requirement.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RequirementFindFirstArgs>(args?: SelectSubset<T, RequirementFindFirstArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Requirement that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementFindFirstOrThrowArgs} args - Arguments to find a Requirement
+     * @example
+     * // Get one Requirement
+     * const requirement = await prisma.requirement.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RequirementFindFirstOrThrowArgs>(args?: SelectSubset<T, RequirementFindFirstOrThrowArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Requirements that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Requirements
+     * const requirements = await prisma.requirement.findMany()
+     * 
+     * // Get first 10 Requirements
+     * const requirements = await prisma.requirement.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const requirementWithIdOnly = await prisma.requirement.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends RequirementFindManyArgs>(args?: SelectSubset<T, RequirementFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Requirement.
+     * @param {RequirementCreateArgs} args - Arguments to create a Requirement.
+     * @example
+     * // Create one Requirement
+     * const Requirement = await prisma.requirement.create({
+     *   data: {
+     *     // ... data to create a Requirement
+     *   }
+     * })
+     * 
+     */
+    create<T extends RequirementCreateArgs>(args: SelectSubset<T, RequirementCreateArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Requirements.
+     * @param {RequirementCreateManyArgs} args - Arguments to create many Requirements.
+     * @example
+     * // Create many Requirements
+     * const requirement = await prisma.requirement.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RequirementCreateManyArgs>(args?: SelectSubset<T, RequirementCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Requirements and returns the data saved in the database.
+     * @param {RequirementCreateManyAndReturnArgs} args - Arguments to create many Requirements.
+     * @example
+     * // Create many Requirements
+     * const requirement = await prisma.requirement.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Requirements and only return the `id`
+     * const requirementWithIdOnly = await prisma.requirement.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RequirementCreateManyAndReturnArgs>(args?: SelectSubset<T, RequirementCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Requirement.
+     * @param {RequirementDeleteArgs} args - Arguments to delete one Requirement.
+     * @example
+     * // Delete one Requirement
+     * const Requirement = await prisma.requirement.delete({
+     *   where: {
+     *     // ... filter to delete one Requirement
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RequirementDeleteArgs>(args: SelectSubset<T, RequirementDeleteArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Requirement.
+     * @param {RequirementUpdateArgs} args - Arguments to update one Requirement.
+     * @example
+     * // Update one Requirement
+     * const requirement = await prisma.requirement.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RequirementUpdateArgs>(args: SelectSubset<T, RequirementUpdateArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Requirements.
+     * @param {RequirementDeleteManyArgs} args - Arguments to filter Requirements to delete.
+     * @example
+     * // Delete a few Requirements
+     * const { count } = await prisma.requirement.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RequirementDeleteManyArgs>(args?: SelectSubset<T, RequirementDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Requirements.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Requirements
+     * const requirement = await prisma.requirement.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RequirementUpdateManyArgs>(args: SelectSubset<T, RequirementUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Requirements and returns the data updated in the database.
+     * @param {RequirementUpdateManyAndReturnArgs} args - Arguments to update many Requirements.
+     * @example
+     * // Update many Requirements
+     * const requirement = await prisma.requirement.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Requirements and only return the `id`
+     * const requirementWithIdOnly = await prisma.requirement.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends RequirementUpdateManyAndReturnArgs>(args: SelectSubset<T, RequirementUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Requirement.
+     * @param {RequirementUpsertArgs} args - Arguments to update or create a Requirement.
+     * @example
+     * // Update or create a Requirement
+     * const requirement = await prisma.requirement.upsert({
+     *   create: {
+     *     // ... data to create a Requirement
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Requirement we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RequirementUpsertArgs>(args: SelectSubset<T, RequirementUpsertArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Requirements.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementCountArgs} args - Arguments to filter Requirements to count.
+     * @example
+     * // Count the number of Requirements
+     * const count = await prisma.requirement.count({
+     *   where: {
+     *     // ... the filter for the Requirements we want to count
+     *   }
+     * })
+    **/
+    count<T extends RequirementCountArgs>(
+      args?: Subset<T, RequirementCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RequirementCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Requirement.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RequirementAggregateArgs>(args: Subset<T, RequirementAggregateArgs>): Prisma.PrismaPromise<GetRequirementAggregateType<T>>
+
+    /**
+     * Group by Requirement.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RequirementGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RequirementGroupByArgs['orderBy'] }
+        : { orderBy?: RequirementGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RequirementGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRequirementGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Requirement model
+   */
+  readonly fields: RequirementFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Requirement.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RequirementClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    client<T extends ClientDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ClientDefaultArgs<ExtArgs>>): Prisma__ClientClient<$Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    assignedAgency<T extends Requirement$assignedAgencyArgs<ExtArgs> = {}>(args?: Subset<T, Requirement$assignedAgencyArgs<ExtArgs>>): Prisma__AgencyClient<$Result.GetResult<Prisma.$AgencyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    jobRoles<T extends Requirement$jobRolesArgs<ExtArgs> = {}>(args?: Subset<T, Requirement$jobRolesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobRolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    labourProfiles<T extends Requirement$labourProfilesArgs<ExtArgs> = {}>(args?: Subset<T, Requirement$labourProfilesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LabourProfilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    procedures<T extends Requirement$proceduresArgs<ExtArgs> = {}>(args?: Subset<T, Requirement$proceduresArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProcedurePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    documents<T extends Requirement$documentsArgs<ExtArgs> = {}>(args?: Subset<T, Requirement$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Requirement model
+   */
+  interface RequirementFieldRefs {
+    readonly id: FieldRef<"Requirement", 'String'>
+    readonly projectLocation: FieldRef<"Requirement", 'String'>
+    readonly startDate: FieldRef<"Requirement", 'DateTime'>
+    readonly contractDuration: FieldRef<"Requirement", 'ContractDuration'>
+    readonly specialNotes: FieldRef<"Requirement", 'String'>
+    readonly status: FieldRef<"Requirement", 'RequirementStatus'>
+    readonly languages: FieldRef<"Requirement", 'String[]'>
+    readonly minExperience: FieldRef<"Requirement", 'ExperienceLevel'>
+    readonly maxAge: FieldRef<"Requirement", 'Int'>
+    readonly ticketType: FieldRef<"Requirement", 'TicketType'>
+    readonly ticketProvided: FieldRef<"Requirement", 'Boolean'>
+    readonly clientId: FieldRef<"Requirement", 'String'>
+    readonly assignedAgencyId: FieldRef<"Requirement", 'String'>
+    readonly createdAt: FieldRef<"Requirement", 'DateTime'>
+    readonly updatedAt: FieldRef<"Requirement", 'DateTime'>
+    readonly submittedAt: FieldRef<"Requirement", 'DateTime'>
+    readonly reviewedAt: FieldRef<"Requirement", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Requirement findUnique
+   */
+  export type RequirementFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Requirement
+     */
+    select?: RequirementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Requirement
+     */
+    omit?: RequirementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementInclude<ExtArgs> | null
+    /**
+     * Filter, which Requirement to fetch.
+     */
+    where: RequirementWhereUniqueInput
+  }
+
+  /**
+   * Requirement findUniqueOrThrow
+   */
+  export type RequirementFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Requirement
+     */
+    select?: RequirementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Requirement
+     */
+    omit?: RequirementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementInclude<ExtArgs> | null
+    /**
+     * Filter, which Requirement to fetch.
+     */
+    where: RequirementWhereUniqueInput
+  }
+
+  /**
+   * Requirement findFirst
+   */
+  export type RequirementFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Requirement
+     */
+    select?: RequirementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Requirement
+     */
+    omit?: RequirementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementInclude<ExtArgs> | null
+    /**
+     * Filter, which Requirement to fetch.
+     */
+    where?: RequirementWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Requirements to fetch.
+     */
+    orderBy?: RequirementOrderByWithRelationInput | RequirementOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Requirements.
+     */
+    cursor?: RequirementWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Requirements from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Requirements.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Requirements.
+     */
+    distinct?: RequirementScalarFieldEnum | RequirementScalarFieldEnum[]
+  }
+
+  /**
+   * Requirement findFirstOrThrow
+   */
+  export type RequirementFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Requirement
+     */
+    select?: RequirementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Requirement
+     */
+    omit?: RequirementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementInclude<ExtArgs> | null
+    /**
+     * Filter, which Requirement to fetch.
+     */
+    where?: RequirementWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Requirements to fetch.
+     */
+    orderBy?: RequirementOrderByWithRelationInput | RequirementOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Requirements.
+     */
+    cursor?: RequirementWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Requirements from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Requirements.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Requirements.
+     */
+    distinct?: RequirementScalarFieldEnum | RequirementScalarFieldEnum[]
+  }
+
+  /**
+   * Requirement findMany
+   */
+  export type RequirementFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Requirement
+     */
+    select?: RequirementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Requirement
+     */
+    omit?: RequirementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementInclude<ExtArgs> | null
+    /**
+     * Filter, which Requirements to fetch.
+     */
+    where?: RequirementWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Requirements to fetch.
+     */
+    orderBy?: RequirementOrderByWithRelationInput | RequirementOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Requirements.
+     */
+    cursor?: RequirementWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Requirements from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Requirements.
+     */
+    skip?: number
+    distinct?: RequirementScalarFieldEnum | RequirementScalarFieldEnum[]
+  }
+
+  /**
+   * Requirement create
+   */
+  export type RequirementCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Requirement
+     */
+    select?: RequirementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Requirement
+     */
+    omit?: RequirementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Requirement.
+     */
+    data: XOR<RequirementCreateInput, RequirementUncheckedCreateInput>
+  }
+
+  /**
+   * Requirement createMany
+   */
+  export type RequirementCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Requirements.
+     */
+    data: RequirementCreateManyInput | RequirementCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Requirement createManyAndReturn
+   */
+  export type RequirementCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Requirement
+     */
+    select?: RequirementSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Requirement
+     */
+    omit?: RequirementOmit<ExtArgs> | null
+    /**
+     * The data used to create many Requirements.
+     */
+    data: RequirementCreateManyInput | RequirementCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Requirement update
+   */
+  export type RequirementUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Requirement
+     */
+    select?: RequirementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Requirement
+     */
+    omit?: RequirementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Requirement.
+     */
+    data: XOR<RequirementUpdateInput, RequirementUncheckedUpdateInput>
+    /**
+     * Choose, which Requirement to update.
+     */
+    where: RequirementWhereUniqueInput
+  }
+
+  /**
+   * Requirement updateMany
+   */
+  export type RequirementUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Requirements.
+     */
+    data: XOR<RequirementUpdateManyMutationInput, RequirementUncheckedUpdateManyInput>
+    /**
+     * Filter which Requirements to update
+     */
+    where?: RequirementWhereInput
+    /**
+     * Limit how many Requirements to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Requirement updateManyAndReturn
+   */
+  export type RequirementUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Requirement
+     */
+    select?: RequirementSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Requirement
+     */
+    omit?: RequirementOmit<ExtArgs> | null
+    /**
+     * The data used to update Requirements.
+     */
+    data: XOR<RequirementUpdateManyMutationInput, RequirementUncheckedUpdateManyInput>
+    /**
+     * Filter which Requirements to update
+     */
+    where?: RequirementWhereInput
+    /**
+     * Limit how many Requirements to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Requirement upsert
+   */
+  export type RequirementUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Requirement
+     */
+    select?: RequirementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Requirement
+     */
+    omit?: RequirementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Requirement to update in case it exists.
+     */
+    where: RequirementWhereUniqueInput
+    /**
+     * In case the Requirement found by the `where` argument doesn't exist, create a new Requirement with this data.
+     */
+    create: XOR<RequirementCreateInput, RequirementUncheckedCreateInput>
+    /**
+     * In case the Requirement was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RequirementUpdateInput, RequirementUncheckedUpdateInput>
+  }
+
+  /**
+   * Requirement delete
+   */
+  export type RequirementDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Requirement
+     */
+    select?: RequirementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Requirement
+     */
+    omit?: RequirementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementInclude<ExtArgs> | null
+    /**
+     * Filter which Requirement to delete.
+     */
+    where: RequirementWhereUniqueInput
+  }
+
+  /**
+   * Requirement deleteMany
+   */
+  export type RequirementDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Requirements to delete
+     */
+    where?: RequirementWhereInput
+    /**
+     * Limit how many Requirements to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Requirement.assignedAgency
+   */
+  export type Requirement$assignedAgencyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Agency
+     */
+    select?: AgencySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Agency
+     */
+    omit?: AgencyOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AgencyInclude<ExtArgs> | null
+    where?: AgencyWhereInput
+  }
+
+  /**
+   * Requirement.jobRoles
+   */
+  export type Requirement$jobRolesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobRole
+     */
+    select?: JobRoleSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the JobRole
+     */
+    omit?: JobRoleOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobRoleInclude<ExtArgs> | null
+    where?: JobRoleWhereInput
+    orderBy?: JobRoleOrderByWithRelationInput | JobRoleOrderByWithRelationInput[]
+    cursor?: JobRoleWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: JobRoleScalarFieldEnum | JobRoleScalarFieldEnum[]
+  }
+
+  /**
+   * Requirement.labourProfiles
+   */
+  export type Requirement$labourProfilesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LabourProfile
+     */
+    select?: LabourProfileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LabourProfile
+     */
+    omit?: LabourProfileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LabourProfileInclude<ExtArgs> | null
+    where?: LabourProfileWhereInput
+    orderBy?: LabourProfileOrderByWithRelationInput | LabourProfileOrderByWithRelationInput[]
+    cursor?: LabourProfileWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LabourProfileScalarFieldEnum | LabourProfileScalarFieldEnum[]
+  }
+
+  /**
+   * Requirement.procedures
+   */
+  export type Requirement$proceduresArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Procedure
+     */
+    select?: ProcedureSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Procedure
+     */
+    omit?: ProcedureOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ProcedureInclude<ExtArgs> | null
+    where?: ProcedureWhereInput
+    orderBy?: ProcedureOrderByWithRelationInput | ProcedureOrderByWithRelationInput[]
+    cursor?: ProcedureWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ProcedureScalarFieldEnum | ProcedureScalarFieldEnum[]
+  }
+
+  /**
+   * Requirement.documents
+   */
+  export type Requirement$documentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementDocument
+     */
+    select?: RequirementDocumentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementDocument
+     */
+    omit?: RequirementDocumentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementDocumentInclude<ExtArgs> | null
+    where?: RequirementDocumentWhereInput
+    orderBy?: RequirementDocumentOrderByWithRelationInput | RequirementDocumentOrderByWithRelationInput[]
+    cursor?: RequirementDocumentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RequirementDocumentScalarFieldEnum | RequirementDocumentScalarFieldEnum[]
+  }
+
+  /**
+   * Requirement without action
+   */
+  export type RequirementDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Requirement
+     */
+    select?: RequirementSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Requirement
+     */
+    omit?: RequirementOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model JobRole
    */
 
@@ -7587,10 +9069,12 @@ export namespace Prisma {
 
   export type JobRoleAvgAggregateOutputType = {
     quantity: number | null
+    salary: number | null
   }
 
   export type JobRoleSumAggregateOutputType = {
     quantity: number | null
+    salary: number | null
   }
 
   export type JobRoleMinAggregateOutputType = {
@@ -7598,7 +9082,8 @@ export namespace Prisma {
     title: string | null
     quantity: number | null
     nationality: string | null
-    salary: string | null
+    salary: number | null
+    salaryCurrency: string | null
     requirementId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -7609,7 +9094,8 @@ export namespace Prisma {
     title: string | null
     quantity: number | null
     nationality: string | null
-    salary: string | null
+    salary: number | null
+    salaryCurrency: string | null
     requirementId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -7621,6 +9107,7 @@ export namespace Prisma {
     quantity: number
     nationality: number
     salary: number
+    salaryCurrency: number
     requirementId: number
     createdAt: number
     updatedAt: number
@@ -7630,10 +9117,12 @@ export namespace Prisma {
 
   export type JobRoleAvgAggregateInputType = {
     quantity?: true
+    salary?: true
   }
 
   export type JobRoleSumAggregateInputType = {
     quantity?: true
+    salary?: true
   }
 
   export type JobRoleMinAggregateInputType = {
@@ -7642,6 +9131,7 @@ export namespace Prisma {
     quantity?: true
     nationality?: true
     salary?: true
+    salaryCurrency?: true
     requirementId?: true
     createdAt?: true
     updatedAt?: true
@@ -7653,6 +9143,7 @@ export namespace Prisma {
     quantity?: true
     nationality?: true
     salary?: true
+    salaryCurrency?: true
     requirementId?: true
     createdAt?: true
     updatedAt?: true
@@ -7664,6 +9155,7 @@ export namespace Prisma {
     quantity?: true
     nationality?: true
     salary?: true
+    salaryCurrency?: true
     requirementId?: true
     createdAt?: true
     updatedAt?: true
@@ -7761,7 +9253,8 @@ export namespace Prisma {
     title: string
     quantity: number
     nationality: string
-    salary: string
+    salary: number | null
+    salaryCurrency: string
     requirementId: string
     createdAt: Date
     updatedAt: Date
@@ -7792,6 +9285,7 @@ export namespace Prisma {
     quantity?: boolean
     nationality?: boolean
     salary?: boolean
+    salaryCurrency?: boolean
     requirementId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7804,6 +9298,7 @@ export namespace Prisma {
     quantity?: boolean
     nationality?: boolean
     salary?: boolean
+    salaryCurrency?: boolean
     requirementId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7816,6 +9311,7 @@ export namespace Prisma {
     quantity?: boolean
     nationality?: boolean
     salary?: boolean
+    salaryCurrency?: boolean
     requirementId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -7828,12 +9324,13 @@ export namespace Prisma {
     quantity?: boolean
     nationality?: boolean
     salary?: boolean
+    salaryCurrency?: boolean
     requirementId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type JobRoleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "quantity" | "nationality" | "salary" | "requirementId" | "createdAt" | "updatedAt", ExtArgs["result"]["jobRole"]>
+  export type JobRoleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "quantity" | "nationality" | "salary" | "salaryCurrency" | "requirementId" | "createdAt" | "updatedAt", ExtArgs["result"]["jobRole"]>
   export type JobRoleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     requirement?: boolean | RequirementDefaultArgs<ExtArgs>
   }
@@ -7854,7 +9351,8 @@ export namespace Prisma {
       title: string
       quantity: number
       nationality: string
-      salary: string
+      salary: number | null
+      salaryCurrency: string
       requirementId: string
       createdAt: Date
       updatedAt: Date
@@ -8286,7 +9784,8 @@ export namespace Prisma {
     readonly title: FieldRef<"JobRole", 'String'>
     readonly quantity: FieldRef<"JobRole", 'Int'>
     readonly nationality: FieldRef<"JobRole", 'String'>
-    readonly salary: FieldRef<"JobRole", 'String'>
+    readonly salary: FieldRef<"JobRole", 'Float'>
+    readonly salaryCurrency: FieldRef<"JobRole", 'String'>
     readonly requirementId: FieldRef<"JobRole", 'String'>
     readonly createdAt: FieldRef<"JobRole", 'DateTime'>
     readonly updatedAt: FieldRef<"JobRole", 'DateTime'>
@@ -8705,1369 +10204,6 @@ export namespace Prisma {
 
 
   /**
-   * Model Requirement
-   */
-
-  export type AggregateRequirement = {
-    _count: RequirementCountAggregateOutputType | null
-    _avg: RequirementAvgAggregateOutputType | null
-    _sum: RequirementSumAggregateOutputType | null
-    _min: RequirementMinAggregateOutputType | null
-    _max: RequirementMaxAggregateOutputType | null
-  }
-
-  export type RequirementAvgAggregateOutputType = {
-    totalExperienceYears: number | null
-    preferredAge: number | null
-  }
-
-  export type RequirementSumAggregateOutputType = {
-    totalExperienceYears: number | null
-    preferredAge: number | null
-  }
-
-  export type RequirementMinAggregateOutputType = {
-    id: string | null
-    projectLocation: string | null
-    startDate: Date | null
-    contractDuration: $Enums.ContractDuration | null
-    previousExperience: $Enums.PreviousExperience | null
-    ticketDetails: $Enums.TicketDetails | null
-    totalExperienceYears: number | null
-    preferredAge: number | null
-    specialNotes: string | null
-    status: $Enums.RequirementStatus | null
-    clientId: string | null
-    assignedToId: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type RequirementMaxAggregateOutputType = {
-    id: string | null
-    projectLocation: string | null
-    startDate: Date | null
-    contractDuration: $Enums.ContractDuration | null
-    previousExperience: $Enums.PreviousExperience | null
-    ticketDetails: $Enums.TicketDetails | null
-    totalExperienceYears: number | null
-    preferredAge: number | null
-    specialNotes: string | null
-    status: $Enums.RequirementStatus | null
-    clientId: string | null
-    assignedToId: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type RequirementCountAggregateOutputType = {
-    id: number
-    projectLocation: number
-    startDate: number
-    contractDuration: number
-    previousExperience: number
-    ticketDetails: number
-    totalExperienceYears: number
-    preferredAge: number
-    specialNotes: number
-    status: number
-    languages: number
-    clientId: number
-    assignedToId: number
-    createdAt: number
-    updatedAt: number
-    _all: number
-  }
-
-
-  export type RequirementAvgAggregateInputType = {
-    totalExperienceYears?: true
-    preferredAge?: true
-  }
-
-  export type RequirementSumAggregateInputType = {
-    totalExperienceYears?: true
-    preferredAge?: true
-  }
-
-  export type RequirementMinAggregateInputType = {
-    id?: true
-    projectLocation?: true
-    startDate?: true
-    contractDuration?: true
-    previousExperience?: true
-    ticketDetails?: true
-    totalExperienceYears?: true
-    preferredAge?: true
-    specialNotes?: true
-    status?: true
-    clientId?: true
-    assignedToId?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type RequirementMaxAggregateInputType = {
-    id?: true
-    projectLocation?: true
-    startDate?: true
-    contractDuration?: true
-    previousExperience?: true
-    ticketDetails?: true
-    totalExperienceYears?: true
-    preferredAge?: true
-    specialNotes?: true
-    status?: true
-    clientId?: true
-    assignedToId?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type RequirementCountAggregateInputType = {
-    id?: true
-    projectLocation?: true
-    startDate?: true
-    contractDuration?: true
-    previousExperience?: true
-    ticketDetails?: true
-    totalExperienceYears?: true
-    preferredAge?: true
-    specialNotes?: true
-    status?: true
-    languages?: true
-    clientId?: true
-    assignedToId?: true
-    createdAt?: true
-    updatedAt?: true
-    _all?: true
-  }
-
-  export type RequirementAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which Requirement to aggregate.
-     */
-    where?: RequirementWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Requirements to fetch.
-     */
-    orderBy?: RequirementOrderByWithRelationInput | RequirementOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: RequirementWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Requirements from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Requirements.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned Requirements
-    **/
-    _count?: true | RequirementCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: RequirementAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: RequirementSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: RequirementMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: RequirementMaxAggregateInputType
-  }
-
-  export type GetRequirementAggregateType<T extends RequirementAggregateArgs> = {
-        [P in keyof T & keyof AggregateRequirement]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateRequirement[P]>
-      : GetScalarType<T[P], AggregateRequirement[P]>
-  }
-
-
-
-
-  export type RequirementGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: RequirementWhereInput
-    orderBy?: RequirementOrderByWithAggregationInput | RequirementOrderByWithAggregationInput[]
-    by: RequirementScalarFieldEnum[] | RequirementScalarFieldEnum
-    having?: RequirementScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: RequirementCountAggregateInputType | true
-    _avg?: RequirementAvgAggregateInputType
-    _sum?: RequirementSumAggregateInputType
-    _min?: RequirementMinAggregateInputType
-    _max?: RequirementMaxAggregateInputType
-  }
-
-  export type RequirementGroupByOutputType = {
-    id: string
-    projectLocation: string | null
-    startDate: Date | null
-    contractDuration: $Enums.ContractDuration | null
-    previousExperience: $Enums.PreviousExperience | null
-    ticketDetails: $Enums.TicketDetails | null
-    totalExperienceYears: number | null
-    preferredAge: number | null
-    specialNotes: string | null
-    status: $Enums.RequirementStatus
-    languages: string[]
-    clientId: string
-    assignedToId: string | null
-    createdAt: Date
-    updatedAt: Date
-    _count: RequirementCountAggregateOutputType | null
-    _avg: RequirementAvgAggregateOutputType | null
-    _sum: RequirementSumAggregateOutputType | null
-    _min: RequirementMinAggregateOutputType | null
-    _max: RequirementMaxAggregateOutputType | null
-  }
-
-  type GetRequirementGroupByPayload<T extends RequirementGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<RequirementGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof RequirementGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], RequirementGroupByOutputType[P]>
-            : GetScalarType<T[P], RequirementGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type RequirementSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    projectLocation?: boolean
-    startDate?: boolean
-    contractDuration?: boolean
-    previousExperience?: boolean
-    ticketDetails?: boolean
-    totalExperienceYears?: boolean
-    preferredAge?: boolean
-    specialNotes?: boolean
-    status?: boolean
-    languages?: boolean
-    clientId?: boolean
-    assignedToId?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    jobRoles?: boolean | Requirement$jobRolesArgs<ExtArgs>
-    client?: boolean | ClientDefaultArgs<ExtArgs>
-    assignedTo?: boolean | Requirement$assignedToArgs<ExtArgs>
-    labourProfiles?: boolean | Requirement$labourProfilesArgs<ExtArgs>
-    procedures?: boolean | Requirement$proceduresArgs<ExtArgs>
-    documents?: boolean | Requirement$documentsArgs<ExtArgs>
-    _count?: boolean | RequirementCountOutputTypeDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["requirement"]>
-
-  export type RequirementSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    projectLocation?: boolean
-    startDate?: boolean
-    contractDuration?: boolean
-    previousExperience?: boolean
-    ticketDetails?: boolean
-    totalExperienceYears?: boolean
-    preferredAge?: boolean
-    specialNotes?: boolean
-    status?: boolean
-    languages?: boolean
-    clientId?: boolean
-    assignedToId?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    client?: boolean | ClientDefaultArgs<ExtArgs>
-    assignedTo?: boolean | Requirement$assignedToArgs<ExtArgs>
-  }, ExtArgs["result"]["requirement"]>
-
-  export type RequirementSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    projectLocation?: boolean
-    startDate?: boolean
-    contractDuration?: boolean
-    previousExperience?: boolean
-    ticketDetails?: boolean
-    totalExperienceYears?: boolean
-    preferredAge?: boolean
-    specialNotes?: boolean
-    status?: boolean
-    languages?: boolean
-    clientId?: boolean
-    assignedToId?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    client?: boolean | ClientDefaultArgs<ExtArgs>
-    assignedTo?: boolean | Requirement$assignedToArgs<ExtArgs>
-  }, ExtArgs["result"]["requirement"]>
-
-  export type RequirementSelectScalar = {
-    id?: boolean
-    projectLocation?: boolean
-    startDate?: boolean
-    contractDuration?: boolean
-    previousExperience?: boolean
-    ticketDetails?: boolean
-    totalExperienceYears?: boolean
-    preferredAge?: boolean
-    specialNotes?: boolean
-    status?: boolean
-    languages?: boolean
-    clientId?: boolean
-    assignedToId?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }
-
-  export type RequirementOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "projectLocation" | "startDate" | "contractDuration" | "previousExperience" | "ticketDetails" | "totalExperienceYears" | "preferredAge" | "specialNotes" | "status" | "languages" | "clientId" | "assignedToId" | "createdAt" | "updatedAt", ExtArgs["result"]["requirement"]>
-  export type RequirementInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    jobRoles?: boolean | Requirement$jobRolesArgs<ExtArgs>
-    client?: boolean | ClientDefaultArgs<ExtArgs>
-    assignedTo?: boolean | Requirement$assignedToArgs<ExtArgs>
-    labourProfiles?: boolean | Requirement$labourProfilesArgs<ExtArgs>
-    procedures?: boolean | Requirement$proceduresArgs<ExtArgs>
-    documents?: boolean | Requirement$documentsArgs<ExtArgs>
-    _count?: boolean | RequirementCountOutputTypeDefaultArgs<ExtArgs>
-  }
-  export type RequirementIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    client?: boolean | ClientDefaultArgs<ExtArgs>
-    assignedTo?: boolean | Requirement$assignedToArgs<ExtArgs>
-  }
-  export type RequirementIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    client?: boolean | ClientDefaultArgs<ExtArgs>
-    assignedTo?: boolean | Requirement$assignedToArgs<ExtArgs>
-  }
-
-  export type $RequirementPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "Requirement"
-    objects: {
-      jobRoles: Prisma.$JobRolePayload<ExtArgs>[]
-      client: Prisma.$ClientPayload<ExtArgs>
-      assignedTo: Prisma.$AgencyPayload<ExtArgs> | null
-      labourProfiles: Prisma.$LabourProfilePayload<ExtArgs>[]
-      procedures: Prisma.$ProcedurePayload<ExtArgs>[]
-      documents: Prisma.$RequirementDocumentPayload<ExtArgs>[]
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      projectLocation: string | null
-      startDate: Date | null
-      contractDuration: $Enums.ContractDuration | null
-      previousExperience: $Enums.PreviousExperience | null
-      ticketDetails: $Enums.TicketDetails | null
-      totalExperienceYears: number | null
-      preferredAge: number | null
-      specialNotes: string | null
-      status: $Enums.RequirementStatus
-      languages: string[]
-      clientId: string
-      assignedToId: string | null
-      createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["requirement"]>
-    composites: {}
-  }
-
-  type RequirementGetPayload<S extends boolean | null | undefined | RequirementDefaultArgs> = $Result.GetResult<Prisma.$RequirementPayload, S>
-
-  type RequirementCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<RequirementFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: RequirementCountAggregateInputType | true
-    }
-
-  export interface RequirementDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Requirement'], meta: { name: 'Requirement' } }
-    /**
-     * Find zero or one Requirement that matches the filter.
-     * @param {RequirementFindUniqueArgs} args - Arguments to find a Requirement
-     * @example
-     * // Get one Requirement
-     * const requirement = await prisma.requirement.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends RequirementFindUniqueArgs>(args: SelectSubset<T, RequirementFindUniqueArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one Requirement that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {RequirementFindUniqueOrThrowArgs} args - Arguments to find a Requirement
-     * @example
-     * // Get one Requirement
-     * const requirement = await prisma.requirement.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends RequirementFindUniqueOrThrowArgs>(args: SelectSubset<T, RequirementFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Requirement that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RequirementFindFirstArgs} args - Arguments to find a Requirement
-     * @example
-     * // Get one Requirement
-     * const requirement = await prisma.requirement.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends RequirementFindFirstArgs>(args?: SelectSubset<T, RequirementFindFirstArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first Requirement that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RequirementFindFirstOrThrowArgs} args - Arguments to find a Requirement
-     * @example
-     * // Get one Requirement
-     * const requirement = await prisma.requirement.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends RequirementFindFirstOrThrowArgs>(args?: SelectSubset<T, RequirementFindFirstOrThrowArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more Requirements that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RequirementFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all Requirements
-     * const requirements = await prisma.requirement.findMany()
-     * 
-     * // Get first 10 Requirements
-     * const requirements = await prisma.requirement.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const requirementWithIdOnly = await prisma.requirement.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends RequirementFindManyArgs>(args?: SelectSubset<T, RequirementFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a Requirement.
-     * @param {RequirementCreateArgs} args - Arguments to create a Requirement.
-     * @example
-     * // Create one Requirement
-     * const Requirement = await prisma.requirement.create({
-     *   data: {
-     *     // ... data to create a Requirement
-     *   }
-     * })
-     * 
-     */
-    create<T extends RequirementCreateArgs>(args: SelectSubset<T, RequirementCreateArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many Requirements.
-     * @param {RequirementCreateManyArgs} args - Arguments to create many Requirements.
-     * @example
-     * // Create many Requirements
-     * const requirement = await prisma.requirement.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends RequirementCreateManyArgs>(args?: SelectSubset<T, RequirementCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many Requirements and returns the data saved in the database.
-     * @param {RequirementCreateManyAndReturnArgs} args - Arguments to create many Requirements.
-     * @example
-     * // Create many Requirements
-     * const requirement = await prisma.requirement.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many Requirements and only return the `id`
-     * const requirementWithIdOnly = await prisma.requirement.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends RequirementCreateManyAndReturnArgs>(args?: SelectSubset<T, RequirementCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a Requirement.
-     * @param {RequirementDeleteArgs} args - Arguments to delete one Requirement.
-     * @example
-     * // Delete one Requirement
-     * const Requirement = await prisma.requirement.delete({
-     *   where: {
-     *     // ... filter to delete one Requirement
-     *   }
-     * })
-     * 
-     */
-    delete<T extends RequirementDeleteArgs>(args: SelectSubset<T, RequirementDeleteArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one Requirement.
-     * @param {RequirementUpdateArgs} args - Arguments to update one Requirement.
-     * @example
-     * // Update one Requirement
-     * const requirement = await prisma.requirement.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends RequirementUpdateArgs>(args: SelectSubset<T, RequirementUpdateArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more Requirements.
-     * @param {RequirementDeleteManyArgs} args - Arguments to filter Requirements to delete.
-     * @example
-     * // Delete a few Requirements
-     * const { count } = await prisma.requirement.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends RequirementDeleteManyArgs>(args?: SelectSubset<T, RequirementDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Requirements.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RequirementUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many Requirements
-     * const requirement = await prisma.requirement.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends RequirementUpdateManyArgs>(args: SelectSubset<T, RequirementUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Requirements and returns the data updated in the database.
-     * @param {RequirementUpdateManyAndReturnArgs} args - Arguments to update many Requirements.
-     * @example
-     * // Update many Requirements
-     * const requirement = await prisma.requirement.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Requirements and only return the `id`
-     * const requirementWithIdOnly = await prisma.requirement.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends RequirementUpdateManyAndReturnArgs>(args: SelectSubset<T, RequirementUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one Requirement.
-     * @param {RequirementUpsertArgs} args - Arguments to update or create a Requirement.
-     * @example
-     * // Update or create a Requirement
-     * const requirement = await prisma.requirement.upsert({
-     *   create: {
-     *     // ... data to create a Requirement
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the Requirement we want to update
-     *   }
-     * })
-     */
-    upsert<T extends RequirementUpsertArgs>(args: SelectSubset<T, RequirementUpsertArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of Requirements.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RequirementCountArgs} args - Arguments to filter Requirements to count.
-     * @example
-     * // Count the number of Requirements
-     * const count = await prisma.requirement.count({
-     *   where: {
-     *     // ... the filter for the Requirements we want to count
-     *   }
-     * })
-    **/
-    count<T extends RequirementCountArgs>(
-      args?: Subset<T, RequirementCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], RequirementCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a Requirement.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RequirementAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends RequirementAggregateArgs>(args: Subset<T, RequirementAggregateArgs>): Prisma.PrismaPromise<GetRequirementAggregateType<T>>
-
-    /**
-     * Group by Requirement.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RequirementGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends RequirementGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: RequirementGroupByArgs['orderBy'] }
-        : { orderBy?: RequirementGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, RequirementGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRequirementGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the Requirement model
-   */
-  readonly fields: RequirementFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for Requirement.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__RequirementClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    jobRoles<T extends Requirement$jobRolesArgs<ExtArgs> = {}>(args?: Subset<T, Requirement$jobRolesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobRolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    client<T extends ClientDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ClientDefaultArgs<ExtArgs>>): Prisma__ClientClient<$Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    assignedTo<T extends Requirement$assignedToArgs<ExtArgs> = {}>(args?: Subset<T, Requirement$assignedToArgs<ExtArgs>>): Prisma__AgencyClient<$Result.GetResult<Prisma.$AgencyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    labourProfiles<T extends Requirement$labourProfilesArgs<ExtArgs> = {}>(args?: Subset<T, Requirement$labourProfilesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LabourProfilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    procedures<T extends Requirement$proceduresArgs<ExtArgs> = {}>(args?: Subset<T, Requirement$proceduresArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProcedurePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    documents<T extends Requirement$documentsArgs<ExtArgs> = {}>(args?: Subset<T, Requirement$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the Requirement model
-   */
-  interface RequirementFieldRefs {
-    readonly id: FieldRef<"Requirement", 'String'>
-    readonly projectLocation: FieldRef<"Requirement", 'String'>
-    readonly startDate: FieldRef<"Requirement", 'DateTime'>
-    readonly contractDuration: FieldRef<"Requirement", 'ContractDuration'>
-    readonly previousExperience: FieldRef<"Requirement", 'PreviousExperience'>
-    readonly ticketDetails: FieldRef<"Requirement", 'TicketDetails'>
-    readonly totalExperienceYears: FieldRef<"Requirement", 'Int'>
-    readonly preferredAge: FieldRef<"Requirement", 'Int'>
-    readonly specialNotes: FieldRef<"Requirement", 'String'>
-    readonly status: FieldRef<"Requirement", 'RequirementStatus'>
-    readonly languages: FieldRef<"Requirement", 'String[]'>
-    readonly clientId: FieldRef<"Requirement", 'String'>
-    readonly assignedToId: FieldRef<"Requirement", 'String'>
-    readonly createdAt: FieldRef<"Requirement", 'DateTime'>
-    readonly updatedAt: FieldRef<"Requirement", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * Requirement findUnique
-   */
-  export type RequirementFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Requirement
-     */
-    select?: RequirementSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Requirement
-     */
-    omit?: RequirementOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementInclude<ExtArgs> | null
-    /**
-     * Filter, which Requirement to fetch.
-     */
-    where: RequirementWhereUniqueInput
-  }
-
-  /**
-   * Requirement findUniqueOrThrow
-   */
-  export type RequirementFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Requirement
-     */
-    select?: RequirementSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Requirement
-     */
-    omit?: RequirementOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementInclude<ExtArgs> | null
-    /**
-     * Filter, which Requirement to fetch.
-     */
-    where: RequirementWhereUniqueInput
-  }
-
-  /**
-   * Requirement findFirst
-   */
-  export type RequirementFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Requirement
-     */
-    select?: RequirementSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Requirement
-     */
-    omit?: RequirementOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementInclude<ExtArgs> | null
-    /**
-     * Filter, which Requirement to fetch.
-     */
-    where?: RequirementWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Requirements to fetch.
-     */
-    orderBy?: RequirementOrderByWithRelationInput | RequirementOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for Requirements.
-     */
-    cursor?: RequirementWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Requirements from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Requirements.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of Requirements.
-     */
-    distinct?: RequirementScalarFieldEnum | RequirementScalarFieldEnum[]
-  }
-
-  /**
-   * Requirement findFirstOrThrow
-   */
-  export type RequirementFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Requirement
-     */
-    select?: RequirementSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Requirement
-     */
-    omit?: RequirementOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementInclude<ExtArgs> | null
-    /**
-     * Filter, which Requirement to fetch.
-     */
-    where?: RequirementWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Requirements to fetch.
-     */
-    orderBy?: RequirementOrderByWithRelationInput | RequirementOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for Requirements.
-     */
-    cursor?: RequirementWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Requirements from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Requirements.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of Requirements.
-     */
-    distinct?: RequirementScalarFieldEnum | RequirementScalarFieldEnum[]
-  }
-
-  /**
-   * Requirement findMany
-   */
-  export type RequirementFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Requirement
-     */
-    select?: RequirementSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Requirement
-     */
-    omit?: RequirementOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementInclude<ExtArgs> | null
-    /**
-     * Filter, which Requirements to fetch.
-     */
-    where?: RequirementWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of Requirements to fetch.
-     */
-    orderBy?: RequirementOrderByWithRelationInput | RequirementOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing Requirements.
-     */
-    cursor?: RequirementWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` Requirements from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` Requirements.
-     */
-    skip?: number
-    distinct?: RequirementScalarFieldEnum | RequirementScalarFieldEnum[]
-  }
-
-  /**
-   * Requirement create
-   */
-  export type RequirementCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Requirement
-     */
-    select?: RequirementSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Requirement
-     */
-    omit?: RequirementOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementInclude<ExtArgs> | null
-    /**
-     * The data needed to create a Requirement.
-     */
-    data: XOR<RequirementCreateInput, RequirementUncheckedCreateInput>
-  }
-
-  /**
-   * Requirement createMany
-   */
-  export type RequirementCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many Requirements.
-     */
-    data: RequirementCreateManyInput | RequirementCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * Requirement createManyAndReturn
-   */
-  export type RequirementCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Requirement
-     */
-    select?: RequirementSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Requirement
-     */
-    omit?: RequirementOmit<ExtArgs> | null
-    /**
-     * The data used to create many Requirements.
-     */
-    data: RequirementCreateManyInput | RequirementCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * Requirement update
-   */
-  export type RequirementUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Requirement
-     */
-    select?: RequirementSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Requirement
-     */
-    omit?: RequirementOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementInclude<ExtArgs> | null
-    /**
-     * The data needed to update a Requirement.
-     */
-    data: XOR<RequirementUpdateInput, RequirementUncheckedUpdateInput>
-    /**
-     * Choose, which Requirement to update.
-     */
-    where: RequirementWhereUniqueInput
-  }
-
-  /**
-   * Requirement updateMany
-   */
-  export type RequirementUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update Requirements.
-     */
-    data: XOR<RequirementUpdateManyMutationInput, RequirementUncheckedUpdateManyInput>
-    /**
-     * Filter which Requirements to update
-     */
-    where?: RequirementWhereInput
-    /**
-     * Limit how many Requirements to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Requirement updateManyAndReturn
-   */
-  export type RequirementUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Requirement
-     */
-    select?: RequirementSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Requirement
-     */
-    omit?: RequirementOmit<ExtArgs> | null
-    /**
-     * The data used to update Requirements.
-     */
-    data: XOR<RequirementUpdateManyMutationInput, RequirementUncheckedUpdateManyInput>
-    /**
-     * Filter which Requirements to update
-     */
-    where?: RequirementWhereInput
-    /**
-     * Limit how many Requirements to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * Requirement upsert
-   */
-  export type RequirementUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Requirement
-     */
-    select?: RequirementSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Requirement
-     */
-    omit?: RequirementOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementInclude<ExtArgs> | null
-    /**
-     * The filter to search for the Requirement to update in case it exists.
-     */
-    where: RequirementWhereUniqueInput
-    /**
-     * In case the Requirement found by the `where` argument doesn't exist, create a new Requirement with this data.
-     */
-    create: XOR<RequirementCreateInput, RequirementUncheckedCreateInput>
-    /**
-     * In case the Requirement was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<RequirementUpdateInput, RequirementUncheckedUpdateInput>
-  }
-
-  /**
-   * Requirement delete
-   */
-  export type RequirementDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Requirement
-     */
-    select?: RequirementSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Requirement
-     */
-    omit?: RequirementOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementInclude<ExtArgs> | null
-    /**
-     * Filter which Requirement to delete.
-     */
-    where: RequirementWhereUniqueInput
-  }
-
-  /**
-   * Requirement deleteMany
-   */
-  export type RequirementDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which Requirements to delete
-     */
-    where?: RequirementWhereInput
-    /**
-     * Limit how many Requirements to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * Requirement.jobRoles
-   */
-  export type Requirement$jobRolesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the JobRole
-     */
-    select?: JobRoleSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the JobRole
-     */
-    omit?: JobRoleOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: JobRoleInclude<ExtArgs> | null
-    where?: JobRoleWhereInput
-    orderBy?: JobRoleOrderByWithRelationInput | JobRoleOrderByWithRelationInput[]
-    cursor?: JobRoleWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: JobRoleScalarFieldEnum | JobRoleScalarFieldEnum[]
-  }
-
-  /**
-   * Requirement.assignedTo
-   */
-  export type Requirement$assignedToArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Agency
-     */
-    select?: AgencySelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Agency
-     */
-    omit?: AgencyOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AgencyInclude<ExtArgs> | null
-    where?: AgencyWhereInput
-  }
-
-  /**
-   * Requirement.labourProfiles
-   */
-  export type Requirement$labourProfilesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the LabourProfile
-     */
-    select?: LabourProfileSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the LabourProfile
-     */
-    omit?: LabourProfileOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: LabourProfileInclude<ExtArgs> | null
-    where?: LabourProfileWhereInput
-    orderBy?: LabourProfileOrderByWithRelationInput | LabourProfileOrderByWithRelationInput[]
-    cursor?: LabourProfileWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: LabourProfileScalarFieldEnum | LabourProfileScalarFieldEnum[]
-  }
-
-  /**
-   * Requirement.procedures
-   */
-  export type Requirement$proceduresArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Procedure
-     */
-    select?: ProcedureSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Procedure
-     */
-    omit?: ProcedureOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ProcedureInclude<ExtArgs> | null
-    where?: ProcedureWhereInput
-    orderBy?: ProcedureOrderByWithRelationInput | ProcedureOrderByWithRelationInput[]
-    cursor?: ProcedureWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: ProcedureScalarFieldEnum | ProcedureScalarFieldEnum[]
-  }
-
-  /**
-   * Requirement.documents
-   */
-  export type Requirement$documentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RequirementDocument
-     */
-    select?: RequirementDocumentSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RequirementDocument
-     */
-    omit?: RequirementDocumentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementDocumentInclude<ExtArgs> | null
-    where?: RequirementDocumentWhereInput
-    orderBy?: RequirementDocumentOrderByWithRelationInput | RequirementDocumentOrderByWithRelationInput[]
-    cursor?: RequirementDocumentWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: RequirementDocumentScalarFieldEnum | RequirementDocumentScalarFieldEnum[]
-  }
-
-  /**
-   * Requirement without action
-   */
-  export type RequirementDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Requirement
-     */
-    select?: RequirementSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Requirement
-     */
-    omit?: RequirementOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementInclude<ExtArgs> | null
-  }
-
-
-  /**
    * Model LabourProfile
    */
 
@@ -10093,15 +10229,34 @@ export namespace Prisma {
     id: string | null
     name: string | null
     age: number | null
-    gender: string | null
+    gender: $Enums.Gender | null
     nationality: string | null
+    maritalStatus: string | null
     experienceYears: number | null
     education: string | null
-    status: $Enums.LabourStatus | null
+    currentPosition: string | null
+    currentCompany: string | null
+    englishProficiency: string | null
+    email: string | null
+    phone: string | null
+    address: string | null
+    city: string | null
+    country: string | null
     cvUrl: string | null
-    passportCopy: string | null
+    passportNumber: string | null
+    passportExpiry: Date | null
+    visaType: string | null
+    visaExpiry: Date | null
+    medicalStatus: string | null
+    medicalExpiry: Date | null
+    photo: string | null
+    status: $Enums.LabourProfileStatus | null
+    statusReason: string | null
     requirementId: string | null
     agencyId: string | null
+    deploymentDate: Date | null
+    contractStartDate: Date | null
+    contractEndDate: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -10110,15 +10265,34 @@ export namespace Prisma {
     id: string | null
     name: string | null
     age: number | null
-    gender: string | null
+    gender: $Enums.Gender | null
     nationality: string | null
+    maritalStatus: string | null
     experienceYears: number | null
     education: string | null
-    status: $Enums.LabourStatus | null
+    currentPosition: string | null
+    currentCompany: string | null
+    englishProficiency: string | null
+    email: string | null
+    phone: string | null
+    address: string | null
+    city: string | null
+    country: string | null
     cvUrl: string | null
-    passportCopy: string | null
+    passportNumber: string | null
+    passportExpiry: Date | null
+    visaType: string | null
+    visaExpiry: Date | null
+    medicalStatus: string | null
+    medicalExpiry: Date | null
+    photo: string | null
+    status: $Enums.LabourProfileStatus | null
+    statusReason: string | null
     requirementId: string | null
     agencyId: string | null
+    deploymentDate: Date | null
+    contractStartDate: Date | null
+    contractEndDate: Date | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -10129,16 +10303,35 @@ export namespace Prisma {
     age: number
     gender: number
     nationality: number
+    maritalStatus: number
     skills: number
     experienceYears: number
     education: number
-    language: number
-    status: number
+    currentPosition: number
+    currentCompany: number
+    languages: number
+    englishProficiency: number
+    email: number
+    phone: number
+    address: number
+    city: number
+    country: number
     cvUrl: number
-    passportCopy: number
+    passportNumber: number
+    passportExpiry: number
+    visaType: number
+    visaExpiry: number
+    medicalStatus: number
+    medicalExpiry: number
+    photo: number
     otherDocs: number
+    status: number
+    statusReason: number
     requirementId: number
     agencyId: number
+    deploymentDate: number
+    contractStartDate: number
+    contractEndDate: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -10161,13 +10354,32 @@ export namespace Prisma {
     age?: true
     gender?: true
     nationality?: true
+    maritalStatus?: true
     experienceYears?: true
     education?: true
-    status?: true
+    currentPosition?: true
+    currentCompany?: true
+    englishProficiency?: true
+    email?: true
+    phone?: true
+    address?: true
+    city?: true
+    country?: true
     cvUrl?: true
-    passportCopy?: true
+    passportNumber?: true
+    passportExpiry?: true
+    visaType?: true
+    visaExpiry?: true
+    medicalStatus?: true
+    medicalExpiry?: true
+    photo?: true
+    status?: true
+    statusReason?: true
     requirementId?: true
     agencyId?: true
+    deploymentDate?: true
+    contractStartDate?: true
+    contractEndDate?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -10178,13 +10390,32 @@ export namespace Prisma {
     age?: true
     gender?: true
     nationality?: true
+    maritalStatus?: true
     experienceYears?: true
     education?: true
-    status?: true
+    currentPosition?: true
+    currentCompany?: true
+    englishProficiency?: true
+    email?: true
+    phone?: true
+    address?: true
+    city?: true
+    country?: true
     cvUrl?: true
-    passportCopy?: true
+    passportNumber?: true
+    passportExpiry?: true
+    visaType?: true
+    visaExpiry?: true
+    medicalStatus?: true
+    medicalExpiry?: true
+    photo?: true
+    status?: true
+    statusReason?: true
     requirementId?: true
     agencyId?: true
+    deploymentDate?: true
+    contractStartDate?: true
+    contractEndDate?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -10195,16 +10426,35 @@ export namespace Prisma {
     age?: true
     gender?: true
     nationality?: true
+    maritalStatus?: true
     skills?: true
     experienceYears?: true
     education?: true
-    language?: true
-    status?: true
+    currentPosition?: true
+    currentCompany?: true
+    languages?: true
+    englishProficiency?: true
+    email?: true
+    phone?: true
+    address?: true
+    city?: true
+    country?: true
     cvUrl?: true
-    passportCopy?: true
+    passportNumber?: true
+    passportExpiry?: true
+    visaType?: true
+    visaExpiry?: true
+    medicalStatus?: true
+    medicalExpiry?: true
+    photo?: true
     otherDocs?: true
+    status?: true
+    statusReason?: true
     requirementId?: true
     agencyId?: true
+    deploymentDate?: true
+    contractStartDate?: true
+    contractEndDate?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -10300,18 +10550,37 @@ export namespace Prisma {
     id: string
     name: string
     age: number
-    gender: string
+    gender: $Enums.Gender
     nationality: string
+    maritalStatus: string | null
     skills: string[]
     experienceYears: number
     education: string | null
-    language: string[]
-    status: $Enums.LabourStatus
+    currentPosition: string | null
+    currentCompany: string | null
+    languages: string[]
+    englishProficiency: string | null
+    email: string | null
+    phone: string
+    address: string | null
+    city: string | null
+    country: string | null
     cvUrl: string
-    passportCopy: string | null
+    passportNumber: string | null
+    passportExpiry: Date | null
+    visaType: string | null
+    visaExpiry: Date | null
+    medicalStatus: string | null
+    medicalExpiry: Date | null
+    photo: string | null
     otherDocs: string[]
+    status: $Enums.LabourProfileStatus
+    statusReason: string | null
     requirementId: string
     agencyId: string
+    deploymentDate: Date | null
+    contractStartDate: Date | null
+    contractEndDate: Date | null
     createdAt: Date
     updatedAt: Date
     _count: LabourProfileCountAggregateOutputType | null
@@ -10341,16 +10610,35 @@ export namespace Prisma {
     age?: boolean
     gender?: boolean
     nationality?: boolean
+    maritalStatus?: boolean
     skills?: boolean
     experienceYears?: boolean
     education?: boolean
-    language?: boolean
-    status?: boolean
+    currentPosition?: boolean
+    currentCompany?: boolean
+    languages?: boolean
+    englishProficiency?: boolean
+    email?: boolean
+    phone?: boolean
+    address?: boolean
+    city?: boolean
+    country?: boolean
     cvUrl?: boolean
-    passportCopy?: boolean
+    passportNumber?: boolean
+    passportExpiry?: boolean
+    visaType?: boolean
+    visaExpiry?: boolean
+    medicalStatus?: boolean
+    medicalExpiry?: boolean
+    photo?: boolean
     otherDocs?: boolean
+    status?: boolean
+    statusReason?: boolean
     requirementId?: boolean
     agencyId?: boolean
+    deploymentDate?: boolean
+    contractStartDate?: boolean
+    contractEndDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     requirement?: boolean | RequirementDefaultArgs<ExtArgs>
@@ -10366,16 +10654,35 @@ export namespace Prisma {
     age?: boolean
     gender?: boolean
     nationality?: boolean
+    maritalStatus?: boolean
     skills?: boolean
     experienceYears?: boolean
     education?: boolean
-    language?: boolean
-    status?: boolean
+    currentPosition?: boolean
+    currentCompany?: boolean
+    languages?: boolean
+    englishProficiency?: boolean
+    email?: boolean
+    phone?: boolean
+    address?: boolean
+    city?: boolean
+    country?: boolean
     cvUrl?: boolean
-    passportCopy?: boolean
+    passportNumber?: boolean
+    passportExpiry?: boolean
+    visaType?: boolean
+    visaExpiry?: boolean
+    medicalStatus?: boolean
+    medicalExpiry?: boolean
+    photo?: boolean
     otherDocs?: boolean
+    status?: boolean
+    statusReason?: boolean
     requirementId?: boolean
     agencyId?: boolean
+    deploymentDate?: boolean
+    contractStartDate?: boolean
+    contractEndDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     requirement?: boolean | RequirementDefaultArgs<ExtArgs>
@@ -10388,16 +10695,35 @@ export namespace Prisma {
     age?: boolean
     gender?: boolean
     nationality?: boolean
+    maritalStatus?: boolean
     skills?: boolean
     experienceYears?: boolean
     education?: boolean
-    language?: boolean
-    status?: boolean
+    currentPosition?: boolean
+    currentCompany?: boolean
+    languages?: boolean
+    englishProficiency?: boolean
+    email?: boolean
+    phone?: boolean
+    address?: boolean
+    city?: boolean
+    country?: boolean
     cvUrl?: boolean
-    passportCopy?: boolean
+    passportNumber?: boolean
+    passportExpiry?: boolean
+    visaType?: boolean
+    visaExpiry?: boolean
+    medicalStatus?: boolean
+    medicalExpiry?: boolean
+    photo?: boolean
     otherDocs?: boolean
+    status?: boolean
+    statusReason?: boolean
     requirementId?: boolean
     agencyId?: boolean
+    deploymentDate?: boolean
+    contractStartDate?: boolean
+    contractEndDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     requirement?: boolean | RequirementDefaultArgs<ExtArgs>
@@ -10410,21 +10736,40 @@ export namespace Prisma {
     age?: boolean
     gender?: boolean
     nationality?: boolean
+    maritalStatus?: boolean
     skills?: boolean
     experienceYears?: boolean
     education?: boolean
-    language?: boolean
-    status?: boolean
+    currentPosition?: boolean
+    currentCompany?: boolean
+    languages?: boolean
+    englishProficiency?: boolean
+    email?: boolean
+    phone?: boolean
+    address?: boolean
+    city?: boolean
+    country?: boolean
     cvUrl?: boolean
-    passportCopy?: boolean
+    passportNumber?: boolean
+    passportExpiry?: boolean
+    visaType?: boolean
+    visaExpiry?: boolean
+    medicalStatus?: boolean
+    medicalExpiry?: boolean
+    photo?: boolean
     otherDocs?: boolean
+    status?: boolean
+    statusReason?: boolean
     requirementId?: boolean
     agencyId?: boolean
+    deploymentDate?: boolean
+    contractStartDate?: boolean
+    contractEndDate?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type LabourProfileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "age" | "gender" | "nationality" | "skills" | "experienceYears" | "education" | "language" | "status" | "cvUrl" | "passportCopy" | "otherDocs" | "requirementId" | "agencyId" | "createdAt" | "updatedAt", ExtArgs["result"]["labourProfile"]>
+  export type LabourProfileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "age" | "gender" | "nationality" | "maritalStatus" | "skills" | "experienceYears" | "education" | "currentPosition" | "currentCompany" | "languages" | "englishProficiency" | "email" | "phone" | "address" | "city" | "country" | "cvUrl" | "passportNumber" | "passportExpiry" | "visaType" | "visaExpiry" | "medicalStatus" | "medicalExpiry" | "photo" | "otherDocs" | "status" | "statusReason" | "requirementId" | "agencyId" | "deploymentDate" | "contractStartDate" | "contractEndDate" | "createdAt" | "updatedAt", ExtArgs["result"]["labourProfile"]>
   export type LabourProfileInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     requirement?: boolean | RequirementDefaultArgs<ExtArgs>
     agency?: boolean | AgencyDefaultArgs<ExtArgs>
@@ -10453,18 +10798,37 @@ export namespace Prisma {
       id: string
       name: string
       age: number
-      gender: string
+      gender: $Enums.Gender
       nationality: string
+      maritalStatus: string | null
       skills: string[]
       experienceYears: number
       education: string | null
-      language: string[]
-      status: $Enums.LabourStatus
+      currentPosition: string | null
+      currentCompany: string | null
+      languages: string[]
+      englishProficiency: string | null
+      email: string | null
+      phone: string
+      address: string | null
+      city: string | null
+      country: string | null
       cvUrl: string
-      passportCopy: string | null
+      passportNumber: string | null
+      passportExpiry: Date | null
+      visaType: string | null
+      visaExpiry: Date | null
+      medicalStatus: string | null
+      medicalExpiry: Date | null
+      photo: string | null
       otherDocs: string[]
+      status: $Enums.LabourProfileStatus
+      statusReason: string | null
       requirementId: string
       agencyId: string
+      deploymentDate: Date | null
+      contractStartDate: Date | null
+      contractEndDate: Date | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["labourProfile"]>
@@ -10897,18 +11261,37 @@ export namespace Prisma {
     readonly id: FieldRef<"LabourProfile", 'String'>
     readonly name: FieldRef<"LabourProfile", 'String'>
     readonly age: FieldRef<"LabourProfile", 'Int'>
-    readonly gender: FieldRef<"LabourProfile", 'String'>
+    readonly gender: FieldRef<"LabourProfile", 'Gender'>
     readonly nationality: FieldRef<"LabourProfile", 'String'>
+    readonly maritalStatus: FieldRef<"LabourProfile", 'String'>
     readonly skills: FieldRef<"LabourProfile", 'String[]'>
     readonly experienceYears: FieldRef<"LabourProfile", 'Int'>
     readonly education: FieldRef<"LabourProfile", 'String'>
-    readonly language: FieldRef<"LabourProfile", 'String[]'>
-    readonly status: FieldRef<"LabourProfile", 'LabourStatus'>
+    readonly currentPosition: FieldRef<"LabourProfile", 'String'>
+    readonly currentCompany: FieldRef<"LabourProfile", 'String'>
+    readonly languages: FieldRef<"LabourProfile", 'String[]'>
+    readonly englishProficiency: FieldRef<"LabourProfile", 'String'>
+    readonly email: FieldRef<"LabourProfile", 'String'>
+    readonly phone: FieldRef<"LabourProfile", 'String'>
+    readonly address: FieldRef<"LabourProfile", 'String'>
+    readonly city: FieldRef<"LabourProfile", 'String'>
+    readonly country: FieldRef<"LabourProfile", 'String'>
     readonly cvUrl: FieldRef<"LabourProfile", 'String'>
-    readonly passportCopy: FieldRef<"LabourProfile", 'String'>
+    readonly passportNumber: FieldRef<"LabourProfile", 'String'>
+    readonly passportExpiry: FieldRef<"LabourProfile", 'DateTime'>
+    readonly visaType: FieldRef<"LabourProfile", 'String'>
+    readonly visaExpiry: FieldRef<"LabourProfile", 'DateTime'>
+    readonly medicalStatus: FieldRef<"LabourProfile", 'String'>
+    readonly medicalExpiry: FieldRef<"LabourProfile", 'DateTime'>
+    readonly photo: FieldRef<"LabourProfile", 'String'>
     readonly otherDocs: FieldRef<"LabourProfile", 'String[]'>
+    readonly status: FieldRef<"LabourProfile", 'LabourProfileStatus'>
+    readonly statusReason: FieldRef<"LabourProfile", 'String'>
     readonly requirementId: FieldRef<"LabourProfile", 'String'>
     readonly agencyId: FieldRef<"LabourProfile", 'String'>
+    readonly deploymentDate: FieldRef<"LabourProfile", 'DateTime'>
+    readonly contractStartDate: FieldRef<"LabourProfile", 'DateTime'>
+    readonly contractEndDate: FieldRef<"LabourProfile", 'DateTime'>
     readonly createdAt: FieldRef<"LabourProfile", 'DateTime'>
     readonly updatedAt: FieldRef<"LabourProfile", 'DateTime'>
   }
@@ -11387,7 +11770,7 @@ export namespace Prisma {
     id: string | null
     name: string | null
     description: string | null
-    status: string | null
+    status: $Enums.ProcedureStatus | null
     dueDate: Date | null
     completedDate: Date | null
     comments: string | null
@@ -11401,7 +11784,7 @@ export namespace Prisma {
     id: string | null
     name: string | null
     description: string | null
-    status: string | null
+    status: $Enums.ProcedureStatus | null
     dueDate: Date | null
     completedDate: Date | null
     comments: string | null
@@ -11419,6 +11802,7 @@ export namespace Prisma {
     dueDate: number
     completedDate: number
     comments: number
+    metadata: number
     requirementId: number
     labourProfileId: number
     createdAt: number
@@ -11463,6 +11847,7 @@ export namespace Prisma {
     dueDate?: true
     completedDate?: true
     comments?: true
+    metadata?: true
     requirementId?: true
     labourProfileId?: true
     createdAt?: true
@@ -11546,10 +11931,11 @@ export namespace Prisma {
     id: string
     name: string
     description: string
-    status: string
+    status: $Enums.ProcedureStatus
     dueDate: Date | null
     completedDate: Date | null
     comments: string | null
+    metadata: JsonValue | null
     requirementId: string | null
     labourProfileId: string | null
     createdAt: Date
@@ -11581,6 +11967,7 @@ export namespace Prisma {
     dueDate?: boolean
     completedDate?: boolean
     comments?: boolean
+    metadata?: boolean
     requirementId?: boolean
     labourProfileId?: boolean
     createdAt?: boolean
@@ -11597,6 +11984,7 @@ export namespace Prisma {
     dueDate?: boolean
     completedDate?: boolean
     comments?: boolean
+    metadata?: boolean
     requirementId?: boolean
     labourProfileId?: boolean
     createdAt?: boolean
@@ -11613,6 +12001,7 @@ export namespace Prisma {
     dueDate?: boolean
     completedDate?: boolean
     comments?: boolean
+    metadata?: boolean
     requirementId?: boolean
     labourProfileId?: boolean
     createdAt?: boolean
@@ -11629,13 +12018,14 @@ export namespace Prisma {
     dueDate?: boolean
     completedDate?: boolean
     comments?: boolean
+    metadata?: boolean
     requirementId?: boolean
     labourProfileId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ProcedureOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "status" | "dueDate" | "completedDate" | "comments" | "requirementId" | "labourProfileId" | "createdAt" | "updatedAt", ExtArgs["result"]["procedure"]>
+  export type ProcedureOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "status" | "dueDate" | "completedDate" | "comments" | "metadata" | "requirementId" | "labourProfileId" | "createdAt" | "updatedAt", ExtArgs["result"]["procedure"]>
   export type ProcedureInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     requirement?: boolean | Procedure$requirementArgs<ExtArgs>
     labourProfile?: boolean | Procedure$labourProfileArgs<ExtArgs>
@@ -11659,10 +12049,11 @@ export namespace Prisma {
       id: string
       name: string
       description: string
-      status: string
+      status: $Enums.ProcedureStatus
       dueDate: Date | null
       completedDate: Date | null
       comments: string | null
+      metadata: Prisma.JsonValue | null
       requirementId: string | null
       labourProfileId: string | null
       createdAt: Date
@@ -12095,10 +12486,11 @@ export namespace Prisma {
     readonly id: FieldRef<"Procedure", 'String'>
     readonly name: FieldRef<"Procedure", 'String'>
     readonly description: FieldRef<"Procedure", 'String'>
-    readonly status: FieldRef<"Procedure", 'String'>
+    readonly status: FieldRef<"Procedure", 'ProcedureStatus'>
     readonly dueDate: FieldRef<"Procedure", 'DateTime'>
     readonly completedDate: FieldRef<"Procedure", 'DateTime'>
     readonly comments: FieldRef<"Procedure", 'String'>
+    readonly metadata: FieldRef<"Procedure", 'Json'>
     readonly requirementId: FieldRef<"Procedure", 'String'>
     readonly labourProfileId: FieldRef<"Procedure", 'String'>
     readonly createdAt: FieldRef<"Procedure", 'DateTime'>
@@ -12567,7 +12959,7 @@ export namespace Prisma {
 
   export type LabourStatusLogMinAggregateOutputType = {
     id: string | null
-    status: $Enums.LabourStatus | null
+    status: $Enums.LabourProfileStatus | null
     comments: string | null
     labourProfileId: string | null
     changedById: string | null
@@ -12576,7 +12968,7 @@ export namespace Prisma {
 
   export type LabourStatusLogMaxAggregateOutputType = {
     id: string | null
-    status: $Enums.LabourStatus | null
+    status: $Enums.LabourProfileStatus | null
     comments: string | null
     labourProfileId: string | null
     changedById: string | null
@@ -12587,6 +12979,7 @@ export namespace Prisma {
     id: number
     status: number
     comments: number
+    metadata: number
     labourProfileId: number
     changedById: number
     createdAt: number
@@ -12616,6 +13009,7 @@ export namespace Prisma {
     id?: true
     status?: true
     comments?: true
+    metadata?: true
     labourProfileId?: true
     changedById?: true
     createdAt?: true
@@ -12696,8 +13090,9 @@ export namespace Prisma {
 
   export type LabourStatusLogGroupByOutputType = {
     id: string
-    status: $Enums.LabourStatus
+    status: $Enums.LabourProfileStatus
     comments: string | null
+    metadata: JsonValue | null
     labourProfileId: string
     changedById: string
     createdAt: Date
@@ -12724,6 +13119,7 @@ export namespace Prisma {
     id?: boolean
     status?: boolean
     comments?: boolean
+    metadata?: boolean
     labourProfileId?: boolean
     changedById?: boolean
     createdAt?: boolean
@@ -12735,6 +13131,7 @@ export namespace Prisma {
     id?: boolean
     status?: boolean
     comments?: boolean
+    metadata?: boolean
     labourProfileId?: boolean
     changedById?: boolean
     createdAt?: boolean
@@ -12746,6 +13143,7 @@ export namespace Prisma {
     id?: boolean
     status?: boolean
     comments?: boolean
+    metadata?: boolean
     labourProfileId?: boolean
     changedById?: boolean
     createdAt?: boolean
@@ -12757,12 +13155,13 @@ export namespace Prisma {
     id?: boolean
     status?: boolean
     comments?: boolean
+    metadata?: boolean
     labourProfileId?: boolean
     changedById?: boolean
     createdAt?: boolean
   }
 
-  export type LabourStatusLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "status" | "comments" | "labourProfileId" | "changedById" | "createdAt", ExtArgs["result"]["labourStatusLog"]>
+  export type LabourStatusLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "status" | "comments" | "metadata" | "labourProfileId" | "changedById" | "createdAt", ExtArgs["result"]["labourStatusLog"]>
   export type LabourStatusLogInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     labourProfile?: boolean | LabourProfileDefaultArgs<ExtArgs>
     changedBy?: boolean | UserDefaultArgs<ExtArgs>
@@ -12784,8 +13183,9 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      status: $Enums.LabourStatus
+      status: $Enums.LabourProfileStatus
       comments: string | null
+      metadata: Prisma.JsonValue | null
       labourProfileId: string
       changedById: string
       createdAt: Date
@@ -13215,8 +13615,9 @@ export namespace Prisma {
    */
   interface LabourStatusLogFieldRefs {
     readonly id: FieldRef<"LabourStatusLog", 'String'>
-    readonly status: FieldRef<"LabourStatusLog", 'LabourStatus'>
+    readonly status: FieldRef<"LabourStatusLog", 'LabourProfileStatus'>
     readonly comments: FieldRef<"LabourStatusLog", 'String'>
+    readonly metadata: FieldRef<"LabourStatusLog", 'Json'>
     readonly labourProfileId: FieldRef<"LabourStatusLog", 'String'>
     readonly changedById: FieldRef<"LabourStatusLog", 'String'>
     readonly createdAt: FieldRef<"LabourStatusLog", 'DateTime'>
@@ -13648,8 +14049,11 @@ export namespace Prisma {
     id: string | null
     type: $Enums.DocumentType | null
     url: string | null
+    name: string | null
+    description: string | null
     verified: boolean | null
     comments: string | null
+    expiryDate: Date | null
     clientId: string | null
     verifiedById: string | null
     createdAt: Date | null
@@ -13660,8 +14064,11 @@ export namespace Prisma {
     id: string | null
     type: $Enums.DocumentType | null
     url: string | null
+    name: string | null
+    description: string | null
     verified: boolean | null
     comments: string | null
+    expiryDate: Date | null
     clientId: string | null
     verifiedById: string | null
     createdAt: Date | null
@@ -13672,8 +14079,11 @@ export namespace Prisma {
     id: number
     type: number
     url: number
+    name: number
+    description: number
     verified: number
     comments: number
+    expiryDate: number
     clientId: number
     verifiedById: number
     createdAt: number
@@ -13686,8 +14096,11 @@ export namespace Prisma {
     id?: true
     type?: true
     url?: true
+    name?: true
+    description?: true
     verified?: true
     comments?: true
+    expiryDate?: true
     clientId?: true
     verifiedById?: true
     createdAt?: true
@@ -13698,8 +14111,11 @@ export namespace Prisma {
     id?: true
     type?: true
     url?: true
+    name?: true
+    description?: true
     verified?: true
     comments?: true
+    expiryDate?: true
     clientId?: true
     verifiedById?: true
     createdAt?: true
@@ -13710,8 +14126,11 @@ export namespace Prisma {
     id?: true
     type?: true
     url?: true
+    name?: true
+    description?: true
     verified?: true
     comments?: true
+    expiryDate?: true
     clientId?: true
     verifiedById?: true
     createdAt?: true
@@ -13795,8 +14214,11 @@ export namespace Prisma {
     id: string
     type: $Enums.DocumentType
     url: string
+    name: string | null
+    description: string | null
     verified: boolean
     comments: string | null
+    expiryDate: Date | null
     clientId: string
     verifiedById: string | null
     createdAt: Date
@@ -13824,8 +14246,11 @@ export namespace Prisma {
     id?: boolean
     type?: boolean
     url?: boolean
+    name?: boolean
+    description?: boolean
     verified?: boolean
     comments?: boolean
+    expiryDate?: boolean
     clientId?: boolean
     verifiedById?: boolean
     createdAt?: boolean
@@ -13838,8 +14263,11 @@ export namespace Prisma {
     id?: boolean
     type?: boolean
     url?: boolean
+    name?: boolean
+    description?: boolean
     verified?: boolean
     comments?: boolean
+    expiryDate?: boolean
     clientId?: boolean
     verifiedById?: boolean
     createdAt?: boolean
@@ -13852,8 +14280,11 @@ export namespace Prisma {
     id?: boolean
     type?: boolean
     url?: boolean
+    name?: boolean
+    description?: boolean
     verified?: boolean
     comments?: boolean
+    expiryDate?: boolean
     clientId?: boolean
     verifiedById?: boolean
     createdAt?: boolean
@@ -13866,15 +14297,18 @@ export namespace Prisma {
     id?: boolean
     type?: boolean
     url?: boolean
+    name?: boolean
+    description?: boolean
     verified?: boolean
     comments?: boolean
+    expiryDate?: boolean
     clientId?: boolean
     verifiedById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type ClientDocumentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "url" | "verified" | "comments" | "clientId" | "verifiedById" | "createdAt" | "updatedAt", ExtArgs["result"]["clientDocument"]>
+  export type ClientDocumentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "url" | "name" | "description" | "verified" | "comments" | "expiryDate" | "clientId" | "verifiedById" | "createdAt" | "updatedAt", ExtArgs["result"]["clientDocument"]>
   export type ClientDocumentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     client?: boolean | ClientDefaultArgs<ExtArgs>
     verifiedBy?: boolean | ClientDocument$verifiedByArgs<ExtArgs>
@@ -13898,8 +14332,11 @@ export namespace Prisma {
       id: string
       type: $Enums.DocumentType
       url: string
+      name: string | null
+      description: string | null
       verified: boolean
       comments: string | null
+      expiryDate: Date | null
       clientId: string
       verifiedById: string | null
       createdAt: Date
@@ -14332,8 +14769,11 @@ export namespace Prisma {
     readonly id: FieldRef<"ClientDocument", 'String'>
     readonly type: FieldRef<"ClientDocument", 'DocumentType'>
     readonly url: FieldRef<"ClientDocument", 'String'>
+    readonly name: FieldRef<"ClientDocument", 'String'>
+    readonly description: FieldRef<"ClientDocument", 'String'>
     readonly verified: FieldRef<"ClientDocument", 'Boolean'>
     readonly comments: FieldRef<"ClientDocument", 'String'>
+    readonly expiryDate: FieldRef<"ClientDocument", 'DateTime'>
     readonly clientId: FieldRef<"ClientDocument", 'String'>
     readonly verifiedById: FieldRef<"ClientDocument", 'String'>
     readonly createdAt: FieldRef<"ClientDocument", 'DateTime'>
@@ -14785,8 +15225,11 @@ export namespace Prisma {
     id: string | null
     type: $Enums.DocumentType | null
     url: string | null
+    name: string | null
+    description: string | null
     verified: boolean | null
     comments: string | null
+    expiryDate: Date | null
     agencyId: string | null
     verifiedById: string | null
     createdAt: Date | null
@@ -14797,8 +15240,11 @@ export namespace Prisma {
     id: string | null
     type: $Enums.DocumentType | null
     url: string | null
+    name: string | null
+    description: string | null
     verified: boolean | null
     comments: string | null
+    expiryDate: Date | null
     agencyId: string | null
     verifiedById: string | null
     createdAt: Date | null
@@ -14809,8 +15255,11 @@ export namespace Prisma {
     id: number
     type: number
     url: number
+    name: number
+    description: number
     verified: number
     comments: number
+    expiryDate: number
     agencyId: number
     verifiedById: number
     createdAt: number
@@ -14823,8 +15272,11 @@ export namespace Prisma {
     id?: true
     type?: true
     url?: true
+    name?: true
+    description?: true
     verified?: true
     comments?: true
+    expiryDate?: true
     agencyId?: true
     verifiedById?: true
     createdAt?: true
@@ -14835,8 +15287,11 @@ export namespace Prisma {
     id?: true
     type?: true
     url?: true
+    name?: true
+    description?: true
     verified?: true
     comments?: true
+    expiryDate?: true
     agencyId?: true
     verifiedById?: true
     createdAt?: true
@@ -14847,8 +15302,11 @@ export namespace Prisma {
     id?: true
     type?: true
     url?: true
+    name?: true
+    description?: true
     verified?: true
     comments?: true
+    expiryDate?: true
     agencyId?: true
     verifiedById?: true
     createdAt?: true
@@ -14932,8 +15390,11 @@ export namespace Prisma {
     id: string
     type: $Enums.DocumentType
     url: string
+    name: string | null
+    description: string | null
     verified: boolean
     comments: string | null
+    expiryDate: Date | null
     agencyId: string
     verifiedById: string | null
     createdAt: Date
@@ -14961,8 +15422,11 @@ export namespace Prisma {
     id?: boolean
     type?: boolean
     url?: boolean
+    name?: boolean
+    description?: boolean
     verified?: boolean
     comments?: boolean
+    expiryDate?: boolean
     agencyId?: boolean
     verifiedById?: boolean
     createdAt?: boolean
@@ -14975,8 +15439,11 @@ export namespace Prisma {
     id?: boolean
     type?: boolean
     url?: boolean
+    name?: boolean
+    description?: boolean
     verified?: boolean
     comments?: boolean
+    expiryDate?: boolean
     agencyId?: boolean
     verifiedById?: boolean
     createdAt?: boolean
@@ -14989,8 +15456,11 @@ export namespace Prisma {
     id?: boolean
     type?: boolean
     url?: boolean
+    name?: boolean
+    description?: boolean
     verified?: boolean
     comments?: boolean
+    expiryDate?: boolean
     agencyId?: boolean
     verifiedById?: boolean
     createdAt?: boolean
@@ -15003,15 +15473,18 @@ export namespace Prisma {
     id?: boolean
     type?: boolean
     url?: boolean
+    name?: boolean
+    description?: boolean
     verified?: boolean
     comments?: boolean
+    expiryDate?: boolean
     agencyId?: boolean
     verifiedById?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type AgencyDocumentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "url" | "verified" | "comments" | "agencyId" | "verifiedById" | "createdAt" | "updatedAt", ExtArgs["result"]["agencyDocument"]>
+  export type AgencyDocumentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "url" | "name" | "description" | "verified" | "comments" | "expiryDate" | "agencyId" | "verifiedById" | "createdAt" | "updatedAt", ExtArgs["result"]["agencyDocument"]>
   export type AgencyDocumentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     agency?: boolean | AgencyDefaultArgs<ExtArgs>
     verifiedBy?: boolean | AgencyDocument$verifiedByArgs<ExtArgs>
@@ -15035,8 +15508,11 @@ export namespace Prisma {
       id: string
       type: $Enums.DocumentType
       url: string
+      name: string | null
+      description: string | null
       verified: boolean
       comments: string | null
+      expiryDate: Date | null
       agencyId: string
       verifiedById: string | null
       createdAt: Date
@@ -15469,8 +15945,11 @@ export namespace Prisma {
     readonly id: FieldRef<"AgencyDocument", 'String'>
     readonly type: FieldRef<"AgencyDocument", 'DocumentType'>
     readonly url: FieldRef<"AgencyDocument", 'String'>
+    readonly name: FieldRef<"AgencyDocument", 'String'>
+    readonly description: FieldRef<"AgencyDocument", 'String'>
     readonly verified: FieldRef<"AgencyDocument", 'Boolean'>
     readonly comments: FieldRef<"AgencyDocument", 'String'>
+    readonly expiryDate: FieldRef<"AgencyDocument", 'DateTime'>
     readonly agencyId: FieldRef<"AgencyDocument", 'String'>
     readonly verifiedById: FieldRef<"AgencyDocument", 'String'>
     readonly createdAt: FieldRef<"AgencyDocument", 'DateTime'>
@@ -15922,30 +16401,36 @@ export namespace Prisma {
     id: string | null
     type: $Enums.DocumentType | null
     url: string | null
+    name: string | null
     description: string | null
     requirementId: string | null
     uploadedById: string | null
     createdAt: Date | null
+    updatedAt: Date | null
   }
 
   export type RequirementDocumentMaxAggregateOutputType = {
     id: string | null
     type: $Enums.DocumentType | null
     url: string | null
+    name: string | null
     description: string | null
     requirementId: string | null
     uploadedById: string | null
     createdAt: Date | null
+    updatedAt: Date | null
   }
 
   export type RequirementDocumentCountAggregateOutputType = {
     id: number
     type: number
     url: number
+    name: number
     description: number
     requirementId: number
     uploadedById: number
     createdAt: number
+    updatedAt: number
     _all: number
   }
 
@@ -15954,30 +16439,36 @@ export namespace Prisma {
     id?: true
     type?: true
     url?: true
+    name?: true
     description?: true
     requirementId?: true
     uploadedById?: true
     createdAt?: true
+    updatedAt?: true
   }
 
   export type RequirementDocumentMaxAggregateInputType = {
     id?: true
     type?: true
     url?: true
+    name?: true
     description?: true
     requirementId?: true
     uploadedById?: true
     createdAt?: true
+    updatedAt?: true
   }
 
   export type RequirementDocumentCountAggregateInputType = {
     id?: true
     type?: true
     url?: true
+    name?: true
     description?: true
     requirementId?: true
     uploadedById?: true
     createdAt?: true
+    updatedAt?: true
     _all?: true
   }
 
@@ -16057,10 +16548,12 @@ export namespace Prisma {
     id: string
     type: $Enums.DocumentType
     url: string
+    name: string | null
     description: string | null
     requirementId: string
     uploadedById: string
     createdAt: Date
+    updatedAt: Date
     _count: RequirementDocumentCountAggregateOutputType | null
     _min: RequirementDocumentMinAggregateOutputType | null
     _max: RequirementDocumentMaxAggregateOutputType | null
@@ -16084,10 +16577,12 @@ export namespace Prisma {
     id?: boolean
     type?: boolean
     url?: boolean
+    name?: boolean
     description?: boolean
     requirementId?: boolean
     uploadedById?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
     requirement?: boolean | RequirementDefaultArgs<ExtArgs>
     uploadedBy?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["requirementDocument"]>
@@ -16096,10 +16591,12 @@ export namespace Prisma {
     id?: boolean
     type?: boolean
     url?: boolean
+    name?: boolean
     description?: boolean
     requirementId?: boolean
     uploadedById?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
     requirement?: boolean | RequirementDefaultArgs<ExtArgs>
     uploadedBy?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["requirementDocument"]>
@@ -16108,10 +16605,12 @@ export namespace Prisma {
     id?: boolean
     type?: boolean
     url?: boolean
+    name?: boolean
     description?: boolean
     requirementId?: boolean
     uploadedById?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
     requirement?: boolean | RequirementDefaultArgs<ExtArgs>
     uploadedBy?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["requirementDocument"]>
@@ -16120,13 +16619,15 @@ export namespace Prisma {
     id?: boolean
     type?: boolean
     url?: boolean
+    name?: boolean
     description?: boolean
     requirementId?: boolean
     uploadedById?: boolean
     createdAt?: boolean
+    updatedAt?: boolean
   }
 
-  export type RequirementDocumentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "url" | "description" | "requirementId" | "uploadedById" | "createdAt", ExtArgs["result"]["requirementDocument"]>
+  export type RequirementDocumentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "url" | "name" | "description" | "requirementId" | "uploadedById" | "createdAt" | "updatedAt", ExtArgs["result"]["requirementDocument"]>
   export type RequirementDocumentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     requirement?: boolean | RequirementDefaultArgs<ExtArgs>
     uploadedBy?: boolean | UserDefaultArgs<ExtArgs>
@@ -16150,10 +16651,12 @@ export namespace Prisma {
       id: string
       type: $Enums.DocumentType
       url: string
+      name: string | null
       description: string | null
       requirementId: string
       uploadedById: string
       createdAt: Date
+      updatedAt: Date
     }, ExtArgs["result"]["requirementDocument"]>
     composites: {}
   }
@@ -16582,10 +17085,12 @@ export namespace Prisma {
     readonly id: FieldRef<"RequirementDocument", 'String'>
     readonly type: FieldRef<"RequirementDocument", 'DocumentType'>
     readonly url: FieldRef<"RequirementDocument", 'String'>
+    readonly name: FieldRef<"RequirementDocument", 'String'>
     readonly description: FieldRef<"RequirementDocument", 'String'>
     readonly requirementId: FieldRef<"RequirementDocument", 'String'>
     readonly uploadedById: FieldRef<"RequirementDocument", 'String'>
     readonly createdAt: FieldRef<"RequirementDocument", 'DateTime'>
+    readonly updatedAt: FieldRef<"RequirementDocument", 'DateTime'>
   }
     
 
@@ -17018,8 +17523,8 @@ export namespace Prisma {
     description: string | null
     ipAddress: string | null
     userAgent: string | null
-    performedAt: Date | null
     performedById: string | null
+    performedAt: Date | null
     createdAt: Date | null
   }
 
@@ -17031,8 +17536,8 @@ export namespace Prisma {
     description: string | null
     ipAddress: string | null
     userAgent: string | null
-    performedAt: Date | null
     performedById: string | null
+    performedAt: Date | null
     createdAt: Date | null
   }
 
@@ -17047,8 +17552,8 @@ export namespace Prisma {
     affectedFields: number
     ipAddress: number
     userAgent: number
-    performedAt: number
     performedById: number
+    performedAt: number
     createdAt: number
     _all: number
   }
@@ -17062,8 +17567,8 @@ export namespace Prisma {
     description?: true
     ipAddress?: true
     userAgent?: true
-    performedAt?: true
     performedById?: true
+    performedAt?: true
     createdAt?: true
   }
 
@@ -17075,8 +17580,8 @@ export namespace Prisma {
     description?: true
     ipAddress?: true
     userAgent?: true
-    performedAt?: true
     performedById?: true
+    performedAt?: true
     createdAt?: true
   }
 
@@ -17091,8 +17596,8 @@ export namespace Prisma {
     affectedFields?: true
     ipAddress?: true
     userAgent?: true
-    performedAt?: true
     performedById?: true
+    performedAt?: true
     createdAt?: true
     _all?: true
   }
@@ -17180,8 +17685,8 @@ export namespace Prisma {
     affectedFields: string[]
     ipAddress: string | null
     userAgent: string | null
-    performedAt: Date
     performedById: string
+    performedAt: Date
     createdAt: Date
     _count: AuditLogCountAggregateOutputType | null
     _min: AuditLogMinAggregateOutputType | null
@@ -17213,8 +17718,8 @@ export namespace Prisma {
     affectedFields?: boolean
     ipAddress?: boolean
     userAgent?: boolean
-    performedAt?: boolean
     performedById?: boolean
+    performedAt?: boolean
     createdAt?: boolean
     performedBy?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["auditLog"]>
@@ -17230,8 +17735,8 @@ export namespace Prisma {
     affectedFields?: boolean
     ipAddress?: boolean
     userAgent?: boolean
-    performedAt?: boolean
     performedById?: boolean
+    performedAt?: boolean
     createdAt?: boolean
     performedBy?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["auditLog"]>
@@ -17247,8 +17752,8 @@ export namespace Prisma {
     affectedFields?: boolean
     ipAddress?: boolean
     userAgent?: boolean
-    performedAt?: boolean
     performedById?: boolean
+    performedAt?: boolean
     createdAt?: boolean
     performedBy?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["auditLog"]>
@@ -17264,12 +17769,12 @@ export namespace Prisma {
     affectedFields?: boolean
     ipAddress?: boolean
     userAgent?: boolean
-    performedAt?: boolean
     performedById?: boolean
+    performedAt?: boolean
     createdAt?: boolean
   }
 
-  export type AuditLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "action" | "entityType" | "entityId" | "description" | "oldData" | "newData" | "affectedFields" | "ipAddress" | "userAgent" | "performedAt" | "performedById" | "createdAt", ExtArgs["result"]["auditLog"]>
+  export type AuditLogOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "action" | "entityType" | "entityId" | "description" | "oldData" | "newData" | "affectedFields" | "ipAddress" | "userAgent" | "performedById" | "performedAt" | "createdAt", ExtArgs["result"]["auditLog"]>
   export type AuditLogInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     performedBy?: boolean | UserDefaultArgs<ExtArgs>
   }
@@ -17296,8 +17801,8 @@ export namespace Prisma {
       affectedFields: string[]
       ipAddress: string | null
       userAgent: string | null
-      performedAt: Date
       performedById: string
+      performedAt: Date
       createdAt: Date
     }, ExtArgs["result"]["auditLog"]>
     composites: {}
@@ -17733,8 +18238,8 @@ export namespace Prisma {
     readonly affectedFields: FieldRef<"AuditLog", 'String[]'>
     readonly ipAddress: FieldRef<"AuditLog", 'String'>
     readonly userAgent: FieldRef<"AuditLog", 'String'>
-    readonly performedAt: FieldRef<"AuditLog", 'DateTime'>
     readonly performedById: FieldRef<"AuditLog", 'String'>
+    readonly performedAt: FieldRef<"AuditLog", 'DateTime'>
     readonly createdAt: FieldRef<"AuditLog", 'DateTime'>
   }
     
@@ -18164,7 +18669,7 @@ export namespace Prisma {
     id: string | null
     title: string | null
     message: string | null
-    type: string | null
+    type: $Enums.NotificationType | null
     read: boolean | null
     actionUrl: string | null
     recipientId: string | null
@@ -18176,7 +18681,7 @@ export namespace Prisma {
     id: string | null
     title: string | null
     message: string | null
-    type: string | null
+    type: $Enums.NotificationType | null
     read: boolean | null
     actionUrl: string | null
     recipientId: string | null
@@ -18313,7 +18818,7 @@ export namespace Prisma {
     id: string
     title: string
     message: string
-    type: string
+    type: $Enums.NotificationType
     read: boolean
     actionUrl: string | null
     metadata: JsonValue | null
@@ -18414,7 +18919,7 @@ export namespace Prisma {
       id: string
       title: string
       message: string
-      type: string
+      type: $Enums.NotificationType
       read: boolean
       actionUrl: string | null
       metadata: Prisma.JsonValue | null
@@ -18848,7 +19353,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Notification", 'String'>
     readonly title: FieldRef<"Notification", 'String'>
     readonly message: FieldRef<"Notification", 'String'>
-    readonly type: FieldRef<"Notification", 'String'>
+    readonly type: FieldRef<"Notification", 'NotificationType'>
     readonly read: FieldRef<"Notification", 'Boolean'>
     readonly actionUrl: FieldRef<"Notification", 'String'>
     readonly metadata: FieldRef<"Notification", 'Json'>
@@ -19288,6 +19793,9 @@ export namespace Prisma {
     name: 'name',
     email: 'email',
     password: 'password',
+    phone: 'phone',
+    altContact: 'altContact',
+    profilePicture: 'profilePicture',
     role: 'role',
     status: 'status',
     resetRequired: 'resetRequired',
@@ -19296,6 +19804,7 @@ export namespace Prisma {
     updatedAt: 'updatedAt',
     deleteAt: 'deleteAt',
     deletionType: 'deletionType',
+    deletionReason: 'deletionReason',
     deletionRequestedBy: 'deletionRequestedBy',
     createdById: 'createdById'
   };
@@ -19307,17 +19816,15 @@ export namespace Prisma {
     id: 'id',
     userId: 'userId',
     companyName: 'companyName',
-    contactPerson: 'contactPerson',
     registrationNo: 'registrationNo',
     companySector: 'companySector',
     companySize: 'companySize',
     website: 'website',
-    designation: 'designation',
-    phone: 'phone',
     address: 'address',
-    altContact: 'altContact',
-    businessLicense: 'businessLicense',
-    image: 'image',
+    city: 'city',
+    country: 'country',
+    postalCode: 'postalCode',
+    designation: 'designation',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -19334,10 +19841,10 @@ export namespace Prisma {
     licenseExpiry: 'licenseExpiry',
     country: 'country',
     regions: 'regions',
-    contactPerson: 'contactPerson',
-    phone: 'phone',
-    email: 'email',
     website: 'website',
+    address: 'address',
+    city: 'city',
+    postalCode: 'postalCode',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -19350,12 +19857,35 @@ export namespace Prisma {
     userId: 'userId',
     name: 'name',
     department: 'department',
-    canCreateUsers: 'canCreateUsers',
+    permissions: 'permissions',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
 
   export type AdminScalarFieldEnum = (typeof AdminScalarFieldEnum)[keyof typeof AdminScalarFieldEnum]
+
+
+  export const RequirementScalarFieldEnum: {
+    id: 'id',
+    projectLocation: 'projectLocation',
+    startDate: 'startDate',
+    contractDuration: 'contractDuration',
+    specialNotes: 'specialNotes',
+    status: 'status',
+    languages: 'languages',
+    minExperience: 'minExperience',
+    maxAge: 'maxAge',
+    ticketType: 'ticketType',
+    ticketProvided: 'ticketProvided',
+    clientId: 'clientId',
+    assignedAgencyId: 'assignedAgencyId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    submittedAt: 'submittedAt',
+    reviewedAt: 'reviewedAt'
+  };
+
+  export type RequirementScalarFieldEnum = (typeof RequirementScalarFieldEnum)[keyof typeof RequirementScalarFieldEnum]
 
 
   export const JobRoleScalarFieldEnum: {
@@ -19364,6 +19894,7 @@ export namespace Prisma {
     quantity: 'quantity',
     nationality: 'nationality',
     salary: 'salary',
+    salaryCurrency: 'salaryCurrency',
     requirementId: 'requirementId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -19372,43 +19903,41 @@ export namespace Prisma {
   export type JobRoleScalarFieldEnum = (typeof JobRoleScalarFieldEnum)[keyof typeof JobRoleScalarFieldEnum]
 
 
-  export const RequirementScalarFieldEnum: {
-    id: 'id',
-    projectLocation: 'projectLocation',
-    startDate: 'startDate',
-    contractDuration: 'contractDuration',
-    previousExperience: 'previousExperience',
-    ticketDetails: 'ticketDetails',
-    totalExperienceYears: 'totalExperienceYears',
-    preferredAge: 'preferredAge',
-    specialNotes: 'specialNotes',
-    status: 'status',
-    languages: 'languages',
-    clientId: 'clientId',
-    assignedToId: 'assignedToId',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
-  };
-
-  export type RequirementScalarFieldEnum = (typeof RequirementScalarFieldEnum)[keyof typeof RequirementScalarFieldEnum]
-
-
   export const LabourProfileScalarFieldEnum: {
     id: 'id',
     name: 'name',
     age: 'age',
     gender: 'gender',
     nationality: 'nationality',
+    maritalStatus: 'maritalStatus',
     skills: 'skills',
     experienceYears: 'experienceYears',
     education: 'education',
-    language: 'language',
-    status: 'status',
+    currentPosition: 'currentPosition',
+    currentCompany: 'currentCompany',
+    languages: 'languages',
+    englishProficiency: 'englishProficiency',
+    email: 'email',
+    phone: 'phone',
+    address: 'address',
+    city: 'city',
+    country: 'country',
     cvUrl: 'cvUrl',
-    passportCopy: 'passportCopy',
+    passportNumber: 'passportNumber',
+    passportExpiry: 'passportExpiry',
+    visaType: 'visaType',
+    visaExpiry: 'visaExpiry',
+    medicalStatus: 'medicalStatus',
+    medicalExpiry: 'medicalExpiry',
+    photo: 'photo',
     otherDocs: 'otherDocs',
+    status: 'status',
+    statusReason: 'statusReason',
     requirementId: 'requirementId',
     agencyId: 'agencyId',
+    deploymentDate: 'deploymentDate',
+    contractStartDate: 'contractStartDate',
+    contractEndDate: 'contractEndDate',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -19424,6 +19953,7 @@ export namespace Prisma {
     dueDate: 'dueDate',
     completedDate: 'completedDate',
     comments: 'comments',
+    metadata: 'metadata',
     requirementId: 'requirementId',
     labourProfileId: 'labourProfileId',
     createdAt: 'createdAt',
@@ -19437,6 +19967,7 @@ export namespace Prisma {
     id: 'id',
     status: 'status',
     comments: 'comments',
+    metadata: 'metadata',
     labourProfileId: 'labourProfileId',
     changedById: 'changedById',
     createdAt: 'createdAt'
@@ -19449,8 +19980,11 @@ export namespace Prisma {
     id: 'id',
     type: 'type',
     url: 'url',
+    name: 'name',
+    description: 'description',
     verified: 'verified',
     comments: 'comments',
+    expiryDate: 'expiryDate',
     clientId: 'clientId',
     verifiedById: 'verifiedById',
     createdAt: 'createdAt',
@@ -19464,8 +19998,11 @@ export namespace Prisma {
     id: 'id',
     type: 'type',
     url: 'url',
+    name: 'name',
+    description: 'description',
     verified: 'verified',
     comments: 'comments',
+    expiryDate: 'expiryDate',
     agencyId: 'agencyId',
     verifiedById: 'verifiedById',
     createdAt: 'createdAt',
@@ -19479,10 +20016,12 @@ export namespace Prisma {
     id: 'id',
     type: 'type',
     url: 'url',
+    name: 'name',
     description: 'description',
     requirementId: 'requirementId',
     uploadedById: 'uploadedById',
-    createdAt: 'createdAt'
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
   };
 
   export type RequirementDocumentScalarFieldEnum = (typeof RequirementDocumentScalarFieldEnum)[keyof typeof RequirementDocumentScalarFieldEnum]
@@ -19499,8 +20038,8 @@ export namespace Prisma {
     affectedFields: 'affectedFields',
     ipAddress: 'ipAddress',
     userAgent: 'userAgent',
-    performedAt: 'performedAt',
     performedById: 'performedById',
+    performedAt: 'performedAt',
     createdAt: 'createdAt'
   };
 
@@ -19675,16 +20214,16 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Int'
+   * Reference to a field of type 'Json'
    */
-  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
     
 
 
   /**
-   * Reference to a field of type 'Int[]'
+   * Reference to a field of type 'QueryMode'
    */
-  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -19703,34 +20242,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'PreviousExperience'
-   */
-  export type EnumPreviousExperienceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PreviousExperience'>
-    
-
-
-  /**
-   * Reference to a field of type 'PreviousExperience[]'
-   */
-  export type ListEnumPreviousExperienceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PreviousExperience[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'TicketDetails'
-   */
-  export type EnumTicketDetailsFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TicketDetails'>
-    
-
-
-  /**
-   * Reference to a field of type 'TicketDetails[]'
-   */
-  export type ListEnumTicketDetailsFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TicketDetails[]'>
-    
-
-
-  /**
    * Reference to a field of type 'RequirementStatus'
    */
   export type EnumRequirementStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RequirementStatus'>
@@ -19745,16 +20256,100 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'LabourStatus'
+   * Reference to a field of type 'ExperienceLevel'
    */
-  export type EnumLabourStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LabourStatus'>
+  export type EnumExperienceLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExperienceLevel'>
     
 
 
   /**
-   * Reference to a field of type 'LabourStatus[]'
+   * Reference to a field of type 'ExperienceLevel[]'
    */
-  export type ListEnumLabourStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LabourStatus[]'>
+  export type ListEnumExperienceLevelFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ExperienceLevel[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Int'
+   */
+  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+  /**
+   * Reference to a field of type 'Int[]'
+   */
+  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'TicketType'
+   */
+  export type EnumTicketTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TicketType'>
+    
+
+
+  /**
+   * Reference to a field of type 'TicketType[]'
+   */
+  export type ListEnumTicketTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TicketType[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float'
+   */
+  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+  /**
+   * Reference to a field of type 'Float[]'
+   */
+  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Gender'
+   */
+  export type EnumGenderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gender'>
+    
+
+
+  /**
+   * Reference to a field of type 'Gender[]'
+   */
+  export type ListEnumGenderFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Gender[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'LabourProfileStatus'
+   */
+  export type EnumLabourProfileStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LabourProfileStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'LabourProfileStatus[]'
+   */
+  export type ListEnumLabourProfileStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LabourProfileStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ProcedureStatus'
+   */
+  export type EnumProcedureStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProcedureStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'ProcedureStatus[]'
+   */
+  export type ListEnumProcedureStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProcedureStatus[]'>
     
 
 
@@ -19787,30 +20382,16 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Json'
+   * Reference to a field of type 'NotificationType'
    */
-  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+  export type EnumNotificationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NotificationType'>
     
 
 
   /**
-   * Reference to a field of type 'QueryMode'
+   * Reference to a field of type 'NotificationType[]'
    */
-  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
-    
-
-
-  /**
-   * Reference to a field of type 'Float'
-   */
-  export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-  /**
-   * Reference to a field of type 'Float[]'
-   */
-  export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+  export type ListEnumNotificationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'NotificationType[]'>
     
   /**
    * Deep Input Types
@@ -19825,6 +20406,9 @@ export namespace Prisma {
     name?: StringFilter<"User"> | string
     email?: StringFilter<"User"> | string
     password?: StringFilter<"User"> | string
+    phone?: StringNullableFilter<"User"> | string | null
+    altContact?: StringNullableFilter<"User"> | string | null
+    profilePicture?: StringNullableFilter<"User"> | string | null
     role?: EnumUserRoleFilter<"User"> | $Enums.UserRole
     status?: EnumAccountStatusFilter<"User"> | $Enums.AccountStatus
     resetRequired?: BoolFilter<"User"> | boolean
@@ -19833,19 +20417,20 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"User"> | Date | string
     deleteAt?: DateTimeNullableFilter<"User"> | Date | string | null
     deletionType?: EnumDeletionTypeNullableFilter<"User"> | $Enums.DeletionType | null
+    deletionReason?: StringNullableFilter<"User"> | string | null
     deletionRequestedBy?: StringNullableFilter<"User"> | string | null
     createdById?: StringNullableFilter<"User"> | string | null
-    client?: XOR<ClientNullableScalarRelationFilter, ClientWhereInput> | null
-    agency?: XOR<AgencyNullableScalarRelationFilter, AgencyWhereInput> | null
-    admin?: XOR<AdminNullableScalarRelationFilter, AdminWhereInput> | null
+    clientProfile?: XOR<ClientNullableScalarRelationFilter, ClientWhereInput> | null
+    agencyProfile?: XOR<AgencyNullableScalarRelationFilter, AgencyWhereInput> | null
+    adminProfile?: XOR<AdminNullableScalarRelationFilter, AdminWhereInput> | null
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     createdUsers?: UserListRelationFilter
     auditLogs?: AuditLogListRelationFilter
-    LabourStatusLog?: LabourStatusLogListRelationFilter
-    ClientDocument?: ClientDocumentListRelationFilter
-    AgencyDocument?: AgencyDocumentListRelationFilter
-    RequirementDocument?: RequirementDocumentListRelationFilter
-    Notification?: NotificationListRelationFilter
+    notifications?: NotificationListRelationFilter
+    statusLogs?: LabourStatusLogListRelationFilter
+    clientDocuments?: ClientDocumentListRelationFilter
+    agencyDocuments?: AgencyDocumentListRelationFilter
+    requirementDocuments?: RequirementDocumentListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -19853,6 +20438,9 @@ export namespace Prisma {
     name?: SortOrder
     email?: SortOrder
     password?: SortOrder
+    phone?: SortOrderInput | SortOrder
+    altContact?: SortOrderInput | SortOrder
+    profilePicture?: SortOrderInput | SortOrder
     role?: SortOrder
     status?: SortOrder
     resetRequired?: SortOrder
@@ -19861,29 +20449,33 @@ export namespace Prisma {
     updatedAt?: SortOrder
     deleteAt?: SortOrderInput | SortOrder
     deletionType?: SortOrderInput | SortOrder
+    deletionReason?: SortOrderInput | SortOrder
     deletionRequestedBy?: SortOrderInput | SortOrder
     createdById?: SortOrderInput | SortOrder
-    client?: ClientOrderByWithRelationInput
-    agency?: AgencyOrderByWithRelationInput
-    admin?: AdminOrderByWithRelationInput
+    clientProfile?: ClientOrderByWithRelationInput
+    agencyProfile?: AgencyOrderByWithRelationInput
+    adminProfile?: AdminOrderByWithRelationInput
     createdBy?: UserOrderByWithRelationInput
     createdUsers?: UserOrderByRelationAggregateInput
     auditLogs?: AuditLogOrderByRelationAggregateInput
-    LabourStatusLog?: LabourStatusLogOrderByRelationAggregateInput
-    ClientDocument?: ClientDocumentOrderByRelationAggregateInput
-    AgencyDocument?: AgencyDocumentOrderByRelationAggregateInput
-    RequirementDocument?: RequirementDocumentOrderByRelationAggregateInput
-    Notification?: NotificationOrderByRelationAggregateInput
+    notifications?: NotificationOrderByRelationAggregateInput
+    statusLogs?: LabourStatusLogOrderByRelationAggregateInput
+    clientDocuments?: ClientDocumentOrderByRelationAggregateInput
+    agencyDocuments?: AgencyDocumentOrderByRelationAggregateInput
+    requirementDocuments?: RequirementDocumentOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     email?: string
+    phone?: string
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
     name?: StringFilter<"User"> | string
     password?: StringFilter<"User"> | string
+    altContact?: StringNullableFilter<"User"> | string | null
+    profilePicture?: StringNullableFilter<"User"> | string | null
     role?: EnumUserRoleFilter<"User"> | $Enums.UserRole
     status?: EnumAccountStatusFilter<"User"> | $Enums.AccountStatus
     resetRequired?: BoolFilter<"User"> | boolean
@@ -19892,26 +20484,30 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"User"> | Date | string
     deleteAt?: DateTimeNullableFilter<"User"> | Date | string | null
     deletionType?: EnumDeletionTypeNullableFilter<"User"> | $Enums.DeletionType | null
+    deletionReason?: StringNullableFilter<"User"> | string | null
     deletionRequestedBy?: StringNullableFilter<"User"> | string | null
     createdById?: StringNullableFilter<"User"> | string | null
-    client?: XOR<ClientNullableScalarRelationFilter, ClientWhereInput> | null
-    agency?: XOR<AgencyNullableScalarRelationFilter, AgencyWhereInput> | null
-    admin?: XOR<AdminNullableScalarRelationFilter, AdminWhereInput> | null
+    clientProfile?: XOR<ClientNullableScalarRelationFilter, ClientWhereInput> | null
+    agencyProfile?: XOR<AgencyNullableScalarRelationFilter, AgencyWhereInput> | null
+    adminProfile?: XOR<AdminNullableScalarRelationFilter, AdminWhereInput> | null
     createdBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
     createdUsers?: UserListRelationFilter
     auditLogs?: AuditLogListRelationFilter
-    LabourStatusLog?: LabourStatusLogListRelationFilter
-    ClientDocument?: ClientDocumentListRelationFilter
-    AgencyDocument?: AgencyDocumentListRelationFilter
-    RequirementDocument?: RequirementDocumentListRelationFilter
-    Notification?: NotificationListRelationFilter
-  }, "id" | "email">
+    notifications?: NotificationListRelationFilter
+    statusLogs?: LabourStatusLogListRelationFilter
+    clientDocuments?: ClientDocumentListRelationFilter
+    agencyDocuments?: AgencyDocumentListRelationFilter
+    requirementDocuments?: RequirementDocumentListRelationFilter
+  }, "id" | "email" | "phone">
 
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
     email?: SortOrder
     password?: SortOrder
+    phone?: SortOrderInput | SortOrder
+    altContact?: SortOrderInput | SortOrder
+    profilePicture?: SortOrderInput | SortOrder
     role?: SortOrder
     status?: SortOrder
     resetRequired?: SortOrder
@@ -19920,6 +20516,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     deleteAt?: SortOrderInput | SortOrder
     deletionType?: SortOrderInput | SortOrder
+    deletionReason?: SortOrderInput | SortOrder
     deletionRequestedBy?: SortOrderInput | SortOrder
     createdById?: SortOrderInput | SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -19935,6 +20532,9 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"User"> | string
     email?: StringWithAggregatesFilter<"User"> | string
     password?: StringWithAggregatesFilter<"User"> | string
+    phone?: StringNullableWithAggregatesFilter<"User"> | string | null
+    altContact?: StringNullableWithAggregatesFilter<"User"> | string | null
+    profilePicture?: StringNullableWithAggregatesFilter<"User"> | string | null
     role?: EnumUserRoleWithAggregatesFilter<"User"> | $Enums.UserRole
     status?: EnumAccountStatusWithAggregatesFilter<"User"> | $Enums.AccountStatus
     resetRequired?: BoolWithAggregatesFilter<"User"> | boolean
@@ -19943,6 +20543,7 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     deleteAt?: DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
     deletionType?: EnumDeletionTypeNullableWithAggregatesFilter<"User"> | $Enums.DeletionType | null
+    deletionReason?: StringNullableWithAggregatesFilter<"User"> | string | null
     deletionRequestedBy?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdById?: StringNullableWithAggregatesFilter<"User"> | string | null
   }
@@ -19954,17 +20555,15 @@ export namespace Prisma {
     id?: StringFilter<"Client"> | string
     userId?: StringFilter<"Client"> | string
     companyName?: StringFilter<"Client"> | string
-    contactPerson?: StringNullableFilter<"Client"> | string | null
     registrationNo?: StringNullableFilter<"Client"> | string | null
-    companySector?: EnumCompanySectorNullableFilter<"Client"> | $Enums.CompanySector | null
-    companySize?: EnumCompanySizeNullableFilter<"Client"> | $Enums.CompanySize | null
+    companySector?: EnumCompanySectorFilter<"Client"> | $Enums.CompanySector
+    companySize?: EnumCompanySizeFilter<"Client"> | $Enums.CompanySize
     website?: StringNullableFilter<"Client"> | string | null
-    designation?: StringNullableFilter<"Client"> | string | null
-    phone?: StringNullableFilter<"Client"> | string | null
     address?: StringFilter<"Client"> | string
-    altContact?: StringNullableFilter<"Client"> | string | null
-    businessLicense?: StringNullableFilter<"Client"> | string | null
-    image?: StringNullableFilter<"Client"> | string | null
+    city?: StringFilter<"Client"> | string
+    country?: StringFilter<"Client"> | string
+    postalCode?: StringNullableFilter<"Client"> | string | null
+    designation?: StringFilter<"Client"> | string
     createdAt?: DateTimeFilter<"Client"> | Date | string
     updatedAt?: DateTimeFilter<"Client"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -19976,17 +20575,15 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     companyName?: SortOrder
-    contactPerson?: SortOrderInput | SortOrder
     registrationNo?: SortOrderInput | SortOrder
-    companySector?: SortOrderInput | SortOrder
-    companySize?: SortOrderInput | SortOrder
+    companySector?: SortOrder
+    companySize?: SortOrder
     website?: SortOrderInput | SortOrder
-    designation?: SortOrderInput | SortOrder
-    phone?: SortOrderInput | SortOrder
     address?: SortOrder
-    altContact?: SortOrderInput | SortOrder
-    businessLicense?: SortOrderInput | SortOrder
-    image?: SortOrderInput | SortOrder
+    city?: SortOrder
+    country?: SortOrder
+    postalCode?: SortOrderInput | SortOrder
+    designation?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -19997,43 +20594,39 @@ export namespace Prisma {
   export type ClientWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     userId?: string
+    registrationNo?: string
     AND?: ClientWhereInput | ClientWhereInput[]
     OR?: ClientWhereInput[]
     NOT?: ClientWhereInput | ClientWhereInput[]
     companyName?: StringFilter<"Client"> | string
-    contactPerson?: StringNullableFilter<"Client"> | string | null
-    registrationNo?: StringNullableFilter<"Client"> | string | null
-    companySector?: EnumCompanySectorNullableFilter<"Client"> | $Enums.CompanySector | null
-    companySize?: EnumCompanySizeNullableFilter<"Client"> | $Enums.CompanySize | null
+    companySector?: EnumCompanySectorFilter<"Client"> | $Enums.CompanySector
+    companySize?: EnumCompanySizeFilter<"Client"> | $Enums.CompanySize
     website?: StringNullableFilter<"Client"> | string | null
-    designation?: StringNullableFilter<"Client"> | string | null
-    phone?: StringNullableFilter<"Client"> | string | null
     address?: StringFilter<"Client"> | string
-    altContact?: StringNullableFilter<"Client"> | string | null
-    businessLicense?: StringNullableFilter<"Client"> | string | null
-    image?: StringNullableFilter<"Client"> | string | null
+    city?: StringFilter<"Client"> | string
+    country?: StringFilter<"Client"> | string
+    postalCode?: StringNullableFilter<"Client"> | string | null
+    designation?: StringFilter<"Client"> | string
     createdAt?: DateTimeFilter<"Client"> | Date | string
     updatedAt?: DateTimeFilter<"Client"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     requirements?: RequirementListRelationFilter
     documents?: ClientDocumentListRelationFilter
-  }, "id" | "userId">
+  }, "id" | "userId" | "registrationNo">
 
   export type ClientOrderByWithAggregationInput = {
     id?: SortOrder
     userId?: SortOrder
     companyName?: SortOrder
-    contactPerson?: SortOrderInput | SortOrder
     registrationNo?: SortOrderInput | SortOrder
-    companySector?: SortOrderInput | SortOrder
-    companySize?: SortOrderInput | SortOrder
+    companySector?: SortOrder
+    companySize?: SortOrder
     website?: SortOrderInput | SortOrder
-    designation?: SortOrderInput | SortOrder
-    phone?: SortOrderInput | SortOrder
     address?: SortOrder
-    altContact?: SortOrderInput | SortOrder
-    businessLicense?: SortOrderInput | SortOrder
-    image?: SortOrderInput | SortOrder
+    city?: SortOrder
+    country?: SortOrder
+    postalCode?: SortOrderInput | SortOrder
+    designation?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ClientCountOrderByAggregateInput
@@ -20048,17 +20641,15 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Client"> | string
     userId?: StringWithAggregatesFilter<"Client"> | string
     companyName?: StringWithAggregatesFilter<"Client"> | string
-    contactPerson?: StringNullableWithAggregatesFilter<"Client"> | string | null
     registrationNo?: StringNullableWithAggregatesFilter<"Client"> | string | null
-    companySector?: EnumCompanySectorNullableWithAggregatesFilter<"Client"> | $Enums.CompanySector | null
-    companySize?: EnumCompanySizeNullableWithAggregatesFilter<"Client"> | $Enums.CompanySize | null
+    companySector?: EnumCompanySectorWithAggregatesFilter<"Client"> | $Enums.CompanySector
+    companySize?: EnumCompanySizeWithAggregatesFilter<"Client"> | $Enums.CompanySize
     website?: StringNullableWithAggregatesFilter<"Client"> | string | null
-    designation?: StringNullableWithAggregatesFilter<"Client"> | string | null
-    phone?: StringNullableWithAggregatesFilter<"Client"> | string | null
     address?: StringWithAggregatesFilter<"Client"> | string
-    altContact?: StringNullableWithAggregatesFilter<"Client"> | string | null
-    businessLicense?: StringNullableWithAggregatesFilter<"Client"> | string | null
-    image?: StringNullableWithAggregatesFilter<"Client"> | string | null
+    city?: StringWithAggregatesFilter<"Client"> | string
+    country?: StringWithAggregatesFilter<"Client"> | string
+    postalCode?: StringNullableWithAggregatesFilter<"Client"> | string | null
+    designation?: StringWithAggregatesFilter<"Client"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Client"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Client"> | Date | string
   }
@@ -20075,16 +20666,16 @@ export namespace Prisma {
     licenseExpiry?: DateTimeFilter<"Agency"> | Date | string
     country?: StringFilter<"Agency"> | string
     regions?: StringNullableListFilter<"Agency">
-    contactPerson?: StringFilter<"Agency"> | string
-    phone?: StringFilter<"Agency"> | string
-    email?: StringNullableFilter<"Agency"> | string | null
     website?: StringNullableFilter<"Agency"> | string | null
+    address?: StringFilter<"Agency"> | string
+    city?: StringFilter<"Agency"> | string
+    postalCode?: StringNullableFilter<"Agency"> | string | null
     createdAt?: DateTimeFilter<"Agency"> | Date | string
     updatedAt?: DateTimeFilter<"Agency"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
-    documents?: AgencyDocumentListRelationFilter
     labourProfiles?: LabourProfileListRelationFilter
     requirements?: RequirementListRelationFilter
+    documents?: AgencyDocumentListRelationFilter
   }
 
   export type AgencyOrderByWithRelationInput = {
@@ -20096,16 +20687,16 @@ export namespace Prisma {
     licenseExpiry?: SortOrder
     country?: SortOrder
     regions?: SortOrder
-    contactPerson?: SortOrder
-    phone?: SortOrder
-    email?: SortOrderInput | SortOrder
     website?: SortOrderInput | SortOrder
+    address?: SortOrder
+    city?: SortOrder
+    postalCode?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
-    documents?: AgencyDocumentOrderByRelationAggregateInput
     labourProfiles?: LabourProfileOrderByRelationAggregateInput
     requirements?: RequirementOrderByRelationAggregateInput
+    documents?: AgencyDocumentOrderByRelationAggregateInput
   }
 
   export type AgencyWhereUniqueInput = Prisma.AtLeast<{
@@ -20120,16 +20711,16 @@ export namespace Prisma {
     licenseExpiry?: DateTimeFilter<"Agency"> | Date | string
     country?: StringFilter<"Agency"> | string
     regions?: StringNullableListFilter<"Agency">
-    contactPerson?: StringFilter<"Agency"> | string
-    phone?: StringFilter<"Agency"> | string
-    email?: StringNullableFilter<"Agency"> | string | null
     website?: StringNullableFilter<"Agency"> | string | null
+    address?: StringFilter<"Agency"> | string
+    city?: StringFilter<"Agency"> | string
+    postalCode?: StringNullableFilter<"Agency"> | string | null
     createdAt?: DateTimeFilter<"Agency"> | Date | string
     updatedAt?: DateTimeFilter<"Agency"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
-    documents?: AgencyDocumentListRelationFilter
     labourProfiles?: LabourProfileListRelationFilter
     requirements?: RequirementListRelationFilter
+    documents?: AgencyDocumentListRelationFilter
   }, "id" | "userId" | "registrationNo">
 
   export type AgencyOrderByWithAggregationInput = {
@@ -20141,10 +20732,10 @@ export namespace Prisma {
     licenseExpiry?: SortOrder
     country?: SortOrder
     regions?: SortOrder
-    contactPerson?: SortOrder
-    phone?: SortOrder
-    email?: SortOrderInput | SortOrder
     website?: SortOrderInput | SortOrder
+    address?: SortOrder
+    city?: SortOrder
+    postalCode?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: AgencyCountOrderByAggregateInput
@@ -20164,10 +20755,10 @@ export namespace Prisma {
     licenseExpiry?: DateTimeWithAggregatesFilter<"Agency"> | Date | string
     country?: StringWithAggregatesFilter<"Agency"> | string
     regions?: StringNullableListFilter<"Agency">
-    contactPerson?: StringWithAggregatesFilter<"Agency"> | string
-    phone?: StringWithAggregatesFilter<"Agency"> | string
-    email?: StringNullableWithAggregatesFilter<"Agency"> | string | null
     website?: StringNullableWithAggregatesFilter<"Agency"> | string | null
+    address?: StringWithAggregatesFilter<"Agency"> | string
+    city?: StringWithAggregatesFilter<"Agency"> | string
+    postalCode?: StringNullableWithAggregatesFilter<"Agency"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Agency"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Agency"> | Date | string
   }
@@ -20180,7 +20771,7 @@ export namespace Prisma {
     userId?: StringFilter<"Admin"> | string
     name?: StringFilter<"Admin"> | string
     department?: StringNullableFilter<"Admin"> | string | null
-    canCreateUsers?: BoolFilter<"Admin"> | boolean
+    permissions?: JsonNullableFilter<"Admin">
     createdAt?: DateTimeFilter<"Admin"> | Date | string
     updatedAt?: DateTimeFilter<"Admin"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -20191,7 +20782,7 @@ export namespace Prisma {
     userId?: SortOrder
     name?: SortOrder
     department?: SortOrderInput | SortOrder
-    canCreateUsers?: SortOrder
+    permissions?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     user?: UserOrderByWithRelationInput
@@ -20205,7 +20796,7 @@ export namespace Prisma {
     NOT?: AdminWhereInput | AdminWhereInput[]
     name?: StringFilter<"Admin"> | string
     department?: StringNullableFilter<"Admin"> | string | null
-    canCreateUsers?: BoolFilter<"Admin"> | boolean
+    permissions?: JsonNullableFilter<"Admin">
     createdAt?: DateTimeFilter<"Admin"> | Date | string
     updatedAt?: DateTimeFilter<"Admin"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
@@ -20216,7 +20807,7 @@ export namespace Prisma {
     userId?: SortOrder
     name?: SortOrder
     department?: SortOrderInput | SortOrder
-    canCreateUsers?: SortOrder
+    permissions?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: AdminCountOrderByAggregateInput
@@ -20232,9 +20823,141 @@ export namespace Prisma {
     userId?: StringWithAggregatesFilter<"Admin"> | string
     name?: StringWithAggregatesFilter<"Admin"> | string
     department?: StringNullableWithAggregatesFilter<"Admin"> | string | null
-    canCreateUsers?: BoolWithAggregatesFilter<"Admin"> | boolean
+    permissions?: JsonNullableWithAggregatesFilter<"Admin">
     createdAt?: DateTimeWithAggregatesFilter<"Admin"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Admin"> | Date | string
+  }
+
+  export type RequirementWhereInput = {
+    AND?: RequirementWhereInput | RequirementWhereInput[]
+    OR?: RequirementWhereInput[]
+    NOT?: RequirementWhereInput | RequirementWhereInput[]
+    id?: StringFilter<"Requirement"> | string
+    projectLocation?: StringNullableFilter<"Requirement"> | string | null
+    startDate?: DateTimeNullableFilter<"Requirement"> | Date | string | null
+    contractDuration?: EnumContractDurationNullableFilter<"Requirement"> | $Enums.ContractDuration | null
+    specialNotes?: StringNullableFilter<"Requirement"> | string | null
+    status?: EnumRequirementStatusFilter<"Requirement"> | $Enums.RequirementStatus
+    languages?: StringNullableListFilter<"Requirement">
+    minExperience?: EnumExperienceLevelNullableFilter<"Requirement"> | $Enums.ExperienceLevel | null
+    maxAge?: IntNullableFilter<"Requirement"> | number | null
+    ticketType?: EnumTicketTypeNullableFilter<"Requirement"> | $Enums.TicketType | null
+    ticketProvided?: BoolFilter<"Requirement"> | boolean
+    clientId?: StringFilter<"Requirement"> | string
+    assignedAgencyId?: StringNullableFilter<"Requirement"> | string | null
+    createdAt?: DateTimeFilter<"Requirement"> | Date | string
+    updatedAt?: DateTimeFilter<"Requirement"> | Date | string
+    submittedAt?: DateTimeNullableFilter<"Requirement"> | Date | string | null
+    reviewedAt?: DateTimeNullableFilter<"Requirement"> | Date | string | null
+    client?: XOR<ClientScalarRelationFilter, ClientWhereInput>
+    assignedAgency?: XOR<AgencyNullableScalarRelationFilter, AgencyWhereInput> | null
+    jobRoles?: JobRoleListRelationFilter
+    labourProfiles?: LabourProfileListRelationFilter
+    procedures?: ProcedureListRelationFilter
+    documents?: RequirementDocumentListRelationFilter
+  }
+
+  export type RequirementOrderByWithRelationInput = {
+    id?: SortOrder
+    projectLocation?: SortOrderInput | SortOrder
+    startDate?: SortOrderInput | SortOrder
+    contractDuration?: SortOrderInput | SortOrder
+    specialNotes?: SortOrderInput | SortOrder
+    status?: SortOrder
+    languages?: SortOrder
+    minExperience?: SortOrderInput | SortOrder
+    maxAge?: SortOrderInput | SortOrder
+    ticketType?: SortOrderInput | SortOrder
+    ticketProvided?: SortOrder
+    clientId?: SortOrder
+    assignedAgencyId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    submittedAt?: SortOrderInput | SortOrder
+    reviewedAt?: SortOrderInput | SortOrder
+    client?: ClientOrderByWithRelationInput
+    assignedAgency?: AgencyOrderByWithRelationInput
+    jobRoles?: JobRoleOrderByRelationAggregateInput
+    labourProfiles?: LabourProfileOrderByRelationAggregateInput
+    procedures?: ProcedureOrderByRelationAggregateInput
+    documents?: RequirementDocumentOrderByRelationAggregateInput
+  }
+
+  export type RequirementWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: RequirementWhereInput | RequirementWhereInput[]
+    OR?: RequirementWhereInput[]
+    NOT?: RequirementWhereInput | RequirementWhereInput[]
+    projectLocation?: StringNullableFilter<"Requirement"> | string | null
+    startDate?: DateTimeNullableFilter<"Requirement"> | Date | string | null
+    contractDuration?: EnumContractDurationNullableFilter<"Requirement"> | $Enums.ContractDuration | null
+    specialNotes?: StringNullableFilter<"Requirement"> | string | null
+    status?: EnumRequirementStatusFilter<"Requirement"> | $Enums.RequirementStatus
+    languages?: StringNullableListFilter<"Requirement">
+    minExperience?: EnumExperienceLevelNullableFilter<"Requirement"> | $Enums.ExperienceLevel | null
+    maxAge?: IntNullableFilter<"Requirement"> | number | null
+    ticketType?: EnumTicketTypeNullableFilter<"Requirement"> | $Enums.TicketType | null
+    ticketProvided?: BoolFilter<"Requirement"> | boolean
+    clientId?: StringFilter<"Requirement"> | string
+    assignedAgencyId?: StringNullableFilter<"Requirement"> | string | null
+    createdAt?: DateTimeFilter<"Requirement"> | Date | string
+    updatedAt?: DateTimeFilter<"Requirement"> | Date | string
+    submittedAt?: DateTimeNullableFilter<"Requirement"> | Date | string | null
+    reviewedAt?: DateTimeNullableFilter<"Requirement"> | Date | string | null
+    client?: XOR<ClientScalarRelationFilter, ClientWhereInput>
+    assignedAgency?: XOR<AgencyNullableScalarRelationFilter, AgencyWhereInput> | null
+    jobRoles?: JobRoleListRelationFilter
+    labourProfiles?: LabourProfileListRelationFilter
+    procedures?: ProcedureListRelationFilter
+    documents?: RequirementDocumentListRelationFilter
+  }, "id">
+
+  export type RequirementOrderByWithAggregationInput = {
+    id?: SortOrder
+    projectLocation?: SortOrderInput | SortOrder
+    startDate?: SortOrderInput | SortOrder
+    contractDuration?: SortOrderInput | SortOrder
+    specialNotes?: SortOrderInput | SortOrder
+    status?: SortOrder
+    languages?: SortOrder
+    minExperience?: SortOrderInput | SortOrder
+    maxAge?: SortOrderInput | SortOrder
+    ticketType?: SortOrderInput | SortOrder
+    ticketProvided?: SortOrder
+    clientId?: SortOrder
+    assignedAgencyId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    submittedAt?: SortOrderInput | SortOrder
+    reviewedAt?: SortOrderInput | SortOrder
+    _count?: RequirementCountOrderByAggregateInput
+    _avg?: RequirementAvgOrderByAggregateInput
+    _max?: RequirementMaxOrderByAggregateInput
+    _min?: RequirementMinOrderByAggregateInput
+    _sum?: RequirementSumOrderByAggregateInput
+  }
+
+  export type RequirementScalarWhereWithAggregatesInput = {
+    AND?: RequirementScalarWhereWithAggregatesInput | RequirementScalarWhereWithAggregatesInput[]
+    OR?: RequirementScalarWhereWithAggregatesInput[]
+    NOT?: RequirementScalarWhereWithAggregatesInput | RequirementScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Requirement"> | string
+    projectLocation?: StringNullableWithAggregatesFilter<"Requirement"> | string | null
+    startDate?: DateTimeNullableWithAggregatesFilter<"Requirement"> | Date | string | null
+    contractDuration?: EnumContractDurationNullableWithAggregatesFilter<"Requirement"> | $Enums.ContractDuration | null
+    specialNotes?: StringNullableWithAggregatesFilter<"Requirement"> | string | null
+    status?: EnumRequirementStatusWithAggregatesFilter<"Requirement"> | $Enums.RequirementStatus
+    languages?: StringNullableListFilter<"Requirement">
+    minExperience?: EnumExperienceLevelNullableWithAggregatesFilter<"Requirement"> | $Enums.ExperienceLevel | null
+    maxAge?: IntNullableWithAggregatesFilter<"Requirement"> | number | null
+    ticketType?: EnumTicketTypeNullableWithAggregatesFilter<"Requirement"> | $Enums.TicketType | null
+    ticketProvided?: BoolWithAggregatesFilter<"Requirement"> | boolean
+    clientId?: StringWithAggregatesFilter<"Requirement"> | string
+    assignedAgencyId?: StringNullableWithAggregatesFilter<"Requirement"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Requirement"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Requirement"> | Date | string
+    submittedAt?: DateTimeNullableWithAggregatesFilter<"Requirement"> | Date | string | null
+    reviewedAt?: DateTimeNullableWithAggregatesFilter<"Requirement"> | Date | string | null
   }
 
   export type JobRoleWhereInput = {
@@ -20245,7 +20968,8 @@ export namespace Prisma {
     title?: StringFilter<"JobRole"> | string
     quantity?: IntFilter<"JobRole"> | number
     nationality?: StringFilter<"JobRole"> | string
-    salary?: StringFilter<"JobRole"> | string
+    salary?: FloatNullableFilter<"JobRole"> | number | null
+    salaryCurrency?: StringFilter<"JobRole"> | string
     requirementId?: StringFilter<"JobRole"> | string
     createdAt?: DateTimeFilter<"JobRole"> | Date | string
     updatedAt?: DateTimeFilter<"JobRole"> | Date | string
@@ -20257,7 +20981,8 @@ export namespace Prisma {
     title?: SortOrder
     quantity?: SortOrder
     nationality?: SortOrder
-    salary?: SortOrder
+    salary?: SortOrderInput | SortOrder
+    salaryCurrency?: SortOrder
     requirementId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -20272,7 +20997,8 @@ export namespace Prisma {
     title?: StringFilter<"JobRole"> | string
     quantity?: IntFilter<"JobRole"> | number
     nationality?: StringFilter<"JobRole"> | string
-    salary?: StringFilter<"JobRole"> | string
+    salary?: FloatNullableFilter<"JobRole"> | number | null
+    salaryCurrency?: StringFilter<"JobRole"> | string
     requirementId?: StringFilter<"JobRole"> | string
     createdAt?: DateTimeFilter<"JobRole"> | Date | string
     updatedAt?: DateTimeFilter<"JobRole"> | Date | string
@@ -20284,7 +21010,8 @@ export namespace Prisma {
     title?: SortOrder
     quantity?: SortOrder
     nationality?: SortOrder
-    salary?: SortOrder
+    salary?: SortOrderInput | SortOrder
+    salaryCurrency?: SortOrder
     requirementId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -20303,132 +21030,11 @@ export namespace Prisma {
     title?: StringWithAggregatesFilter<"JobRole"> | string
     quantity?: IntWithAggregatesFilter<"JobRole"> | number
     nationality?: StringWithAggregatesFilter<"JobRole"> | string
-    salary?: StringWithAggregatesFilter<"JobRole"> | string
+    salary?: FloatNullableWithAggregatesFilter<"JobRole"> | number | null
+    salaryCurrency?: StringWithAggregatesFilter<"JobRole"> | string
     requirementId?: StringWithAggregatesFilter<"JobRole"> | string
     createdAt?: DateTimeWithAggregatesFilter<"JobRole"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"JobRole"> | Date | string
-  }
-
-  export type RequirementWhereInput = {
-    AND?: RequirementWhereInput | RequirementWhereInput[]
-    OR?: RequirementWhereInput[]
-    NOT?: RequirementWhereInput | RequirementWhereInput[]
-    id?: StringFilter<"Requirement"> | string
-    projectLocation?: StringNullableFilter<"Requirement"> | string | null
-    startDate?: DateTimeNullableFilter<"Requirement"> | Date | string | null
-    contractDuration?: EnumContractDurationNullableFilter<"Requirement"> | $Enums.ContractDuration | null
-    previousExperience?: EnumPreviousExperienceNullableFilter<"Requirement"> | $Enums.PreviousExperience | null
-    ticketDetails?: EnumTicketDetailsNullableFilter<"Requirement"> | $Enums.TicketDetails | null
-    totalExperienceYears?: IntNullableFilter<"Requirement"> | number | null
-    preferredAge?: IntNullableFilter<"Requirement"> | number | null
-    specialNotes?: StringNullableFilter<"Requirement"> | string | null
-    status?: EnumRequirementStatusFilter<"Requirement"> | $Enums.RequirementStatus
-    languages?: StringNullableListFilter<"Requirement">
-    clientId?: StringFilter<"Requirement"> | string
-    assignedToId?: StringNullableFilter<"Requirement"> | string | null
-    createdAt?: DateTimeFilter<"Requirement"> | Date | string
-    updatedAt?: DateTimeFilter<"Requirement"> | Date | string
-    jobRoles?: JobRoleListRelationFilter
-    client?: XOR<ClientScalarRelationFilter, ClientWhereInput>
-    assignedTo?: XOR<AgencyNullableScalarRelationFilter, AgencyWhereInput> | null
-    labourProfiles?: LabourProfileListRelationFilter
-    procedures?: ProcedureListRelationFilter
-    documents?: RequirementDocumentListRelationFilter
-  }
-
-  export type RequirementOrderByWithRelationInput = {
-    id?: SortOrder
-    projectLocation?: SortOrderInput | SortOrder
-    startDate?: SortOrderInput | SortOrder
-    contractDuration?: SortOrderInput | SortOrder
-    previousExperience?: SortOrderInput | SortOrder
-    ticketDetails?: SortOrderInput | SortOrder
-    totalExperienceYears?: SortOrderInput | SortOrder
-    preferredAge?: SortOrderInput | SortOrder
-    specialNotes?: SortOrderInput | SortOrder
-    status?: SortOrder
-    languages?: SortOrder
-    clientId?: SortOrder
-    assignedToId?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    jobRoles?: JobRoleOrderByRelationAggregateInput
-    client?: ClientOrderByWithRelationInput
-    assignedTo?: AgencyOrderByWithRelationInput
-    labourProfiles?: LabourProfileOrderByRelationAggregateInput
-    procedures?: ProcedureOrderByRelationAggregateInput
-    documents?: RequirementDocumentOrderByRelationAggregateInput
-  }
-
-  export type RequirementWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    AND?: RequirementWhereInput | RequirementWhereInput[]
-    OR?: RequirementWhereInput[]
-    NOT?: RequirementWhereInput | RequirementWhereInput[]
-    projectLocation?: StringNullableFilter<"Requirement"> | string | null
-    startDate?: DateTimeNullableFilter<"Requirement"> | Date | string | null
-    contractDuration?: EnumContractDurationNullableFilter<"Requirement"> | $Enums.ContractDuration | null
-    previousExperience?: EnumPreviousExperienceNullableFilter<"Requirement"> | $Enums.PreviousExperience | null
-    ticketDetails?: EnumTicketDetailsNullableFilter<"Requirement"> | $Enums.TicketDetails | null
-    totalExperienceYears?: IntNullableFilter<"Requirement"> | number | null
-    preferredAge?: IntNullableFilter<"Requirement"> | number | null
-    specialNotes?: StringNullableFilter<"Requirement"> | string | null
-    status?: EnumRequirementStatusFilter<"Requirement"> | $Enums.RequirementStatus
-    languages?: StringNullableListFilter<"Requirement">
-    clientId?: StringFilter<"Requirement"> | string
-    assignedToId?: StringNullableFilter<"Requirement"> | string | null
-    createdAt?: DateTimeFilter<"Requirement"> | Date | string
-    updatedAt?: DateTimeFilter<"Requirement"> | Date | string
-    jobRoles?: JobRoleListRelationFilter
-    client?: XOR<ClientScalarRelationFilter, ClientWhereInput>
-    assignedTo?: XOR<AgencyNullableScalarRelationFilter, AgencyWhereInput> | null
-    labourProfiles?: LabourProfileListRelationFilter
-    procedures?: ProcedureListRelationFilter
-    documents?: RequirementDocumentListRelationFilter
-  }, "id">
-
-  export type RequirementOrderByWithAggregationInput = {
-    id?: SortOrder
-    projectLocation?: SortOrderInput | SortOrder
-    startDate?: SortOrderInput | SortOrder
-    contractDuration?: SortOrderInput | SortOrder
-    previousExperience?: SortOrderInput | SortOrder
-    ticketDetails?: SortOrderInput | SortOrder
-    totalExperienceYears?: SortOrderInput | SortOrder
-    preferredAge?: SortOrderInput | SortOrder
-    specialNotes?: SortOrderInput | SortOrder
-    status?: SortOrder
-    languages?: SortOrder
-    clientId?: SortOrder
-    assignedToId?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: RequirementCountOrderByAggregateInput
-    _avg?: RequirementAvgOrderByAggregateInput
-    _max?: RequirementMaxOrderByAggregateInput
-    _min?: RequirementMinOrderByAggregateInput
-    _sum?: RequirementSumOrderByAggregateInput
-  }
-
-  export type RequirementScalarWhereWithAggregatesInput = {
-    AND?: RequirementScalarWhereWithAggregatesInput | RequirementScalarWhereWithAggregatesInput[]
-    OR?: RequirementScalarWhereWithAggregatesInput[]
-    NOT?: RequirementScalarWhereWithAggregatesInput | RequirementScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"Requirement"> | string
-    projectLocation?: StringNullableWithAggregatesFilter<"Requirement"> | string | null
-    startDate?: DateTimeNullableWithAggregatesFilter<"Requirement"> | Date | string | null
-    contractDuration?: EnumContractDurationNullableWithAggregatesFilter<"Requirement"> | $Enums.ContractDuration | null
-    previousExperience?: EnumPreviousExperienceNullableWithAggregatesFilter<"Requirement"> | $Enums.PreviousExperience | null
-    ticketDetails?: EnumTicketDetailsNullableWithAggregatesFilter<"Requirement"> | $Enums.TicketDetails | null
-    totalExperienceYears?: IntNullableWithAggregatesFilter<"Requirement"> | number | null
-    preferredAge?: IntNullableWithAggregatesFilter<"Requirement"> | number | null
-    specialNotes?: StringNullableWithAggregatesFilter<"Requirement"> | string | null
-    status?: EnumRequirementStatusWithAggregatesFilter<"Requirement"> | $Enums.RequirementStatus
-    languages?: StringNullableListFilter<"Requirement">
-    clientId?: StringWithAggregatesFilter<"Requirement"> | string
-    assignedToId?: StringNullableWithAggregatesFilter<"Requirement"> | string | null
-    createdAt?: DateTimeWithAggregatesFilter<"Requirement"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"Requirement"> | Date | string
   }
 
   export type LabourProfileWhereInput = {
@@ -20438,18 +21044,37 @@ export namespace Prisma {
     id?: StringFilter<"LabourProfile"> | string
     name?: StringFilter<"LabourProfile"> | string
     age?: IntFilter<"LabourProfile"> | number
-    gender?: StringFilter<"LabourProfile"> | string
+    gender?: EnumGenderFilter<"LabourProfile"> | $Enums.Gender
     nationality?: StringFilter<"LabourProfile"> | string
+    maritalStatus?: StringNullableFilter<"LabourProfile"> | string | null
     skills?: StringNullableListFilter<"LabourProfile">
     experienceYears?: IntFilter<"LabourProfile"> | number
     education?: StringNullableFilter<"LabourProfile"> | string | null
-    language?: StringNullableListFilter<"LabourProfile">
-    status?: EnumLabourStatusFilter<"LabourProfile"> | $Enums.LabourStatus
+    currentPosition?: StringNullableFilter<"LabourProfile"> | string | null
+    currentCompany?: StringNullableFilter<"LabourProfile"> | string | null
+    languages?: StringNullableListFilter<"LabourProfile">
+    englishProficiency?: StringNullableFilter<"LabourProfile"> | string | null
+    email?: StringNullableFilter<"LabourProfile"> | string | null
+    phone?: StringFilter<"LabourProfile"> | string
+    address?: StringNullableFilter<"LabourProfile"> | string | null
+    city?: StringNullableFilter<"LabourProfile"> | string | null
+    country?: StringNullableFilter<"LabourProfile"> | string | null
     cvUrl?: StringFilter<"LabourProfile"> | string
-    passportCopy?: StringNullableFilter<"LabourProfile"> | string | null
+    passportNumber?: StringNullableFilter<"LabourProfile"> | string | null
+    passportExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    visaType?: StringNullableFilter<"LabourProfile"> | string | null
+    visaExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    medicalStatus?: StringNullableFilter<"LabourProfile"> | string | null
+    medicalExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    photo?: StringNullableFilter<"LabourProfile"> | string | null
     otherDocs?: StringNullableListFilter<"LabourProfile">
+    status?: EnumLabourProfileStatusFilter<"LabourProfile"> | $Enums.LabourProfileStatus
+    statusReason?: StringNullableFilter<"LabourProfile"> | string | null
     requirementId?: StringFilter<"LabourProfile"> | string
     agencyId?: StringFilter<"LabourProfile"> | string
+    deploymentDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    contractStartDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    contractEndDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
     createdAt?: DateTimeFilter<"LabourProfile"> | Date | string
     updatedAt?: DateTimeFilter<"LabourProfile"> | Date | string
     requirement?: XOR<RequirementScalarRelationFilter, RequirementWhereInput>
@@ -20464,16 +21089,35 @@ export namespace Prisma {
     age?: SortOrder
     gender?: SortOrder
     nationality?: SortOrder
+    maritalStatus?: SortOrderInput | SortOrder
     skills?: SortOrder
     experienceYears?: SortOrder
     education?: SortOrderInput | SortOrder
-    language?: SortOrder
-    status?: SortOrder
+    currentPosition?: SortOrderInput | SortOrder
+    currentCompany?: SortOrderInput | SortOrder
+    languages?: SortOrder
+    englishProficiency?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    phone?: SortOrder
+    address?: SortOrderInput | SortOrder
+    city?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
     cvUrl?: SortOrder
-    passportCopy?: SortOrderInput | SortOrder
+    passportNumber?: SortOrderInput | SortOrder
+    passportExpiry?: SortOrderInput | SortOrder
+    visaType?: SortOrderInput | SortOrder
+    visaExpiry?: SortOrderInput | SortOrder
+    medicalStatus?: SortOrderInput | SortOrder
+    medicalExpiry?: SortOrderInput | SortOrder
+    photo?: SortOrderInput | SortOrder
     otherDocs?: SortOrder
+    status?: SortOrder
+    statusReason?: SortOrderInput | SortOrder
     requirementId?: SortOrder
     agencyId?: SortOrder
+    deploymentDate?: SortOrderInput | SortOrder
+    contractStartDate?: SortOrderInput | SortOrder
+    contractEndDate?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     requirement?: RequirementOrderByWithRelationInput
@@ -20489,18 +21133,37 @@ export namespace Prisma {
     NOT?: LabourProfileWhereInput | LabourProfileWhereInput[]
     name?: StringFilter<"LabourProfile"> | string
     age?: IntFilter<"LabourProfile"> | number
-    gender?: StringFilter<"LabourProfile"> | string
+    gender?: EnumGenderFilter<"LabourProfile"> | $Enums.Gender
     nationality?: StringFilter<"LabourProfile"> | string
+    maritalStatus?: StringNullableFilter<"LabourProfile"> | string | null
     skills?: StringNullableListFilter<"LabourProfile">
     experienceYears?: IntFilter<"LabourProfile"> | number
     education?: StringNullableFilter<"LabourProfile"> | string | null
-    language?: StringNullableListFilter<"LabourProfile">
-    status?: EnumLabourStatusFilter<"LabourProfile"> | $Enums.LabourStatus
+    currentPosition?: StringNullableFilter<"LabourProfile"> | string | null
+    currentCompany?: StringNullableFilter<"LabourProfile"> | string | null
+    languages?: StringNullableListFilter<"LabourProfile">
+    englishProficiency?: StringNullableFilter<"LabourProfile"> | string | null
+    email?: StringNullableFilter<"LabourProfile"> | string | null
+    phone?: StringFilter<"LabourProfile"> | string
+    address?: StringNullableFilter<"LabourProfile"> | string | null
+    city?: StringNullableFilter<"LabourProfile"> | string | null
+    country?: StringNullableFilter<"LabourProfile"> | string | null
     cvUrl?: StringFilter<"LabourProfile"> | string
-    passportCopy?: StringNullableFilter<"LabourProfile"> | string | null
+    passportNumber?: StringNullableFilter<"LabourProfile"> | string | null
+    passportExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    visaType?: StringNullableFilter<"LabourProfile"> | string | null
+    visaExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    medicalStatus?: StringNullableFilter<"LabourProfile"> | string | null
+    medicalExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    photo?: StringNullableFilter<"LabourProfile"> | string | null
     otherDocs?: StringNullableListFilter<"LabourProfile">
+    status?: EnumLabourProfileStatusFilter<"LabourProfile"> | $Enums.LabourProfileStatus
+    statusReason?: StringNullableFilter<"LabourProfile"> | string | null
     requirementId?: StringFilter<"LabourProfile"> | string
     agencyId?: StringFilter<"LabourProfile"> | string
+    deploymentDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    contractStartDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    contractEndDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
     createdAt?: DateTimeFilter<"LabourProfile"> | Date | string
     updatedAt?: DateTimeFilter<"LabourProfile"> | Date | string
     requirement?: XOR<RequirementScalarRelationFilter, RequirementWhereInput>
@@ -20515,16 +21178,35 @@ export namespace Prisma {
     age?: SortOrder
     gender?: SortOrder
     nationality?: SortOrder
+    maritalStatus?: SortOrderInput | SortOrder
     skills?: SortOrder
     experienceYears?: SortOrder
     education?: SortOrderInput | SortOrder
-    language?: SortOrder
-    status?: SortOrder
+    currentPosition?: SortOrderInput | SortOrder
+    currentCompany?: SortOrderInput | SortOrder
+    languages?: SortOrder
+    englishProficiency?: SortOrderInput | SortOrder
+    email?: SortOrderInput | SortOrder
+    phone?: SortOrder
+    address?: SortOrderInput | SortOrder
+    city?: SortOrderInput | SortOrder
+    country?: SortOrderInput | SortOrder
     cvUrl?: SortOrder
-    passportCopy?: SortOrderInput | SortOrder
+    passportNumber?: SortOrderInput | SortOrder
+    passportExpiry?: SortOrderInput | SortOrder
+    visaType?: SortOrderInput | SortOrder
+    visaExpiry?: SortOrderInput | SortOrder
+    medicalStatus?: SortOrderInput | SortOrder
+    medicalExpiry?: SortOrderInput | SortOrder
+    photo?: SortOrderInput | SortOrder
     otherDocs?: SortOrder
+    status?: SortOrder
+    statusReason?: SortOrderInput | SortOrder
     requirementId?: SortOrder
     agencyId?: SortOrder
+    deploymentDate?: SortOrderInput | SortOrder
+    contractStartDate?: SortOrderInput | SortOrder
+    contractEndDate?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: LabourProfileCountOrderByAggregateInput
@@ -20541,18 +21223,37 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"LabourProfile"> | string
     name?: StringWithAggregatesFilter<"LabourProfile"> | string
     age?: IntWithAggregatesFilter<"LabourProfile"> | number
-    gender?: StringWithAggregatesFilter<"LabourProfile"> | string
+    gender?: EnumGenderWithAggregatesFilter<"LabourProfile"> | $Enums.Gender
     nationality?: StringWithAggregatesFilter<"LabourProfile"> | string
+    maritalStatus?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
     skills?: StringNullableListFilter<"LabourProfile">
     experienceYears?: IntWithAggregatesFilter<"LabourProfile"> | number
     education?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
-    language?: StringNullableListFilter<"LabourProfile">
-    status?: EnumLabourStatusWithAggregatesFilter<"LabourProfile"> | $Enums.LabourStatus
+    currentPosition?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
+    currentCompany?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
+    languages?: StringNullableListFilter<"LabourProfile">
+    englishProficiency?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
+    email?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
+    phone?: StringWithAggregatesFilter<"LabourProfile"> | string
+    address?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
+    city?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
+    country?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
     cvUrl?: StringWithAggregatesFilter<"LabourProfile"> | string
-    passportCopy?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
+    passportNumber?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
+    passportExpiry?: DateTimeNullableWithAggregatesFilter<"LabourProfile"> | Date | string | null
+    visaType?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
+    visaExpiry?: DateTimeNullableWithAggregatesFilter<"LabourProfile"> | Date | string | null
+    medicalStatus?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
+    medicalExpiry?: DateTimeNullableWithAggregatesFilter<"LabourProfile"> | Date | string | null
+    photo?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
     otherDocs?: StringNullableListFilter<"LabourProfile">
+    status?: EnumLabourProfileStatusWithAggregatesFilter<"LabourProfile"> | $Enums.LabourProfileStatus
+    statusReason?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
     requirementId?: StringWithAggregatesFilter<"LabourProfile"> | string
     agencyId?: StringWithAggregatesFilter<"LabourProfile"> | string
+    deploymentDate?: DateTimeNullableWithAggregatesFilter<"LabourProfile"> | Date | string | null
+    contractStartDate?: DateTimeNullableWithAggregatesFilter<"LabourProfile"> | Date | string | null
+    contractEndDate?: DateTimeNullableWithAggregatesFilter<"LabourProfile"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"LabourProfile"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"LabourProfile"> | Date | string
   }
@@ -20564,10 +21265,11 @@ export namespace Prisma {
     id?: StringFilter<"Procedure"> | string
     name?: StringFilter<"Procedure"> | string
     description?: StringFilter<"Procedure"> | string
-    status?: StringFilter<"Procedure"> | string
+    status?: EnumProcedureStatusFilter<"Procedure"> | $Enums.ProcedureStatus
     dueDate?: DateTimeNullableFilter<"Procedure"> | Date | string | null
     completedDate?: DateTimeNullableFilter<"Procedure"> | Date | string | null
     comments?: StringNullableFilter<"Procedure"> | string | null
+    metadata?: JsonNullableFilter<"Procedure">
     requirementId?: StringNullableFilter<"Procedure"> | string | null
     labourProfileId?: StringNullableFilter<"Procedure"> | string | null
     createdAt?: DateTimeFilter<"Procedure"> | Date | string
@@ -20584,6 +21286,7 @@ export namespace Prisma {
     dueDate?: SortOrderInput | SortOrder
     completedDate?: SortOrderInput | SortOrder
     comments?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
     requirementId?: SortOrderInput | SortOrder
     labourProfileId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -20599,10 +21302,11 @@ export namespace Prisma {
     NOT?: ProcedureWhereInput | ProcedureWhereInput[]
     name?: StringFilter<"Procedure"> | string
     description?: StringFilter<"Procedure"> | string
-    status?: StringFilter<"Procedure"> | string
+    status?: EnumProcedureStatusFilter<"Procedure"> | $Enums.ProcedureStatus
     dueDate?: DateTimeNullableFilter<"Procedure"> | Date | string | null
     completedDate?: DateTimeNullableFilter<"Procedure"> | Date | string | null
     comments?: StringNullableFilter<"Procedure"> | string | null
+    metadata?: JsonNullableFilter<"Procedure">
     requirementId?: StringNullableFilter<"Procedure"> | string | null
     labourProfileId?: StringNullableFilter<"Procedure"> | string | null
     createdAt?: DateTimeFilter<"Procedure"> | Date | string
@@ -20619,6 +21323,7 @@ export namespace Prisma {
     dueDate?: SortOrderInput | SortOrder
     completedDate?: SortOrderInput | SortOrder
     comments?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
     requirementId?: SortOrderInput | SortOrder
     labourProfileId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -20635,10 +21340,11 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Procedure"> | string
     name?: StringWithAggregatesFilter<"Procedure"> | string
     description?: StringWithAggregatesFilter<"Procedure"> | string
-    status?: StringWithAggregatesFilter<"Procedure"> | string
+    status?: EnumProcedureStatusWithAggregatesFilter<"Procedure"> | $Enums.ProcedureStatus
     dueDate?: DateTimeNullableWithAggregatesFilter<"Procedure"> | Date | string | null
     completedDate?: DateTimeNullableWithAggregatesFilter<"Procedure"> | Date | string | null
     comments?: StringNullableWithAggregatesFilter<"Procedure"> | string | null
+    metadata?: JsonNullableWithAggregatesFilter<"Procedure">
     requirementId?: StringNullableWithAggregatesFilter<"Procedure"> | string | null
     labourProfileId?: StringNullableWithAggregatesFilter<"Procedure"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Procedure"> | Date | string
@@ -20650,8 +21356,9 @@ export namespace Prisma {
     OR?: LabourStatusLogWhereInput[]
     NOT?: LabourStatusLogWhereInput | LabourStatusLogWhereInput[]
     id?: StringFilter<"LabourStatusLog"> | string
-    status?: EnumLabourStatusFilter<"LabourStatusLog"> | $Enums.LabourStatus
+    status?: EnumLabourProfileStatusFilter<"LabourStatusLog"> | $Enums.LabourProfileStatus
     comments?: StringNullableFilter<"LabourStatusLog"> | string | null
+    metadata?: JsonNullableFilter<"LabourStatusLog">
     labourProfileId?: StringFilter<"LabourStatusLog"> | string
     changedById?: StringFilter<"LabourStatusLog"> | string
     createdAt?: DateTimeFilter<"LabourStatusLog"> | Date | string
@@ -20663,6 +21370,7 @@ export namespace Prisma {
     id?: SortOrder
     status?: SortOrder
     comments?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
     labourProfileId?: SortOrder
     changedById?: SortOrder
     createdAt?: SortOrder
@@ -20675,8 +21383,9 @@ export namespace Prisma {
     AND?: LabourStatusLogWhereInput | LabourStatusLogWhereInput[]
     OR?: LabourStatusLogWhereInput[]
     NOT?: LabourStatusLogWhereInput | LabourStatusLogWhereInput[]
-    status?: EnumLabourStatusFilter<"LabourStatusLog"> | $Enums.LabourStatus
+    status?: EnumLabourProfileStatusFilter<"LabourStatusLog"> | $Enums.LabourProfileStatus
     comments?: StringNullableFilter<"LabourStatusLog"> | string | null
+    metadata?: JsonNullableFilter<"LabourStatusLog">
     labourProfileId?: StringFilter<"LabourStatusLog"> | string
     changedById?: StringFilter<"LabourStatusLog"> | string
     createdAt?: DateTimeFilter<"LabourStatusLog"> | Date | string
@@ -20688,6 +21397,7 @@ export namespace Prisma {
     id?: SortOrder
     status?: SortOrder
     comments?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
     labourProfileId?: SortOrder
     changedById?: SortOrder
     createdAt?: SortOrder
@@ -20701,8 +21411,9 @@ export namespace Prisma {
     OR?: LabourStatusLogScalarWhereWithAggregatesInput[]
     NOT?: LabourStatusLogScalarWhereWithAggregatesInput | LabourStatusLogScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"LabourStatusLog"> | string
-    status?: EnumLabourStatusWithAggregatesFilter<"LabourStatusLog"> | $Enums.LabourStatus
+    status?: EnumLabourProfileStatusWithAggregatesFilter<"LabourStatusLog"> | $Enums.LabourProfileStatus
     comments?: StringNullableWithAggregatesFilter<"LabourStatusLog"> | string | null
+    metadata?: JsonNullableWithAggregatesFilter<"LabourStatusLog">
     labourProfileId?: StringWithAggregatesFilter<"LabourStatusLog"> | string
     changedById?: StringWithAggregatesFilter<"LabourStatusLog"> | string
     createdAt?: DateTimeWithAggregatesFilter<"LabourStatusLog"> | Date | string
@@ -20715,8 +21426,11 @@ export namespace Prisma {
     id?: StringFilter<"ClientDocument"> | string
     type?: EnumDocumentTypeFilter<"ClientDocument"> | $Enums.DocumentType
     url?: StringFilter<"ClientDocument"> | string
+    name?: StringNullableFilter<"ClientDocument"> | string | null
+    description?: StringNullableFilter<"ClientDocument"> | string | null
     verified?: BoolFilter<"ClientDocument"> | boolean
     comments?: StringNullableFilter<"ClientDocument"> | string | null
+    expiryDate?: DateTimeNullableFilter<"ClientDocument"> | Date | string | null
     clientId?: StringFilter<"ClientDocument"> | string
     verifiedById?: StringNullableFilter<"ClientDocument"> | string | null
     createdAt?: DateTimeFilter<"ClientDocument"> | Date | string
@@ -20729,8 +21443,11 @@ export namespace Prisma {
     id?: SortOrder
     type?: SortOrder
     url?: SortOrder
+    name?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
     verified?: SortOrder
     comments?: SortOrderInput | SortOrder
+    expiryDate?: SortOrderInput | SortOrder
     clientId?: SortOrder
     verifiedById?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -20746,8 +21463,11 @@ export namespace Prisma {
     NOT?: ClientDocumentWhereInput | ClientDocumentWhereInput[]
     type?: EnumDocumentTypeFilter<"ClientDocument"> | $Enums.DocumentType
     url?: StringFilter<"ClientDocument"> | string
+    name?: StringNullableFilter<"ClientDocument"> | string | null
+    description?: StringNullableFilter<"ClientDocument"> | string | null
     verified?: BoolFilter<"ClientDocument"> | boolean
     comments?: StringNullableFilter<"ClientDocument"> | string | null
+    expiryDate?: DateTimeNullableFilter<"ClientDocument"> | Date | string | null
     clientId?: StringFilter<"ClientDocument"> | string
     verifiedById?: StringNullableFilter<"ClientDocument"> | string | null
     createdAt?: DateTimeFilter<"ClientDocument"> | Date | string
@@ -20760,8 +21480,11 @@ export namespace Prisma {
     id?: SortOrder
     type?: SortOrder
     url?: SortOrder
+    name?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
     verified?: SortOrder
     comments?: SortOrderInput | SortOrder
+    expiryDate?: SortOrderInput | SortOrder
     clientId?: SortOrder
     verifiedById?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -20778,8 +21501,11 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"ClientDocument"> | string
     type?: EnumDocumentTypeWithAggregatesFilter<"ClientDocument"> | $Enums.DocumentType
     url?: StringWithAggregatesFilter<"ClientDocument"> | string
+    name?: StringNullableWithAggregatesFilter<"ClientDocument"> | string | null
+    description?: StringNullableWithAggregatesFilter<"ClientDocument"> | string | null
     verified?: BoolWithAggregatesFilter<"ClientDocument"> | boolean
     comments?: StringNullableWithAggregatesFilter<"ClientDocument"> | string | null
+    expiryDate?: DateTimeNullableWithAggregatesFilter<"ClientDocument"> | Date | string | null
     clientId?: StringWithAggregatesFilter<"ClientDocument"> | string
     verifiedById?: StringNullableWithAggregatesFilter<"ClientDocument"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"ClientDocument"> | Date | string
@@ -20793,8 +21519,11 @@ export namespace Prisma {
     id?: StringFilter<"AgencyDocument"> | string
     type?: EnumDocumentTypeFilter<"AgencyDocument"> | $Enums.DocumentType
     url?: StringFilter<"AgencyDocument"> | string
+    name?: StringNullableFilter<"AgencyDocument"> | string | null
+    description?: StringNullableFilter<"AgencyDocument"> | string | null
     verified?: BoolFilter<"AgencyDocument"> | boolean
     comments?: StringNullableFilter<"AgencyDocument"> | string | null
+    expiryDate?: DateTimeNullableFilter<"AgencyDocument"> | Date | string | null
     agencyId?: StringFilter<"AgencyDocument"> | string
     verifiedById?: StringNullableFilter<"AgencyDocument"> | string | null
     createdAt?: DateTimeFilter<"AgencyDocument"> | Date | string
@@ -20807,8 +21536,11 @@ export namespace Prisma {
     id?: SortOrder
     type?: SortOrder
     url?: SortOrder
+    name?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
     verified?: SortOrder
     comments?: SortOrderInput | SortOrder
+    expiryDate?: SortOrderInput | SortOrder
     agencyId?: SortOrder
     verifiedById?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -20824,8 +21556,11 @@ export namespace Prisma {
     NOT?: AgencyDocumentWhereInput | AgencyDocumentWhereInput[]
     type?: EnumDocumentTypeFilter<"AgencyDocument"> | $Enums.DocumentType
     url?: StringFilter<"AgencyDocument"> | string
+    name?: StringNullableFilter<"AgencyDocument"> | string | null
+    description?: StringNullableFilter<"AgencyDocument"> | string | null
     verified?: BoolFilter<"AgencyDocument"> | boolean
     comments?: StringNullableFilter<"AgencyDocument"> | string | null
+    expiryDate?: DateTimeNullableFilter<"AgencyDocument"> | Date | string | null
     agencyId?: StringFilter<"AgencyDocument"> | string
     verifiedById?: StringNullableFilter<"AgencyDocument"> | string | null
     createdAt?: DateTimeFilter<"AgencyDocument"> | Date | string
@@ -20838,8 +21573,11 @@ export namespace Prisma {
     id?: SortOrder
     type?: SortOrder
     url?: SortOrder
+    name?: SortOrderInput | SortOrder
+    description?: SortOrderInput | SortOrder
     verified?: SortOrder
     comments?: SortOrderInput | SortOrder
+    expiryDate?: SortOrderInput | SortOrder
     agencyId?: SortOrder
     verifiedById?: SortOrderInput | SortOrder
     createdAt?: SortOrder
@@ -20856,8 +21594,11 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"AgencyDocument"> | string
     type?: EnumDocumentTypeWithAggregatesFilter<"AgencyDocument"> | $Enums.DocumentType
     url?: StringWithAggregatesFilter<"AgencyDocument"> | string
+    name?: StringNullableWithAggregatesFilter<"AgencyDocument"> | string | null
+    description?: StringNullableWithAggregatesFilter<"AgencyDocument"> | string | null
     verified?: BoolWithAggregatesFilter<"AgencyDocument"> | boolean
     comments?: StringNullableWithAggregatesFilter<"AgencyDocument"> | string | null
+    expiryDate?: DateTimeNullableWithAggregatesFilter<"AgencyDocument"> | Date | string | null
     agencyId?: StringWithAggregatesFilter<"AgencyDocument"> | string
     verifiedById?: StringNullableWithAggregatesFilter<"AgencyDocument"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"AgencyDocument"> | Date | string
@@ -20871,10 +21612,12 @@ export namespace Prisma {
     id?: StringFilter<"RequirementDocument"> | string
     type?: EnumDocumentTypeFilter<"RequirementDocument"> | $Enums.DocumentType
     url?: StringFilter<"RequirementDocument"> | string
+    name?: StringNullableFilter<"RequirementDocument"> | string | null
     description?: StringNullableFilter<"RequirementDocument"> | string | null
     requirementId?: StringFilter<"RequirementDocument"> | string
     uploadedById?: StringFilter<"RequirementDocument"> | string
     createdAt?: DateTimeFilter<"RequirementDocument"> | Date | string
+    updatedAt?: DateTimeFilter<"RequirementDocument"> | Date | string
     requirement?: XOR<RequirementScalarRelationFilter, RequirementWhereInput>
     uploadedBy?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
@@ -20883,10 +21626,12 @@ export namespace Prisma {
     id?: SortOrder
     type?: SortOrder
     url?: SortOrder
+    name?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     requirementId?: SortOrder
     uploadedById?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
     requirement?: RequirementOrderByWithRelationInput
     uploadedBy?: UserOrderByWithRelationInput
   }
@@ -20898,10 +21643,12 @@ export namespace Prisma {
     NOT?: RequirementDocumentWhereInput | RequirementDocumentWhereInput[]
     type?: EnumDocumentTypeFilter<"RequirementDocument"> | $Enums.DocumentType
     url?: StringFilter<"RequirementDocument"> | string
+    name?: StringNullableFilter<"RequirementDocument"> | string | null
     description?: StringNullableFilter<"RequirementDocument"> | string | null
     requirementId?: StringFilter<"RequirementDocument"> | string
     uploadedById?: StringFilter<"RequirementDocument"> | string
     createdAt?: DateTimeFilter<"RequirementDocument"> | Date | string
+    updatedAt?: DateTimeFilter<"RequirementDocument"> | Date | string
     requirement?: XOR<RequirementScalarRelationFilter, RequirementWhereInput>
     uploadedBy?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id">
@@ -20910,10 +21657,12 @@ export namespace Prisma {
     id?: SortOrder
     type?: SortOrder
     url?: SortOrder
+    name?: SortOrderInput | SortOrder
     description?: SortOrderInput | SortOrder
     requirementId?: SortOrder
     uploadedById?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
     _count?: RequirementDocumentCountOrderByAggregateInput
     _max?: RequirementDocumentMaxOrderByAggregateInput
     _min?: RequirementDocumentMinOrderByAggregateInput
@@ -20926,10 +21675,12 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"RequirementDocument"> | string
     type?: EnumDocumentTypeWithAggregatesFilter<"RequirementDocument"> | $Enums.DocumentType
     url?: StringWithAggregatesFilter<"RequirementDocument"> | string
+    name?: StringNullableWithAggregatesFilter<"RequirementDocument"> | string | null
     description?: StringNullableWithAggregatesFilter<"RequirementDocument"> | string | null
     requirementId?: StringWithAggregatesFilter<"RequirementDocument"> | string
     uploadedById?: StringWithAggregatesFilter<"RequirementDocument"> | string
     createdAt?: DateTimeWithAggregatesFilter<"RequirementDocument"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"RequirementDocument"> | Date | string
   }
 
   export type AuditLogWhereInput = {
@@ -20946,8 +21697,8 @@ export namespace Prisma {
     affectedFields?: StringNullableListFilter<"AuditLog">
     ipAddress?: StringNullableFilter<"AuditLog"> | string | null
     userAgent?: StringNullableFilter<"AuditLog"> | string | null
-    performedAt?: DateTimeFilter<"AuditLog"> | Date | string
     performedById?: StringFilter<"AuditLog"> | string
+    performedAt?: DateTimeFilter<"AuditLog"> | Date | string
     createdAt?: DateTimeFilter<"AuditLog"> | Date | string
     performedBy?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
@@ -20963,8 +21714,8 @@ export namespace Prisma {
     affectedFields?: SortOrder
     ipAddress?: SortOrderInput | SortOrder
     userAgent?: SortOrderInput | SortOrder
-    performedAt?: SortOrder
     performedById?: SortOrder
+    performedAt?: SortOrder
     createdAt?: SortOrder
     performedBy?: UserOrderByWithRelationInput
   }
@@ -20983,8 +21734,8 @@ export namespace Prisma {
     affectedFields?: StringNullableListFilter<"AuditLog">
     ipAddress?: StringNullableFilter<"AuditLog"> | string | null
     userAgent?: StringNullableFilter<"AuditLog"> | string | null
-    performedAt?: DateTimeFilter<"AuditLog"> | Date | string
     performedById?: StringFilter<"AuditLog"> | string
+    performedAt?: DateTimeFilter<"AuditLog"> | Date | string
     createdAt?: DateTimeFilter<"AuditLog"> | Date | string
     performedBy?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id">
@@ -21000,8 +21751,8 @@ export namespace Prisma {
     affectedFields?: SortOrder
     ipAddress?: SortOrderInput | SortOrder
     userAgent?: SortOrderInput | SortOrder
-    performedAt?: SortOrder
     performedById?: SortOrder
+    performedAt?: SortOrder
     createdAt?: SortOrder
     _count?: AuditLogCountOrderByAggregateInput
     _max?: AuditLogMaxOrderByAggregateInput
@@ -21022,8 +21773,8 @@ export namespace Prisma {
     affectedFields?: StringNullableListFilter<"AuditLog">
     ipAddress?: StringNullableWithAggregatesFilter<"AuditLog"> | string | null
     userAgent?: StringNullableWithAggregatesFilter<"AuditLog"> | string | null
-    performedAt?: DateTimeWithAggregatesFilter<"AuditLog"> | Date | string
     performedById?: StringWithAggregatesFilter<"AuditLog"> | string
+    performedAt?: DateTimeWithAggregatesFilter<"AuditLog"> | Date | string
     createdAt?: DateTimeWithAggregatesFilter<"AuditLog"> | Date | string
   }
 
@@ -21034,7 +21785,7 @@ export namespace Prisma {
     id?: StringFilter<"Notification"> | string
     title?: StringFilter<"Notification"> | string
     message?: StringFilter<"Notification"> | string
-    type?: StringFilter<"Notification"> | string
+    type?: EnumNotificationTypeFilter<"Notification"> | $Enums.NotificationType
     read?: BoolFilter<"Notification"> | boolean
     actionUrl?: StringNullableFilter<"Notification"> | string | null
     metadata?: JsonNullableFilter<"Notification">
@@ -21065,7 +21816,7 @@ export namespace Prisma {
     NOT?: NotificationWhereInput | NotificationWhereInput[]
     title?: StringFilter<"Notification"> | string
     message?: StringFilter<"Notification"> | string
-    type?: StringFilter<"Notification"> | string
+    type?: EnumNotificationTypeFilter<"Notification"> | $Enums.NotificationType
     read?: BoolFilter<"Notification"> | boolean
     actionUrl?: StringNullableFilter<"Notification"> | string | null
     metadata?: JsonNullableFilter<"Notification">
@@ -21098,7 +21849,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Notification"> | string
     title?: StringWithAggregatesFilter<"Notification"> | string
     message?: StringWithAggregatesFilter<"Notification"> | string
-    type?: StringWithAggregatesFilter<"Notification"> | string
+    type?: EnumNotificationTypeWithAggregatesFilter<"Notification"> | $Enums.NotificationType
     read?: BoolWithAggregatesFilter<"Notification"> | boolean
     actionUrl?: StringNullableWithAggregatesFilter<"Notification"> | string | null
     metadata?: JsonNullableWithAggregatesFilter<"Notification">
@@ -21112,6 +21863,9 @@ export namespace Prisma {
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -21120,18 +21874,19 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
-    client?: ClientCreateNestedOneWithoutUserInput
-    agency?: AgencyCreateNestedOneWithoutUserInput
-    admin?: AdminCreateNestedOneWithoutUserInput
+    clientProfile?: ClientCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyCreateNestedOneWithoutUserInput
+    adminProfile?: AdminCreateNestedOneWithoutUserInput
     createdBy?: UserCreateNestedOneWithoutCreatedUsersInput
     createdUsers?: UserCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -21139,6 +21894,9 @@ export namespace Prisma {
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -21147,18 +21905,19 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
     createdById?: string | null
-    client?: ClientUncheckedCreateNestedOneWithoutUserInput
-    agency?: AgencyUncheckedCreateNestedOneWithoutUserInput
-    admin?: AdminUncheckedCreateNestedOneWithoutUserInput
+    clientProfile?: ClientUncheckedCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyUncheckedCreateNestedOneWithoutUserInput
+    adminProfile?: AdminUncheckedCreateNestedOneWithoutUserInput
     createdUsers?: UserUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
   export type UserUpdateInput = {
@@ -21166,6 +21925,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -21174,18 +21936,19 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUpdateOneWithoutUserNestedInput
-    agency?: AgencyUpdateOneWithoutUserNestedInput
-    admin?: AdminUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUpdateOneWithoutUserNestedInput
     createdBy?: UserUpdateOneWithoutCreatedUsersNestedInput
     createdUsers?: UserUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -21193,6 +21956,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -21201,18 +21967,19 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUncheckedUpdateOneWithoutUserNestedInput
-    agency?: AgencyUncheckedUpdateOneWithoutUserNestedInput
-    admin?: AdminUncheckedUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUncheckedUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUncheckedUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUncheckedUpdateOneWithoutUserNestedInput
     createdUsers?: UserUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -21220,6 +21987,9 @@ export namespace Prisma {
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -21228,6 +21998,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
     createdById?: string | null
   }
@@ -21237,6 +22008,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -21245,6 +22019,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -21253,6 +22028,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -21261,6 +22039,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -21268,20 +22047,18 @@ export namespace Prisma {
   export type ClientCreateInput = {
     id?: string
     companyName: string
-    contactPerson?: string | null
     registrationNo?: string | null
-    companySector?: $Enums.CompanySector | null
-    companySize?: $Enums.CompanySize | null
+    companySector: $Enums.CompanySector
+    companySize: $Enums.CompanySize
     website?: string | null
-    designation?: string | null
-    phone?: string | null
     address: string
-    altContact?: string | null
-    businessLicense?: string | null
-    image?: string | null
+    city: string
+    country: string
+    postalCode?: string | null
+    designation: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutClientInput
+    user: UserCreateNestedOneWithoutClientProfileInput
     requirements?: RequirementCreateNestedManyWithoutClientInput
     documents?: ClientDocumentCreateNestedManyWithoutClientInput
   }
@@ -21290,17 +22067,15 @@ export namespace Prisma {
     id?: string
     userId: string
     companyName: string
-    contactPerson?: string | null
     registrationNo?: string | null
-    companySector?: $Enums.CompanySector | null
-    companySize?: $Enums.CompanySize | null
+    companySector: $Enums.CompanySector
+    companySize: $Enums.CompanySize
     website?: string | null
-    designation?: string | null
-    phone?: string | null
     address: string
-    altContact?: string | null
-    businessLicense?: string | null
-    image?: string | null
+    city: string
+    country: string
+    postalCode?: string | null
+    designation: string
     createdAt?: Date | string
     updatedAt?: Date | string
     requirements?: RequirementUncheckedCreateNestedManyWithoutClientInput
@@ -21310,20 +22085,18 @@ export namespace Prisma {
   export type ClientUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     companyName?: StringFieldUpdateOperationsInput | string
-    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
-    companySector?: NullableEnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector | null
-    companySize?: NullableEnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize | null
+    companySector?: EnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector
+    companySize?: EnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize
     website?: NullableStringFieldUpdateOperationsInput | string | null
-    designation?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
-    altContact?: NullableStringFieldUpdateOperationsInput | string | null
-    businessLicense?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designation?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutClientNestedInput
+    user?: UserUpdateOneRequiredWithoutClientProfileNestedInput
     requirements?: RequirementUpdateManyWithoutClientNestedInput
     documents?: ClientDocumentUpdateManyWithoutClientNestedInput
   }
@@ -21332,17 +22105,15 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     companyName?: StringFieldUpdateOperationsInput | string
-    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
-    companySector?: NullableEnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector | null
-    companySize?: NullableEnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize | null
+    companySector?: EnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector
+    companySize?: EnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize
     website?: NullableStringFieldUpdateOperationsInput | string | null
-    designation?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
-    altContact?: NullableStringFieldUpdateOperationsInput | string | null
-    businessLicense?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designation?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requirements?: RequirementUncheckedUpdateManyWithoutClientNestedInput
@@ -21353,17 +22124,15 @@ export namespace Prisma {
     id?: string
     userId: string
     companyName: string
-    contactPerson?: string | null
     registrationNo?: string | null
-    companySector?: $Enums.CompanySector | null
-    companySize?: $Enums.CompanySize | null
+    companySector: $Enums.CompanySector
+    companySize: $Enums.CompanySize
     website?: string | null
-    designation?: string | null
-    phone?: string | null
     address: string
-    altContact?: string | null
-    businessLicense?: string | null
-    image?: string | null
+    city: string
+    country: string
+    postalCode?: string | null
+    designation: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -21371,17 +22140,15 @@ export namespace Prisma {
   export type ClientUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     companyName?: StringFieldUpdateOperationsInput | string
-    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
-    companySector?: NullableEnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector | null
-    companySize?: NullableEnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize | null
+    companySector?: EnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector
+    companySize?: EnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize
     website?: NullableStringFieldUpdateOperationsInput | string | null
-    designation?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
-    altContact?: NullableStringFieldUpdateOperationsInput | string | null
-    businessLicense?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designation?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -21390,17 +22157,15 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     companyName?: StringFieldUpdateOperationsInput | string
-    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
-    companySector?: NullableEnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector | null
-    companySize?: NullableEnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize | null
+    companySector?: EnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector
+    companySize?: EnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize
     website?: NullableStringFieldUpdateOperationsInput | string | null
-    designation?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
-    altContact?: NullableStringFieldUpdateOperationsInput | string | null
-    businessLicense?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designation?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -21413,16 +22178,16 @@ export namespace Prisma {
     licenseExpiry: Date | string
     country: string
     regions?: AgencyCreateregionsInput | string[]
-    contactPerson: string
-    phone: string
-    email?: string | null
     website?: string | null
+    address: string
+    city: string
+    postalCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutAgencyInput
-    documents?: AgencyDocumentCreateNestedManyWithoutAgencyInput
+    user: UserCreateNestedOneWithoutAgencyProfileInput
     labourProfiles?: LabourProfileCreateNestedManyWithoutAgencyInput
-    requirements?: RequirementCreateNestedManyWithoutAssignedToInput
+    requirements?: RequirementCreateNestedManyWithoutAssignedAgencyInput
+    documents?: AgencyDocumentCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyUncheckedCreateInput = {
@@ -21434,15 +22199,15 @@ export namespace Prisma {
     licenseExpiry: Date | string
     country: string
     regions?: AgencyCreateregionsInput | string[]
-    contactPerson: string
-    phone: string
-    email?: string | null
     website?: string | null
+    address: string
+    city: string
+    postalCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    documents?: AgencyDocumentUncheckedCreateNestedManyWithoutAgencyInput
     labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutAgencyInput
-    requirements?: RequirementUncheckedCreateNestedManyWithoutAssignedToInput
+    requirements?: RequirementUncheckedCreateNestedManyWithoutAssignedAgencyInput
+    documents?: AgencyDocumentUncheckedCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyUpdateInput = {
@@ -21453,16 +22218,16 @@ export namespace Prisma {
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
     regions?: AgencyUpdateregionsInput | string[]
-    contactPerson?: StringFieldUpdateOperationsInput | string
-    phone?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutAgencyNestedInput
-    documents?: AgencyDocumentUpdateManyWithoutAgencyNestedInput
+    user?: UserUpdateOneRequiredWithoutAgencyProfileNestedInput
     labourProfiles?: LabourProfileUpdateManyWithoutAgencyNestedInput
-    requirements?: RequirementUpdateManyWithoutAssignedToNestedInput
+    requirements?: RequirementUpdateManyWithoutAssignedAgencyNestedInput
+    documents?: AgencyDocumentUpdateManyWithoutAgencyNestedInput
   }
 
   export type AgencyUncheckedUpdateInput = {
@@ -21474,15 +22239,15 @@ export namespace Prisma {
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
     regions?: AgencyUpdateregionsInput | string[]
-    contactPerson?: StringFieldUpdateOperationsInput | string
-    phone?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    documents?: AgencyDocumentUncheckedUpdateManyWithoutAgencyNestedInput
     labourProfiles?: LabourProfileUncheckedUpdateManyWithoutAgencyNestedInput
-    requirements?: RequirementUncheckedUpdateManyWithoutAssignedToNestedInput
+    requirements?: RequirementUncheckedUpdateManyWithoutAssignedAgencyNestedInput
+    documents?: AgencyDocumentUncheckedUpdateManyWithoutAgencyNestedInput
   }
 
   export type AgencyCreateManyInput = {
@@ -21494,10 +22259,10 @@ export namespace Prisma {
     licenseExpiry: Date | string
     country: string
     regions?: AgencyCreateregionsInput | string[]
-    contactPerson: string
-    phone: string
-    email?: string | null
     website?: string | null
+    address: string
+    city: string
+    postalCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -21510,10 +22275,10 @@ export namespace Prisma {
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
     regions?: AgencyUpdateregionsInput | string[]
-    contactPerson?: StringFieldUpdateOperationsInput | string
-    phone?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -21527,10 +22292,10 @@ export namespace Prisma {
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
     regions?: AgencyUpdateregionsInput | string[]
-    contactPerson?: StringFieldUpdateOperationsInput | string
-    phone?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -21539,10 +22304,10 @@ export namespace Prisma {
     id?: string
     name: string
     department?: string | null
-    canCreateUsers?: boolean
+    permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutAdminInput
+    user: UserCreateNestedOneWithoutAdminProfileInput
   }
 
   export type AdminUncheckedCreateInput = {
@@ -21550,7 +22315,7 @@ export namespace Prisma {
     userId: string
     name: string
     department?: string | null
-    canCreateUsers?: boolean
+    permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -21559,10 +22324,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     department?: NullableStringFieldUpdateOperationsInput | string | null
-    canCreateUsers?: BoolFieldUpdateOperationsInput | boolean
+    permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutAdminNestedInput
+    user?: UserUpdateOneRequiredWithoutAdminProfileNestedInput
   }
 
   export type AdminUncheckedUpdateInput = {
@@ -21570,7 +22335,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     department?: NullableStringFieldUpdateOperationsInput | string | null
-    canCreateUsers?: BoolFieldUpdateOperationsInput | boolean
+    permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -21580,7 +22345,7 @@ export namespace Prisma {
     userId: string
     name: string
     department?: string | null
-    canCreateUsers?: boolean
+    permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -21589,7 +22354,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     department?: NullableStringFieldUpdateOperationsInput | string | null
-    canCreateUsers?: BoolFieldUpdateOperationsInput | boolean
+    permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -21599,83 +22364,7 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     department?: NullableStringFieldUpdateOperationsInput | string | null
-    canCreateUsers?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type JobRoleCreateInput = {
-    id?: string
-    title: string
-    quantity: number
-    nationality: string
-    salary: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    requirement: RequirementCreateNestedOneWithoutJobRolesInput
-  }
-
-  export type JobRoleUncheckedCreateInput = {
-    id?: string
-    title: string
-    quantity: number
-    nationality: string
-    salary: string
-    requirementId: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type JobRoleUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    quantity?: IntFieldUpdateOperationsInput | number
-    nationality?: StringFieldUpdateOperationsInput | string
-    salary?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    requirement?: RequirementUpdateOneRequiredWithoutJobRolesNestedInput
-  }
-
-  export type JobRoleUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    quantity?: IntFieldUpdateOperationsInput | number
-    nationality?: StringFieldUpdateOperationsInput | string
-    salary?: StringFieldUpdateOperationsInput | string
-    requirementId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type JobRoleCreateManyInput = {
-    id?: string
-    title: string
-    quantity: number
-    nationality: string
-    salary: string
-    requirementId: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type JobRoleUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    quantity?: IntFieldUpdateOperationsInput | number
-    nationality?: StringFieldUpdateOperationsInput | string
-    salary?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type JobRoleUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    title?: StringFieldUpdateOperationsInput | string
-    quantity?: IntFieldUpdateOperationsInput | number
-    nationality?: StringFieldUpdateOperationsInput | string
-    salary?: StringFieldUpdateOperationsInput | string
-    requirementId?: StringFieldUpdateOperationsInput | string
+    permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -21685,18 +22374,20 @@ export namespace Prisma {
     projectLocation?: string | null
     startDate?: Date | string | null
     contractDuration?: $Enums.ContractDuration | null
-    previousExperience?: $Enums.PreviousExperience | null
-    ticketDetails?: $Enums.TicketDetails | null
-    totalExperienceYears?: number | null
-    preferredAge?: number | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
+    minExperience?: $Enums.ExperienceLevel | null
+    maxAge?: number | null
+    ticketType?: $Enums.TicketType | null
+    ticketProvided?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    jobRoles?: JobRoleCreateNestedManyWithoutRequirementInput
+    submittedAt?: Date | string | null
+    reviewedAt?: Date | string | null
     client: ClientCreateNestedOneWithoutRequirementsInput
-    assignedTo?: AgencyCreateNestedOneWithoutRequirementsInput
+    assignedAgency?: AgencyCreateNestedOneWithoutRequirementsInput
+    jobRoles?: JobRoleCreateNestedManyWithoutRequirementInput
     labourProfiles?: LabourProfileCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureCreateNestedManyWithoutRequirementInput
     documents?: RequirementDocumentCreateNestedManyWithoutRequirementInput
@@ -21707,17 +22398,19 @@ export namespace Prisma {
     projectLocation?: string | null
     startDate?: Date | string | null
     contractDuration?: $Enums.ContractDuration | null
-    previousExperience?: $Enums.PreviousExperience | null
-    ticketDetails?: $Enums.TicketDetails | null
-    totalExperienceYears?: number | null
-    preferredAge?: number | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
+    minExperience?: $Enums.ExperienceLevel | null
+    maxAge?: number | null
+    ticketType?: $Enums.TicketType | null
+    ticketProvided?: boolean
     clientId: string
-    assignedToId?: string | null
+    assignedAgencyId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    submittedAt?: Date | string | null
+    reviewedAt?: Date | string | null
     jobRoles?: JobRoleUncheckedCreateNestedManyWithoutRequirementInput
     labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureUncheckedCreateNestedManyWithoutRequirementInput
@@ -21729,18 +22422,20 @@ export namespace Prisma {
     projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     client?: ClientUpdateOneRequiredWithoutRequirementsNestedInput
-    assignedTo?: AgencyUpdateOneWithoutRequirementsNestedInput
+    assignedAgency?: AgencyUpdateOneWithoutRequirementsNestedInput
+    jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
     labourProfiles?: LabourProfileUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUpdateManyWithoutRequirementNestedInput
     documents?: RequirementDocumentUpdateManyWithoutRequirementNestedInput
@@ -21751,17 +22446,19 @@ export namespace Prisma {
     projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
     clientId?: StringFieldUpdateOperationsInput | string
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    assignedAgencyId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     jobRoles?: JobRoleUncheckedUpdateManyWithoutRequirementNestedInput
     labourProfiles?: LabourProfileUncheckedUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUncheckedUpdateManyWithoutRequirementNestedInput
@@ -21773,17 +22470,19 @@ export namespace Prisma {
     projectLocation?: string | null
     startDate?: Date | string | null
     contractDuration?: $Enums.ContractDuration | null
-    previousExperience?: $Enums.PreviousExperience | null
-    ticketDetails?: $Enums.TicketDetails | null
-    totalExperienceYears?: number | null
-    preferredAge?: number | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
+    minExperience?: $Enums.ExperienceLevel | null
+    maxAge?: number | null
+    ticketType?: $Enums.TicketType | null
+    ticketProvided?: boolean
     clientId: string
-    assignedToId?: string | null
+    assignedAgencyId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    submittedAt?: Date | string | null
+    reviewedAt?: Date | string | null
   }
 
   export type RequirementUpdateManyMutationInput = {
@@ -21791,15 +22490,17 @@ export namespace Prisma {
     projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type RequirementUncheckedUpdateManyInput = {
@@ -21807,15 +22508,100 @@ export namespace Prisma {
     projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
     clientId?: StringFieldUpdateOperationsInput | string
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    assignedAgencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type JobRoleCreateInput = {
+    id?: string
+    title: string
+    quantity?: number
+    nationality: string
+    salary?: number | null
+    salaryCurrency?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    requirement: RequirementCreateNestedOneWithoutJobRolesInput
+  }
+
+  export type JobRoleUncheckedCreateInput = {
+    id?: string
+    title: string
+    quantity?: number
+    nationality: string
+    salary?: number | null
+    salaryCurrency?: string
+    requirementId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type JobRoleUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    nationality?: StringFieldUpdateOperationsInput | string
+    salary?: NullableFloatFieldUpdateOperationsInput | number | null
+    salaryCurrency?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    requirement?: RequirementUpdateOneRequiredWithoutJobRolesNestedInput
+  }
+
+  export type JobRoleUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    nationality?: StringFieldUpdateOperationsInput | string
+    salary?: NullableFloatFieldUpdateOperationsInput | number | null
+    salaryCurrency?: StringFieldUpdateOperationsInput | string
+    requirementId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type JobRoleCreateManyInput = {
+    id?: string
+    title: string
+    quantity?: number
+    nationality: string
+    salary?: number | null
+    salaryCurrency?: string
+    requirementId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type JobRoleUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    nationality?: StringFieldUpdateOperationsInput | string
+    salary?: NullableFloatFieldUpdateOperationsInput | number | null
+    salaryCurrency?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type JobRoleUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    nationality?: StringFieldUpdateOperationsInput | string
+    salary?: NullableFloatFieldUpdateOperationsInput | number | null
+    salaryCurrency?: StringFieldUpdateOperationsInput | string
+    requirementId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -21824,16 +22610,35 @@ export namespace Prisma {
     id?: string
     name: string
     age: number
-    gender: string
+    gender: $Enums.Gender
     nationality: string
+    maritalStatus?: string | null
     skills?: LabourProfileCreateskillsInput | string[]
     experienceYears: number
     education?: string | null
-    language?: LabourProfileCreatelanguageInput | string[]
-    status?: $Enums.LabourStatus
+    currentPosition?: string | null
+    currentCompany?: string | null
+    languages?: LabourProfileCreatelanguagesInput | string[]
+    englishProficiency?: string | null
+    email?: string | null
+    phone: string
+    address?: string | null
+    city?: string | null
+    country?: string | null
     cvUrl: string
-    passportCopy?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    medicalStatus?: string | null
+    medicalExpiry?: Date | string | null
+    photo?: string | null
     otherDocs?: LabourProfileCreateotherDocsInput | string[]
+    status?: $Enums.LabourProfileStatus
+    statusReason?: string | null
+    deploymentDate?: Date | string | null
+    contractStartDate?: Date | string | null
+    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     requirement: RequirementCreateNestedOneWithoutLabourProfilesInput
@@ -21846,18 +22651,37 @@ export namespace Prisma {
     id?: string
     name: string
     age: number
-    gender: string
+    gender: $Enums.Gender
     nationality: string
+    maritalStatus?: string | null
     skills?: LabourProfileCreateskillsInput | string[]
     experienceYears: number
     education?: string | null
-    language?: LabourProfileCreatelanguageInput | string[]
-    status?: $Enums.LabourStatus
+    currentPosition?: string | null
+    currentCompany?: string | null
+    languages?: LabourProfileCreatelanguagesInput | string[]
+    englishProficiency?: string | null
+    email?: string | null
+    phone: string
+    address?: string | null
+    city?: string | null
+    country?: string | null
     cvUrl: string
-    passportCopy?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    medicalStatus?: string | null
+    medicalExpiry?: Date | string | null
+    photo?: string | null
     otherDocs?: LabourProfileCreateotherDocsInput | string[]
+    status?: $Enums.LabourProfileStatus
+    statusReason?: string | null
     requirementId: string
     agencyId: string
+    deploymentDate?: Date | string | null
+    contractStartDate?: Date | string | null
+    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutLabourProfileInput
@@ -21868,16 +22692,35 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     age?: IntFieldUpdateOperationsInput | number
-    gender?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
+    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: LabourProfileUpdateskillsInput | string[]
     experienceYears?: IntFieldUpdateOperationsInput | number
     education?: NullableStringFieldUpdateOperationsInput | string | null
-    language?: LabourProfileUpdatelanguageInput | string[]
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: LabourProfileUpdatelanguagesInput | string[]
+    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: StringFieldUpdateOperationsInput | string
-    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    photo?: NullableStringFieldUpdateOperationsInput | string | null
     otherDocs?: LabourProfileUpdateotherDocsInput | string[]
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
+    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requirement?: RequirementUpdateOneRequiredWithoutLabourProfilesNestedInput
@@ -21890,18 +22733,37 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     age?: IntFieldUpdateOperationsInput | number
-    gender?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
+    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: LabourProfileUpdateskillsInput | string[]
     experienceYears?: IntFieldUpdateOperationsInput | number
     education?: NullableStringFieldUpdateOperationsInput | string | null
-    language?: LabourProfileUpdatelanguageInput | string[]
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: LabourProfileUpdatelanguagesInput | string[]
+    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: StringFieldUpdateOperationsInput | string
-    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    photo?: NullableStringFieldUpdateOperationsInput | string | null
     otherDocs?: LabourProfileUpdateotherDocsInput | string[]
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
     requirementId?: StringFieldUpdateOperationsInput | string
     agencyId?: StringFieldUpdateOperationsInput | string
+    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutLabourProfileNestedInput
@@ -21912,18 +22774,37 @@ export namespace Prisma {
     id?: string
     name: string
     age: number
-    gender: string
+    gender: $Enums.Gender
     nationality: string
+    maritalStatus?: string | null
     skills?: LabourProfileCreateskillsInput | string[]
     experienceYears: number
     education?: string | null
-    language?: LabourProfileCreatelanguageInput | string[]
-    status?: $Enums.LabourStatus
+    currentPosition?: string | null
+    currentCompany?: string | null
+    languages?: LabourProfileCreatelanguagesInput | string[]
+    englishProficiency?: string | null
+    email?: string | null
+    phone: string
+    address?: string | null
+    city?: string | null
+    country?: string | null
     cvUrl: string
-    passportCopy?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    medicalStatus?: string | null
+    medicalExpiry?: Date | string | null
+    photo?: string | null
     otherDocs?: LabourProfileCreateotherDocsInput | string[]
+    status?: $Enums.LabourProfileStatus
+    statusReason?: string | null
     requirementId: string
     agencyId: string
+    deploymentDate?: Date | string | null
+    contractStartDate?: Date | string | null
+    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -21932,16 +22813,35 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     age?: IntFieldUpdateOperationsInput | number
-    gender?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
+    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: LabourProfileUpdateskillsInput | string[]
     experienceYears?: IntFieldUpdateOperationsInput | number
     education?: NullableStringFieldUpdateOperationsInput | string | null
-    language?: LabourProfileUpdatelanguageInput | string[]
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: LabourProfileUpdatelanguagesInput | string[]
+    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: StringFieldUpdateOperationsInput | string
-    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    photo?: NullableStringFieldUpdateOperationsInput | string | null
     otherDocs?: LabourProfileUpdateotherDocsInput | string[]
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
+    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -21950,18 +22850,37 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     age?: IntFieldUpdateOperationsInput | number
-    gender?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
+    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: LabourProfileUpdateskillsInput | string[]
     experienceYears?: IntFieldUpdateOperationsInput | number
     education?: NullableStringFieldUpdateOperationsInput | string | null
-    language?: LabourProfileUpdatelanguageInput | string[]
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: LabourProfileUpdatelanguagesInput | string[]
+    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: StringFieldUpdateOperationsInput | string
-    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    photo?: NullableStringFieldUpdateOperationsInput | string | null
     otherDocs?: LabourProfileUpdateotherDocsInput | string[]
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
     requirementId?: StringFieldUpdateOperationsInput | string
     agencyId?: StringFieldUpdateOperationsInput | string
+    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -21970,10 +22889,11 @@ export namespace Prisma {
     id?: string
     name: string
     description: string
-    status?: string
+    status?: $Enums.ProcedureStatus
     dueDate?: Date | string | null
     completedDate?: Date | string | null
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     requirement?: RequirementCreateNestedOneWithoutProceduresInput
@@ -21984,10 +22904,11 @@ export namespace Prisma {
     id?: string
     name: string
     description: string
-    status?: string
+    status?: $Enums.ProcedureStatus
     dueDate?: Date | string | null
     completedDate?: Date | string | null
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     requirementId?: string | null
     labourProfileId?: string | null
     createdAt?: Date | string
@@ -21998,10 +22919,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumProcedureStatusFieldUpdateOperationsInput | $Enums.ProcedureStatus
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requirement?: RequirementUpdateOneWithoutProceduresNestedInput
@@ -22012,10 +22934,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumProcedureStatusFieldUpdateOperationsInput | $Enums.ProcedureStatus
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     requirementId?: NullableStringFieldUpdateOperationsInput | string | null
     labourProfileId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22026,10 +22949,11 @@ export namespace Prisma {
     id?: string
     name: string
     description: string
-    status?: string
+    status?: $Enums.ProcedureStatus
     dueDate?: Date | string | null
     completedDate?: Date | string | null
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     requirementId?: string | null
     labourProfileId?: string | null
     createdAt?: Date | string
@@ -22040,10 +22964,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumProcedureStatusFieldUpdateOperationsInput | $Enums.ProcedureStatus
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -22052,10 +22977,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumProcedureStatusFieldUpdateOperationsInput | $Enums.ProcedureStatus
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     requirementId?: NullableStringFieldUpdateOperationsInput | string | null
     labourProfileId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22064,17 +22990,19 @@ export namespace Prisma {
 
   export type LabourStatusLogCreateInput = {
     id?: string
-    status: $Enums.LabourStatus
+    status: $Enums.LabourProfileStatus
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     labourProfile: LabourProfileCreateNestedOneWithoutStatusLogsInput
-    changedBy: UserCreateNestedOneWithoutLabourStatusLogInput
+    changedBy: UserCreateNestedOneWithoutStatusLogsInput
   }
 
   export type LabourStatusLogUncheckedCreateInput = {
     id?: string
-    status: $Enums.LabourStatus
+    status: $Enums.LabourProfileStatus
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     labourProfileId: string
     changedById: string
     createdAt?: Date | string
@@ -22082,17 +23010,19 @@ export namespace Prisma {
 
   export type LabourStatusLogUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     labourProfile?: LabourProfileUpdateOneRequiredWithoutStatusLogsNestedInput
-    changedBy?: UserUpdateOneRequiredWithoutLabourStatusLogNestedInput
+    changedBy?: UserUpdateOneRequiredWithoutStatusLogsNestedInput
   }
 
   export type LabourStatusLogUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     labourProfileId?: StringFieldUpdateOperationsInput | string
     changedById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22100,8 +23030,9 @@ export namespace Prisma {
 
   export type LabourStatusLogCreateManyInput = {
     id?: string
-    status: $Enums.LabourStatus
+    status: $Enums.LabourProfileStatus
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     labourProfileId: string
     changedById: string
     createdAt?: Date | string
@@ -22109,15 +23040,17 @@ export namespace Prisma {
 
   export type LabourStatusLogUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type LabourStatusLogUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     labourProfileId?: StringFieldUpdateOperationsInput | string
     changedById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22127,20 +23060,26 @@ export namespace Prisma {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
+    description?: string | null
     verified?: boolean
     comments?: string | null
+    expiryDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     client: ClientCreateNestedOneWithoutDocumentsInput
-    verifiedBy?: UserCreateNestedOneWithoutClientDocumentInput
+    verifiedBy?: UserCreateNestedOneWithoutClientDocumentsInput
   }
 
   export type ClientDocumentUncheckedCreateInput = {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
+    description?: string | null
     verified?: boolean
     comments?: string | null
+    expiryDate?: Date | string | null
     clientId: string
     verifiedById?: string | null
     createdAt?: Date | string
@@ -22151,20 +23090,26 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     verified?: BoolFieldUpdateOperationsInput | boolean
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     client?: ClientUpdateOneRequiredWithoutDocumentsNestedInput
-    verifiedBy?: UserUpdateOneWithoutClientDocumentNestedInput
+    verifiedBy?: UserUpdateOneWithoutClientDocumentsNestedInput
   }
 
   export type ClientDocumentUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     verified?: BoolFieldUpdateOperationsInput | boolean
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     clientId?: StringFieldUpdateOperationsInput | string
     verifiedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22175,8 +23120,11 @@ export namespace Prisma {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
+    description?: string | null
     verified?: boolean
     comments?: string | null
+    expiryDate?: Date | string | null
     clientId: string
     verifiedById?: string | null
     createdAt?: Date | string
@@ -22187,8 +23135,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     verified?: BoolFieldUpdateOperationsInput | boolean
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -22197,8 +23148,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     verified?: BoolFieldUpdateOperationsInput | boolean
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     clientId?: StringFieldUpdateOperationsInput | string
     verifiedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22209,20 +23163,26 @@ export namespace Prisma {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
+    description?: string | null
     verified?: boolean
     comments?: string | null
+    expiryDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     agency: AgencyCreateNestedOneWithoutDocumentsInput
-    verifiedBy?: UserCreateNestedOneWithoutAgencyDocumentInput
+    verifiedBy?: UserCreateNestedOneWithoutAgencyDocumentsInput
   }
 
   export type AgencyDocumentUncheckedCreateInput = {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
+    description?: string | null
     verified?: boolean
     comments?: string | null
+    expiryDate?: Date | string | null
     agencyId: string
     verifiedById?: string | null
     createdAt?: Date | string
@@ -22233,20 +23193,26 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     verified?: BoolFieldUpdateOperationsInput | boolean
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     agency?: AgencyUpdateOneRequiredWithoutDocumentsNestedInput
-    verifiedBy?: UserUpdateOneWithoutAgencyDocumentNestedInput
+    verifiedBy?: UserUpdateOneWithoutAgencyDocumentsNestedInput
   }
 
   export type AgencyDocumentUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     verified?: BoolFieldUpdateOperationsInput | boolean
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     agencyId?: StringFieldUpdateOperationsInput | string
     verifiedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22257,8 +23223,11 @@ export namespace Prisma {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
+    description?: string | null
     verified?: boolean
     comments?: string | null
+    expiryDate?: Date | string | null
     agencyId: string
     verifiedById?: string | null
     createdAt?: Date | string
@@ -22269,8 +23238,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     verified?: BoolFieldUpdateOperationsInput | boolean
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -22279,8 +23251,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     verified?: BoolFieldUpdateOperationsInput | boolean
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     agencyId?: StringFieldUpdateOperationsInput | string
     verifiedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22291,68 +23266,82 @@ export namespace Prisma {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
     description?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     requirement: RequirementCreateNestedOneWithoutDocumentsInput
-    uploadedBy: UserCreateNestedOneWithoutRequirementDocumentInput
+    uploadedBy: UserCreateNestedOneWithoutRequirementDocumentsInput
   }
 
   export type RequirementDocumentUncheckedCreateInput = {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
     description?: string | null
     requirementId: string
     uploadedById: string
     createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type RequirementDocumentUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requirement?: RequirementUpdateOneRequiredWithoutDocumentsNestedInput
-    uploadedBy?: UserUpdateOneRequiredWithoutRequirementDocumentNestedInput
+    uploadedBy?: UserUpdateOneRequiredWithoutRequirementDocumentsNestedInput
   }
 
   export type RequirementDocumentUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     requirementId?: StringFieldUpdateOperationsInput | string
     uploadedById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type RequirementDocumentCreateManyInput = {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
     description?: string | null
     requirementId: string
     uploadedById: string
     createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type RequirementDocumentUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type RequirementDocumentUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     requirementId?: StringFieldUpdateOperationsInput | string
     uploadedById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type AuditLogCreateInput = {
@@ -22382,8 +23371,8 @@ export namespace Prisma {
     affectedFields?: AuditLogCreateaffectedFieldsInput | string[]
     ipAddress?: string | null
     userAgent?: string | null
-    performedAt?: Date | string
     performedById: string
+    performedAt?: Date | string
     createdAt?: Date | string
   }
 
@@ -22414,8 +23403,8 @@ export namespace Prisma {
     affectedFields?: AuditLogUpdateaffectedFieldsInput | string[]
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
-    performedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     performedById?: StringFieldUpdateOperationsInput | string
+    performedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -22430,8 +23419,8 @@ export namespace Prisma {
     affectedFields?: AuditLogCreateaffectedFieldsInput | string[]
     ipAddress?: string | null
     userAgent?: string | null
-    performedAt?: Date | string
     performedById: string
+    performedAt?: Date | string
     createdAt?: Date | string
   }
 
@@ -22461,8 +23450,8 @@ export namespace Prisma {
     affectedFields?: AuditLogUpdateaffectedFieldsInput | string[]
     ipAddress?: NullableStringFieldUpdateOperationsInput | string | null
     userAgent?: NullableStringFieldUpdateOperationsInput | string | null
-    performedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     performedById?: StringFieldUpdateOperationsInput | string
+    performedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -22470,20 +23459,20 @@ export namespace Prisma {
     id?: string
     title: string
     message: string
-    type: string
+    type: $Enums.NotificationType
     read?: boolean
     actionUrl?: string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     readAt?: Date | string | null
-    recipient: UserCreateNestedOneWithoutNotificationInput
+    recipient: UserCreateNestedOneWithoutNotificationsInput
   }
 
   export type NotificationUncheckedCreateInput = {
     id?: string
     title: string
     message: string
-    type: string
+    type: $Enums.NotificationType
     read?: boolean
     actionUrl?: string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
@@ -22496,20 +23485,20 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
+    type?: EnumNotificationTypeFieldUpdateOperationsInput | $Enums.NotificationType
     read?: BoolFieldUpdateOperationsInput | boolean
     actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    recipient?: UserUpdateOneRequiredWithoutNotificationNestedInput
+    recipient?: UserUpdateOneRequiredWithoutNotificationsNestedInput
   }
 
   export type NotificationUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
+    type?: EnumNotificationTypeFieldUpdateOperationsInput | $Enums.NotificationType
     read?: BoolFieldUpdateOperationsInput | boolean
     actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
@@ -22522,7 +23511,7 @@ export namespace Prisma {
     id?: string
     title: string
     message: string
-    type: string
+    type: $Enums.NotificationType
     read?: boolean
     actionUrl?: string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
@@ -22535,7 +23524,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
+    type?: EnumNotificationTypeFieldUpdateOperationsInput | $Enums.NotificationType
     read?: BoolFieldUpdateOperationsInput | boolean
     actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
@@ -22547,7 +23536,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
+    type?: EnumNotificationTypeFieldUpdateOperationsInput | $Enums.NotificationType
     read?: BoolFieldUpdateOperationsInput | boolean
     actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
@@ -22569,6 +23558,21 @@ export namespace Prisma {
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     mode?: QueryMode
     not?: NestedStringFilter<$PrismaModel> | string
+  }
+
+  export type StringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
   export type EnumUserRoleFilter<$PrismaModel = never> = {
@@ -22619,21 +23623,6 @@ export namespace Prisma {
     not?: NestedEnumDeletionTypeNullableFilter<$PrismaModel> | $Enums.DeletionType | null
   }
 
-  export type StringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
   export type ClientNullableScalarRelationFilter = {
     is?: ClientWhereInput | null
     isNot?: ClientWhereInput | null
@@ -22666,6 +23655,12 @@ export namespace Prisma {
     none?: AuditLogWhereInput
   }
 
+  export type NotificationListRelationFilter = {
+    every?: NotificationWhereInput
+    some?: NotificationWhereInput
+    none?: NotificationWhereInput
+  }
+
   export type LabourStatusLogListRelationFilter = {
     every?: LabourStatusLogWhereInput
     some?: LabourStatusLogWhereInput
@@ -22690,12 +23685,6 @@ export namespace Prisma {
     none?: RequirementDocumentWhereInput
   }
 
-  export type NotificationListRelationFilter = {
-    every?: NotificationWhereInput
-    some?: NotificationWhereInput
-    none?: NotificationWhereInput
-  }
-
   export type SortOrderInput = {
     sort: SortOrder
     nulls?: NullsOrder
@@ -22706,6 +23695,10 @@ export namespace Prisma {
   }
 
   export type AuditLogOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type NotificationOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -22725,15 +23718,14 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type NotificationOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
   export type UserCountOrderByAggregateInput = {
     id?: SortOrder
     name?: SortOrder
     email?: SortOrder
     password?: SortOrder
+    phone?: SortOrder
+    altContact?: SortOrder
+    profilePicture?: SortOrder
     role?: SortOrder
     status?: SortOrder
     resetRequired?: SortOrder
@@ -22742,6 +23734,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     deleteAt?: SortOrder
     deletionType?: SortOrder
+    deletionReason?: SortOrder
     deletionRequestedBy?: SortOrder
     createdById?: SortOrder
   }
@@ -22751,6 +23744,9 @@ export namespace Prisma {
     name?: SortOrder
     email?: SortOrder
     password?: SortOrder
+    phone?: SortOrder
+    altContact?: SortOrder
+    profilePicture?: SortOrder
     role?: SortOrder
     status?: SortOrder
     resetRequired?: SortOrder
@@ -22759,6 +23755,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     deleteAt?: SortOrder
     deletionType?: SortOrder
+    deletionReason?: SortOrder
     deletionRequestedBy?: SortOrder
     createdById?: SortOrder
   }
@@ -22768,6 +23765,9 @@ export namespace Prisma {
     name?: SortOrder
     email?: SortOrder
     password?: SortOrder
+    phone?: SortOrder
+    altContact?: SortOrder
+    profilePicture?: SortOrder
     role?: SortOrder
     status?: SortOrder
     resetRequired?: SortOrder
@@ -22776,6 +23776,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     deleteAt?: SortOrder
     deletionType?: SortOrder
+    deletionReason?: SortOrder
     deletionRequestedBy?: SortOrder
     createdById?: SortOrder
   }
@@ -22796,6 +23797,24 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedStringFilter<$PrismaModel>
     _max?: NestedStringFilter<$PrismaModel>
+  }
+
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
   export type EnumUserRoleWithAggregatesFilter<$PrismaModel = never> = {
@@ -22864,36 +23883,18 @@ export namespace Prisma {
     _max?: NestedEnumDeletionTypeNullableFilter<$PrismaModel>
   }
 
-  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    mode?: QueryMode
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
+  export type EnumCompanySectorFilter<$PrismaModel = never> = {
+    equals?: $Enums.CompanySector | EnumCompanySectorFieldRefInput<$PrismaModel>
+    in?: $Enums.CompanySector[] | ListEnumCompanySectorFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CompanySector[] | ListEnumCompanySectorFieldRefInput<$PrismaModel>
+    not?: NestedEnumCompanySectorFilter<$PrismaModel> | $Enums.CompanySector
   }
 
-  export type EnumCompanySectorNullableFilter<$PrismaModel = never> = {
-    equals?: $Enums.CompanySector | EnumCompanySectorFieldRefInput<$PrismaModel> | null
-    in?: $Enums.CompanySector[] | ListEnumCompanySectorFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.CompanySector[] | ListEnumCompanySectorFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumCompanySectorNullableFilter<$PrismaModel> | $Enums.CompanySector | null
-  }
-
-  export type EnumCompanySizeNullableFilter<$PrismaModel = never> = {
-    equals?: $Enums.CompanySize | EnumCompanySizeFieldRefInput<$PrismaModel> | null
-    in?: $Enums.CompanySize[] | ListEnumCompanySizeFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.CompanySize[] | ListEnumCompanySizeFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumCompanySizeNullableFilter<$PrismaModel> | $Enums.CompanySize | null
+  export type EnumCompanySizeFilter<$PrismaModel = never> = {
+    equals?: $Enums.CompanySize | EnumCompanySizeFieldRefInput<$PrismaModel>
+    in?: $Enums.CompanySize[] | ListEnumCompanySizeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CompanySize[] | ListEnumCompanySizeFieldRefInput<$PrismaModel>
+    not?: NestedEnumCompanySizeFilter<$PrismaModel> | $Enums.CompanySize
   }
 
   export type UserScalarRelationFilter = {
@@ -22915,17 +23916,15 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     companyName?: SortOrder
-    contactPerson?: SortOrder
     registrationNo?: SortOrder
     companySector?: SortOrder
     companySize?: SortOrder
     website?: SortOrder
-    designation?: SortOrder
-    phone?: SortOrder
     address?: SortOrder
-    altContact?: SortOrder
-    businessLicense?: SortOrder
-    image?: SortOrder
+    city?: SortOrder
+    country?: SortOrder
+    postalCode?: SortOrder
+    designation?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -22934,17 +23933,15 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     companyName?: SortOrder
-    contactPerson?: SortOrder
     registrationNo?: SortOrder
     companySector?: SortOrder
     companySize?: SortOrder
     website?: SortOrder
-    designation?: SortOrder
-    phone?: SortOrder
     address?: SortOrder
-    altContact?: SortOrder
-    businessLicense?: SortOrder
-    image?: SortOrder
+    city?: SortOrder
+    country?: SortOrder
+    postalCode?: SortOrder
+    designation?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -22953,39 +23950,37 @@ export namespace Prisma {
     id?: SortOrder
     userId?: SortOrder
     companyName?: SortOrder
-    contactPerson?: SortOrder
     registrationNo?: SortOrder
     companySector?: SortOrder
     companySize?: SortOrder
     website?: SortOrder
-    designation?: SortOrder
-    phone?: SortOrder
     address?: SortOrder
-    altContact?: SortOrder
-    businessLicense?: SortOrder
-    image?: SortOrder
+    city?: SortOrder
+    country?: SortOrder
+    postalCode?: SortOrder
+    designation?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
 
-  export type EnumCompanySectorNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.CompanySector | EnumCompanySectorFieldRefInput<$PrismaModel> | null
-    in?: $Enums.CompanySector[] | ListEnumCompanySectorFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.CompanySector[] | ListEnumCompanySectorFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumCompanySectorNullableWithAggregatesFilter<$PrismaModel> | $Enums.CompanySector | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedEnumCompanySectorNullableFilter<$PrismaModel>
-    _max?: NestedEnumCompanySectorNullableFilter<$PrismaModel>
+  export type EnumCompanySectorWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CompanySector | EnumCompanySectorFieldRefInput<$PrismaModel>
+    in?: $Enums.CompanySector[] | ListEnumCompanySectorFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CompanySector[] | ListEnumCompanySectorFieldRefInput<$PrismaModel>
+    not?: NestedEnumCompanySectorWithAggregatesFilter<$PrismaModel> | $Enums.CompanySector
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumCompanySectorFilter<$PrismaModel>
+    _max?: NestedEnumCompanySectorFilter<$PrismaModel>
   }
 
-  export type EnumCompanySizeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.CompanySize | EnumCompanySizeFieldRefInput<$PrismaModel> | null
-    in?: $Enums.CompanySize[] | ListEnumCompanySizeFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.CompanySize[] | ListEnumCompanySizeFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumCompanySizeNullableWithAggregatesFilter<$PrismaModel> | $Enums.CompanySize | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedEnumCompanySizeNullableFilter<$PrismaModel>
-    _max?: NestedEnumCompanySizeNullableFilter<$PrismaModel>
+  export type EnumCompanySizeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CompanySize | EnumCompanySizeFieldRefInput<$PrismaModel>
+    in?: $Enums.CompanySize[] | ListEnumCompanySizeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CompanySize[] | ListEnumCompanySizeFieldRefInput<$PrismaModel>
+    not?: NestedEnumCompanySizeWithAggregatesFilter<$PrismaModel> | $Enums.CompanySize
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumCompanySizeFilter<$PrismaModel>
+    _max?: NestedEnumCompanySizeFilter<$PrismaModel>
   }
 
   export type StringNullableListFilter<$PrismaModel = never> = {
@@ -23015,10 +24010,10 @@ export namespace Prisma {
     licenseExpiry?: SortOrder
     country?: SortOrder
     regions?: SortOrder
-    contactPerson?: SortOrder
-    phone?: SortOrder
-    email?: SortOrder
     website?: SortOrder
+    address?: SortOrder
+    city?: SortOrder
+    postalCode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -23031,10 +24026,10 @@ export namespace Prisma {
     licenseNumber?: SortOrder
     licenseExpiry?: SortOrder
     country?: SortOrder
-    contactPerson?: SortOrder
-    phone?: SortOrder
-    email?: SortOrder
     website?: SortOrder
+    address?: SortOrder
+    city?: SortOrder
+    postalCode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -23047,12 +24042,35 @@ export namespace Prisma {
     licenseNumber?: SortOrder
     licenseExpiry?: SortOrder
     country?: SortOrder
-    contactPerson?: SortOrder
-    phone?: SortOrder
-    email?: SortOrder
     website?: SortOrder
+    address?: SortOrder
+    city?: SortOrder
+    postalCode?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type AdminCountOrderByAggregateInput = {
@@ -23060,7 +24078,7 @@ export namespace Prisma {
     userId?: SortOrder
     name?: SortOrder
     department?: SortOrder
-    canCreateUsers?: SortOrder
+    permissions?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -23070,7 +24088,6 @@ export namespace Prisma {
     userId?: SortOrder
     name?: SortOrder
     department?: SortOrder
-    canCreateUsers?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -23080,82 +24097,34 @@ export namespace Prisma {
     userId?: SortOrder
     name?: SortOrder
     department?: SortOrder
-    canCreateUsers?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
 
-  export type IntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
-  }
-
-  export type RequirementScalarRelationFilter = {
-    is?: RequirementWhereInput
-    isNot?: RequirementWhereInput
-  }
-
-  export type JobRoleCountOrderByAggregateInput = {
-    id?: SortOrder
-    title?: SortOrder
-    quantity?: SortOrder
-    nationality?: SortOrder
-    salary?: SortOrder
-    requirementId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type JobRoleAvgOrderByAggregateInput = {
-    quantity?: SortOrder
-  }
-
-  export type JobRoleMaxOrderByAggregateInput = {
-    id?: SortOrder
-    title?: SortOrder
-    quantity?: SortOrder
-    nationality?: SortOrder
-    salary?: SortOrder
-    requirementId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type JobRoleMinOrderByAggregateInput = {
-    id?: SortOrder
-    title?: SortOrder
-    quantity?: SortOrder
-    nationality?: SortOrder
-    salary?: SortOrder
-    requirementId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type JobRoleSumOrderByAggregateInput = {
-    quantity?: SortOrder
-  }
-
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type EnumContractDurationNullableFilter<$PrismaModel = never> = {
@@ -23165,18 +24134,18 @@ export namespace Prisma {
     not?: NestedEnumContractDurationNullableFilter<$PrismaModel> | $Enums.ContractDuration | null
   }
 
-  export type EnumPreviousExperienceNullableFilter<$PrismaModel = never> = {
-    equals?: $Enums.PreviousExperience | EnumPreviousExperienceFieldRefInput<$PrismaModel> | null
-    in?: $Enums.PreviousExperience[] | ListEnumPreviousExperienceFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.PreviousExperience[] | ListEnumPreviousExperienceFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumPreviousExperienceNullableFilter<$PrismaModel> | $Enums.PreviousExperience | null
+  export type EnumRequirementStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.RequirementStatus | EnumRequirementStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RequirementStatus[] | ListEnumRequirementStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RequirementStatus[] | ListEnumRequirementStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRequirementStatusFilter<$PrismaModel> | $Enums.RequirementStatus
   }
 
-  export type EnumTicketDetailsNullableFilter<$PrismaModel = never> = {
-    equals?: $Enums.TicketDetails | EnumTicketDetailsFieldRefInput<$PrismaModel> | null
-    in?: $Enums.TicketDetails[] | ListEnumTicketDetailsFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.TicketDetails[] | ListEnumTicketDetailsFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumTicketDetailsNullableFilter<$PrismaModel> | $Enums.TicketDetails | null
+  export type EnumExperienceLevelNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExperienceLevel | EnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ExperienceLevel[] | ListEnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ExperienceLevel[] | ListEnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumExperienceLevelNullableFilter<$PrismaModel> | $Enums.ExperienceLevel | null
   }
 
   export type IntNullableFilter<$PrismaModel = never> = {
@@ -23190,22 +24159,22 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
-  export type EnumRequirementStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.RequirementStatus | EnumRequirementStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.RequirementStatus[] | ListEnumRequirementStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.RequirementStatus[] | ListEnumRequirementStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumRequirementStatusFilter<$PrismaModel> | $Enums.RequirementStatus
+  export type EnumTicketTypeNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.TicketType | EnumTicketTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.TicketType[] | ListEnumTicketTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.TicketType[] | ListEnumTicketTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumTicketTypeNullableFilter<$PrismaModel> | $Enums.TicketType | null
+  }
+
+  export type ClientScalarRelationFilter = {
+    is?: ClientWhereInput
+    isNot?: ClientWhereInput
   }
 
   export type JobRoleListRelationFilter = {
     every?: JobRoleWhereInput
     some?: JobRoleWhereInput
     none?: JobRoleWhereInput
-  }
-
-  export type ClientScalarRelationFilter = {
-    is?: ClientWhereInput
-    isNot?: ClientWhereInput
   }
 
   export type ProcedureListRelationFilter = {
@@ -23227,22 +24196,23 @@ export namespace Prisma {
     projectLocation?: SortOrder
     startDate?: SortOrder
     contractDuration?: SortOrder
-    previousExperience?: SortOrder
-    ticketDetails?: SortOrder
-    totalExperienceYears?: SortOrder
-    preferredAge?: SortOrder
     specialNotes?: SortOrder
     status?: SortOrder
     languages?: SortOrder
+    minExperience?: SortOrder
+    maxAge?: SortOrder
+    ticketType?: SortOrder
+    ticketProvided?: SortOrder
     clientId?: SortOrder
-    assignedToId?: SortOrder
+    assignedAgencyId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    submittedAt?: SortOrder
+    reviewedAt?: SortOrder
   }
 
   export type RequirementAvgOrderByAggregateInput = {
-    totalExperienceYears?: SortOrder
-    preferredAge?: SortOrder
+    maxAge?: SortOrder
   }
 
   export type RequirementMaxOrderByAggregateInput = {
@@ -23250,16 +24220,18 @@ export namespace Prisma {
     projectLocation?: SortOrder
     startDate?: SortOrder
     contractDuration?: SortOrder
-    previousExperience?: SortOrder
-    ticketDetails?: SortOrder
-    totalExperienceYears?: SortOrder
-    preferredAge?: SortOrder
     specialNotes?: SortOrder
     status?: SortOrder
+    minExperience?: SortOrder
+    maxAge?: SortOrder
+    ticketType?: SortOrder
+    ticketProvided?: SortOrder
     clientId?: SortOrder
-    assignedToId?: SortOrder
+    assignedAgencyId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    submittedAt?: SortOrder
+    reviewedAt?: SortOrder
   }
 
   export type RequirementMinOrderByAggregateInput = {
@@ -23267,21 +24239,22 @@ export namespace Prisma {
     projectLocation?: SortOrder
     startDate?: SortOrder
     contractDuration?: SortOrder
-    previousExperience?: SortOrder
-    ticketDetails?: SortOrder
-    totalExperienceYears?: SortOrder
-    preferredAge?: SortOrder
     specialNotes?: SortOrder
     status?: SortOrder
+    minExperience?: SortOrder
+    maxAge?: SortOrder
+    ticketType?: SortOrder
+    ticketProvided?: SortOrder
     clientId?: SortOrder
-    assignedToId?: SortOrder
+    assignedAgencyId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    submittedAt?: SortOrder
+    reviewedAt?: SortOrder
   }
 
   export type RequirementSumOrderByAggregateInput = {
-    totalExperienceYears?: SortOrder
-    preferredAge?: SortOrder
+    maxAge?: SortOrder
   }
 
   export type EnumContractDurationNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -23294,24 +24267,24 @@ export namespace Prisma {
     _max?: NestedEnumContractDurationNullableFilter<$PrismaModel>
   }
 
-  export type EnumPreviousExperienceNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.PreviousExperience | EnumPreviousExperienceFieldRefInput<$PrismaModel> | null
-    in?: $Enums.PreviousExperience[] | ListEnumPreviousExperienceFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.PreviousExperience[] | ListEnumPreviousExperienceFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumPreviousExperienceNullableWithAggregatesFilter<$PrismaModel> | $Enums.PreviousExperience | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedEnumPreviousExperienceNullableFilter<$PrismaModel>
-    _max?: NestedEnumPreviousExperienceNullableFilter<$PrismaModel>
+  export type EnumRequirementStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RequirementStatus | EnumRequirementStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RequirementStatus[] | ListEnumRequirementStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RequirementStatus[] | ListEnumRequirementStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRequirementStatusWithAggregatesFilter<$PrismaModel> | $Enums.RequirementStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRequirementStatusFilter<$PrismaModel>
+    _max?: NestedEnumRequirementStatusFilter<$PrismaModel>
   }
 
-  export type EnumTicketDetailsNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.TicketDetails | EnumTicketDetailsFieldRefInput<$PrismaModel> | null
-    in?: $Enums.TicketDetails[] | ListEnumTicketDetailsFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.TicketDetails[] | ListEnumTicketDetailsFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumTicketDetailsNullableWithAggregatesFilter<$PrismaModel> | $Enums.TicketDetails | null
+  export type EnumExperienceLevelNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExperienceLevel | EnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ExperienceLevel[] | ListEnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ExperienceLevel[] | ListEnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumExperienceLevelNullableWithAggregatesFilter<$PrismaModel> | $Enums.ExperienceLevel | null
     _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedEnumTicketDetailsNullableFilter<$PrismaModel>
-    _max?: NestedEnumTicketDetailsNullableFilter<$PrismaModel>
+    _min?: NestedEnumExperienceLevelNullableFilter<$PrismaModel>
+    _max?: NestedEnumExperienceLevelNullableFilter<$PrismaModel>
   }
 
   export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -23330,21 +24303,133 @@ export namespace Prisma {
     _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
-  export type EnumRequirementStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.RequirementStatus | EnumRequirementStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.RequirementStatus[] | ListEnumRequirementStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.RequirementStatus[] | ListEnumRequirementStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumRequirementStatusWithAggregatesFilter<$PrismaModel> | $Enums.RequirementStatus
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumRequirementStatusFilter<$PrismaModel>
-    _max?: NestedEnumRequirementStatusFilter<$PrismaModel>
+  export type EnumTicketTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TicketType | EnumTicketTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.TicketType[] | ListEnumTicketTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.TicketType[] | ListEnumTicketTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumTicketTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.TicketType | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumTicketTypeNullableFilter<$PrismaModel>
+    _max?: NestedEnumTicketTypeNullableFilter<$PrismaModel>
   }
 
-  export type EnumLabourStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.LabourStatus | EnumLabourStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.LabourStatus[] | ListEnumLabourStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.LabourStatus[] | ListEnumLabourStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumLabourStatusFilter<$PrismaModel> | $Enums.LabourStatus
+  export type IntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type FloatNullableFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type RequirementScalarRelationFilter = {
+    is?: RequirementWhereInput
+    isNot?: RequirementWhereInput
+  }
+
+  export type JobRoleCountOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    quantity?: SortOrder
+    nationality?: SortOrder
+    salary?: SortOrder
+    salaryCurrency?: SortOrder
+    requirementId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type JobRoleAvgOrderByAggregateInput = {
+    quantity?: SortOrder
+    salary?: SortOrder
+  }
+
+  export type JobRoleMaxOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    quantity?: SortOrder
+    nationality?: SortOrder
+    salary?: SortOrder
+    salaryCurrency?: SortOrder
+    requirementId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type JobRoleMinOrderByAggregateInput = {
+    id?: SortOrder
+    title?: SortOrder
+    quantity?: SortOrder
+    nationality?: SortOrder
+    salary?: SortOrder
+    salaryCurrency?: SortOrder
+    requirementId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type JobRoleSumOrderByAggregateInput = {
+    quantity?: SortOrder
+    salary?: SortOrder
+  }
+
+  export type IntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
+  }
+
+  export type FloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type EnumGenderFilter<$PrismaModel = never> = {
+    equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel>
+    in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
+    not?: NestedEnumGenderFilter<$PrismaModel> | $Enums.Gender
+  }
+
+  export type EnumLabourProfileStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.LabourProfileStatus | EnumLabourProfileStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.LabourProfileStatus[] | ListEnumLabourProfileStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.LabourProfileStatus[] | ListEnumLabourProfileStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumLabourProfileStatusFilter<$PrismaModel> | $Enums.LabourProfileStatus
   }
 
   export type AgencyScalarRelationFilter = {
@@ -23358,16 +24443,35 @@ export namespace Prisma {
     age?: SortOrder
     gender?: SortOrder
     nationality?: SortOrder
+    maritalStatus?: SortOrder
     skills?: SortOrder
     experienceYears?: SortOrder
     education?: SortOrder
-    language?: SortOrder
-    status?: SortOrder
+    currentPosition?: SortOrder
+    currentCompany?: SortOrder
+    languages?: SortOrder
+    englishProficiency?: SortOrder
+    email?: SortOrder
+    phone?: SortOrder
+    address?: SortOrder
+    city?: SortOrder
+    country?: SortOrder
     cvUrl?: SortOrder
-    passportCopy?: SortOrder
+    passportNumber?: SortOrder
+    passportExpiry?: SortOrder
+    visaType?: SortOrder
+    visaExpiry?: SortOrder
+    medicalStatus?: SortOrder
+    medicalExpiry?: SortOrder
+    photo?: SortOrder
     otherDocs?: SortOrder
+    status?: SortOrder
+    statusReason?: SortOrder
     requirementId?: SortOrder
     agencyId?: SortOrder
+    deploymentDate?: SortOrder
+    contractStartDate?: SortOrder
+    contractEndDate?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -23383,13 +24487,32 @@ export namespace Prisma {
     age?: SortOrder
     gender?: SortOrder
     nationality?: SortOrder
+    maritalStatus?: SortOrder
     experienceYears?: SortOrder
     education?: SortOrder
-    status?: SortOrder
+    currentPosition?: SortOrder
+    currentCompany?: SortOrder
+    englishProficiency?: SortOrder
+    email?: SortOrder
+    phone?: SortOrder
+    address?: SortOrder
+    city?: SortOrder
+    country?: SortOrder
     cvUrl?: SortOrder
-    passportCopy?: SortOrder
+    passportNumber?: SortOrder
+    passportExpiry?: SortOrder
+    visaType?: SortOrder
+    visaExpiry?: SortOrder
+    medicalStatus?: SortOrder
+    medicalExpiry?: SortOrder
+    photo?: SortOrder
+    status?: SortOrder
+    statusReason?: SortOrder
     requirementId?: SortOrder
     agencyId?: SortOrder
+    deploymentDate?: SortOrder
+    contractStartDate?: SortOrder
+    contractEndDate?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -23400,13 +24523,32 @@ export namespace Prisma {
     age?: SortOrder
     gender?: SortOrder
     nationality?: SortOrder
+    maritalStatus?: SortOrder
     experienceYears?: SortOrder
     education?: SortOrder
-    status?: SortOrder
+    currentPosition?: SortOrder
+    currentCompany?: SortOrder
+    englishProficiency?: SortOrder
+    email?: SortOrder
+    phone?: SortOrder
+    address?: SortOrder
+    city?: SortOrder
+    country?: SortOrder
     cvUrl?: SortOrder
-    passportCopy?: SortOrder
+    passportNumber?: SortOrder
+    passportExpiry?: SortOrder
+    visaType?: SortOrder
+    visaExpiry?: SortOrder
+    medicalStatus?: SortOrder
+    medicalExpiry?: SortOrder
+    photo?: SortOrder
+    status?: SortOrder
+    statusReason?: SortOrder
     requirementId?: SortOrder
     agencyId?: SortOrder
+    deploymentDate?: SortOrder
+    contractStartDate?: SortOrder
+    contractEndDate?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -23416,14 +24558,31 @@ export namespace Prisma {
     experienceYears?: SortOrder
   }
 
-  export type EnumLabourStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.LabourStatus | EnumLabourStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.LabourStatus[] | ListEnumLabourStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.LabourStatus[] | ListEnumLabourStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumLabourStatusWithAggregatesFilter<$PrismaModel> | $Enums.LabourStatus
+  export type EnumGenderWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel>
+    in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
+    not?: NestedEnumGenderWithAggregatesFilter<$PrismaModel> | $Enums.Gender
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumLabourStatusFilter<$PrismaModel>
-    _max?: NestedEnumLabourStatusFilter<$PrismaModel>
+    _min?: NestedEnumGenderFilter<$PrismaModel>
+    _max?: NestedEnumGenderFilter<$PrismaModel>
+  }
+
+  export type EnumLabourProfileStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.LabourProfileStatus | EnumLabourProfileStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.LabourProfileStatus[] | ListEnumLabourProfileStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.LabourProfileStatus[] | ListEnumLabourProfileStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumLabourProfileStatusWithAggregatesFilter<$PrismaModel> | $Enums.LabourProfileStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumLabourProfileStatusFilter<$PrismaModel>
+    _max?: NestedEnumLabourProfileStatusFilter<$PrismaModel>
+  }
+
+  export type EnumProcedureStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProcedureStatus | EnumProcedureStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ProcedureStatus[] | ListEnumProcedureStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProcedureStatus[] | ListEnumProcedureStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumProcedureStatusFilter<$PrismaModel> | $Enums.ProcedureStatus
   }
 
   export type RequirementNullableScalarRelationFilter = {
@@ -23444,6 +24603,7 @@ export namespace Prisma {
     dueDate?: SortOrder
     completedDate?: SortOrder
     comments?: SortOrder
+    metadata?: SortOrder
     requirementId?: SortOrder
     labourProfileId?: SortOrder
     createdAt?: SortOrder
@@ -23478,6 +24638,16 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type EnumProcedureStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProcedureStatus | EnumProcedureStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ProcedureStatus[] | ListEnumProcedureStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProcedureStatus[] | ListEnumProcedureStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumProcedureStatusWithAggregatesFilter<$PrismaModel> | $Enums.ProcedureStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumProcedureStatusFilter<$PrismaModel>
+    _max?: NestedEnumProcedureStatusFilter<$PrismaModel>
+  }
+
   export type LabourProfileScalarRelationFilter = {
     is?: LabourProfileWhereInput
     isNot?: LabourProfileWhereInput
@@ -23487,6 +24657,7 @@ export namespace Prisma {
     id?: SortOrder
     status?: SortOrder
     comments?: SortOrder
+    metadata?: SortOrder
     labourProfileId?: SortOrder
     changedById?: SortOrder
     createdAt?: SortOrder
@@ -23521,8 +24692,11 @@ export namespace Prisma {
     id?: SortOrder
     type?: SortOrder
     url?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
     verified?: SortOrder
     comments?: SortOrder
+    expiryDate?: SortOrder
     clientId?: SortOrder
     verifiedById?: SortOrder
     createdAt?: SortOrder
@@ -23533,8 +24707,11 @@ export namespace Prisma {
     id?: SortOrder
     type?: SortOrder
     url?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
     verified?: SortOrder
     comments?: SortOrder
+    expiryDate?: SortOrder
     clientId?: SortOrder
     verifiedById?: SortOrder
     createdAt?: SortOrder
@@ -23545,8 +24722,11 @@ export namespace Prisma {
     id?: SortOrder
     type?: SortOrder
     url?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
     verified?: SortOrder
     comments?: SortOrder
+    expiryDate?: SortOrder
     clientId?: SortOrder
     verifiedById?: SortOrder
     createdAt?: SortOrder
@@ -23567,8 +24747,11 @@ export namespace Prisma {
     id?: SortOrder
     type?: SortOrder
     url?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
     verified?: SortOrder
     comments?: SortOrder
+    expiryDate?: SortOrder
     agencyId?: SortOrder
     verifiedById?: SortOrder
     createdAt?: SortOrder
@@ -23579,8 +24762,11 @@ export namespace Prisma {
     id?: SortOrder
     type?: SortOrder
     url?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
     verified?: SortOrder
     comments?: SortOrder
+    expiryDate?: SortOrder
     agencyId?: SortOrder
     verifiedById?: SortOrder
     createdAt?: SortOrder
@@ -23591,8 +24777,11 @@ export namespace Prisma {
     id?: SortOrder
     type?: SortOrder
     url?: SortOrder
+    name?: SortOrder
+    description?: SortOrder
     verified?: SortOrder
     comments?: SortOrder
+    expiryDate?: SortOrder
     agencyId?: SortOrder
     verifiedById?: SortOrder
     createdAt?: SortOrder
@@ -23603,30 +24792,36 @@ export namespace Prisma {
     id?: SortOrder
     type?: SortOrder
     url?: SortOrder
+    name?: SortOrder
     description?: SortOrder
     requirementId?: SortOrder
     uploadedById?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type RequirementDocumentMaxOrderByAggregateInput = {
     id?: SortOrder
     type?: SortOrder
     url?: SortOrder
+    name?: SortOrder
     description?: SortOrder
     requirementId?: SortOrder
     uploadedById?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type RequirementDocumentMinOrderByAggregateInput = {
     id?: SortOrder
     type?: SortOrder
     url?: SortOrder
+    name?: SortOrder
     description?: SortOrder
     requirementId?: SortOrder
     uploadedById?: SortOrder
     createdAt?: SortOrder
+    updatedAt?: SortOrder
   }
 
   export type EnumAuditActionFilter<$PrismaModel = never> = {
@@ -23634,29 +24829,6 @@ export namespace Prisma {
     in?: $Enums.AuditAction[] | ListEnumAuditActionFieldRefInput<$PrismaModel>
     notIn?: $Enums.AuditAction[] | ListEnumAuditActionFieldRefInput<$PrismaModel>
     not?: NestedEnumAuditActionFilter<$PrismaModel> | $Enums.AuditAction
-  }
-  export type JsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type AuditLogCountOrderByAggregateInput = {
@@ -23670,8 +24842,8 @@ export namespace Prisma {
     affectedFields?: SortOrder
     ipAddress?: SortOrder
     userAgent?: SortOrder
-    performedAt?: SortOrder
     performedById?: SortOrder
+    performedAt?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -23683,8 +24855,8 @@ export namespace Prisma {
     description?: SortOrder
     ipAddress?: SortOrder
     userAgent?: SortOrder
-    performedAt?: SortOrder
     performedById?: SortOrder
+    performedAt?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -23696,8 +24868,8 @@ export namespace Prisma {
     description?: SortOrder
     ipAddress?: SortOrder
     userAgent?: SortOrder
-    performedAt?: SortOrder
     performedById?: SortOrder
+    performedAt?: SortOrder
     createdAt?: SortOrder
   }
 
@@ -23710,31 +24882,12 @@ export namespace Prisma {
     _min?: NestedEnumAuditActionFilter<$PrismaModel>
     _max?: NestedEnumAuditActionFilter<$PrismaModel>
   }
-  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
 
-  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedJsonNullableFilter<$PrismaModel>
-    _max?: NestedJsonNullableFilter<$PrismaModel>
+  export type EnumNotificationTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.NotificationType | EnumNotificationTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.NotificationType[] | ListEnumNotificationTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.NotificationType[] | ListEnumNotificationTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumNotificationTypeFilter<$PrismaModel> | $Enums.NotificationType
   }
 
   export type NotificationCountOrderByAggregateInput = {
@@ -23772,6 +24925,16 @@ export namespace Prisma {
     recipientId?: SortOrder
     createdAt?: SortOrder
     readAt?: SortOrder
+  }
+
+  export type EnumNotificationTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.NotificationType | EnumNotificationTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.NotificationType[] | ListEnumNotificationTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.NotificationType[] | ListEnumNotificationTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumNotificationTypeWithAggregatesFilter<$PrismaModel> | $Enums.NotificationType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumNotificationTypeFilter<$PrismaModel>
+    _max?: NestedEnumNotificationTypeFilter<$PrismaModel>
   }
 
   export type ClientCreateNestedOneWithoutUserInput = {
@@ -23812,6 +24975,13 @@ export namespace Prisma {
     connect?: AuditLogWhereUniqueInput | AuditLogWhereUniqueInput[]
   }
 
+  export type NotificationCreateNestedManyWithoutRecipientInput = {
+    create?: XOR<NotificationCreateWithoutRecipientInput, NotificationUncheckedCreateWithoutRecipientInput> | NotificationCreateWithoutRecipientInput[] | NotificationUncheckedCreateWithoutRecipientInput[]
+    connectOrCreate?: NotificationCreateOrConnectWithoutRecipientInput | NotificationCreateOrConnectWithoutRecipientInput[]
+    createMany?: NotificationCreateManyRecipientInputEnvelope
+    connect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+  }
+
   export type LabourStatusLogCreateNestedManyWithoutChangedByInput = {
     create?: XOR<LabourStatusLogCreateWithoutChangedByInput, LabourStatusLogUncheckedCreateWithoutChangedByInput> | LabourStatusLogCreateWithoutChangedByInput[] | LabourStatusLogUncheckedCreateWithoutChangedByInput[]
     connectOrCreate?: LabourStatusLogCreateOrConnectWithoutChangedByInput | LabourStatusLogCreateOrConnectWithoutChangedByInput[]
@@ -23838,13 +25008,6 @@ export namespace Prisma {
     connectOrCreate?: RequirementDocumentCreateOrConnectWithoutUploadedByInput | RequirementDocumentCreateOrConnectWithoutUploadedByInput[]
     createMany?: RequirementDocumentCreateManyUploadedByInputEnvelope
     connect?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
-  }
-
-  export type NotificationCreateNestedManyWithoutRecipientInput = {
-    create?: XOR<NotificationCreateWithoutRecipientInput, NotificationUncheckedCreateWithoutRecipientInput> | NotificationCreateWithoutRecipientInput[] | NotificationUncheckedCreateWithoutRecipientInput[]
-    connectOrCreate?: NotificationCreateOrConnectWithoutRecipientInput | NotificationCreateOrConnectWithoutRecipientInput[]
-    createMany?: NotificationCreateManyRecipientInputEnvelope
-    connect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
   }
 
   export type ClientUncheckedCreateNestedOneWithoutUserInput = {
@@ -23879,6 +25042,13 @@ export namespace Prisma {
     connect?: AuditLogWhereUniqueInput | AuditLogWhereUniqueInput[]
   }
 
+  export type NotificationUncheckedCreateNestedManyWithoutRecipientInput = {
+    create?: XOR<NotificationCreateWithoutRecipientInput, NotificationUncheckedCreateWithoutRecipientInput> | NotificationCreateWithoutRecipientInput[] | NotificationUncheckedCreateWithoutRecipientInput[]
+    connectOrCreate?: NotificationCreateOrConnectWithoutRecipientInput | NotificationCreateOrConnectWithoutRecipientInput[]
+    createMany?: NotificationCreateManyRecipientInputEnvelope
+    connect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+  }
+
   export type LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput = {
     create?: XOR<LabourStatusLogCreateWithoutChangedByInput, LabourStatusLogUncheckedCreateWithoutChangedByInput> | LabourStatusLogCreateWithoutChangedByInput[] | LabourStatusLogUncheckedCreateWithoutChangedByInput[]
     connectOrCreate?: LabourStatusLogCreateOrConnectWithoutChangedByInput | LabourStatusLogCreateOrConnectWithoutChangedByInput[]
@@ -23907,15 +25077,12 @@ export namespace Prisma {
     connect?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
   }
 
-  export type NotificationUncheckedCreateNestedManyWithoutRecipientInput = {
-    create?: XOR<NotificationCreateWithoutRecipientInput, NotificationUncheckedCreateWithoutRecipientInput> | NotificationCreateWithoutRecipientInput[] | NotificationUncheckedCreateWithoutRecipientInput[]
-    connectOrCreate?: NotificationCreateOrConnectWithoutRecipientInput | NotificationCreateOrConnectWithoutRecipientInput[]
-    createMany?: NotificationCreateManyRecipientInputEnvelope
-    connect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
-  }
-
   export type StringFieldUpdateOperationsInput = {
     set?: string
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
   }
 
   export type EnumUserRoleFieldUpdateOperationsInput = {
@@ -23940,10 +25107,6 @@ export namespace Prisma {
 
   export type NullableEnumDeletionTypeFieldUpdateOperationsInput = {
     set?: $Enums.DeletionType | null
-  }
-
-  export type NullableStringFieldUpdateOperationsInput = {
-    set?: string | null
   }
 
   export type ClientUpdateOneWithoutUserNestedInput = {
@@ -24014,6 +25177,20 @@ export namespace Prisma {
     deleteMany?: AuditLogScalarWhereInput | AuditLogScalarWhereInput[]
   }
 
+  export type NotificationUpdateManyWithoutRecipientNestedInput = {
+    create?: XOR<NotificationCreateWithoutRecipientInput, NotificationUncheckedCreateWithoutRecipientInput> | NotificationCreateWithoutRecipientInput[] | NotificationUncheckedCreateWithoutRecipientInput[]
+    connectOrCreate?: NotificationCreateOrConnectWithoutRecipientInput | NotificationCreateOrConnectWithoutRecipientInput[]
+    upsert?: NotificationUpsertWithWhereUniqueWithoutRecipientInput | NotificationUpsertWithWhereUniqueWithoutRecipientInput[]
+    createMany?: NotificationCreateManyRecipientInputEnvelope
+    set?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+    disconnect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+    delete?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+    connect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+    update?: NotificationUpdateWithWhereUniqueWithoutRecipientInput | NotificationUpdateWithWhereUniqueWithoutRecipientInput[]
+    updateMany?: NotificationUpdateManyWithWhereWithoutRecipientInput | NotificationUpdateManyWithWhereWithoutRecipientInput[]
+    deleteMany?: NotificationScalarWhereInput | NotificationScalarWhereInput[]
+  }
+
   export type LabourStatusLogUpdateManyWithoutChangedByNestedInput = {
     create?: XOR<LabourStatusLogCreateWithoutChangedByInput, LabourStatusLogUncheckedCreateWithoutChangedByInput> | LabourStatusLogCreateWithoutChangedByInput[] | LabourStatusLogUncheckedCreateWithoutChangedByInput[]
     connectOrCreate?: LabourStatusLogCreateOrConnectWithoutChangedByInput | LabourStatusLogCreateOrConnectWithoutChangedByInput[]
@@ -24068,20 +25245,6 @@ export namespace Prisma {
     update?: RequirementDocumentUpdateWithWhereUniqueWithoutUploadedByInput | RequirementDocumentUpdateWithWhereUniqueWithoutUploadedByInput[]
     updateMany?: RequirementDocumentUpdateManyWithWhereWithoutUploadedByInput | RequirementDocumentUpdateManyWithWhereWithoutUploadedByInput[]
     deleteMany?: RequirementDocumentScalarWhereInput | RequirementDocumentScalarWhereInput[]
-  }
-
-  export type NotificationUpdateManyWithoutRecipientNestedInput = {
-    create?: XOR<NotificationCreateWithoutRecipientInput, NotificationUncheckedCreateWithoutRecipientInput> | NotificationCreateWithoutRecipientInput[] | NotificationUncheckedCreateWithoutRecipientInput[]
-    connectOrCreate?: NotificationCreateOrConnectWithoutRecipientInput | NotificationCreateOrConnectWithoutRecipientInput[]
-    upsert?: NotificationUpsertWithWhereUniqueWithoutRecipientInput | NotificationUpsertWithWhereUniqueWithoutRecipientInput[]
-    createMany?: NotificationCreateManyRecipientInputEnvelope
-    set?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
-    disconnect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
-    delete?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
-    connect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
-    update?: NotificationUpdateWithWhereUniqueWithoutRecipientInput | NotificationUpdateWithWhereUniqueWithoutRecipientInput[]
-    updateMany?: NotificationUpdateManyWithWhereWithoutRecipientInput | NotificationUpdateManyWithWhereWithoutRecipientInput[]
-    deleteMany?: NotificationScalarWhereInput | NotificationScalarWhereInput[]
   }
 
   export type ClientUncheckedUpdateOneWithoutUserNestedInput = {
@@ -24142,6 +25305,20 @@ export namespace Prisma {
     deleteMany?: AuditLogScalarWhereInput | AuditLogScalarWhereInput[]
   }
 
+  export type NotificationUncheckedUpdateManyWithoutRecipientNestedInput = {
+    create?: XOR<NotificationCreateWithoutRecipientInput, NotificationUncheckedCreateWithoutRecipientInput> | NotificationCreateWithoutRecipientInput[] | NotificationUncheckedCreateWithoutRecipientInput[]
+    connectOrCreate?: NotificationCreateOrConnectWithoutRecipientInput | NotificationCreateOrConnectWithoutRecipientInput[]
+    upsert?: NotificationUpsertWithWhereUniqueWithoutRecipientInput | NotificationUpsertWithWhereUniqueWithoutRecipientInput[]
+    createMany?: NotificationCreateManyRecipientInputEnvelope
+    set?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+    disconnect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+    delete?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+    connect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
+    update?: NotificationUpdateWithWhereUniqueWithoutRecipientInput | NotificationUpdateWithWhereUniqueWithoutRecipientInput[]
+    updateMany?: NotificationUpdateManyWithWhereWithoutRecipientInput | NotificationUpdateManyWithWhereWithoutRecipientInput[]
+    deleteMany?: NotificationScalarWhereInput | NotificationScalarWhereInput[]
+  }
+
   export type LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput = {
     create?: XOR<LabourStatusLogCreateWithoutChangedByInput, LabourStatusLogUncheckedCreateWithoutChangedByInput> | LabourStatusLogCreateWithoutChangedByInput[] | LabourStatusLogUncheckedCreateWithoutChangedByInput[]
     connectOrCreate?: LabourStatusLogCreateOrConnectWithoutChangedByInput | LabourStatusLogCreateOrConnectWithoutChangedByInput[]
@@ -24198,23 +25375,9 @@ export namespace Prisma {
     deleteMany?: RequirementDocumentScalarWhereInput | RequirementDocumentScalarWhereInput[]
   }
 
-  export type NotificationUncheckedUpdateManyWithoutRecipientNestedInput = {
-    create?: XOR<NotificationCreateWithoutRecipientInput, NotificationUncheckedCreateWithoutRecipientInput> | NotificationCreateWithoutRecipientInput[] | NotificationUncheckedCreateWithoutRecipientInput[]
-    connectOrCreate?: NotificationCreateOrConnectWithoutRecipientInput | NotificationCreateOrConnectWithoutRecipientInput[]
-    upsert?: NotificationUpsertWithWhereUniqueWithoutRecipientInput | NotificationUpsertWithWhereUniqueWithoutRecipientInput[]
-    createMany?: NotificationCreateManyRecipientInputEnvelope
-    set?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
-    disconnect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
-    delete?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
-    connect?: NotificationWhereUniqueInput | NotificationWhereUniqueInput[]
-    update?: NotificationUpdateWithWhereUniqueWithoutRecipientInput | NotificationUpdateWithWhereUniqueWithoutRecipientInput[]
-    updateMany?: NotificationUpdateManyWithWhereWithoutRecipientInput | NotificationUpdateManyWithWhereWithoutRecipientInput[]
-    deleteMany?: NotificationScalarWhereInput | NotificationScalarWhereInput[]
-  }
-
-  export type UserCreateNestedOneWithoutClientInput = {
-    create?: XOR<UserCreateWithoutClientInput, UserUncheckedCreateWithoutClientInput>
-    connectOrCreate?: UserCreateOrConnectWithoutClientInput
+  export type UserCreateNestedOneWithoutClientProfileInput = {
+    create?: XOR<UserCreateWithoutClientProfileInput, UserUncheckedCreateWithoutClientProfileInput>
+    connectOrCreate?: UserCreateOrConnectWithoutClientProfileInput
     connect?: UserWhereUniqueInput
   }
 
@@ -24246,20 +25409,20 @@ export namespace Prisma {
     connect?: ClientDocumentWhereUniqueInput | ClientDocumentWhereUniqueInput[]
   }
 
-  export type NullableEnumCompanySectorFieldUpdateOperationsInput = {
-    set?: $Enums.CompanySector | null
+  export type EnumCompanySectorFieldUpdateOperationsInput = {
+    set?: $Enums.CompanySector
   }
 
-  export type NullableEnumCompanySizeFieldUpdateOperationsInput = {
-    set?: $Enums.CompanySize | null
+  export type EnumCompanySizeFieldUpdateOperationsInput = {
+    set?: $Enums.CompanySize
   }
 
-  export type UserUpdateOneRequiredWithoutClientNestedInput = {
-    create?: XOR<UserCreateWithoutClientInput, UserUncheckedCreateWithoutClientInput>
-    connectOrCreate?: UserCreateOrConnectWithoutClientInput
-    upsert?: UserUpsertWithoutClientInput
+  export type UserUpdateOneRequiredWithoutClientProfileNestedInput = {
+    create?: XOR<UserCreateWithoutClientProfileInput, UserUncheckedCreateWithoutClientProfileInput>
+    connectOrCreate?: UserCreateOrConnectWithoutClientProfileInput
+    upsert?: UserUpsertWithoutClientProfileInput
     connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutClientInput, UserUpdateWithoutClientInput>, UserUncheckedUpdateWithoutClientInput>
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutClientProfileInput, UserUpdateWithoutClientProfileInput>, UserUncheckedUpdateWithoutClientProfileInput>
   }
 
   export type RequirementUpdateManyWithoutClientNestedInput = {
@@ -24322,17 +25485,10 @@ export namespace Prisma {
     set: string[]
   }
 
-  export type UserCreateNestedOneWithoutAgencyInput = {
-    create?: XOR<UserCreateWithoutAgencyInput, UserUncheckedCreateWithoutAgencyInput>
-    connectOrCreate?: UserCreateOrConnectWithoutAgencyInput
+  export type UserCreateNestedOneWithoutAgencyProfileInput = {
+    create?: XOR<UserCreateWithoutAgencyProfileInput, UserUncheckedCreateWithoutAgencyProfileInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAgencyProfileInput
     connect?: UserWhereUniqueInput
-  }
-
-  export type AgencyDocumentCreateNestedManyWithoutAgencyInput = {
-    create?: XOR<AgencyDocumentCreateWithoutAgencyInput, AgencyDocumentUncheckedCreateWithoutAgencyInput> | AgencyDocumentCreateWithoutAgencyInput[] | AgencyDocumentUncheckedCreateWithoutAgencyInput[]
-    connectOrCreate?: AgencyDocumentCreateOrConnectWithoutAgencyInput | AgencyDocumentCreateOrConnectWithoutAgencyInput[]
-    createMany?: AgencyDocumentCreateManyAgencyInputEnvelope
-    connect?: AgencyDocumentWhereUniqueInput | AgencyDocumentWhereUniqueInput[]
   }
 
   export type LabourProfileCreateNestedManyWithoutAgencyInput = {
@@ -24342,14 +25498,14 @@ export namespace Prisma {
     connect?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
   }
 
-  export type RequirementCreateNestedManyWithoutAssignedToInput = {
-    create?: XOR<RequirementCreateWithoutAssignedToInput, RequirementUncheckedCreateWithoutAssignedToInput> | RequirementCreateWithoutAssignedToInput[] | RequirementUncheckedCreateWithoutAssignedToInput[]
-    connectOrCreate?: RequirementCreateOrConnectWithoutAssignedToInput | RequirementCreateOrConnectWithoutAssignedToInput[]
-    createMany?: RequirementCreateManyAssignedToInputEnvelope
+  export type RequirementCreateNestedManyWithoutAssignedAgencyInput = {
+    create?: XOR<RequirementCreateWithoutAssignedAgencyInput, RequirementUncheckedCreateWithoutAssignedAgencyInput> | RequirementCreateWithoutAssignedAgencyInput[] | RequirementUncheckedCreateWithoutAssignedAgencyInput[]
+    connectOrCreate?: RequirementCreateOrConnectWithoutAssignedAgencyInput | RequirementCreateOrConnectWithoutAssignedAgencyInput[]
+    createMany?: RequirementCreateManyAssignedAgencyInputEnvelope
     connect?: RequirementWhereUniqueInput | RequirementWhereUniqueInput[]
   }
 
-  export type AgencyDocumentUncheckedCreateNestedManyWithoutAgencyInput = {
+  export type AgencyDocumentCreateNestedManyWithoutAgencyInput = {
     create?: XOR<AgencyDocumentCreateWithoutAgencyInput, AgencyDocumentUncheckedCreateWithoutAgencyInput> | AgencyDocumentCreateWithoutAgencyInput[] | AgencyDocumentUncheckedCreateWithoutAgencyInput[]
     connectOrCreate?: AgencyDocumentCreateOrConnectWithoutAgencyInput | AgencyDocumentCreateOrConnectWithoutAgencyInput[]
     createMany?: AgencyDocumentCreateManyAgencyInputEnvelope
@@ -24363,11 +25519,18 @@ export namespace Prisma {
     connect?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
   }
 
-  export type RequirementUncheckedCreateNestedManyWithoutAssignedToInput = {
-    create?: XOR<RequirementCreateWithoutAssignedToInput, RequirementUncheckedCreateWithoutAssignedToInput> | RequirementCreateWithoutAssignedToInput[] | RequirementUncheckedCreateWithoutAssignedToInput[]
-    connectOrCreate?: RequirementCreateOrConnectWithoutAssignedToInput | RequirementCreateOrConnectWithoutAssignedToInput[]
-    createMany?: RequirementCreateManyAssignedToInputEnvelope
+  export type RequirementUncheckedCreateNestedManyWithoutAssignedAgencyInput = {
+    create?: XOR<RequirementCreateWithoutAssignedAgencyInput, RequirementUncheckedCreateWithoutAssignedAgencyInput> | RequirementCreateWithoutAssignedAgencyInput[] | RequirementUncheckedCreateWithoutAssignedAgencyInput[]
+    connectOrCreate?: RequirementCreateOrConnectWithoutAssignedAgencyInput | RequirementCreateOrConnectWithoutAssignedAgencyInput[]
+    createMany?: RequirementCreateManyAssignedAgencyInputEnvelope
     connect?: RequirementWhereUniqueInput | RequirementWhereUniqueInput[]
+  }
+
+  export type AgencyDocumentUncheckedCreateNestedManyWithoutAgencyInput = {
+    create?: XOR<AgencyDocumentCreateWithoutAgencyInput, AgencyDocumentUncheckedCreateWithoutAgencyInput> | AgencyDocumentCreateWithoutAgencyInput[] | AgencyDocumentUncheckedCreateWithoutAgencyInput[]
+    connectOrCreate?: AgencyDocumentCreateOrConnectWithoutAgencyInput | AgencyDocumentCreateOrConnectWithoutAgencyInput[]
+    createMany?: AgencyDocumentCreateManyAgencyInputEnvelope
+    connect?: AgencyDocumentWhereUniqueInput | AgencyDocumentWhereUniqueInput[]
   }
 
   export type AgencyUpdateregionsInput = {
@@ -24375,26 +25538,12 @@ export namespace Prisma {
     push?: string | string[]
   }
 
-  export type UserUpdateOneRequiredWithoutAgencyNestedInput = {
-    create?: XOR<UserCreateWithoutAgencyInput, UserUncheckedCreateWithoutAgencyInput>
-    connectOrCreate?: UserCreateOrConnectWithoutAgencyInput
-    upsert?: UserUpsertWithoutAgencyInput
+  export type UserUpdateOneRequiredWithoutAgencyProfileNestedInput = {
+    create?: XOR<UserCreateWithoutAgencyProfileInput, UserUncheckedCreateWithoutAgencyProfileInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAgencyProfileInput
+    upsert?: UserUpsertWithoutAgencyProfileInput
     connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAgencyInput, UserUpdateWithoutAgencyInput>, UserUncheckedUpdateWithoutAgencyInput>
-  }
-
-  export type AgencyDocumentUpdateManyWithoutAgencyNestedInput = {
-    create?: XOR<AgencyDocumentCreateWithoutAgencyInput, AgencyDocumentUncheckedCreateWithoutAgencyInput> | AgencyDocumentCreateWithoutAgencyInput[] | AgencyDocumentUncheckedCreateWithoutAgencyInput[]
-    connectOrCreate?: AgencyDocumentCreateOrConnectWithoutAgencyInput | AgencyDocumentCreateOrConnectWithoutAgencyInput[]
-    upsert?: AgencyDocumentUpsertWithWhereUniqueWithoutAgencyInput | AgencyDocumentUpsertWithWhereUniqueWithoutAgencyInput[]
-    createMany?: AgencyDocumentCreateManyAgencyInputEnvelope
-    set?: AgencyDocumentWhereUniqueInput | AgencyDocumentWhereUniqueInput[]
-    disconnect?: AgencyDocumentWhereUniqueInput | AgencyDocumentWhereUniqueInput[]
-    delete?: AgencyDocumentWhereUniqueInput | AgencyDocumentWhereUniqueInput[]
-    connect?: AgencyDocumentWhereUniqueInput | AgencyDocumentWhereUniqueInput[]
-    update?: AgencyDocumentUpdateWithWhereUniqueWithoutAgencyInput | AgencyDocumentUpdateWithWhereUniqueWithoutAgencyInput[]
-    updateMany?: AgencyDocumentUpdateManyWithWhereWithoutAgencyInput | AgencyDocumentUpdateManyWithWhereWithoutAgencyInput[]
-    deleteMany?: AgencyDocumentScalarWhereInput | AgencyDocumentScalarWhereInput[]
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAgencyProfileInput, UserUpdateWithoutAgencyProfileInput>, UserUncheckedUpdateWithoutAgencyProfileInput>
   }
 
   export type LabourProfileUpdateManyWithoutAgencyNestedInput = {
@@ -24411,21 +25560,21 @@ export namespace Prisma {
     deleteMany?: LabourProfileScalarWhereInput | LabourProfileScalarWhereInput[]
   }
 
-  export type RequirementUpdateManyWithoutAssignedToNestedInput = {
-    create?: XOR<RequirementCreateWithoutAssignedToInput, RequirementUncheckedCreateWithoutAssignedToInput> | RequirementCreateWithoutAssignedToInput[] | RequirementUncheckedCreateWithoutAssignedToInput[]
-    connectOrCreate?: RequirementCreateOrConnectWithoutAssignedToInput | RequirementCreateOrConnectWithoutAssignedToInput[]
-    upsert?: RequirementUpsertWithWhereUniqueWithoutAssignedToInput | RequirementUpsertWithWhereUniqueWithoutAssignedToInput[]
-    createMany?: RequirementCreateManyAssignedToInputEnvelope
+  export type RequirementUpdateManyWithoutAssignedAgencyNestedInput = {
+    create?: XOR<RequirementCreateWithoutAssignedAgencyInput, RequirementUncheckedCreateWithoutAssignedAgencyInput> | RequirementCreateWithoutAssignedAgencyInput[] | RequirementUncheckedCreateWithoutAssignedAgencyInput[]
+    connectOrCreate?: RequirementCreateOrConnectWithoutAssignedAgencyInput | RequirementCreateOrConnectWithoutAssignedAgencyInput[]
+    upsert?: RequirementUpsertWithWhereUniqueWithoutAssignedAgencyInput | RequirementUpsertWithWhereUniqueWithoutAssignedAgencyInput[]
+    createMany?: RequirementCreateManyAssignedAgencyInputEnvelope
     set?: RequirementWhereUniqueInput | RequirementWhereUniqueInput[]
     disconnect?: RequirementWhereUniqueInput | RequirementWhereUniqueInput[]
     delete?: RequirementWhereUniqueInput | RequirementWhereUniqueInput[]
     connect?: RequirementWhereUniqueInput | RequirementWhereUniqueInput[]
-    update?: RequirementUpdateWithWhereUniqueWithoutAssignedToInput | RequirementUpdateWithWhereUniqueWithoutAssignedToInput[]
-    updateMany?: RequirementUpdateManyWithWhereWithoutAssignedToInput | RequirementUpdateManyWithWhereWithoutAssignedToInput[]
+    update?: RequirementUpdateWithWhereUniqueWithoutAssignedAgencyInput | RequirementUpdateWithWhereUniqueWithoutAssignedAgencyInput[]
+    updateMany?: RequirementUpdateManyWithWhereWithoutAssignedAgencyInput | RequirementUpdateManyWithWhereWithoutAssignedAgencyInput[]
     deleteMany?: RequirementScalarWhereInput | RequirementScalarWhereInput[]
   }
 
-  export type AgencyDocumentUncheckedUpdateManyWithoutAgencyNestedInput = {
+  export type AgencyDocumentUpdateManyWithoutAgencyNestedInput = {
     create?: XOR<AgencyDocumentCreateWithoutAgencyInput, AgencyDocumentUncheckedCreateWithoutAgencyInput> | AgencyDocumentCreateWithoutAgencyInput[] | AgencyDocumentUncheckedCreateWithoutAgencyInput[]
     connectOrCreate?: AgencyDocumentCreateOrConnectWithoutAgencyInput | AgencyDocumentCreateOrConnectWithoutAgencyInput[]
     upsert?: AgencyDocumentUpsertWithWhereUniqueWithoutAgencyInput | AgencyDocumentUpsertWithWhereUniqueWithoutAgencyInput[]
@@ -24453,65 +25602,50 @@ export namespace Prisma {
     deleteMany?: LabourProfileScalarWhereInput | LabourProfileScalarWhereInput[]
   }
 
-  export type RequirementUncheckedUpdateManyWithoutAssignedToNestedInput = {
-    create?: XOR<RequirementCreateWithoutAssignedToInput, RequirementUncheckedCreateWithoutAssignedToInput> | RequirementCreateWithoutAssignedToInput[] | RequirementUncheckedCreateWithoutAssignedToInput[]
-    connectOrCreate?: RequirementCreateOrConnectWithoutAssignedToInput | RequirementCreateOrConnectWithoutAssignedToInput[]
-    upsert?: RequirementUpsertWithWhereUniqueWithoutAssignedToInput | RequirementUpsertWithWhereUniqueWithoutAssignedToInput[]
-    createMany?: RequirementCreateManyAssignedToInputEnvelope
+  export type RequirementUncheckedUpdateManyWithoutAssignedAgencyNestedInput = {
+    create?: XOR<RequirementCreateWithoutAssignedAgencyInput, RequirementUncheckedCreateWithoutAssignedAgencyInput> | RequirementCreateWithoutAssignedAgencyInput[] | RequirementUncheckedCreateWithoutAssignedAgencyInput[]
+    connectOrCreate?: RequirementCreateOrConnectWithoutAssignedAgencyInput | RequirementCreateOrConnectWithoutAssignedAgencyInput[]
+    upsert?: RequirementUpsertWithWhereUniqueWithoutAssignedAgencyInput | RequirementUpsertWithWhereUniqueWithoutAssignedAgencyInput[]
+    createMany?: RequirementCreateManyAssignedAgencyInputEnvelope
     set?: RequirementWhereUniqueInput | RequirementWhereUniqueInput[]
     disconnect?: RequirementWhereUniqueInput | RequirementWhereUniqueInput[]
     delete?: RequirementWhereUniqueInput | RequirementWhereUniqueInput[]
     connect?: RequirementWhereUniqueInput | RequirementWhereUniqueInput[]
-    update?: RequirementUpdateWithWhereUniqueWithoutAssignedToInput | RequirementUpdateWithWhereUniqueWithoutAssignedToInput[]
-    updateMany?: RequirementUpdateManyWithWhereWithoutAssignedToInput | RequirementUpdateManyWithWhereWithoutAssignedToInput[]
+    update?: RequirementUpdateWithWhereUniqueWithoutAssignedAgencyInput | RequirementUpdateWithWhereUniqueWithoutAssignedAgencyInput[]
+    updateMany?: RequirementUpdateManyWithWhereWithoutAssignedAgencyInput | RequirementUpdateManyWithWhereWithoutAssignedAgencyInput[]
     deleteMany?: RequirementScalarWhereInput | RequirementScalarWhereInput[]
   }
 
-  export type UserCreateNestedOneWithoutAdminInput = {
-    create?: XOR<UserCreateWithoutAdminInput, UserUncheckedCreateWithoutAdminInput>
-    connectOrCreate?: UserCreateOrConnectWithoutAdminInput
+  export type AgencyDocumentUncheckedUpdateManyWithoutAgencyNestedInput = {
+    create?: XOR<AgencyDocumentCreateWithoutAgencyInput, AgencyDocumentUncheckedCreateWithoutAgencyInput> | AgencyDocumentCreateWithoutAgencyInput[] | AgencyDocumentUncheckedCreateWithoutAgencyInput[]
+    connectOrCreate?: AgencyDocumentCreateOrConnectWithoutAgencyInput | AgencyDocumentCreateOrConnectWithoutAgencyInput[]
+    upsert?: AgencyDocumentUpsertWithWhereUniqueWithoutAgencyInput | AgencyDocumentUpsertWithWhereUniqueWithoutAgencyInput[]
+    createMany?: AgencyDocumentCreateManyAgencyInputEnvelope
+    set?: AgencyDocumentWhereUniqueInput | AgencyDocumentWhereUniqueInput[]
+    disconnect?: AgencyDocumentWhereUniqueInput | AgencyDocumentWhereUniqueInput[]
+    delete?: AgencyDocumentWhereUniqueInput | AgencyDocumentWhereUniqueInput[]
+    connect?: AgencyDocumentWhereUniqueInput | AgencyDocumentWhereUniqueInput[]
+    update?: AgencyDocumentUpdateWithWhereUniqueWithoutAgencyInput | AgencyDocumentUpdateWithWhereUniqueWithoutAgencyInput[]
+    updateMany?: AgencyDocumentUpdateManyWithWhereWithoutAgencyInput | AgencyDocumentUpdateManyWithWhereWithoutAgencyInput[]
+    deleteMany?: AgencyDocumentScalarWhereInput | AgencyDocumentScalarWhereInput[]
+  }
+
+  export type UserCreateNestedOneWithoutAdminProfileInput = {
+    create?: XOR<UserCreateWithoutAdminProfileInput, UserUncheckedCreateWithoutAdminProfileInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAdminProfileInput
     connect?: UserWhereUniqueInput
   }
 
-  export type UserUpdateOneRequiredWithoutAdminNestedInput = {
-    create?: XOR<UserCreateWithoutAdminInput, UserUncheckedCreateWithoutAdminInput>
-    connectOrCreate?: UserCreateOrConnectWithoutAdminInput
-    upsert?: UserUpsertWithoutAdminInput
+  export type UserUpdateOneRequiredWithoutAdminProfileNestedInput = {
+    create?: XOR<UserCreateWithoutAdminProfileInput, UserUncheckedCreateWithoutAdminProfileInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAdminProfileInput
+    upsert?: UserUpsertWithoutAdminProfileInput
     connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAdminInput, UserUpdateWithoutAdminInput>, UserUncheckedUpdateWithoutAdminInput>
-  }
-
-  export type RequirementCreateNestedOneWithoutJobRolesInput = {
-    create?: XOR<RequirementCreateWithoutJobRolesInput, RequirementUncheckedCreateWithoutJobRolesInput>
-    connectOrCreate?: RequirementCreateOrConnectWithoutJobRolesInput
-    connect?: RequirementWhereUniqueInput
-  }
-
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
-  export type RequirementUpdateOneRequiredWithoutJobRolesNestedInput = {
-    create?: XOR<RequirementCreateWithoutJobRolesInput, RequirementUncheckedCreateWithoutJobRolesInput>
-    connectOrCreate?: RequirementCreateOrConnectWithoutJobRolesInput
-    upsert?: RequirementUpsertWithoutJobRolesInput
-    connect?: RequirementWhereUniqueInput
-    update?: XOR<XOR<RequirementUpdateToOneWithWhereWithoutJobRolesInput, RequirementUpdateWithoutJobRolesInput>, RequirementUncheckedUpdateWithoutJobRolesInput>
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAdminProfileInput, UserUpdateWithoutAdminProfileInput>, UserUncheckedUpdateWithoutAdminProfileInput>
   }
 
   export type RequirementCreatelanguagesInput = {
     set: string[]
-  }
-
-  export type JobRoleCreateNestedManyWithoutRequirementInput = {
-    create?: XOR<JobRoleCreateWithoutRequirementInput, JobRoleUncheckedCreateWithoutRequirementInput> | JobRoleCreateWithoutRequirementInput[] | JobRoleUncheckedCreateWithoutRequirementInput[]
-    connectOrCreate?: JobRoleCreateOrConnectWithoutRequirementInput | JobRoleCreateOrConnectWithoutRequirementInput[]
-    createMany?: JobRoleCreateManyRequirementInputEnvelope
-    connect?: JobRoleWhereUniqueInput | JobRoleWhereUniqueInput[]
   }
 
   export type ClientCreateNestedOneWithoutRequirementsInput = {
@@ -24524,6 +25658,13 @@ export namespace Prisma {
     create?: XOR<AgencyCreateWithoutRequirementsInput, AgencyUncheckedCreateWithoutRequirementsInput>
     connectOrCreate?: AgencyCreateOrConnectWithoutRequirementsInput
     connect?: AgencyWhereUniqueInput
+  }
+
+  export type JobRoleCreateNestedManyWithoutRequirementInput = {
+    create?: XOR<JobRoleCreateWithoutRequirementInput, JobRoleUncheckedCreateWithoutRequirementInput> | JobRoleCreateWithoutRequirementInput[] | JobRoleUncheckedCreateWithoutRequirementInput[]
+    connectOrCreate?: JobRoleCreateOrConnectWithoutRequirementInput | JobRoleCreateOrConnectWithoutRequirementInput[]
+    createMany?: JobRoleCreateManyRequirementInputEnvelope
+    connect?: JobRoleWhereUniqueInput | JobRoleWhereUniqueInput[]
   }
 
   export type LabourProfileCreateNestedManyWithoutRequirementInput = {
@@ -24579,12 +25720,17 @@ export namespace Prisma {
     set?: $Enums.ContractDuration | null
   }
 
-  export type NullableEnumPreviousExperienceFieldUpdateOperationsInput = {
-    set?: $Enums.PreviousExperience | null
+  export type EnumRequirementStatusFieldUpdateOperationsInput = {
+    set?: $Enums.RequirementStatus
   }
 
-  export type NullableEnumTicketDetailsFieldUpdateOperationsInput = {
-    set?: $Enums.TicketDetails | null
+  export type RequirementUpdatelanguagesInput = {
+    set?: string[]
+    push?: string | string[]
+  }
+
+  export type NullableEnumExperienceLevelFieldUpdateOperationsInput = {
+    set?: $Enums.ExperienceLevel | null
   }
 
   export type NullableIntFieldUpdateOperationsInput = {
@@ -24595,27 +25741,8 @@ export namespace Prisma {
     divide?: number
   }
 
-  export type EnumRequirementStatusFieldUpdateOperationsInput = {
-    set?: $Enums.RequirementStatus
-  }
-
-  export type RequirementUpdatelanguagesInput = {
-    set?: string[]
-    push?: string | string[]
-  }
-
-  export type JobRoleUpdateManyWithoutRequirementNestedInput = {
-    create?: XOR<JobRoleCreateWithoutRequirementInput, JobRoleUncheckedCreateWithoutRequirementInput> | JobRoleCreateWithoutRequirementInput[] | JobRoleUncheckedCreateWithoutRequirementInput[]
-    connectOrCreate?: JobRoleCreateOrConnectWithoutRequirementInput | JobRoleCreateOrConnectWithoutRequirementInput[]
-    upsert?: JobRoleUpsertWithWhereUniqueWithoutRequirementInput | JobRoleUpsertWithWhereUniqueWithoutRequirementInput[]
-    createMany?: JobRoleCreateManyRequirementInputEnvelope
-    set?: JobRoleWhereUniqueInput | JobRoleWhereUniqueInput[]
-    disconnect?: JobRoleWhereUniqueInput | JobRoleWhereUniqueInput[]
-    delete?: JobRoleWhereUniqueInput | JobRoleWhereUniqueInput[]
-    connect?: JobRoleWhereUniqueInput | JobRoleWhereUniqueInput[]
-    update?: JobRoleUpdateWithWhereUniqueWithoutRequirementInput | JobRoleUpdateWithWhereUniqueWithoutRequirementInput[]
-    updateMany?: JobRoleUpdateManyWithWhereWithoutRequirementInput | JobRoleUpdateManyWithWhereWithoutRequirementInput[]
-    deleteMany?: JobRoleScalarWhereInput | JobRoleScalarWhereInput[]
+  export type NullableEnumTicketTypeFieldUpdateOperationsInput = {
+    set?: $Enums.TicketType | null
   }
 
   export type ClientUpdateOneRequiredWithoutRequirementsNestedInput = {
@@ -24634,6 +25761,20 @@ export namespace Prisma {
     delete?: AgencyWhereInput | boolean
     connect?: AgencyWhereUniqueInput
     update?: XOR<XOR<AgencyUpdateToOneWithWhereWithoutRequirementsInput, AgencyUpdateWithoutRequirementsInput>, AgencyUncheckedUpdateWithoutRequirementsInput>
+  }
+
+  export type JobRoleUpdateManyWithoutRequirementNestedInput = {
+    create?: XOR<JobRoleCreateWithoutRequirementInput, JobRoleUncheckedCreateWithoutRequirementInput> | JobRoleCreateWithoutRequirementInput[] | JobRoleUncheckedCreateWithoutRequirementInput[]
+    connectOrCreate?: JobRoleCreateOrConnectWithoutRequirementInput | JobRoleCreateOrConnectWithoutRequirementInput[]
+    upsert?: JobRoleUpsertWithWhereUniqueWithoutRequirementInput | JobRoleUpsertWithWhereUniqueWithoutRequirementInput[]
+    createMany?: JobRoleCreateManyRequirementInputEnvelope
+    set?: JobRoleWhereUniqueInput | JobRoleWhereUniqueInput[]
+    disconnect?: JobRoleWhereUniqueInput | JobRoleWhereUniqueInput[]
+    delete?: JobRoleWhereUniqueInput | JobRoleWhereUniqueInput[]
+    connect?: JobRoleWhereUniqueInput | JobRoleWhereUniqueInput[]
+    update?: JobRoleUpdateWithWhereUniqueWithoutRequirementInput | JobRoleUpdateWithWhereUniqueWithoutRequirementInput[]
+    updateMany?: JobRoleUpdateManyWithWhereWithoutRequirementInput | JobRoleUpdateManyWithWhereWithoutRequirementInput[]
+    deleteMany?: JobRoleScalarWhereInput | JobRoleScalarWhereInput[]
   }
 
   export type LabourProfileUpdateManyWithoutRequirementNestedInput = {
@@ -24734,11 +25875,41 @@ export namespace Prisma {
     deleteMany?: RequirementDocumentScalarWhereInput | RequirementDocumentScalarWhereInput[]
   }
 
+  export type RequirementCreateNestedOneWithoutJobRolesInput = {
+    create?: XOR<RequirementCreateWithoutJobRolesInput, RequirementUncheckedCreateWithoutJobRolesInput>
+    connectOrCreate?: RequirementCreateOrConnectWithoutJobRolesInput
+    connect?: RequirementWhereUniqueInput
+  }
+
+  export type IntFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type NullableFloatFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type RequirementUpdateOneRequiredWithoutJobRolesNestedInput = {
+    create?: XOR<RequirementCreateWithoutJobRolesInput, RequirementUncheckedCreateWithoutJobRolesInput>
+    connectOrCreate?: RequirementCreateOrConnectWithoutJobRolesInput
+    upsert?: RequirementUpsertWithoutJobRolesInput
+    connect?: RequirementWhereUniqueInput
+    update?: XOR<XOR<RequirementUpdateToOneWithWhereWithoutJobRolesInput, RequirementUpdateWithoutJobRolesInput>, RequirementUncheckedUpdateWithoutJobRolesInput>
+  }
+
   export type LabourProfileCreateskillsInput = {
     set: string[]
   }
 
-  export type LabourProfileCreatelanguageInput = {
+  export type LabourProfileCreatelanguagesInput = {
     set: string[]
   }
 
@@ -24786,23 +25957,27 @@ export namespace Prisma {
     connect?: ProcedureWhereUniqueInput | ProcedureWhereUniqueInput[]
   }
 
+  export type EnumGenderFieldUpdateOperationsInput = {
+    set?: $Enums.Gender
+  }
+
   export type LabourProfileUpdateskillsInput = {
     set?: string[]
     push?: string | string[]
   }
 
-  export type LabourProfileUpdatelanguageInput = {
+  export type LabourProfileUpdatelanguagesInput = {
     set?: string[]
     push?: string | string[]
-  }
-
-  export type EnumLabourStatusFieldUpdateOperationsInput = {
-    set?: $Enums.LabourStatus
   }
 
   export type LabourProfileUpdateotherDocsInput = {
     set?: string[]
     push?: string | string[]
+  }
+
+  export type EnumLabourProfileStatusFieldUpdateOperationsInput = {
+    set?: $Enums.LabourProfileStatus
   }
 
   export type RequirementUpdateOneRequiredWithoutLabourProfilesNestedInput = {
@@ -24889,6 +26064,10 @@ export namespace Prisma {
     connect?: LabourProfileWhereUniqueInput
   }
 
+  export type EnumProcedureStatusFieldUpdateOperationsInput = {
+    set?: $Enums.ProcedureStatus
+  }
+
   export type RequirementUpdateOneWithoutProceduresNestedInput = {
     create?: XOR<RequirementCreateWithoutProceduresInput, RequirementUncheckedCreateWithoutProceduresInput>
     connectOrCreate?: RequirementCreateOrConnectWithoutProceduresInput
@@ -24915,9 +26094,9 @@ export namespace Prisma {
     connect?: LabourProfileWhereUniqueInput
   }
 
-  export type UserCreateNestedOneWithoutLabourStatusLogInput = {
-    create?: XOR<UserCreateWithoutLabourStatusLogInput, UserUncheckedCreateWithoutLabourStatusLogInput>
-    connectOrCreate?: UserCreateOrConnectWithoutLabourStatusLogInput
+  export type UserCreateNestedOneWithoutStatusLogsInput = {
+    create?: XOR<UserCreateWithoutStatusLogsInput, UserUncheckedCreateWithoutStatusLogsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutStatusLogsInput
     connect?: UserWhereUniqueInput
   }
 
@@ -24929,12 +26108,12 @@ export namespace Prisma {
     update?: XOR<XOR<LabourProfileUpdateToOneWithWhereWithoutStatusLogsInput, LabourProfileUpdateWithoutStatusLogsInput>, LabourProfileUncheckedUpdateWithoutStatusLogsInput>
   }
 
-  export type UserUpdateOneRequiredWithoutLabourStatusLogNestedInput = {
-    create?: XOR<UserCreateWithoutLabourStatusLogInput, UserUncheckedCreateWithoutLabourStatusLogInput>
-    connectOrCreate?: UserCreateOrConnectWithoutLabourStatusLogInput
-    upsert?: UserUpsertWithoutLabourStatusLogInput
+  export type UserUpdateOneRequiredWithoutStatusLogsNestedInput = {
+    create?: XOR<UserCreateWithoutStatusLogsInput, UserUncheckedCreateWithoutStatusLogsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutStatusLogsInput
+    upsert?: UserUpsertWithoutStatusLogsInput
     connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutLabourStatusLogInput, UserUpdateWithoutLabourStatusLogInput>, UserUncheckedUpdateWithoutLabourStatusLogInput>
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutStatusLogsInput, UserUpdateWithoutStatusLogsInput>, UserUncheckedUpdateWithoutStatusLogsInput>
   }
 
   export type ClientCreateNestedOneWithoutDocumentsInput = {
@@ -24943,9 +26122,9 @@ export namespace Prisma {
     connect?: ClientWhereUniqueInput
   }
 
-  export type UserCreateNestedOneWithoutClientDocumentInput = {
-    create?: XOR<UserCreateWithoutClientDocumentInput, UserUncheckedCreateWithoutClientDocumentInput>
-    connectOrCreate?: UserCreateOrConnectWithoutClientDocumentInput
+  export type UserCreateNestedOneWithoutClientDocumentsInput = {
+    create?: XOR<UserCreateWithoutClientDocumentsInput, UserUncheckedCreateWithoutClientDocumentsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutClientDocumentsInput
     connect?: UserWhereUniqueInput
   }
 
@@ -24961,14 +26140,14 @@ export namespace Prisma {
     update?: XOR<XOR<ClientUpdateToOneWithWhereWithoutDocumentsInput, ClientUpdateWithoutDocumentsInput>, ClientUncheckedUpdateWithoutDocumentsInput>
   }
 
-  export type UserUpdateOneWithoutClientDocumentNestedInput = {
-    create?: XOR<UserCreateWithoutClientDocumentInput, UserUncheckedCreateWithoutClientDocumentInput>
-    connectOrCreate?: UserCreateOrConnectWithoutClientDocumentInput
-    upsert?: UserUpsertWithoutClientDocumentInput
+  export type UserUpdateOneWithoutClientDocumentsNestedInput = {
+    create?: XOR<UserCreateWithoutClientDocumentsInput, UserUncheckedCreateWithoutClientDocumentsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutClientDocumentsInput
+    upsert?: UserUpsertWithoutClientDocumentsInput
     disconnect?: UserWhereInput | boolean
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutClientDocumentInput, UserUpdateWithoutClientDocumentInput>, UserUncheckedUpdateWithoutClientDocumentInput>
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutClientDocumentsInput, UserUpdateWithoutClientDocumentsInput>, UserUncheckedUpdateWithoutClientDocumentsInput>
   }
 
   export type AgencyCreateNestedOneWithoutDocumentsInput = {
@@ -24977,9 +26156,9 @@ export namespace Prisma {
     connect?: AgencyWhereUniqueInput
   }
 
-  export type UserCreateNestedOneWithoutAgencyDocumentInput = {
-    create?: XOR<UserCreateWithoutAgencyDocumentInput, UserUncheckedCreateWithoutAgencyDocumentInput>
-    connectOrCreate?: UserCreateOrConnectWithoutAgencyDocumentInput
+  export type UserCreateNestedOneWithoutAgencyDocumentsInput = {
+    create?: XOR<UserCreateWithoutAgencyDocumentsInput, UserUncheckedCreateWithoutAgencyDocumentsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAgencyDocumentsInput
     connect?: UserWhereUniqueInput
   }
 
@@ -24991,14 +26170,14 @@ export namespace Prisma {
     update?: XOR<XOR<AgencyUpdateToOneWithWhereWithoutDocumentsInput, AgencyUpdateWithoutDocumentsInput>, AgencyUncheckedUpdateWithoutDocumentsInput>
   }
 
-  export type UserUpdateOneWithoutAgencyDocumentNestedInput = {
-    create?: XOR<UserCreateWithoutAgencyDocumentInput, UserUncheckedCreateWithoutAgencyDocumentInput>
-    connectOrCreate?: UserCreateOrConnectWithoutAgencyDocumentInput
-    upsert?: UserUpsertWithoutAgencyDocumentInput
+  export type UserUpdateOneWithoutAgencyDocumentsNestedInput = {
+    create?: XOR<UserCreateWithoutAgencyDocumentsInput, UserUncheckedCreateWithoutAgencyDocumentsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAgencyDocumentsInput
+    upsert?: UserUpsertWithoutAgencyDocumentsInput
     disconnect?: UserWhereInput | boolean
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAgencyDocumentInput, UserUpdateWithoutAgencyDocumentInput>, UserUncheckedUpdateWithoutAgencyDocumentInput>
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAgencyDocumentsInput, UserUpdateWithoutAgencyDocumentsInput>, UserUncheckedUpdateWithoutAgencyDocumentsInput>
   }
 
   export type RequirementCreateNestedOneWithoutDocumentsInput = {
@@ -25007,9 +26186,9 @@ export namespace Prisma {
     connect?: RequirementWhereUniqueInput
   }
 
-  export type UserCreateNestedOneWithoutRequirementDocumentInput = {
-    create?: XOR<UserCreateWithoutRequirementDocumentInput, UserUncheckedCreateWithoutRequirementDocumentInput>
-    connectOrCreate?: UserCreateOrConnectWithoutRequirementDocumentInput
+  export type UserCreateNestedOneWithoutRequirementDocumentsInput = {
+    create?: XOR<UserCreateWithoutRequirementDocumentsInput, UserUncheckedCreateWithoutRequirementDocumentsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutRequirementDocumentsInput
     connect?: UserWhereUniqueInput
   }
 
@@ -25021,12 +26200,12 @@ export namespace Prisma {
     update?: XOR<XOR<RequirementUpdateToOneWithWhereWithoutDocumentsInput, RequirementUpdateWithoutDocumentsInput>, RequirementUncheckedUpdateWithoutDocumentsInput>
   }
 
-  export type UserUpdateOneRequiredWithoutRequirementDocumentNestedInput = {
-    create?: XOR<UserCreateWithoutRequirementDocumentInput, UserUncheckedCreateWithoutRequirementDocumentInput>
-    connectOrCreate?: UserCreateOrConnectWithoutRequirementDocumentInput
-    upsert?: UserUpsertWithoutRequirementDocumentInput
+  export type UserUpdateOneRequiredWithoutRequirementDocumentsNestedInput = {
+    create?: XOR<UserCreateWithoutRequirementDocumentsInput, UserUncheckedCreateWithoutRequirementDocumentsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutRequirementDocumentsInput
+    upsert?: UserUpsertWithoutRequirementDocumentsInput
     connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutRequirementDocumentInput, UserUpdateWithoutRequirementDocumentInput>, UserUncheckedUpdateWithoutRequirementDocumentInput>
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutRequirementDocumentsInput, UserUpdateWithoutRequirementDocumentsInput>, UserUncheckedUpdateWithoutRequirementDocumentsInput>
   }
 
   export type AuditLogCreateaffectedFieldsInput = {
@@ -25056,18 +26235,22 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAuditLogsInput, UserUpdateWithoutAuditLogsInput>, UserUncheckedUpdateWithoutAuditLogsInput>
   }
 
-  export type UserCreateNestedOneWithoutNotificationInput = {
-    create?: XOR<UserCreateWithoutNotificationInput, UserUncheckedCreateWithoutNotificationInput>
-    connectOrCreate?: UserCreateOrConnectWithoutNotificationInput
+  export type UserCreateNestedOneWithoutNotificationsInput = {
+    create?: XOR<UserCreateWithoutNotificationsInput, UserUncheckedCreateWithoutNotificationsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutNotificationsInput
     connect?: UserWhereUniqueInput
   }
 
-  export type UserUpdateOneRequiredWithoutNotificationNestedInput = {
-    create?: XOR<UserCreateWithoutNotificationInput, UserUncheckedCreateWithoutNotificationInput>
-    connectOrCreate?: UserCreateOrConnectWithoutNotificationInput
-    upsert?: UserUpsertWithoutNotificationInput
+  export type EnumNotificationTypeFieldUpdateOperationsInput = {
+    set?: $Enums.NotificationType
+  }
+
+  export type UserUpdateOneRequiredWithoutNotificationsNestedInput = {
+    create?: XOR<UserCreateWithoutNotificationsInput, UserUncheckedCreateWithoutNotificationsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutNotificationsInput
+    upsert?: UserUpsertWithoutNotificationsInput
     connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutNotificationInput, UserUpdateWithoutNotificationInput>, UserUncheckedUpdateWithoutNotificationInput>
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutNotificationsInput, UserUpdateWithoutNotificationsInput>, UserUncheckedUpdateWithoutNotificationsInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -25082,6 +26265,20 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     not?: NestedStringFilter<$PrismaModel> | string
+  }
+
+  export type NestedStringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
   export type NestedEnumUserRoleFilter<$PrismaModel = never> = {
@@ -25132,20 +26329,6 @@ export namespace Prisma {
     not?: NestedEnumDeletionTypeNullableFilter<$PrismaModel> | $Enums.DeletionType | null
   }
 
-  export type NestedStringNullableFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -25172,6 +26355,34 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntFilter<$PrismaModel> | number
+  }
+
+  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
   export type NestedEnumUserRoleWithAggregatesFilter<$PrismaModel = never> = {
@@ -25216,17 +26427,6 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -25251,82 +26451,61 @@ export namespace Prisma {
     _max?: NestedEnumDeletionTypeNullableFilter<$PrismaModel>
   }
 
-  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: string | StringFieldRefInput<$PrismaModel> | null
-    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    lt?: string | StringFieldRefInput<$PrismaModel>
-    lte?: string | StringFieldRefInput<$PrismaModel>
-    gt?: string | StringFieldRefInput<$PrismaModel>
-    gte?: string | StringFieldRefInput<$PrismaModel>
-    contains?: string | StringFieldRefInput<$PrismaModel>
-    startsWith?: string | StringFieldRefInput<$PrismaModel>
-    endsWith?: string | StringFieldRefInput<$PrismaModel>
-    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedStringNullableFilter<$PrismaModel>
-    _max?: NestedStringNullableFilter<$PrismaModel>
+  export type NestedEnumCompanySectorFilter<$PrismaModel = never> = {
+    equals?: $Enums.CompanySector | EnumCompanySectorFieldRefInput<$PrismaModel>
+    in?: $Enums.CompanySector[] | ListEnumCompanySectorFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CompanySector[] | ListEnumCompanySectorFieldRefInput<$PrismaModel>
+    not?: NestedEnumCompanySectorFilter<$PrismaModel> | $Enums.CompanySector
   }
 
-  export type NestedEnumCompanySectorNullableFilter<$PrismaModel = never> = {
-    equals?: $Enums.CompanySector | EnumCompanySectorFieldRefInput<$PrismaModel> | null
-    in?: $Enums.CompanySector[] | ListEnumCompanySectorFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.CompanySector[] | ListEnumCompanySectorFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumCompanySectorNullableFilter<$PrismaModel> | $Enums.CompanySector | null
+  export type NestedEnumCompanySizeFilter<$PrismaModel = never> = {
+    equals?: $Enums.CompanySize | EnumCompanySizeFieldRefInput<$PrismaModel>
+    in?: $Enums.CompanySize[] | ListEnumCompanySizeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CompanySize[] | ListEnumCompanySizeFieldRefInput<$PrismaModel>
+    not?: NestedEnumCompanySizeFilter<$PrismaModel> | $Enums.CompanySize
   }
 
-  export type NestedEnumCompanySizeNullableFilter<$PrismaModel = never> = {
-    equals?: $Enums.CompanySize | EnumCompanySizeFieldRefInput<$PrismaModel> | null
-    in?: $Enums.CompanySize[] | ListEnumCompanySizeFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.CompanySize[] | ListEnumCompanySizeFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumCompanySizeNullableFilter<$PrismaModel> | $Enums.CompanySize | null
-  }
-
-  export type NestedEnumCompanySectorNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.CompanySector | EnumCompanySectorFieldRefInput<$PrismaModel> | null
-    in?: $Enums.CompanySector[] | ListEnumCompanySectorFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.CompanySector[] | ListEnumCompanySectorFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumCompanySectorNullableWithAggregatesFilter<$PrismaModel> | $Enums.CompanySector | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedEnumCompanySectorNullableFilter<$PrismaModel>
-    _max?: NestedEnumCompanySectorNullableFilter<$PrismaModel>
-  }
-
-  export type NestedEnumCompanySizeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.CompanySize | EnumCompanySizeFieldRefInput<$PrismaModel> | null
-    in?: $Enums.CompanySize[] | ListEnumCompanySizeFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.CompanySize[] | ListEnumCompanySizeFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumCompanySizeNullableWithAggregatesFilter<$PrismaModel> | $Enums.CompanySize | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedEnumCompanySizeNullableFilter<$PrismaModel>
-    _max?: NestedEnumCompanySizeNullableFilter<$PrismaModel>
-  }
-
-  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+  export type NestedEnumCompanySectorWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CompanySector | EnumCompanySectorFieldRefInput<$PrismaModel>
+    in?: $Enums.CompanySector[] | ListEnumCompanySectorFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CompanySector[] | ListEnumCompanySectorFieldRefInput<$PrismaModel>
+    not?: NestedEnumCompanySectorWithAggregatesFilter<$PrismaModel> | $Enums.CompanySector
     _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumCompanySectorFilter<$PrismaModel>
+    _max?: NestedEnumCompanySectorFilter<$PrismaModel>
   }
 
-  export type NestedFloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
+  export type NestedEnumCompanySizeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.CompanySize | EnumCompanySizeFieldRefInput<$PrismaModel>
+    in?: $Enums.CompanySize[] | ListEnumCompanySizeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.CompanySize[] | ListEnumCompanySizeFieldRefInput<$PrismaModel>
+    not?: NestedEnumCompanySizeWithAggregatesFilter<$PrismaModel> | $Enums.CompanySize
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumCompanySizeFilter<$PrismaModel>
+    _max?: NestedEnumCompanySizeFilter<$PrismaModel>
+  }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type NestedEnumContractDurationNullableFilter<$PrismaModel = never> = {
@@ -25336,25 +26515,25 @@ export namespace Prisma {
     not?: NestedEnumContractDurationNullableFilter<$PrismaModel> | $Enums.ContractDuration | null
   }
 
-  export type NestedEnumPreviousExperienceNullableFilter<$PrismaModel = never> = {
-    equals?: $Enums.PreviousExperience | EnumPreviousExperienceFieldRefInput<$PrismaModel> | null
-    in?: $Enums.PreviousExperience[] | ListEnumPreviousExperienceFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.PreviousExperience[] | ListEnumPreviousExperienceFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumPreviousExperienceNullableFilter<$PrismaModel> | $Enums.PreviousExperience | null
-  }
-
-  export type NestedEnumTicketDetailsNullableFilter<$PrismaModel = never> = {
-    equals?: $Enums.TicketDetails | EnumTicketDetailsFieldRefInput<$PrismaModel> | null
-    in?: $Enums.TicketDetails[] | ListEnumTicketDetailsFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.TicketDetails[] | ListEnumTicketDetailsFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumTicketDetailsNullableFilter<$PrismaModel> | $Enums.TicketDetails | null
-  }
-
   export type NestedEnumRequirementStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.RequirementStatus | EnumRequirementStatusFieldRefInput<$PrismaModel>
     in?: $Enums.RequirementStatus[] | ListEnumRequirementStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.RequirementStatus[] | ListEnumRequirementStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumRequirementStatusFilter<$PrismaModel> | $Enums.RequirementStatus
+  }
+
+  export type NestedEnumExperienceLevelNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExperienceLevel | EnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ExperienceLevel[] | ListEnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ExperienceLevel[] | ListEnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumExperienceLevelNullableFilter<$PrismaModel> | $Enums.ExperienceLevel | null
+  }
+
+  export type NestedEnumTicketTypeNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.TicketType | EnumTicketTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.TicketType[] | ListEnumTicketTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.TicketType[] | ListEnumTicketTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumTicketTypeNullableFilter<$PrismaModel> | $Enums.TicketType | null
   }
 
   export type NestedEnumContractDurationNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -25367,24 +26546,24 @@ export namespace Prisma {
     _max?: NestedEnumContractDurationNullableFilter<$PrismaModel>
   }
 
-  export type NestedEnumPreviousExperienceNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.PreviousExperience | EnumPreviousExperienceFieldRefInput<$PrismaModel> | null
-    in?: $Enums.PreviousExperience[] | ListEnumPreviousExperienceFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.PreviousExperience[] | ListEnumPreviousExperienceFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumPreviousExperienceNullableWithAggregatesFilter<$PrismaModel> | $Enums.PreviousExperience | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedEnumPreviousExperienceNullableFilter<$PrismaModel>
-    _max?: NestedEnumPreviousExperienceNullableFilter<$PrismaModel>
+  export type NestedEnumRequirementStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RequirementStatus | EnumRequirementStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RequirementStatus[] | ListEnumRequirementStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RequirementStatus[] | ListEnumRequirementStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRequirementStatusWithAggregatesFilter<$PrismaModel> | $Enums.RequirementStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRequirementStatusFilter<$PrismaModel>
+    _max?: NestedEnumRequirementStatusFilter<$PrismaModel>
   }
 
-  export type NestedEnumTicketDetailsNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.TicketDetails | EnumTicketDetailsFieldRefInput<$PrismaModel> | null
-    in?: $Enums.TicketDetails[] | ListEnumTicketDetailsFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.TicketDetails[] | ListEnumTicketDetailsFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumTicketDetailsNullableWithAggregatesFilter<$PrismaModel> | $Enums.TicketDetails | null
+  export type NestedEnumExperienceLevelNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ExperienceLevel | EnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ExperienceLevel[] | ListEnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ExperienceLevel[] | ListEnumExperienceLevelFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumExperienceLevelNullableWithAggregatesFilter<$PrismaModel> | $Enums.ExperienceLevel | null
     _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedEnumTicketDetailsNullableFilter<$PrismaModel>
-    _max?: NestedEnumTicketDetailsNullableFilter<$PrismaModel>
+    _min?: NestedEnumExperienceLevelNullableFilter<$PrismaModel>
+    _max?: NestedEnumExperienceLevelNullableFilter<$PrismaModel>
   }
 
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -25414,31 +26593,108 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
-  export type NestedEnumRequirementStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.RequirementStatus | EnumRequirementStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.RequirementStatus[] | ListEnumRequirementStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.RequirementStatus[] | ListEnumRequirementStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumRequirementStatusWithAggregatesFilter<$PrismaModel> | $Enums.RequirementStatus
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumRequirementStatusFilter<$PrismaModel>
-    _max?: NestedEnumRequirementStatusFilter<$PrismaModel>
+  export type NestedEnumTicketTypeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.TicketType | EnumTicketTypeFieldRefInput<$PrismaModel> | null
+    in?: $Enums.TicketType[] | ListEnumTicketTypeFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.TicketType[] | ListEnumTicketTypeFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumTicketTypeNullableWithAggregatesFilter<$PrismaModel> | $Enums.TicketType | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumTicketTypeNullableFilter<$PrismaModel>
+    _max?: NestedEnumTicketTypeNullableFilter<$PrismaModel>
   }
 
-  export type NestedEnumLabourStatusFilter<$PrismaModel = never> = {
-    equals?: $Enums.LabourStatus | EnumLabourStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.LabourStatus[] | ListEnumLabourStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.LabourStatus[] | ListEnumLabourStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumLabourStatusFilter<$PrismaModel> | $Enums.LabourStatus
+  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedIntFilter<$PrismaModel>
+    _min?: NestedIntFilter<$PrismaModel>
+    _max?: NestedIntFilter<$PrismaModel>
   }
 
-  export type NestedEnumLabourStatusWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.LabourStatus | EnumLabourStatusFieldRefInput<$PrismaModel>
-    in?: $Enums.LabourStatus[] | ListEnumLabourStatusFieldRefInput<$PrismaModel>
-    notIn?: $Enums.LabourStatus[] | ListEnumLabourStatusFieldRefInput<$PrismaModel>
-    not?: NestedEnumLabourStatusWithAggregatesFilter<$PrismaModel> | $Enums.LabourStatus
+  export type NestedFloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NestedFloatNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel> | null
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedFloatNullableFilter<$PrismaModel>
+    _min?: NestedFloatNullableFilter<$PrismaModel>
+    _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumGenderFilter<$PrismaModel = never> = {
+    equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel>
+    in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
+    not?: NestedEnumGenderFilter<$PrismaModel> | $Enums.Gender
+  }
+
+  export type NestedEnumLabourProfileStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.LabourProfileStatus | EnumLabourProfileStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.LabourProfileStatus[] | ListEnumLabourProfileStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.LabourProfileStatus[] | ListEnumLabourProfileStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumLabourProfileStatusFilter<$PrismaModel> | $Enums.LabourProfileStatus
+  }
+
+  export type NestedEnumGenderWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel>
+    in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
+    notIn?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
+    not?: NestedEnumGenderWithAggregatesFilter<$PrismaModel> | $Enums.Gender
     _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedEnumLabourStatusFilter<$PrismaModel>
-    _max?: NestedEnumLabourStatusFilter<$PrismaModel>
+    _min?: NestedEnumGenderFilter<$PrismaModel>
+    _max?: NestedEnumGenderFilter<$PrismaModel>
+  }
+
+  export type NestedEnumLabourProfileStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.LabourProfileStatus | EnumLabourProfileStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.LabourProfileStatus[] | ListEnumLabourProfileStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.LabourProfileStatus[] | ListEnumLabourProfileStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumLabourProfileStatusWithAggregatesFilter<$PrismaModel> | $Enums.LabourProfileStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumLabourProfileStatusFilter<$PrismaModel>
+    _max?: NestedEnumLabourProfileStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumProcedureStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProcedureStatus | EnumProcedureStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ProcedureStatus[] | ListEnumProcedureStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProcedureStatus[] | ListEnumProcedureStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumProcedureStatusFilter<$PrismaModel> | $Enums.ProcedureStatus
+  }
+
+  export type NestedEnumProcedureStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ProcedureStatus | EnumProcedureStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.ProcedureStatus[] | ListEnumProcedureStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.ProcedureStatus[] | ListEnumProcedureStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumProcedureStatusWithAggregatesFilter<$PrismaModel> | $Enums.ProcedureStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumProcedureStatusFilter<$PrismaModel>
+    _max?: NestedEnumProcedureStatusFilter<$PrismaModel>
   }
 
   export type NestedEnumDocumentTypeFilter<$PrismaModel = never> = {
@@ -25474,44 +26730,36 @@ export namespace Prisma {
     _min?: NestedEnumAuditActionFilter<$PrismaModel>
     _max?: NestedEnumAuditActionFilter<$PrismaModel>
   }
-  export type NestedJsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
 
-  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  export type NestedEnumNotificationTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.NotificationType | EnumNotificationTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.NotificationType[] | ListEnumNotificationTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.NotificationType[] | ListEnumNotificationTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumNotificationTypeFilter<$PrismaModel> | $Enums.NotificationType
+  }
+
+  export type NestedEnumNotificationTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.NotificationType | EnumNotificationTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.NotificationType[] | ListEnumNotificationTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.NotificationType[] | ListEnumNotificationTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumNotificationTypeWithAggregatesFilter<$PrismaModel> | $Enums.NotificationType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumNotificationTypeFilter<$PrismaModel>
+    _max?: NestedEnumNotificationTypeFilter<$PrismaModel>
   }
 
   export type ClientCreateWithoutUserInput = {
     id?: string
     companyName: string
-    contactPerson?: string | null
     registrationNo?: string | null
-    companySector?: $Enums.CompanySector | null
-    companySize?: $Enums.CompanySize | null
+    companySector: $Enums.CompanySector
+    companySize: $Enums.CompanySize
     website?: string | null
-    designation?: string | null
-    phone?: string | null
     address: string
-    altContact?: string | null
-    businessLicense?: string | null
-    image?: string | null
+    city: string
+    country: string
+    postalCode?: string | null
+    designation: string
     createdAt?: Date | string
     updatedAt?: Date | string
     requirements?: RequirementCreateNestedManyWithoutClientInput
@@ -25521,17 +26769,15 @@ export namespace Prisma {
   export type ClientUncheckedCreateWithoutUserInput = {
     id?: string
     companyName: string
-    contactPerson?: string | null
     registrationNo?: string | null
-    companySector?: $Enums.CompanySector | null
-    companySize?: $Enums.CompanySize | null
+    companySector: $Enums.CompanySector
+    companySize: $Enums.CompanySize
     website?: string | null
-    designation?: string | null
-    phone?: string | null
     address: string
-    altContact?: string | null
-    businessLicense?: string | null
-    image?: string | null
+    city: string
+    country: string
+    postalCode?: string | null
+    designation: string
     createdAt?: Date | string
     updatedAt?: Date | string
     requirements?: RequirementUncheckedCreateNestedManyWithoutClientInput
@@ -25551,15 +26797,15 @@ export namespace Prisma {
     licenseExpiry: Date | string
     country: string
     regions?: AgencyCreateregionsInput | string[]
-    contactPerson: string
-    phone: string
-    email?: string | null
     website?: string | null
+    address: string
+    city: string
+    postalCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    documents?: AgencyDocumentCreateNestedManyWithoutAgencyInput
     labourProfiles?: LabourProfileCreateNestedManyWithoutAgencyInput
-    requirements?: RequirementCreateNestedManyWithoutAssignedToInput
+    requirements?: RequirementCreateNestedManyWithoutAssignedAgencyInput
+    documents?: AgencyDocumentCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyUncheckedCreateWithoutUserInput = {
@@ -25570,15 +26816,15 @@ export namespace Prisma {
     licenseExpiry: Date | string
     country: string
     regions?: AgencyCreateregionsInput | string[]
-    contactPerson: string
-    phone: string
-    email?: string | null
     website?: string | null
+    address: string
+    city: string
+    postalCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    documents?: AgencyDocumentUncheckedCreateNestedManyWithoutAgencyInput
     labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutAgencyInput
-    requirements?: RequirementUncheckedCreateNestedManyWithoutAssignedToInput
+    requirements?: RequirementUncheckedCreateNestedManyWithoutAssignedAgencyInput
+    documents?: AgencyDocumentUncheckedCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyCreateOrConnectWithoutUserInput = {
@@ -25590,7 +26836,7 @@ export namespace Prisma {
     id?: string
     name: string
     department?: string | null
-    canCreateUsers?: boolean
+    permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -25599,7 +26845,7 @@ export namespace Prisma {
     id?: string
     name: string
     department?: string | null
-    canCreateUsers?: boolean
+    permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -25614,6 +26860,9 @@ export namespace Prisma {
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -25622,17 +26871,18 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
-    client?: ClientCreateNestedOneWithoutUserInput
-    agency?: AgencyCreateNestedOneWithoutUserInput
-    admin?: AdminCreateNestedOneWithoutUserInput
+    clientProfile?: ClientCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyCreateNestedOneWithoutUserInput
+    adminProfile?: AdminCreateNestedOneWithoutUserInput
     createdBy?: UserCreateNestedOneWithoutCreatedUsersInput
     auditLogs?: AuditLogCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
   }
 
   export type UserUncheckedCreateWithoutCreatedUsersInput = {
@@ -25640,6 +26890,9 @@ export namespace Prisma {
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -25648,17 +26901,18 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
     createdById?: string | null
-    client?: ClientUncheckedCreateNestedOneWithoutUserInput
-    agency?: AgencyUncheckedCreateNestedOneWithoutUserInput
-    admin?: AdminUncheckedCreateNestedOneWithoutUserInput
+    clientProfile?: ClientUncheckedCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyUncheckedCreateNestedOneWithoutUserInput
+    adminProfile?: AdminUncheckedCreateNestedOneWithoutUserInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
   export type UserCreateOrConnectWithoutCreatedUsersInput = {
@@ -25671,6 +26925,9 @@ export namespace Prisma {
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -25679,17 +26936,18 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
-    client?: ClientCreateNestedOneWithoutUserInput
-    agency?: AgencyCreateNestedOneWithoutUserInput
-    admin?: AdminCreateNestedOneWithoutUserInput
+    clientProfile?: ClientCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyCreateNestedOneWithoutUserInput
+    adminProfile?: AdminCreateNestedOneWithoutUserInput
     createdUsers?: UserCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
   }
 
   export type UserUncheckedCreateWithoutCreatedByInput = {
@@ -25697,6 +26955,9 @@ export namespace Prisma {
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -25705,17 +26966,18 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
-    client?: ClientUncheckedCreateNestedOneWithoutUserInput
-    agency?: AgencyUncheckedCreateNestedOneWithoutUserInput
-    admin?: AdminUncheckedCreateNestedOneWithoutUserInput
+    clientProfile?: ClientUncheckedCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyUncheckedCreateNestedOneWithoutUserInput
+    adminProfile?: AdminUncheckedCreateNestedOneWithoutUserInput
     createdUsers?: UserUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
   export type UserCreateOrConnectWithoutCreatedByInput = {
@@ -25768,18 +27030,54 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type NotificationCreateWithoutRecipientInput = {
+    id?: string
+    title: string
+    message: string
+    type: $Enums.NotificationType
+    read?: boolean
+    actionUrl?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    readAt?: Date | string | null
+  }
+
+  export type NotificationUncheckedCreateWithoutRecipientInput = {
+    id?: string
+    title: string
+    message: string
+    type: $Enums.NotificationType
+    read?: boolean
+    actionUrl?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    readAt?: Date | string | null
+  }
+
+  export type NotificationCreateOrConnectWithoutRecipientInput = {
+    where: NotificationWhereUniqueInput
+    create: XOR<NotificationCreateWithoutRecipientInput, NotificationUncheckedCreateWithoutRecipientInput>
+  }
+
+  export type NotificationCreateManyRecipientInputEnvelope = {
+    data: NotificationCreateManyRecipientInput | NotificationCreateManyRecipientInput[]
+    skipDuplicates?: boolean
+  }
+
   export type LabourStatusLogCreateWithoutChangedByInput = {
     id?: string
-    status: $Enums.LabourStatus
+    status: $Enums.LabourProfileStatus
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     labourProfile: LabourProfileCreateNestedOneWithoutStatusLogsInput
   }
 
   export type LabourStatusLogUncheckedCreateWithoutChangedByInput = {
     id?: string
-    status: $Enums.LabourStatus
+    status: $Enums.LabourProfileStatus
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     labourProfileId: string
     createdAt?: Date | string
   }
@@ -25798,8 +27096,11 @@ export namespace Prisma {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
+    description?: string | null
     verified?: boolean
     comments?: string | null
+    expiryDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     client: ClientCreateNestedOneWithoutDocumentsInput
@@ -25809,8 +27110,11 @@ export namespace Prisma {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
+    description?: string | null
     verified?: boolean
     comments?: string | null
+    expiryDate?: Date | string | null
     clientId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -25830,8 +27134,11 @@ export namespace Prisma {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
+    description?: string | null
     verified?: boolean
     comments?: string | null
+    expiryDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     agency: AgencyCreateNestedOneWithoutDocumentsInput
@@ -25841,8 +27148,11 @@ export namespace Prisma {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
+    description?: string | null
     verified?: boolean
     comments?: string | null
+    expiryDate?: Date | string | null
     agencyId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -25862,8 +27172,10 @@ export namespace Prisma {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
     description?: string | null
     createdAt?: Date | string
+    updatedAt?: Date | string
     requirement: RequirementCreateNestedOneWithoutDocumentsInput
   }
 
@@ -25871,9 +27183,11 @@ export namespace Prisma {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
     description?: string | null
     requirementId: string
     createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type RequirementDocumentCreateOrConnectWithoutUploadedByInput = {
@@ -25883,40 +27197,6 @@ export namespace Prisma {
 
   export type RequirementDocumentCreateManyUploadedByInputEnvelope = {
     data: RequirementDocumentCreateManyUploadedByInput | RequirementDocumentCreateManyUploadedByInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type NotificationCreateWithoutRecipientInput = {
-    id?: string
-    title: string
-    message: string
-    type: string
-    read?: boolean
-    actionUrl?: string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    readAt?: Date | string | null
-  }
-
-  export type NotificationUncheckedCreateWithoutRecipientInput = {
-    id?: string
-    title: string
-    message: string
-    type: string
-    read?: boolean
-    actionUrl?: string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    readAt?: Date | string | null
-  }
-
-  export type NotificationCreateOrConnectWithoutRecipientInput = {
-    where: NotificationWhereUniqueInput
-    create: XOR<NotificationCreateWithoutRecipientInput, NotificationUncheckedCreateWithoutRecipientInput>
-  }
-
-  export type NotificationCreateManyRecipientInputEnvelope = {
-    data: NotificationCreateManyRecipientInput | NotificationCreateManyRecipientInput[]
     skipDuplicates?: boolean
   }
 
@@ -25934,17 +27214,15 @@ export namespace Prisma {
   export type ClientUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     companyName?: StringFieldUpdateOperationsInput | string
-    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
-    companySector?: NullableEnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector | null
-    companySize?: NullableEnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize | null
+    companySector?: EnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector
+    companySize?: EnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize
     website?: NullableStringFieldUpdateOperationsInput | string | null
-    designation?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
-    altContact?: NullableStringFieldUpdateOperationsInput | string | null
-    businessLicense?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designation?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requirements?: RequirementUpdateManyWithoutClientNestedInput
@@ -25954,17 +27232,15 @@ export namespace Prisma {
   export type ClientUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     companyName?: StringFieldUpdateOperationsInput | string
-    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
-    companySector?: NullableEnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector | null
-    companySize?: NullableEnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize | null
+    companySector?: EnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector
+    companySize?: EnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize
     website?: NullableStringFieldUpdateOperationsInput | string | null
-    designation?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
-    altContact?: NullableStringFieldUpdateOperationsInput | string | null
-    businessLicense?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designation?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requirements?: RequirementUncheckedUpdateManyWithoutClientNestedInput
@@ -25990,15 +27266,15 @@ export namespace Prisma {
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
     regions?: AgencyUpdateregionsInput | string[]
-    contactPerson?: StringFieldUpdateOperationsInput | string
-    phone?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    documents?: AgencyDocumentUpdateManyWithoutAgencyNestedInput
     labourProfiles?: LabourProfileUpdateManyWithoutAgencyNestedInput
-    requirements?: RequirementUpdateManyWithoutAssignedToNestedInput
+    requirements?: RequirementUpdateManyWithoutAssignedAgencyNestedInput
+    documents?: AgencyDocumentUpdateManyWithoutAgencyNestedInput
   }
 
   export type AgencyUncheckedUpdateWithoutUserInput = {
@@ -26009,15 +27285,15 @@ export namespace Prisma {
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
     regions?: AgencyUpdateregionsInput | string[]
-    contactPerson?: StringFieldUpdateOperationsInput | string
-    phone?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    documents?: AgencyDocumentUncheckedUpdateManyWithoutAgencyNestedInput
     labourProfiles?: LabourProfileUncheckedUpdateManyWithoutAgencyNestedInput
-    requirements?: RequirementUncheckedUpdateManyWithoutAssignedToNestedInput
+    requirements?: RequirementUncheckedUpdateManyWithoutAssignedAgencyNestedInput
+    documents?: AgencyDocumentUncheckedUpdateManyWithoutAgencyNestedInput
   }
 
   export type AdminUpsertWithoutUserInput = {
@@ -26035,7 +27311,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     department?: NullableStringFieldUpdateOperationsInput | string | null
-    canCreateUsers?: BoolFieldUpdateOperationsInput | boolean
+    permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -26044,7 +27320,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     department?: NullableStringFieldUpdateOperationsInput | string | null
-    canCreateUsers?: BoolFieldUpdateOperationsInput | boolean
+    permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -26065,6 +27341,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -26073,17 +27352,18 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUpdateOneWithoutUserNestedInput
-    agency?: AgencyUpdateOneWithoutUserNestedInput
-    admin?: AdminUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUpdateOneWithoutUserNestedInput
     createdBy?: UserUpdateOneWithoutCreatedUsersNestedInput
     auditLogs?: AuditLogUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCreatedUsersInput = {
@@ -26091,6 +27371,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -26099,17 +27382,18 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUncheckedUpdateOneWithoutUserNestedInput
-    agency?: AgencyUncheckedUpdateOneWithoutUserNestedInput
-    admin?: AdminUncheckedUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUncheckedUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUncheckedUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUncheckedUpdateOneWithoutUserNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
   export type UserUpsertWithWhereUniqueWithoutCreatedByInput = {
@@ -26136,6 +27420,9 @@ export namespace Prisma {
     name?: StringFilter<"User"> | string
     email?: StringFilter<"User"> | string
     password?: StringFilter<"User"> | string
+    phone?: StringNullableFilter<"User"> | string | null
+    altContact?: StringNullableFilter<"User"> | string | null
+    profilePicture?: StringNullableFilter<"User"> | string | null
     role?: EnumUserRoleFilter<"User"> | $Enums.UserRole
     status?: EnumAccountStatusFilter<"User"> | $Enums.AccountStatus
     resetRequired?: BoolFilter<"User"> | boolean
@@ -26144,6 +27431,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"User"> | Date | string
     deleteAt?: DateTimeNullableFilter<"User"> | Date | string | null
     deletionType?: EnumDeletionTypeNullableFilter<"User"> | $Enums.DeletionType | null
+    deletionReason?: StringNullableFilter<"User"> | string | null
     deletionRequestedBy?: StringNullableFilter<"User"> | string | null
     createdById?: StringNullableFilter<"User"> | string | null
   }
@@ -26178,9 +27466,41 @@ export namespace Prisma {
     affectedFields?: StringNullableListFilter<"AuditLog">
     ipAddress?: StringNullableFilter<"AuditLog"> | string | null
     userAgent?: StringNullableFilter<"AuditLog"> | string | null
-    performedAt?: DateTimeFilter<"AuditLog"> | Date | string
     performedById?: StringFilter<"AuditLog"> | string
+    performedAt?: DateTimeFilter<"AuditLog"> | Date | string
     createdAt?: DateTimeFilter<"AuditLog"> | Date | string
+  }
+
+  export type NotificationUpsertWithWhereUniqueWithoutRecipientInput = {
+    where: NotificationWhereUniqueInput
+    update: XOR<NotificationUpdateWithoutRecipientInput, NotificationUncheckedUpdateWithoutRecipientInput>
+    create: XOR<NotificationCreateWithoutRecipientInput, NotificationUncheckedCreateWithoutRecipientInput>
+  }
+
+  export type NotificationUpdateWithWhereUniqueWithoutRecipientInput = {
+    where: NotificationWhereUniqueInput
+    data: XOR<NotificationUpdateWithoutRecipientInput, NotificationUncheckedUpdateWithoutRecipientInput>
+  }
+
+  export type NotificationUpdateManyWithWhereWithoutRecipientInput = {
+    where: NotificationScalarWhereInput
+    data: XOR<NotificationUpdateManyMutationInput, NotificationUncheckedUpdateManyWithoutRecipientInput>
+  }
+
+  export type NotificationScalarWhereInput = {
+    AND?: NotificationScalarWhereInput | NotificationScalarWhereInput[]
+    OR?: NotificationScalarWhereInput[]
+    NOT?: NotificationScalarWhereInput | NotificationScalarWhereInput[]
+    id?: StringFilter<"Notification"> | string
+    title?: StringFilter<"Notification"> | string
+    message?: StringFilter<"Notification"> | string
+    type?: EnumNotificationTypeFilter<"Notification"> | $Enums.NotificationType
+    read?: BoolFilter<"Notification"> | boolean
+    actionUrl?: StringNullableFilter<"Notification"> | string | null
+    metadata?: JsonNullableFilter<"Notification">
+    recipientId?: StringFilter<"Notification"> | string
+    createdAt?: DateTimeFilter<"Notification"> | Date | string
+    readAt?: DateTimeNullableFilter<"Notification"> | Date | string | null
   }
 
   export type LabourStatusLogUpsertWithWhereUniqueWithoutChangedByInput = {
@@ -26204,8 +27524,9 @@ export namespace Prisma {
     OR?: LabourStatusLogScalarWhereInput[]
     NOT?: LabourStatusLogScalarWhereInput | LabourStatusLogScalarWhereInput[]
     id?: StringFilter<"LabourStatusLog"> | string
-    status?: EnumLabourStatusFilter<"LabourStatusLog"> | $Enums.LabourStatus
+    status?: EnumLabourProfileStatusFilter<"LabourStatusLog"> | $Enums.LabourProfileStatus
     comments?: StringNullableFilter<"LabourStatusLog"> | string | null
+    metadata?: JsonNullableFilter<"LabourStatusLog">
     labourProfileId?: StringFilter<"LabourStatusLog"> | string
     changedById?: StringFilter<"LabourStatusLog"> | string
     createdAt?: DateTimeFilter<"LabourStatusLog"> | Date | string
@@ -26234,8 +27555,11 @@ export namespace Prisma {
     id?: StringFilter<"ClientDocument"> | string
     type?: EnumDocumentTypeFilter<"ClientDocument"> | $Enums.DocumentType
     url?: StringFilter<"ClientDocument"> | string
+    name?: StringNullableFilter<"ClientDocument"> | string | null
+    description?: StringNullableFilter<"ClientDocument"> | string | null
     verified?: BoolFilter<"ClientDocument"> | boolean
     comments?: StringNullableFilter<"ClientDocument"> | string | null
+    expiryDate?: DateTimeNullableFilter<"ClientDocument"> | Date | string | null
     clientId?: StringFilter<"ClientDocument"> | string
     verifiedById?: StringNullableFilter<"ClientDocument"> | string | null
     createdAt?: DateTimeFilter<"ClientDocument"> | Date | string
@@ -26265,8 +27589,11 @@ export namespace Prisma {
     id?: StringFilter<"AgencyDocument"> | string
     type?: EnumDocumentTypeFilter<"AgencyDocument"> | $Enums.DocumentType
     url?: StringFilter<"AgencyDocument"> | string
+    name?: StringNullableFilter<"AgencyDocument"> | string | null
+    description?: StringNullableFilter<"AgencyDocument"> | string | null
     verified?: BoolFilter<"AgencyDocument"> | boolean
     comments?: StringNullableFilter<"AgencyDocument"> | string | null
+    expiryDate?: DateTimeNullableFilter<"AgencyDocument"> | Date | string | null
     agencyId?: StringFilter<"AgencyDocument"> | string
     verifiedById?: StringNullableFilter<"AgencyDocument"> | string | null
     createdAt?: DateTimeFilter<"AgencyDocument"> | Date | string
@@ -26296,49 +27623,22 @@ export namespace Prisma {
     id?: StringFilter<"RequirementDocument"> | string
     type?: EnumDocumentTypeFilter<"RequirementDocument"> | $Enums.DocumentType
     url?: StringFilter<"RequirementDocument"> | string
+    name?: StringNullableFilter<"RequirementDocument"> | string | null
     description?: StringNullableFilter<"RequirementDocument"> | string | null
     requirementId?: StringFilter<"RequirementDocument"> | string
     uploadedById?: StringFilter<"RequirementDocument"> | string
     createdAt?: DateTimeFilter<"RequirementDocument"> | Date | string
+    updatedAt?: DateTimeFilter<"RequirementDocument"> | Date | string
   }
 
-  export type NotificationUpsertWithWhereUniqueWithoutRecipientInput = {
-    where: NotificationWhereUniqueInput
-    update: XOR<NotificationUpdateWithoutRecipientInput, NotificationUncheckedUpdateWithoutRecipientInput>
-    create: XOR<NotificationCreateWithoutRecipientInput, NotificationUncheckedCreateWithoutRecipientInput>
-  }
-
-  export type NotificationUpdateWithWhereUniqueWithoutRecipientInput = {
-    where: NotificationWhereUniqueInput
-    data: XOR<NotificationUpdateWithoutRecipientInput, NotificationUncheckedUpdateWithoutRecipientInput>
-  }
-
-  export type NotificationUpdateManyWithWhereWithoutRecipientInput = {
-    where: NotificationScalarWhereInput
-    data: XOR<NotificationUpdateManyMutationInput, NotificationUncheckedUpdateManyWithoutRecipientInput>
-  }
-
-  export type NotificationScalarWhereInput = {
-    AND?: NotificationScalarWhereInput | NotificationScalarWhereInput[]
-    OR?: NotificationScalarWhereInput[]
-    NOT?: NotificationScalarWhereInput | NotificationScalarWhereInput[]
-    id?: StringFilter<"Notification"> | string
-    title?: StringFilter<"Notification"> | string
-    message?: StringFilter<"Notification"> | string
-    type?: StringFilter<"Notification"> | string
-    read?: BoolFilter<"Notification"> | boolean
-    actionUrl?: StringNullableFilter<"Notification"> | string | null
-    metadata?: JsonNullableFilter<"Notification">
-    recipientId?: StringFilter<"Notification"> | string
-    createdAt?: DateTimeFilter<"Notification"> | Date | string
-    readAt?: DateTimeNullableFilter<"Notification"> | Date | string | null
-  }
-
-  export type UserCreateWithoutClientInput = {
+  export type UserCreateWithoutClientProfileInput = {
     id?: string
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -26347,24 +27647,28 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
-    agency?: AgencyCreateNestedOneWithoutUserInput
-    admin?: AdminCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyCreateNestedOneWithoutUserInput
+    adminProfile?: AdminCreateNestedOneWithoutUserInput
     createdBy?: UserCreateNestedOneWithoutCreatedUsersInput
     createdUsers?: UserCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
   }
 
-  export type UserUncheckedCreateWithoutClientInput = {
+  export type UserUncheckedCreateWithoutClientProfileInput = {
     id?: string
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -26373,22 +27677,23 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
     createdById?: string | null
-    agency?: AgencyUncheckedCreateNestedOneWithoutUserInput
-    admin?: AdminUncheckedCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyUncheckedCreateNestedOneWithoutUserInput
+    adminProfile?: AdminUncheckedCreateNestedOneWithoutUserInput
     createdUsers?: UserUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
-  export type UserCreateOrConnectWithoutClientInput = {
+  export type UserCreateOrConnectWithoutClientProfileInput = {
     where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutClientInput, UserUncheckedCreateWithoutClientInput>
+    create: XOR<UserCreateWithoutClientProfileInput, UserUncheckedCreateWithoutClientProfileInput>
   }
 
   export type RequirementCreateWithoutClientInput = {
@@ -26396,17 +27701,19 @@ export namespace Prisma {
     projectLocation?: string | null
     startDate?: Date | string | null
     contractDuration?: $Enums.ContractDuration | null
-    previousExperience?: $Enums.PreviousExperience | null
-    ticketDetails?: $Enums.TicketDetails | null
-    totalExperienceYears?: number | null
-    preferredAge?: number | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
+    minExperience?: $Enums.ExperienceLevel | null
+    maxAge?: number | null
+    ticketType?: $Enums.TicketType | null
+    ticketProvided?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    submittedAt?: Date | string | null
+    reviewedAt?: Date | string | null
+    assignedAgency?: AgencyCreateNestedOneWithoutRequirementsInput
     jobRoles?: JobRoleCreateNestedManyWithoutRequirementInput
-    assignedTo?: AgencyCreateNestedOneWithoutRequirementsInput
     labourProfiles?: LabourProfileCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureCreateNestedManyWithoutRequirementInput
     documents?: RequirementDocumentCreateNestedManyWithoutRequirementInput
@@ -26417,16 +27724,18 @@ export namespace Prisma {
     projectLocation?: string | null
     startDate?: Date | string | null
     contractDuration?: $Enums.ContractDuration | null
-    previousExperience?: $Enums.PreviousExperience | null
-    ticketDetails?: $Enums.TicketDetails | null
-    totalExperienceYears?: number | null
-    preferredAge?: number | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
-    assignedToId?: string | null
+    minExperience?: $Enums.ExperienceLevel | null
+    maxAge?: number | null
+    ticketType?: $Enums.TicketType | null
+    ticketProvided?: boolean
+    assignedAgencyId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    submittedAt?: Date | string | null
+    reviewedAt?: Date | string | null
     jobRoles?: JobRoleUncheckedCreateNestedManyWithoutRequirementInput
     labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureUncheckedCreateNestedManyWithoutRequirementInput
@@ -26447,19 +27756,25 @@ export namespace Prisma {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
+    description?: string | null
     verified?: boolean
     comments?: string | null
+    expiryDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    verifiedBy?: UserCreateNestedOneWithoutClientDocumentInput
+    verifiedBy?: UserCreateNestedOneWithoutClientDocumentsInput
   }
 
   export type ClientDocumentUncheckedCreateWithoutClientInput = {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
+    description?: string | null
     verified?: boolean
     comments?: string | null
+    expiryDate?: Date | string | null
     verifiedById?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -26475,22 +27790,25 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type UserUpsertWithoutClientInput = {
-    update: XOR<UserUpdateWithoutClientInput, UserUncheckedUpdateWithoutClientInput>
-    create: XOR<UserCreateWithoutClientInput, UserUncheckedCreateWithoutClientInput>
+  export type UserUpsertWithoutClientProfileInput = {
+    update: XOR<UserUpdateWithoutClientProfileInput, UserUncheckedUpdateWithoutClientProfileInput>
+    create: XOR<UserCreateWithoutClientProfileInput, UserUncheckedCreateWithoutClientProfileInput>
     where?: UserWhereInput
   }
 
-  export type UserUpdateToOneWithWhereWithoutClientInput = {
+  export type UserUpdateToOneWithWhereWithoutClientProfileInput = {
     where?: UserWhereInput
-    data: XOR<UserUpdateWithoutClientInput, UserUncheckedUpdateWithoutClientInput>
+    data: XOR<UserUpdateWithoutClientProfileInput, UserUncheckedUpdateWithoutClientProfileInput>
   }
 
-  export type UserUpdateWithoutClientInput = {
+  export type UserUpdateWithoutClientProfileInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -26499,24 +27817,28 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
-    agency?: AgencyUpdateOneWithoutUserNestedInput
-    admin?: AdminUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUpdateOneWithoutUserNestedInput
     createdBy?: UserUpdateOneWithoutCreatedUsersNestedInput
     createdUsers?: UserUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
   }
 
-  export type UserUncheckedUpdateWithoutClientInput = {
+  export type UserUncheckedUpdateWithoutClientProfileInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -26525,17 +27847,18 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
-    agency?: AgencyUncheckedUpdateOneWithoutUserNestedInput
-    admin?: AdminUncheckedUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUncheckedUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUncheckedUpdateOneWithoutUserNestedInput
     createdUsers?: UserUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
   export type RequirementUpsertWithWhereUniqueWithoutClientInput = {
@@ -26562,17 +27885,19 @@ export namespace Prisma {
     projectLocation?: StringNullableFilter<"Requirement"> | string | null
     startDate?: DateTimeNullableFilter<"Requirement"> | Date | string | null
     contractDuration?: EnumContractDurationNullableFilter<"Requirement"> | $Enums.ContractDuration | null
-    previousExperience?: EnumPreviousExperienceNullableFilter<"Requirement"> | $Enums.PreviousExperience | null
-    ticketDetails?: EnumTicketDetailsNullableFilter<"Requirement"> | $Enums.TicketDetails | null
-    totalExperienceYears?: IntNullableFilter<"Requirement"> | number | null
-    preferredAge?: IntNullableFilter<"Requirement"> | number | null
     specialNotes?: StringNullableFilter<"Requirement"> | string | null
     status?: EnumRequirementStatusFilter<"Requirement"> | $Enums.RequirementStatus
     languages?: StringNullableListFilter<"Requirement">
+    minExperience?: EnumExperienceLevelNullableFilter<"Requirement"> | $Enums.ExperienceLevel | null
+    maxAge?: IntNullableFilter<"Requirement"> | number | null
+    ticketType?: EnumTicketTypeNullableFilter<"Requirement"> | $Enums.TicketType | null
+    ticketProvided?: BoolFilter<"Requirement"> | boolean
     clientId?: StringFilter<"Requirement"> | string
-    assignedToId?: StringNullableFilter<"Requirement"> | string | null
+    assignedAgencyId?: StringNullableFilter<"Requirement"> | string | null
     createdAt?: DateTimeFilter<"Requirement"> | Date | string
     updatedAt?: DateTimeFilter<"Requirement"> | Date | string
+    submittedAt?: DateTimeNullableFilter<"Requirement"> | Date | string | null
+    reviewedAt?: DateTimeNullableFilter<"Requirement"> | Date | string | null
   }
 
   export type ClientDocumentUpsertWithWhereUniqueWithoutClientInput = {
@@ -26591,11 +27916,14 @@ export namespace Prisma {
     data: XOR<ClientDocumentUpdateManyMutationInput, ClientDocumentUncheckedUpdateManyWithoutClientInput>
   }
 
-  export type UserCreateWithoutAgencyInput = {
+  export type UserCreateWithoutAgencyProfileInput = {
     id?: string
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -26604,24 +27932,28 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
-    client?: ClientCreateNestedOneWithoutUserInput
-    admin?: AdminCreateNestedOneWithoutUserInput
+    clientProfile?: ClientCreateNestedOneWithoutUserInput
+    adminProfile?: AdminCreateNestedOneWithoutUserInput
     createdBy?: UserCreateNestedOneWithoutCreatedUsersInput
     createdUsers?: UserCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
   }
 
-  export type UserUncheckedCreateWithoutAgencyInput = {
+  export type UserUncheckedCreateWithoutAgencyProfileInput = {
     id?: string
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -26630,70 +27962,58 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
     createdById?: string | null
-    client?: ClientUncheckedCreateNestedOneWithoutUserInput
-    admin?: AdminUncheckedCreateNestedOneWithoutUserInput
+    clientProfile?: ClientUncheckedCreateNestedOneWithoutUserInput
+    adminProfile?: AdminUncheckedCreateNestedOneWithoutUserInput
     createdUsers?: UserUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
-  export type UserCreateOrConnectWithoutAgencyInput = {
+  export type UserCreateOrConnectWithoutAgencyProfileInput = {
     where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutAgencyInput, UserUncheckedCreateWithoutAgencyInput>
-  }
-
-  export type AgencyDocumentCreateWithoutAgencyInput = {
-    id?: string
-    type: $Enums.DocumentType
-    url: string
-    verified?: boolean
-    comments?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    verifiedBy?: UserCreateNestedOneWithoutAgencyDocumentInput
-  }
-
-  export type AgencyDocumentUncheckedCreateWithoutAgencyInput = {
-    id?: string
-    type: $Enums.DocumentType
-    url: string
-    verified?: boolean
-    comments?: string | null
-    verifiedById?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type AgencyDocumentCreateOrConnectWithoutAgencyInput = {
-    where: AgencyDocumentWhereUniqueInput
-    create: XOR<AgencyDocumentCreateWithoutAgencyInput, AgencyDocumentUncheckedCreateWithoutAgencyInput>
-  }
-
-  export type AgencyDocumentCreateManyAgencyInputEnvelope = {
-    data: AgencyDocumentCreateManyAgencyInput | AgencyDocumentCreateManyAgencyInput[]
-    skipDuplicates?: boolean
+    create: XOR<UserCreateWithoutAgencyProfileInput, UserUncheckedCreateWithoutAgencyProfileInput>
   }
 
   export type LabourProfileCreateWithoutAgencyInput = {
     id?: string
     name: string
     age: number
-    gender: string
+    gender: $Enums.Gender
     nationality: string
+    maritalStatus?: string | null
     skills?: LabourProfileCreateskillsInput | string[]
     experienceYears: number
     education?: string | null
-    language?: LabourProfileCreatelanguageInput | string[]
-    status?: $Enums.LabourStatus
+    currentPosition?: string | null
+    currentCompany?: string | null
+    languages?: LabourProfileCreatelanguagesInput | string[]
+    englishProficiency?: string | null
+    email?: string | null
+    phone: string
+    address?: string | null
+    city?: string | null
+    country?: string | null
     cvUrl: string
-    passportCopy?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    medicalStatus?: string | null
+    medicalExpiry?: Date | string | null
+    photo?: string | null
     otherDocs?: LabourProfileCreateotherDocsInput | string[]
+    status?: $Enums.LabourProfileStatus
+    statusReason?: string | null
+    deploymentDate?: Date | string | null
+    contractStartDate?: Date | string | null
+    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     requirement: RequirementCreateNestedOneWithoutLabourProfilesInput
@@ -26705,17 +28025,36 @@ export namespace Prisma {
     id?: string
     name: string
     age: number
-    gender: string
+    gender: $Enums.Gender
     nationality: string
+    maritalStatus?: string | null
     skills?: LabourProfileCreateskillsInput | string[]
     experienceYears: number
     education?: string | null
-    language?: LabourProfileCreatelanguageInput | string[]
-    status?: $Enums.LabourStatus
+    currentPosition?: string | null
+    currentCompany?: string | null
+    languages?: LabourProfileCreatelanguagesInput | string[]
+    englishProficiency?: string | null
+    email?: string | null
+    phone: string
+    address?: string | null
+    city?: string | null
+    country?: string | null
     cvUrl: string
-    passportCopy?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    medicalStatus?: string | null
+    medicalExpiry?: Date | string | null
+    photo?: string | null
     otherDocs?: LabourProfileCreateotherDocsInput | string[]
+    status?: $Enums.LabourProfileStatus
+    statusReason?: string | null
     requirementId: string
+    deploymentDate?: Date | string | null
+    contractStartDate?: Date | string | null
+    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutLabourProfileInput
@@ -26732,135 +28071,169 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type RequirementCreateWithoutAssignedToInput = {
+  export type RequirementCreateWithoutAssignedAgencyInput = {
     id?: string
     projectLocation?: string | null
     startDate?: Date | string | null
     contractDuration?: $Enums.ContractDuration | null
-    previousExperience?: $Enums.PreviousExperience | null
-    ticketDetails?: $Enums.TicketDetails | null
-    totalExperienceYears?: number | null
-    preferredAge?: number | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
+    minExperience?: $Enums.ExperienceLevel | null
+    maxAge?: number | null
+    ticketType?: $Enums.TicketType | null
+    ticketProvided?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    jobRoles?: JobRoleCreateNestedManyWithoutRequirementInput
+    submittedAt?: Date | string | null
+    reviewedAt?: Date | string | null
     client: ClientCreateNestedOneWithoutRequirementsInput
+    jobRoles?: JobRoleCreateNestedManyWithoutRequirementInput
     labourProfiles?: LabourProfileCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureCreateNestedManyWithoutRequirementInput
     documents?: RequirementDocumentCreateNestedManyWithoutRequirementInput
   }
 
-  export type RequirementUncheckedCreateWithoutAssignedToInput = {
+  export type RequirementUncheckedCreateWithoutAssignedAgencyInput = {
     id?: string
     projectLocation?: string | null
     startDate?: Date | string | null
     contractDuration?: $Enums.ContractDuration | null
-    previousExperience?: $Enums.PreviousExperience | null
-    ticketDetails?: $Enums.TicketDetails | null
-    totalExperienceYears?: number | null
-    preferredAge?: number | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
+    minExperience?: $Enums.ExperienceLevel | null
+    maxAge?: number | null
+    ticketType?: $Enums.TicketType | null
+    ticketProvided?: boolean
     clientId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    submittedAt?: Date | string | null
+    reviewedAt?: Date | string | null
     jobRoles?: JobRoleUncheckedCreateNestedManyWithoutRequirementInput
     labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureUncheckedCreateNestedManyWithoutRequirementInput
     documents?: RequirementDocumentUncheckedCreateNestedManyWithoutRequirementInput
   }
 
-  export type RequirementCreateOrConnectWithoutAssignedToInput = {
+  export type RequirementCreateOrConnectWithoutAssignedAgencyInput = {
     where: RequirementWhereUniqueInput
-    create: XOR<RequirementCreateWithoutAssignedToInput, RequirementUncheckedCreateWithoutAssignedToInput>
+    create: XOR<RequirementCreateWithoutAssignedAgencyInput, RequirementUncheckedCreateWithoutAssignedAgencyInput>
   }
 
-  export type RequirementCreateManyAssignedToInputEnvelope = {
-    data: RequirementCreateManyAssignedToInput | RequirementCreateManyAssignedToInput[]
+  export type RequirementCreateManyAssignedAgencyInputEnvelope = {
+    data: RequirementCreateManyAssignedAgencyInput | RequirementCreateManyAssignedAgencyInput[]
     skipDuplicates?: boolean
   }
 
-  export type UserUpsertWithoutAgencyInput = {
-    update: XOR<UserUpdateWithoutAgencyInput, UserUncheckedUpdateWithoutAgencyInput>
-    create: XOR<UserCreateWithoutAgencyInput, UserUncheckedCreateWithoutAgencyInput>
-    where?: UserWhereInput
+  export type AgencyDocumentCreateWithoutAgencyInput = {
+    id?: string
+    type: $Enums.DocumentType
+    url: string
+    name?: string | null
+    description?: string | null
+    verified?: boolean
+    comments?: string | null
+    expiryDate?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    verifiedBy?: UserCreateNestedOneWithoutAgencyDocumentsInput
   }
 
-  export type UserUpdateToOneWithWhereWithoutAgencyInput = {
-    where?: UserWhereInput
-    data: XOR<UserUpdateWithoutAgencyInput, UserUncheckedUpdateWithoutAgencyInput>
+  export type AgencyDocumentUncheckedCreateWithoutAgencyInput = {
+    id?: string
+    type: $Enums.DocumentType
+    url: string
+    name?: string | null
+    description?: string | null
+    verified?: boolean
+    comments?: string | null
+    expiryDate?: Date | string | null
+    verifiedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
-  export type UserUpdateWithoutAgencyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    password?: StringFieldUpdateOperationsInput | string
-    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-    status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
-    resetRequired?: BoolFieldUpdateOperationsInput | boolean
-    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
-    deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUpdateOneWithoutUserNestedInput
-    admin?: AdminUpdateOneWithoutUserNestedInput
-    createdBy?: UserUpdateOneWithoutCreatedUsersNestedInput
-    createdUsers?: UserUpdateManyWithoutCreatedByNestedInput
-    auditLogs?: AuditLogUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUpdateManyWithoutRecipientNestedInput
-  }
-
-  export type UserUncheckedUpdateWithoutAgencyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    password?: StringFieldUpdateOperationsInput | string
-    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-    status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
-    resetRequired?: BoolFieldUpdateOperationsInput | boolean
-    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
-    deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
-    createdById?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUncheckedUpdateOneWithoutUserNestedInput
-    admin?: AdminUncheckedUpdateOneWithoutUserNestedInput
-    createdUsers?: UserUncheckedUpdateManyWithoutCreatedByNestedInput
-    auditLogs?: AuditLogUncheckedUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
-  }
-
-  export type AgencyDocumentUpsertWithWhereUniqueWithoutAgencyInput = {
+  export type AgencyDocumentCreateOrConnectWithoutAgencyInput = {
     where: AgencyDocumentWhereUniqueInput
-    update: XOR<AgencyDocumentUpdateWithoutAgencyInput, AgencyDocumentUncheckedUpdateWithoutAgencyInput>
     create: XOR<AgencyDocumentCreateWithoutAgencyInput, AgencyDocumentUncheckedCreateWithoutAgencyInput>
   }
 
-  export type AgencyDocumentUpdateWithWhereUniqueWithoutAgencyInput = {
-    where: AgencyDocumentWhereUniqueInput
-    data: XOR<AgencyDocumentUpdateWithoutAgencyInput, AgencyDocumentUncheckedUpdateWithoutAgencyInput>
+  export type AgencyDocumentCreateManyAgencyInputEnvelope = {
+    data: AgencyDocumentCreateManyAgencyInput | AgencyDocumentCreateManyAgencyInput[]
+    skipDuplicates?: boolean
   }
 
-  export type AgencyDocumentUpdateManyWithWhereWithoutAgencyInput = {
-    where: AgencyDocumentScalarWhereInput
-    data: XOR<AgencyDocumentUpdateManyMutationInput, AgencyDocumentUncheckedUpdateManyWithoutAgencyInput>
+  export type UserUpsertWithoutAgencyProfileInput = {
+    update: XOR<UserUpdateWithoutAgencyProfileInput, UserUncheckedUpdateWithoutAgencyProfileInput>
+    create: XOR<UserCreateWithoutAgencyProfileInput, UserUncheckedCreateWithoutAgencyProfileInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutAgencyProfileInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutAgencyProfileInput, UserUncheckedUpdateWithoutAgencyProfileInput>
+  }
+
+  export type UserUpdateWithoutAgencyProfileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
+    resetRequired?: BoolFieldUpdateOperationsInput | boolean
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    clientProfile?: ClientUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUpdateOneWithoutUserNestedInput
+    createdBy?: UserUpdateOneWithoutCreatedUsersNestedInput
+    createdUsers?: UserUpdateManyWithoutCreatedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutPerformedByNestedInput
+    notifications?: NotificationUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutAgencyProfileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
+    resetRequired?: BoolFieldUpdateOperationsInput | boolean
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    clientProfile?: ClientUncheckedUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUncheckedUpdateOneWithoutUserNestedInput
+    createdUsers?: UserUncheckedUpdateManyWithoutCreatedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutPerformedByNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
   export type LabourProfileUpsertWithWhereUniqueWithoutAgencyInput = {
@@ -26886,43 +28259,81 @@ export namespace Prisma {
     id?: StringFilter<"LabourProfile"> | string
     name?: StringFilter<"LabourProfile"> | string
     age?: IntFilter<"LabourProfile"> | number
-    gender?: StringFilter<"LabourProfile"> | string
+    gender?: EnumGenderFilter<"LabourProfile"> | $Enums.Gender
     nationality?: StringFilter<"LabourProfile"> | string
+    maritalStatus?: StringNullableFilter<"LabourProfile"> | string | null
     skills?: StringNullableListFilter<"LabourProfile">
     experienceYears?: IntFilter<"LabourProfile"> | number
     education?: StringNullableFilter<"LabourProfile"> | string | null
-    language?: StringNullableListFilter<"LabourProfile">
-    status?: EnumLabourStatusFilter<"LabourProfile"> | $Enums.LabourStatus
+    currentPosition?: StringNullableFilter<"LabourProfile"> | string | null
+    currentCompany?: StringNullableFilter<"LabourProfile"> | string | null
+    languages?: StringNullableListFilter<"LabourProfile">
+    englishProficiency?: StringNullableFilter<"LabourProfile"> | string | null
+    email?: StringNullableFilter<"LabourProfile"> | string | null
+    phone?: StringFilter<"LabourProfile"> | string
+    address?: StringNullableFilter<"LabourProfile"> | string | null
+    city?: StringNullableFilter<"LabourProfile"> | string | null
+    country?: StringNullableFilter<"LabourProfile"> | string | null
     cvUrl?: StringFilter<"LabourProfile"> | string
-    passportCopy?: StringNullableFilter<"LabourProfile"> | string | null
+    passportNumber?: StringNullableFilter<"LabourProfile"> | string | null
+    passportExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    visaType?: StringNullableFilter<"LabourProfile"> | string | null
+    visaExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    medicalStatus?: StringNullableFilter<"LabourProfile"> | string | null
+    medicalExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    photo?: StringNullableFilter<"LabourProfile"> | string | null
     otherDocs?: StringNullableListFilter<"LabourProfile">
+    status?: EnumLabourProfileStatusFilter<"LabourProfile"> | $Enums.LabourProfileStatus
+    statusReason?: StringNullableFilter<"LabourProfile"> | string | null
     requirementId?: StringFilter<"LabourProfile"> | string
     agencyId?: StringFilter<"LabourProfile"> | string
+    deploymentDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    contractStartDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    contractEndDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
     createdAt?: DateTimeFilter<"LabourProfile"> | Date | string
     updatedAt?: DateTimeFilter<"LabourProfile"> | Date | string
   }
 
-  export type RequirementUpsertWithWhereUniqueWithoutAssignedToInput = {
+  export type RequirementUpsertWithWhereUniqueWithoutAssignedAgencyInput = {
     where: RequirementWhereUniqueInput
-    update: XOR<RequirementUpdateWithoutAssignedToInput, RequirementUncheckedUpdateWithoutAssignedToInput>
-    create: XOR<RequirementCreateWithoutAssignedToInput, RequirementUncheckedCreateWithoutAssignedToInput>
+    update: XOR<RequirementUpdateWithoutAssignedAgencyInput, RequirementUncheckedUpdateWithoutAssignedAgencyInput>
+    create: XOR<RequirementCreateWithoutAssignedAgencyInput, RequirementUncheckedCreateWithoutAssignedAgencyInput>
   }
 
-  export type RequirementUpdateWithWhereUniqueWithoutAssignedToInput = {
+  export type RequirementUpdateWithWhereUniqueWithoutAssignedAgencyInput = {
     where: RequirementWhereUniqueInput
-    data: XOR<RequirementUpdateWithoutAssignedToInput, RequirementUncheckedUpdateWithoutAssignedToInput>
+    data: XOR<RequirementUpdateWithoutAssignedAgencyInput, RequirementUncheckedUpdateWithoutAssignedAgencyInput>
   }
 
-  export type RequirementUpdateManyWithWhereWithoutAssignedToInput = {
+  export type RequirementUpdateManyWithWhereWithoutAssignedAgencyInput = {
     where: RequirementScalarWhereInput
-    data: XOR<RequirementUpdateManyMutationInput, RequirementUncheckedUpdateManyWithoutAssignedToInput>
+    data: XOR<RequirementUpdateManyMutationInput, RequirementUncheckedUpdateManyWithoutAssignedAgencyInput>
   }
 
-  export type UserCreateWithoutAdminInput = {
+  export type AgencyDocumentUpsertWithWhereUniqueWithoutAgencyInput = {
+    where: AgencyDocumentWhereUniqueInput
+    update: XOR<AgencyDocumentUpdateWithoutAgencyInput, AgencyDocumentUncheckedUpdateWithoutAgencyInput>
+    create: XOR<AgencyDocumentCreateWithoutAgencyInput, AgencyDocumentUncheckedCreateWithoutAgencyInput>
+  }
+
+  export type AgencyDocumentUpdateWithWhereUniqueWithoutAgencyInput = {
+    where: AgencyDocumentWhereUniqueInput
+    data: XOR<AgencyDocumentUpdateWithoutAgencyInput, AgencyDocumentUncheckedUpdateWithoutAgencyInput>
+  }
+
+  export type AgencyDocumentUpdateManyWithWhereWithoutAgencyInput = {
+    where: AgencyDocumentScalarWhereInput
+    data: XOR<AgencyDocumentUpdateManyMutationInput, AgencyDocumentUncheckedUpdateManyWithoutAgencyInput>
+  }
+
+  export type UserCreateWithoutAdminProfileInput = {
     id?: string
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -26931,24 +28342,28 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
-    client?: ClientCreateNestedOneWithoutUserInput
-    agency?: AgencyCreateNestedOneWithoutUserInput
+    clientProfile?: ClientCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyCreateNestedOneWithoutUserInput
     createdBy?: UserCreateNestedOneWithoutCreatedUsersInput
     createdUsers?: UserCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
   }
 
-  export type UserUncheckedCreateWithoutAdminInput = {
+  export type UserUncheckedCreateWithoutAdminProfileInput = {
     id?: string
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -26957,40 +28372,44 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
     createdById?: string | null
-    client?: ClientUncheckedCreateNestedOneWithoutUserInput
-    agency?: AgencyUncheckedCreateNestedOneWithoutUserInput
+    clientProfile?: ClientUncheckedCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyUncheckedCreateNestedOneWithoutUserInput
     createdUsers?: UserUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
-  export type UserCreateOrConnectWithoutAdminInput = {
+  export type UserCreateOrConnectWithoutAdminProfileInput = {
     where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutAdminInput, UserUncheckedCreateWithoutAdminInput>
+    create: XOR<UserCreateWithoutAdminProfileInput, UserUncheckedCreateWithoutAdminProfileInput>
   }
 
-  export type UserUpsertWithoutAdminInput = {
-    update: XOR<UserUpdateWithoutAdminInput, UserUncheckedUpdateWithoutAdminInput>
-    create: XOR<UserCreateWithoutAdminInput, UserUncheckedCreateWithoutAdminInput>
+  export type UserUpsertWithoutAdminProfileInput = {
+    update: XOR<UserUpdateWithoutAdminProfileInput, UserUncheckedUpdateWithoutAdminProfileInput>
+    create: XOR<UserCreateWithoutAdminProfileInput, UserUncheckedCreateWithoutAdminProfileInput>
     where?: UserWhereInput
   }
 
-  export type UserUpdateToOneWithWhereWithoutAdminInput = {
+  export type UserUpdateToOneWithWhereWithoutAdminProfileInput = {
     where?: UserWhereInput
-    data: XOR<UserUpdateWithoutAdminInput, UserUncheckedUpdateWithoutAdminInput>
+    data: XOR<UserUpdateWithoutAdminProfileInput, UserUncheckedUpdateWithoutAdminProfileInput>
   }
 
-  export type UserUpdateWithoutAdminInput = {
+  export type UserUpdateWithoutAdminProfileInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -26999,24 +28418,28 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUpdateOneWithoutUserNestedInput
-    agency?: AgencyUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUpdateOneWithoutUserNestedInput
     createdBy?: UserUpdateOneWithoutCreatedUsersNestedInput
     createdUsers?: UserUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
   }
 
-  export type UserUncheckedUpdateWithoutAdminInput = {
+  export type UserUncheckedUpdateWithoutAdminProfileInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -27025,166 +28448,35 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUncheckedUpdateOneWithoutUserNestedInput
-    agency?: AgencyUncheckedUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUncheckedUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUncheckedUpdateOneWithoutUserNestedInput
     createdUsers?: UserUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
-  }
-
-  export type RequirementCreateWithoutJobRolesInput = {
-    id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
-    previousExperience?: $Enums.PreviousExperience | null
-    ticketDetails?: $Enums.TicketDetails | null
-    totalExperienceYears?: number | null
-    preferredAge?: number | null
-    specialNotes?: string | null
-    status?: $Enums.RequirementStatus
-    languages?: RequirementCreatelanguagesInput | string[]
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    client: ClientCreateNestedOneWithoutRequirementsInput
-    assignedTo?: AgencyCreateNestedOneWithoutRequirementsInput
-    labourProfiles?: LabourProfileCreateNestedManyWithoutRequirementInput
-    procedures?: ProcedureCreateNestedManyWithoutRequirementInput
-    documents?: RequirementDocumentCreateNestedManyWithoutRequirementInput
-  }
-
-  export type RequirementUncheckedCreateWithoutJobRolesInput = {
-    id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
-    previousExperience?: $Enums.PreviousExperience | null
-    ticketDetails?: $Enums.TicketDetails | null
-    totalExperienceYears?: number | null
-    preferredAge?: number | null
-    specialNotes?: string | null
-    status?: $Enums.RequirementStatus
-    languages?: RequirementCreatelanguagesInput | string[]
-    clientId: string
-    assignedToId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutRequirementInput
-    procedures?: ProcedureUncheckedCreateNestedManyWithoutRequirementInput
-    documents?: RequirementDocumentUncheckedCreateNestedManyWithoutRequirementInput
-  }
-
-  export type RequirementCreateOrConnectWithoutJobRolesInput = {
-    where: RequirementWhereUniqueInput
-    create: XOR<RequirementCreateWithoutJobRolesInput, RequirementUncheckedCreateWithoutJobRolesInput>
-  }
-
-  export type RequirementUpsertWithoutJobRolesInput = {
-    update: XOR<RequirementUpdateWithoutJobRolesInput, RequirementUncheckedUpdateWithoutJobRolesInput>
-    create: XOR<RequirementCreateWithoutJobRolesInput, RequirementUncheckedCreateWithoutJobRolesInput>
-    where?: RequirementWhereInput
-  }
-
-  export type RequirementUpdateToOneWithWhereWithoutJobRolesInput = {
-    where?: RequirementWhereInput
-    data: XOR<RequirementUpdateWithoutJobRolesInput, RequirementUncheckedUpdateWithoutJobRolesInput>
-  }
-
-  export type RequirementUpdateWithoutJobRolesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
-    specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
-    languages?: RequirementUpdatelanguagesInput | string[]
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    client?: ClientUpdateOneRequiredWithoutRequirementsNestedInput
-    assignedTo?: AgencyUpdateOneWithoutRequirementsNestedInput
-    labourProfiles?: LabourProfileUpdateManyWithoutRequirementNestedInput
-    procedures?: ProcedureUpdateManyWithoutRequirementNestedInput
-    documents?: RequirementDocumentUpdateManyWithoutRequirementNestedInput
-  }
-
-  export type RequirementUncheckedUpdateWithoutJobRolesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
-    specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
-    languages?: RequirementUpdatelanguagesInput | string[]
-    clientId?: StringFieldUpdateOperationsInput | string
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    labourProfiles?: LabourProfileUncheckedUpdateManyWithoutRequirementNestedInput
-    procedures?: ProcedureUncheckedUpdateManyWithoutRequirementNestedInput
-    documents?: RequirementDocumentUncheckedUpdateManyWithoutRequirementNestedInput
-  }
-
-  export type JobRoleCreateWithoutRequirementInput = {
-    id?: string
-    title: string
-    quantity: number
-    nationality: string
-    salary: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type JobRoleUncheckedCreateWithoutRequirementInput = {
-    id?: string
-    title: string
-    quantity: number
-    nationality: string
-    salary: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type JobRoleCreateOrConnectWithoutRequirementInput = {
-    where: JobRoleWhereUniqueInput
-    create: XOR<JobRoleCreateWithoutRequirementInput, JobRoleUncheckedCreateWithoutRequirementInput>
-  }
-
-  export type JobRoleCreateManyRequirementInputEnvelope = {
-    data: JobRoleCreateManyRequirementInput | JobRoleCreateManyRequirementInput[]
-    skipDuplicates?: boolean
+    notifications?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
   export type ClientCreateWithoutRequirementsInput = {
     id?: string
     companyName: string
-    contactPerson?: string | null
     registrationNo?: string | null
-    companySector?: $Enums.CompanySector | null
-    companySize?: $Enums.CompanySize | null
+    companySector: $Enums.CompanySector
+    companySize: $Enums.CompanySize
     website?: string | null
-    designation?: string | null
-    phone?: string | null
     address: string
-    altContact?: string | null
-    businessLicense?: string | null
-    image?: string | null
+    city: string
+    country: string
+    postalCode?: string | null
+    designation: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutClientInput
+    user: UserCreateNestedOneWithoutClientProfileInput
     documents?: ClientDocumentCreateNestedManyWithoutClientInput
   }
 
@@ -27192,17 +28484,15 @@ export namespace Prisma {
     id?: string
     userId: string
     companyName: string
-    contactPerson?: string | null
     registrationNo?: string | null
-    companySector?: $Enums.CompanySector | null
-    companySize?: $Enums.CompanySize | null
+    companySector: $Enums.CompanySector
+    companySize: $Enums.CompanySize
     website?: string | null
-    designation?: string | null
-    phone?: string | null
     address: string
-    altContact?: string | null
-    businessLicense?: string | null
-    image?: string | null
+    city: string
+    country: string
+    postalCode?: string | null
+    designation: string
     createdAt?: Date | string
     updatedAt?: Date | string
     documents?: ClientDocumentUncheckedCreateNestedManyWithoutClientInput
@@ -27221,15 +28511,15 @@ export namespace Prisma {
     licenseExpiry: Date | string
     country: string
     regions?: AgencyCreateregionsInput | string[]
-    contactPerson: string
-    phone: string
-    email?: string | null
     website?: string | null
+    address: string
+    city: string
+    postalCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutAgencyInput
-    documents?: AgencyDocumentCreateNestedManyWithoutAgencyInput
+    user: UserCreateNestedOneWithoutAgencyProfileInput
     labourProfiles?: LabourProfileCreateNestedManyWithoutAgencyInput
+    documents?: AgencyDocumentCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyUncheckedCreateWithoutRequirementsInput = {
@@ -27241,14 +28531,14 @@ export namespace Prisma {
     licenseExpiry: Date | string
     country: string
     regions?: AgencyCreateregionsInput | string[]
-    contactPerson: string
-    phone: string
-    email?: string | null
     website?: string | null
+    address: string
+    city: string
+    postalCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    documents?: AgencyDocumentUncheckedCreateNestedManyWithoutAgencyInput
     labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutAgencyInput
+    documents?: AgencyDocumentUncheckedCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyCreateOrConnectWithoutRequirementsInput = {
@@ -27256,20 +28546,71 @@ export namespace Prisma {
     create: XOR<AgencyCreateWithoutRequirementsInput, AgencyUncheckedCreateWithoutRequirementsInput>
   }
 
+  export type JobRoleCreateWithoutRequirementInput = {
+    id?: string
+    title: string
+    quantity?: number
+    nationality: string
+    salary?: number | null
+    salaryCurrency?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type JobRoleUncheckedCreateWithoutRequirementInput = {
+    id?: string
+    title: string
+    quantity?: number
+    nationality: string
+    salary?: number | null
+    salaryCurrency?: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type JobRoleCreateOrConnectWithoutRequirementInput = {
+    where: JobRoleWhereUniqueInput
+    create: XOR<JobRoleCreateWithoutRequirementInput, JobRoleUncheckedCreateWithoutRequirementInput>
+  }
+
+  export type JobRoleCreateManyRequirementInputEnvelope = {
+    data: JobRoleCreateManyRequirementInput | JobRoleCreateManyRequirementInput[]
+    skipDuplicates?: boolean
+  }
+
   export type LabourProfileCreateWithoutRequirementInput = {
     id?: string
     name: string
     age: number
-    gender: string
+    gender: $Enums.Gender
     nationality: string
+    maritalStatus?: string | null
     skills?: LabourProfileCreateskillsInput | string[]
     experienceYears: number
     education?: string | null
-    language?: LabourProfileCreatelanguageInput | string[]
-    status?: $Enums.LabourStatus
+    currentPosition?: string | null
+    currentCompany?: string | null
+    languages?: LabourProfileCreatelanguagesInput | string[]
+    englishProficiency?: string | null
+    email?: string | null
+    phone: string
+    address?: string | null
+    city?: string | null
+    country?: string | null
     cvUrl: string
-    passportCopy?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    medicalStatus?: string | null
+    medicalExpiry?: Date | string | null
+    photo?: string | null
     otherDocs?: LabourProfileCreateotherDocsInput | string[]
+    status?: $Enums.LabourProfileStatus
+    statusReason?: string | null
+    deploymentDate?: Date | string | null
+    contractStartDate?: Date | string | null
+    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     agency: AgencyCreateNestedOneWithoutLabourProfilesInput
@@ -27281,17 +28622,36 @@ export namespace Prisma {
     id?: string
     name: string
     age: number
-    gender: string
+    gender: $Enums.Gender
     nationality: string
+    maritalStatus?: string | null
     skills?: LabourProfileCreateskillsInput | string[]
     experienceYears: number
     education?: string | null
-    language?: LabourProfileCreatelanguageInput | string[]
-    status?: $Enums.LabourStatus
+    currentPosition?: string | null
+    currentCompany?: string | null
+    languages?: LabourProfileCreatelanguagesInput | string[]
+    englishProficiency?: string | null
+    email?: string | null
+    phone: string
+    address?: string | null
+    city?: string | null
+    country?: string | null
     cvUrl: string
-    passportCopy?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    medicalStatus?: string | null
+    medicalExpiry?: Date | string | null
+    photo?: string | null
     otherDocs?: LabourProfileCreateotherDocsInput | string[]
+    status?: $Enums.LabourProfileStatus
+    statusReason?: string | null
     agencyId: string
+    deploymentDate?: Date | string | null
+    contractStartDate?: Date | string | null
+    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutLabourProfileInput
@@ -27312,10 +28672,11 @@ export namespace Prisma {
     id?: string
     name: string
     description: string
-    status?: string
+    status?: $Enums.ProcedureStatus
     dueDate?: Date | string | null
     completedDate?: Date | string | null
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     labourProfile?: LabourProfileCreateNestedOneWithoutProceduresInput
@@ -27325,10 +28686,11 @@ export namespace Prisma {
     id?: string
     name: string
     description: string
-    status?: string
+    status?: $Enums.ProcedureStatus
     dueDate?: Date | string | null
     completedDate?: Date | string | null
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     labourProfileId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -27348,18 +28710,22 @@ export namespace Prisma {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
     description?: string | null
     createdAt?: Date | string
-    uploadedBy: UserCreateNestedOneWithoutRequirementDocumentInput
+    updatedAt?: Date | string
+    uploadedBy: UserCreateNestedOneWithoutRequirementDocumentsInput
   }
 
   export type RequirementDocumentUncheckedCreateWithoutRequirementInput = {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
     description?: string | null
     uploadedById: string
     createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type RequirementDocumentCreateOrConnectWithoutRequirementInput = {
@@ -27370,6 +28736,102 @@ export namespace Prisma {
   export type RequirementDocumentCreateManyRequirementInputEnvelope = {
     data: RequirementDocumentCreateManyRequirementInput | RequirementDocumentCreateManyRequirementInput[]
     skipDuplicates?: boolean
+  }
+
+  export type ClientUpsertWithoutRequirementsInput = {
+    update: XOR<ClientUpdateWithoutRequirementsInput, ClientUncheckedUpdateWithoutRequirementsInput>
+    create: XOR<ClientCreateWithoutRequirementsInput, ClientUncheckedCreateWithoutRequirementsInput>
+    where?: ClientWhereInput
+  }
+
+  export type ClientUpdateToOneWithWhereWithoutRequirementsInput = {
+    where?: ClientWhereInput
+    data: XOR<ClientUpdateWithoutRequirementsInput, ClientUncheckedUpdateWithoutRequirementsInput>
+  }
+
+  export type ClientUpdateWithoutRequirementsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    companyName?: StringFieldUpdateOperationsInput | string
+    registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
+    companySector?: EnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector
+    companySize?: EnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize
+    website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designation?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutClientProfileNestedInput
+    documents?: ClientDocumentUpdateManyWithoutClientNestedInput
+  }
+
+  export type ClientUncheckedUpdateWithoutRequirementsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    companyName?: StringFieldUpdateOperationsInput | string
+    registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
+    companySector?: EnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector
+    companySize?: EnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize
+    website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designation?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documents?: ClientDocumentUncheckedUpdateManyWithoutClientNestedInput
+  }
+
+  export type AgencyUpsertWithoutRequirementsInput = {
+    update: XOR<AgencyUpdateWithoutRequirementsInput, AgencyUncheckedUpdateWithoutRequirementsInput>
+    create: XOR<AgencyCreateWithoutRequirementsInput, AgencyUncheckedCreateWithoutRequirementsInput>
+    where?: AgencyWhereInput
+  }
+
+  export type AgencyUpdateToOneWithWhereWithoutRequirementsInput = {
+    where?: AgencyWhereInput
+    data: XOR<AgencyUpdateWithoutRequirementsInput, AgencyUncheckedUpdateWithoutRequirementsInput>
+  }
+
+  export type AgencyUpdateWithoutRequirementsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    agencyName?: StringFieldUpdateOperationsInput | string
+    registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
+    licenseNumber?: StringFieldUpdateOperationsInput | string
+    licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
+    country?: StringFieldUpdateOperationsInput | string
+    regions?: AgencyUpdateregionsInput | string[]
+    website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutAgencyProfileNestedInput
+    labourProfiles?: LabourProfileUpdateManyWithoutAgencyNestedInput
+    documents?: AgencyDocumentUpdateManyWithoutAgencyNestedInput
+  }
+
+  export type AgencyUncheckedUpdateWithoutRequirementsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    agencyName?: StringFieldUpdateOperationsInput | string
+    registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
+    licenseNumber?: StringFieldUpdateOperationsInput | string
+    licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
+    country?: StringFieldUpdateOperationsInput | string
+    regions?: AgencyUpdateregionsInput | string[]
+    website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    labourProfiles?: LabourProfileUncheckedUpdateManyWithoutAgencyNestedInput
+    documents?: AgencyDocumentUncheckedUpdateManyWithoutAgencyNestedInput
   }
 
   export type JobRoleUpsertWithWhereUniqueWithoutRequirementInput = {
@@ -27396,110 +28858,11 @@ export namespace Prisma {
     title?: StringFilter<"JobRole"> | string
     quantity?: IntFilter<"JobRole"> | number
     nationality?: StringFilter<"JobRole"> | string
-    salary?: StringFilter<"JobRole"> | string
+    salary?: FloatNullableFilter<"JobRole"> | number | null
+    salaryCurrency?: StringFilter<"JobRole"> | string
     requirementId?: StringFilter<"JobRole"> | string
     createdAt?: DateTimeFilter<"JobRole"> | Date | string
     updatedAt?: DateTimeFilter<"JobRole"> | Date | string
-  }
-
-  export type ClientUpsertWithoutRequirementsInput = {
-    update: XOR<ClientUpdateWithoutRequirementsInput, ClientUncheckedUpdateWithoutRequirementsInput>
-    create: XOR<ClientCreateWithoutRequirementsInput, ClientUncheckedCreateWithoutRequirementsInput>
-    where?: ClientWhereInput
-  }
-
-  export type ClientUpdateToOneWithWhereWithoutRequirementsInput = {
-    where?: ClientWhereInput
-    data: XOR<ClientUpdateWithoutRequirementsInput, ClientUncheckedUpdateWithoutRequirementsInput>
-  }
-
-  export type ClientUpdateWithoutRequirementsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    companyName?: StringFieldUpdateOperationsInput | string
-    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
-    registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
-    companySector?: NullableEnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector | null
-    companySize?: NullableEnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize | null
-    website?: NullableStringFieldUpdateOperationsInput | string | null
-    designation?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    address?: StringFieldUpdateOperationsInput | string
-    altContact?: NullableStringFieldUpdateOperationsInput | string | null
-    businessLicense?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutClientNestedInput
-    documents?: ClientDocumentUpdateManyWithoutClientNestedInput
-  }
-
-  export type ClientUncheckedUpdateWithoutRequirementsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    companyName?: StringFieldUpdateOperationsInput | string
-    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
-    registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
-    companySector?: NullableEnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector | null
-    companySize?: NullableEnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize | null
-    website?: NullableStringFieldUpdateOperationsInput | string | null
-    designation?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    address?: StringFieldUpdateOperationsInput | string
-    altContact?: NullableStringFieldUpdateOperationsInput | string | null
-    businessLicense?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    documents?: ClientDocumentUncheckedUpdateManyWithoutClientNestedInput
-  }
-
-  export type AgencyUpsertWithoutRequirementsInput = {
-    update: XOR<AgencyUpdateWithoutRequirementsInput, AgencyUncheckedUpdateWithoutRequirementsInput>
-    create: XOR<AgencyCreateWithoutRequirementsInput, AgencyUncheckedCreateWithoutRequirementsInput>
-    where?: AgencyWhereInput
-  }
-
-  export type AgencyUpdateToOneWithWhereWithoutRequirementsInput = {
-    where?: AgencyWhereInput
-    data: XOR<AgencyUpdateWithoutRequirementsInput, AgencyUncheckedUpdateWithoutRequirementsInput>
-  }
-
-  export type AgencyUpdateWithoutRequirementsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    agencyName?: StringFieldUpdateOperationsInput | string
-    registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
-    licenseNumber?: StringFieldUpdateOperationsInput | string
-    licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
-    country?: StringFieldUpdateOperationsInput | string
-    regions?: AgencyUpdateregionsInput | string[]
-    contactPerson?: StringFieldUpdateOperationsInput | string
-    phone?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    website?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutAgencyNestedInput
-    documents?: AgencyDocumentUpdateManyWithoutAgencyNestedInput
-    labourProfiles?: LabourProfileUpdateManyWithoutAgencyNestedInput
-  }
-
-  export type AgencyUncheckedUpdateWithoutRequirementsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
-    agencyName?: StringFieldUpdateOperationsInput | string
-    registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
-    licenseNumber?: StringFieldUpdateOperationsInput | string
-    licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
-    country?: StringFieldUpdateOperationsInput | string
-    regions?: AgencyUpdateregionsInput | string[]
-    contactPerson?: StringFieldUpdateOperationsInput | string
-    phone?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    website?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    documents?: AgencyDocumentUncheckedUpdateManyWithoutAgencyNestedInput
-    labourProfiles?: LabourProfileUncheckedUpdateManyWithoutAgencyNestedInput
   }
 
   export type LabourProfileUpsertWithWhereUniqueWithoutRequirementInput = {
@@ -27541,10 +28904,11 @@ export namespace Prisma {
     id?: StringFilter<"Procedure"> | string
     name?: StringFilter<"Procedure"> | string
     description?: StringFilter<"Procedure"> | string
-    status?: StringFilter<"Procedure"> | string
+    status?: EnumProcedureStatusFilter<"Procedure"> | $Enums.ProcedureStatus
     dueDate?: DateTimeNullableFilter<"Procedure"> | Date | string | null
     completedDate?: DateTimeNullableFilter<"Procedure"> | Date | string | null
     comments?: StringNullableFilter<"Procedure"> | string | null
+    metadata?: JsonNullableFilter<"Procedure">
     requirementId?: StringNullableFilter<"Procedure"> | string | null
     labourProfileId?: StringNullableFilter<"Procedure"> | string | null
     createdAt?: DateTimeFilter<"Procedure"> | Date | string
@@ -27567,23 +28931,133 @@ export namespace Prisma {
     data: XOR<RequirementDocumentUpdateManyMutationInput, RequirementDocumentUncheckedUpdateManyWithoutRequirementInput>
   }
 
+  export type RequirementCreateWithoutJobRolesInput = {
+    id?: string
+    projectLocation?: string | null
+    startDate?: Date | string | null
+    contractDuration?: $Enums.ContractDuration | null
+    specialNotes?: string | null
+    status?: $Enums.RequirementStatus
+    languages?: RequirementCreatelanguagesInput | string[]
+    minExperience?: $Enums.ExperienceLevel | null
+    maxAge?: number | null
+    ticketType?: $Enums.TicketType | null
+    ticketProvided?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    submittedAt?: Date | string | null
+    reviewedAt?: Date | string | null
+    client: ClientCreateNestedOneWithoutRequirementsInput
+    assignedAgency?: AgencyCreateNestedOneWithoutRequirementsInput
+    labourProfiles?: LabourProfileCreateNestedManyWithoutRequirementInput
+    procedures?: ProcedureCreateNestedManyWithoutRequirementInput
+    documents?: RequirementDocumentCreateNestedManyWithoutRequirementInput
+  }
+
+  export type RequirementUncheckedCreateWithoutJobRolesInput = {
+    id?: string
+    projectLocation?: string | null
+    startDate?: Date | string | null
+    contractDuration?: $Enums.ContractDuration | null
+    specialNotes?: string | null
+    status?: $Enums.RequirementStatus
+    languages?: RequirementCreatelanguagesInput | string[]
+    minExperience?: $Enums.ExperienceLevel | null
+    maxAge?: number | null
+    ticketType?: $Enums.TicketType | null
+    ticketProvided?: boolean
+    clientId: string
+    assignedAgencyId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    submittedAt?: Date | string | null
+    reviewedAt?: Date | string | null
+    labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutRequirementInput
+    procedures?: ProcedureUncheckedCreateNestedManyWithoutRequirementInput
+    documents?: RequirementDocumentUncheckedCreateNestedManyWithoutRequirementInput
+  }
+
+  export type RequirementCreateOrConnectWithoutJobRolesInput = {
+    where: RequirementWhereUniqueInput
+    create: XOR<RequirementCreateWithoutJobRolesInput, RequirementUncheckedCreateWithoutJobRolesInput>
+  }
+
+  export type RequirementUpsertWithoutJobRolesInput = {
+    update: XOR<RequirementUpdateWithoutJobRolesInput, RequirementUncheckedUpdateWithoutJobRolesInput>
+    create: XOR<RequirementCreateWithoutJobRolesInput, RequirementUncheckedCreateWithoutJobRolesInput>
+    where?: RequirementWhereInput
+  }
+
+  export type RequirementUpdateToOneWithWhereWithoutJobRolesInput = {
+    where?: RequirementWhereInput
+    data: XOR<RequirementUpdateWithoutJobRolesInput, RequirementUncheckedUpdateWithoutJobRolesInput>
+  }
+
+  export type RequirementUpdateWithoutJobRolesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
+    specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    client?: ClientUpdateOneRequiredWithoutRequirementsNestedInput
+    assignedAgency?: AgencyUpdateOneWithoutRequirementsNestedInput
+    labourProfiles?: LabourProfileUpdateManyWithoutRequirementNestedInput
+    procedures?: ProcedureUpdateManyWithoutRequirementNestedInput
+    documents?: RequirementDocumentUpdateManyWithoutRequirementNestedInput
+  }
+
+  export type RequirementUncheckedUpdateWithoutJobRolesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
+    specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
+    clientId?: StringFieldUpdateOperationsInput | string
+    assignedAgencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    labourProfiles?: LabourProfileUncheckedUpdateManyWithoutRequirementNestedInput
+    procedures?: ProcedureUncheckedUpdateManyWithoutRequirementNestedInput
+    documents?: RequirementDocumentUncheckedUpdateManyWithoutRequirementNestedInput
+  }
+
   export type RequirementCreateWithoutLabourProfilesInput = {
     id?: string
     projectLocation?: string | null
     startDate?: Date | string | null
     contractDuration?: $Enums.ContractDuration | null
-    previousExperience?: $Enums.PreviousExperience | null
-    ticketDetails?: $Enums.TicketDetails | null
-    totalExperienceYears?: number | null
-    preferredAge?: number | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
+    minExperience?: $Enums.ExperienceLevel | null
+    maxAge?: number | null
+    ticketType?: $Enums.TicketType | null
+    ticketProvided?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    jobRoles?: JobRoleCreateNestedManyWithoutRequirementInput
+    submittedAt?: Date | string | null
+    reviewedAt?: Date | string | null
     client: ClientCreateNestedOneWithoutRequirementsInput
-    assignedTo?: AgencyCreateNestedOneWithoutRequirementsInput
+    assignedAgency?: AgencyCreateNestedOneWithoutRequirementsInput
+    jobRoles?: JobRoleCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureCreateNestedManyWithoutRequirementInput
     documents?: RequirementDocumentCreateNestedManyWithoutRequirementInput
   }
@@ -27593,17 +29067,19 @@ export namespace Prisma {
     projectLocation?: string | null
     startDate?: Date | string | null
     contractDuration?: $Enums.ContractDuration | null
-    previousExperience?: $Enums.PreviousExperience | null
-    ticketDetails?: $Enums.TicketDetails | null
-    totalExperienceYears?: number | null
-    preferredAge?: number | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
+    minExperience?: $Enums.ExperienceLevel | null
+    maxAge?: number | null
+    ticketType?: $Enums.TicketType | null
+    ticketProvided?: boolean
     clientId: string
-    assignedToId?: string | null
+    assignedAgencyId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    submittedAt?: Date | string | null
+    reviewedAt?: Date | string | null
     jobRoles?: JobRoleUncheckedCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureUncheckedCreateNestedManyWithoutRequirementInput
     documents?: RequirementDocumentUncheckedCreateNestedManyWithoutRequirementInput
@@ -27622,15 +29098,15 @@ export namespace Prisma {
     licenseExpiry: Date | string
     country: string
     regions?: AgencyCreateregionsInput | string[]
-    contactPerson: string
-    phone: string
-    email?: string | null
     website?: string | null
+    address: string
+    city: string
+    postalCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutAgencyInput
+    user: UserCreateNestedOneWithoutAgencyProfileInput
+    requirements?: RequirementCreateNestedManyWithoutAssignedAgencyInput
     documents?: AgencyDocumentCreateNestedManyWithoutAgencyInput
-    requirements?: RequirementCreateNestedManyWithoutAssignedToInput
   }
 
   export type AgencyUncheckedCreateWithoutLabourProfilesInput = {
@@ -27642,14 +29118,14 @@ export namespace Prisma {
     licenseExpiry: Date | string
     country: string
     regions?: AgencyCreateregionsInput | string[]
-    contactPerson: string
-    phone: string
-    email?: string | null
     website?: string | null
+    address: string
+    city: string
+    postalCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    requirements?: RequirementUncheckedCreateNestedManyWithoutAssignedAgencyInput
     documents?: AgencyDocumentUncheckedCreateNestedManyWithoutAgencyInput
-    requirements?: RequirementUncheckedCreateNestedManyWithoutAssignedToInput
   }
 
   export type AgencyCreateOrConnectWithoutLabourProfilesInput = {
@@ -27659,16 +29135,18 @@ export namespace Prisma {
 
   export type LabourStatusLogCreateWithoutLabourProfileInput = {
     id?: string
-    status: $Enums.LabourStatus
+    status: $Enums.LabourProfileStatus
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
-    changedBy: UserCreateNestedOneWithoutLabourStatusLogInput
+    changedBy: UserCreateNestedOneWithoutStatusLogsInput
   }
 
   export type LabourStatusLogUncheckedCreateWithoutLabourProfileInput = {
     id?: string
-    status: $Enums.LabourStatus
+    status: $Enums.LabourProfileStatus
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     changedById: string
     createdAt?: Date | string
   }
@@ -27687,10 +29165,11 @@ export namespace Prisma {
     id?: string
     name: string
     description: string
-    status?: string
+    status?: $Enums.ProcedureStatus
     dueDate?: Date | string | null
     completedDate?: Date | string | null
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
     requirement?: RequirementCreateNestedOneWithoutProceduresInput
@@ -27700,10 +29179,11 @@ export namespace Prisma {
     id?: string
     name: string
     description: string
-    status?: string
+    status?: $Enums.ProcedureStatus
     dueDate?: Date | string | null
     completedDate?: Date | string | null
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     requirementId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -27735,18 +29215,20 @@ export namespace Prisma {
     projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     client?: ClientUpdateOneRequiredWithoutRequirementsNestedInput
-    assignedTo?: AgencyUpdateOneWithoutRequirementsNestedInput
+    assignedAgency?: AgencyUpdateOneWithoutRequirementsNestedInput
+    jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUpdateManyWithoutRequirementNestedInput
     documents?: RequirementDocumentUpdateManyWithoutRequirementNestedInput
   }
@@ -27756,17 +29238,19 @@ export namespace Prisma {
     projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
     clientId?: StringFieldUpdateOperationsInput | string
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    assignedAgencyId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     jobRoles?: JobRoleUncheckedUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUncheckedUpdateManyWithoutRequirementNestedInput
     documents?: RequirementDocumentUncheckedUpdateManyWithoutRequirementNestedInput
@@ -27791,15 +29275,15 @@ export namespace Prisma {
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
     regions?: AgencyUpdateregionsInput | string[]
-    contactPerson?: StringFieldUpdateOperationsInput | string
-    phone?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutAgencyNestedInput
+    user?: UserUpdateOneRequiredWithoutAgencyProfileNestedInput
+    requirements?: RequirementUpdateManyWithoutAssignedAgencyNestedInput
     documents?: AgencyDocumentUpdateManyWithoutAgencyNestedInput
-    requirements?: RequirementUpdateManyWithoutAssignedToNestedInput
   }
 
   export type AgencyUncheckedUpdateWithoutLabourProfilesInput = {
@@ -27811,14 +29295,14 @@ export namespace Prisma {
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
     regions?: AgencyUpdateregionsInput | string[]
-    contactPerson?: StringFieldUpdateOperationsInput | string
-    phone?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    requirements?: RequirementUncheckedUpdateManyWithoutAssignedAgencyNestedInput
     documents?: AgencyDocumentUncheckedUpdateManyWithoutAgencyNestedInput
-    requirements?: RequirementUncheckedUpdateManyWithoutAssignedToNestedInput
   }
 
   export type LabourStatusLogUpsertWithWhereUniqueWithoutLabourProfileInput = {
@@ -27858,18 +29342,20 @@ export namespace Prisma {
     projectLocation?: string | null
     startDate?: Date | string | null
     contractDuration?: $Enums.ContractDuration | null
-    previousExperience?: $Enums.PreviousExperience | null
-    ticketDetails?: $Enums.TicketDetails | null
-    totalExperienceYears?: number | null
-    preferredAge?: number | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
+    minExperience?: $Enums.ExperienceLevel | null
+    maxAge?: number | null
+    ticketType?: $Enums.TicketType | null
+    ticketProvided?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    jobRoles?: JobRoleCreateNestedManyWithoutRequirementInput
+    submittedAt?: Date | string | null
+    reviewedAt?: Date | string | null
     client: ClientCreateNestedOneWithoutRequirementsInput
-    assignedTo?: AgencyCreateNestedOneWithoutRequirementsInput
+    assignedAgency?: AgencyCreateNestedOneWithoutRequirementsInput
+    jobRoles?: JobRoleCreateNestedManyWithoutRequirementInput
     labourProfiles?: LabourProfileCreateNestedManyWithoutRequirementInput
     documents?: RequirementDocumentCreateNestedManyWithoutRequirementInput
   }
@@ -27879,17 +29365,19 @@ export namespace Prisma {
     projectLocation?: string | null
     startDate?: Date | string | null
     contractDuration?: $Enums.ContractDuration | null
-    previousExperience?: $Enums.PreviousExperience | null
-    ticketDetails?: $Enums.TicketDetails | null
-    totalExperienceYears?: number | null
-    preferredAge?: number | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
+    minExperience?: $Enums.ExperienceLevel | null
+    maxAge?: number | null
+    ticketType?: $Enums.TicketType | null
+    ticketProvided?: boolean
     clientId: string
-    assignedToId?: string | null
+    assignedAgencyId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    submittedAt?: Date | string | null
+    reviewedAt?: Date | string | null
     jobRoles?: JobRoleUncheckedCreateNestedManyWithoutRequirementInput
     labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutRequirementInput
     documents?: RequirementDocumentUncheckedCreateNestedManyWithoutRequirementInput
@@ -27904,16 +29392,35 @@ export namespace Prisma {
     id?: string
     name: string
     age: number
-    gender: string
+    gender: $Enums.Gender
     nationality: string
+    maritalStatus?: string | null
     skills?: LabourProfileCreateskillsInput | string[]
     experienceYears: number
     education?: string | null
-    language?: LabourProfileCreatelanguageInput | string[]
-    status?: $Enums.LabourStatus
+    currentPosition?: string | null
+    currentCompany?: string | null
+    languages?: LabourProfileCreatelanguagesInput | string[]
+    englishProficiency?: string | null
+    email?: string | null
+    phone: string
+    address?: string | null
+    city?: string | null
+    country?: string | null
     cvUrl: string
-    passportCopy?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    medicalStatus?: string | null
+    medicalExpiry?: Date | string | null
+    photo?: string | null
     otherDocs?: LabourProfileCreateotherDocsInput | string[]
+    status?: $Enums.LabourProfileStatus
+    statusReason?: string | null
+    deploymentDate?: Date | string | null
+    contractStartDate?: Date | string | null
+    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     requirement: RequirementCreateNestedOneWithoutLabourProfilesInput
@@ -27925,18 +29432,37 @@ export namespace Prisma {
     id?: string
     name: string
     age: number
-    gender: string
+    gender: $Enums.Gender
     nationality: string
+    maritalStatus?: string | null
     skills?: LabourProfileCreateskillsInput | string[]
     experienceYears: number
     education?: string | null
-    language?: LabourProfileCreatelanguageInput | string[]
-    status?: $Enums.LabourStatus
+    currentPosition?: string | null
+    currentCompany?: string | null
+    languages?: LabourProfileCreatelanguagesInput | string[]
+    englishProficiency?: string | null
+    email?: string | null
+    phone: string
+    address?: string | null
+    city?: string | null
+    country?: string | null
     cvUrl: string
-    passportCopy?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    medicalStatus?: string | null
+    medicalExpiry?: Date | string | null
+    photo?: string | null
     otherDocs?: LabourProfileCreateotherDocsInput | string[]
+    status?: $Enums.LabourProfileStatus
+    statusReason?: string | null
     requirementId: string
     agencyId: string
+    deploymentDate?: Date | string | null
+    contractStartDate?: Date | string | null
+    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutLabourProfileInput
@@ -27963,18 +29489,20 @@ export namespace Prisma {
     projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     client?: ClientUpdateOneRequiredWithoutRequirementsNestedInput
-    assignedTo?: AgencyUpdateOneWithoutRequirementsNestedInput
+    assignedAgency?: AgencyUpdateOneWithoutRequirementsNestedInput
+    jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
     labourProfiles?: LabourProfileUpdateManyWithoutRequirementNestedInput
     documents?: RequirementDocumentUpdateManyWithoutRequirementNestedInput
   }
@@ -27984,17 +29512,19 @@ export namespace Prisma {
     projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
     clientId?: StringFieldUpdateOperationsInput | string
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    assignedAgencyId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     jobRoles?: JobRoleUncheckedUpdateManyWithoutRequirementNestedInput
     labourProfiles?: LabourProfileUncheckedUpdateManyWithoutRequirementNestedInput
     documents?: RequirementDocumentUncheckedUpdateManyWithoutRequirementNestedInput
@@ -28015,16 +29545,35 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     age?: IntFieldUpdateOperationsInput | number
-    gender?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
+    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: LabourProfileUpdateskillsInput | string[]
     experienceYears?: IntFieldUpdateOperationsInput | number
     education?: NullableStringFieldUpdateOperationsInput | string | null
-    language?: LabourProfileUpdatelanguageInput | string[]
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: LabourProfileUpdatelanguagesInput | string[]
+    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: StringFieldUpdateOperationsInput | string
-    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    photo?: NullableStringFieldUpdateOperationsInput | string | null
     otherDocs?: LabourProfileUpdateotherDocsInput | string[]
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
+    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requirement?: RequirementUpdateOneRequiredWithoutLabourProfilesNestedInput
@@ -28036,18 +29585,37 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     age?: IntFieldUpdateOperationsInput | number
-    gender?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
+    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: LabourProfileUpdateskillsInput | string[]
     experienceYears?: IntFieldUpdateOperationsInput | number
     education?: NullableStringFieldUpdateOperationsInput | string | null
-    language?: LabourProfileUpdatelanguageInput | string[]
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: LabourProfileUpdatelanguagesInput | string[]
+    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: StringFieldUpdateOperationsInput | string
-    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    photo?: NullableStringFieldUpdateOperationsInput | string | null
     otherDocs?: LabourProfileUpdateotherDocsInput | string[]
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
     requirementId?: StringFieldUpdateOperationsInput | string
     agencyId?: StringFieldUpdateOperationsInput | string
+    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutLabourProfileNestedInput
@@ -28057,16 +29625,35 @@ export namespace Prisma {
     id?: string
     name: string
     age: number
-    gender: string
+    gender: $Enums.Gender
     nationality: string
+    maritalStatus?: string | null
     skills?: LabourProfileCreateskillsInput | string[]
     experienceYears: number
     education?: string | null
-    language?: LabourProfileCreatelanguageInput | string[]
-    status?: $Enums.LabourStatus
+    currentPosition?: string | null
+    currentCompany?: string | null
+    languages?: LabourProfileCreatelanguagesInput | string[]
+    englishProficiency?: string | null
+    email?: string | null
+    phone: string
+    address?: string | null
+    city?: string | null
+    country?: string | null
     cvUrl: string
-    passportCopy?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    medicalStatus?: string | null
+    medicalExpiry?: Date | string | null
+    photo?: string | null
     otherDocs?: LabourProfileCreateotherDocsInput | string[]
+    status?: $Enums.LabourProfileStatus
+    statusReason?: string | null
+    deploymentDate?: Date | string | null
+    contractStartDate?: Date | string | null
+    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     requirement: RequirementCreateNestedOneWithoutLabourProfilesInput
@@ -28078,18 +29665,37 @@ export namespace Prisma {
     id?: string
     name: string
     age: number
-    gender: string
+    gender: $Enums.Gender
     nationality: string
+    maritalStatus?: string | null
     skills?: LabourProfileCreateskillsInput | string[]
     experienceYears: number
     education?: string | null
-    language?: LabourProfileCreatelanguageInput | string[]
-    status?: $Enums.LabourStatus
+    currentPosition?: string | null
+    currentCompany?: string | null
+    languages?: LabourProfileCreatelanguagesInput | string[]
+    englishProficiency?: string | null
+    email?: string | null
+    phone: string
+    address?: string | null
+    city?: string | null
+    country?: string | null
     cvUrl: string
-    passportCopy?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    medicalStatus?: string | null
+    medicalExpiry?: Date | string | null
+    photo?: string | null
     otherDocs?: LabourProfileCreateotherDocsInput | string[]
+    status?: $Enums.LabourProfileStatus
+    statusReason?: string | null
     requirementId: string
     agencyId: string
+    deploymentDate?: Date | string | null
+    contractStartDate?: Date | string | null
+    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     procedures?: ProcedureUncheckedCreateNestedManyWithoutLabourProfileInput
@@ -28100,11 +29706,14 @@ export namespace Prisma {
     create: XOR<LabourProfileCreateWithoutStatusLogsInput, LabourProfileUncheckedCreateWithoutStatusLogsInput>
   }
 
-  export type UserCreateWithoutLabourStatusLogInput = {
+  export type UserCreateWithoutStatusLogsInput = {
     id?: string
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -28113,24 +29722,28 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
-    client?: ClientCreateNestedOneWithoutUserInput
-    agency?: AgencyCreateNestedOneWithoutUserInput
-    admin?: AdminCreateNestedOneWithoutUserInput
+    clientProfile?: ClientCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyCreateNestedOneWithoutUserInput
+    adminProfile?: AdminCreateNestedOneWithoutUserInput
     createdBy?: UserCreateNestedOneWithoutCreatedUsersInput
     createdUsers?: UserCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutPerformedByInput
-    ClientDocument?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationCreateNestedManyWithoutRecipientInput
+    clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
   }
 
-  export type UserUncheckedCreateWithoutLabourStatusLogInput = {
+  export type UserUncheckedCreateWithoutStatusLogsInput = {
     id?: string
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -28139,22 +29752,23 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
     createdById?: string | null
-    client?: ClientUncheckedCreateNestedOneWithoutUserInput
-    agency?: AgencyUncheckedCreateNestedOneWithoutUserInput
-    admin?: AdminUncheckedCreateNestedOneWithoutUserInput
+    clientProfile?: ClientUncheckedCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyUncheckedCreateNestedOneWithoutUserInput
+    adminProfile?: AdminUncheckedCreateNestedOneWithoutUserInput
     createdUsers?: UserUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutPerformedByInput
-    ClientDocument?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
-  export type UserCreateOrConnectWithoutLabourStatusLogInput = {
+  export type UserCreateOrConnectWithoutStatusLogsInput = {
     where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutLabourStatusLogInput, UserUncheckedCreateWithoutLabourStatusLogInput>
+    create: XOR<UserCreateWithoutStatusLogsInput, UserUncheckedCreateWithoutStatusLogsInput>
   }
 
   export type LabourProfileUpsertWithoutStatusLogsInput = {
@@ -28172,16 +29786,35 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     age?: IntFieldUpdateOperationsInput | number
-    gender?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
+    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: LabourProfileUpdateskillsInput | string[]
     experienceYears?: IntFieldUpdateOperationsInput | number
     education?: NullableStringFieldUpdateOperationsInput | string | null
-    language?: LabourProfileUpdatelanguageInput | string[]
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: LabourProfileUpdatelanguagesInput | string[]
+    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: StringFieldUpdateOperationsInput | string
-    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    photo?: NullableStringFieldUpdateOperationsInput | string | null
     otherDocs?: LabourProfileUpdateotherDocsInput | string[]
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
+    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requirement?: RequirementUpdateOneRequiredWithoutLabourProfilesNestedInput
@@ -28193,39 +29826,61 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     age?: IntFieldUpdateOperationsInput | number
-    gender?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
+    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: LabourProfileUpdateskillsInput | string[]
     experienceYears?: IntFieldUpdateOperationsInput | number
     education?: NullableStringFieldUpdateOperationsInput | string | null
-    language?: LabourProfileUpdatelanguageInput | string[]
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: LabourProfileUpdatelanguagesInput | string[]
+    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: StringFieldUpdateOperationsInput | string
-    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    photo?: NullableStringFieldUpdateOperationsInput | string | null
     otherDocs?: LabourProfileUpdateotherDocsInput | string[]
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
     requirementId?: StringFieldUpdateOperationsInput | string
     agencyId?: StringFieldUpdateOperationsInput | string
+    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     procedures?: ProcedureUncheckedUpdateManyWithoutLabourProfileNestedInput
   }
 
-  export type UserUpsertWithoutLabourStatusLogInput = {
-    update: XOR<UserUpdateWithoutLabourStatusLogInput, UserUncheckedUpdateWithoutLabourStatusLogInput>
-    create: XOR<UserCreateWithoutLabourStatusLogInput, UserUncheckedCreateWithoutLabourStatusLogInput>
+  export type UserUpsertWithoutStatusLogsInput = {
+    update: XOR<UserUpdateWithoutStatusLogsInput, UserUncheckedUpdateWithoutStatusLogsInput>
+    create: XOR<UserCreateWithoutStatusLogsInput, UserUncheckedCreateWithoutStatusLogsInput>
     where?: UserWhereInput
   }
 
-  export type UserUpdateToOneWithWhereWithoutLabourStatusLogInput = {
+  export type UserUpdateToOneWithWhereWithoutStatusLogsInput = {
     where?: UserWhereInput
-    data: XOR<UserUpdateWithoutLabourStatusLogInput, UserUncheckedUpdateWithoutLabourStatusLogInput>
+    data: XOR<UserUpdateWithoutStatusLogsInput, UserUncheckedUpdateWithoutStatusLogsInput>
   }
 
-  export type UserUpdateWithoutLabourStatusLogInput = {
+  export type UserUpdateWithoutStatusLogsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -28234,24 +29889,28 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUpdateOneWithoutUserNestedInput
-    agency?: AgencyUpdateOneWithoutUserNestedInput
-    admin?: AdminUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUpdateOneWithoutUserNestedInput
     createdBy?: UserUpdateOneWithoutCreatedUsersNestedInput
     createdUsers?: UserUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutPerformedByNestedInput
-    ClientDocument?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUpdateManyWithoutRecipientNestedInput
+    clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
   }
 
-  export type UserUncheckedUpdateWithoutLabourStatusLogInput = {
+  export type UserUncheckedUpdateWithoutStatusLogsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -28260,36 +29919,35 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUncheckedUpdateOneWithoutUserNestedInput
-    agency?: AgencyUncheckedUpdateOneWithoutUserNestedInput
-    admin?: AdminUncheckedUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUncheckedUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUncheckedUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUncheckedUpdateOneWithoutUserNestedInput
     createdUsers?: UserUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutPerformedByNestedInput
-    ClientDocument?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
   export type ClientCreateWithoutDocumentsInput = {
     id?: string
     companyName: string
-    contactPerson?: string | null
     registrationNo?: string | null
-    companySector?: $Enums.CompanySector | null
-    companySize?: $Enums.CompanySize | null
+    companySector: $Enums.CompanySector
+    companySize: $Enums.CompanySize
     website?: string | null
-    designation?: string | null
-    phone?: string | null
     address: string
-    altContact?: string | null
-    businessLicense?: string | null
-    image?: string | null
+    city: string
+    country: string
+    postalCode?: string | null
+    designation: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutClientInput
+    user: UserCreateNestedOneWithoutClientProfileInput
     requirements?: RequirementCreateNestedManyWithoutClientInput
   }
 
@@ -28297,17 +29955,15 @@ export namespace Prisma {
     id?: string
     userId: string
     companyName: string
-    contactPerson?: string | null
     registrationNo?: string | null
-    companySector?: $Enums.CompanySector | null
-    companySize?: $Enums.CompanySize | null
+    companySector: $Enums.CompanySector
+    companySize: $Enums.CompanySize
     website?: string | null
-    designation?: string | null
-    phone?: string | null
     address: string
-    altContact?: string | null
-    businessLicense?: string | null
-    image?: string | null
+    city: string
+    country: string
+    postalCode?: string | null
+    designation: string
     createdAt?: Date | string
     updatedAt?: Date | string
     requirements?: RequirementUncheckedCreateNestedManyWithoutClientInput
@@ -28318,11 +29974,14 @@ export namespace Prisma {
     create: XOR<ClientCreateWithoutDocumentsInput, ClientUncheckedCreateWithoutDocumentsInput>
   }
 
-  export type UserCreateWithoutClientDocumentInput = {
+  export type UserCreateWithoutClientDocumentsInput = {
     id?: string
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -28331,24 +29990,28 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
-    client?: ClientCreateNestedOneWithoutUserInput
-    agency?: AgencyCreateNestedOneWithoutUserInput
-    admin?: AdminCreateNestedOneWithoutUserInput
+    clientProfile?: ClientCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyCreateNestedOneWithoutUserInput
+    adminProfile?: AdminCreateNestedOneWithoutUserInput
     createdBy?: UserCreateNestedOneWithoutCreatedUsersInput
     createdUsers?: UserCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogCreateNestedManyWithoutChangedByInput
-    AgencyDocument?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
+    agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
   }
 
-  export type UserUncheckedCreateWithoutClientDocumentInput = {
+  export type UserUncheckedCreateWithoutClientDocumentsInput = {
     id?: string
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -28357,22 +30020,23 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
     createdById?: string | null
-    client?: ClientUncheckedCreateNestedOneWithoutUserInput
-    agency?: AgencyUncheckedCreateNestedOneWithoutUserInput
-    admin?: AdminUncheckedCreateNestedOneWithoutUserInput
+    clientProfile?: ClientUncheckedCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyUncheckedCreateNestedOneWithoutUserInput
+    adminProfile?: AdminUncheckedCreateNestedOneWithoutUserInput
     createdUsers?: UserUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
-    AgencyDocument?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
+    agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
-  export type UserCreateOrConnectWithoutClientDocumentInput = {
+  export type UserCreateOrConnectWithoutClientDocumentsInput = {
     where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutClientDocumentInput, UserUncheckedCreateWithoutClientDocumentInput>
+    create: XOR<UserCreateWithoutClientDocumentsInput, UserUncheckedCreateWithoutClientDocumentsInput>
   }
 
   export type ClientUpsertWithoutDocumentsInput = {
@@ -28389,20 +30053,18 @@ export namespace Prisma {
   export type ClientUpdateWithoutDocumentsInput = {
     id?: StringFieldUpdateOperationsInput | string
     companyName?: StringFieldUpdateOperationsInput | string
-    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
-    companySector?: NullableEnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector | null
-    companySize?: NullableEnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize | null
+    companySector?: EnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector
+    companySize?: EnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize
     website?: NullableStringFieldUpdateOperationsInput | string | null
-    designation?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
-    altContact?: NullableStringFieldUpdateOperationsInput | string | null
-    businessLicense?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designation?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutClientNestedInput
+    user?: UserUpdateOneRequiredWithoutClientProfileNestedInput
     requirements?: RequirementUpdateManyWithoutClientNestedInput
   }
 
@@ -28410,38 +30072,39 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     companyName?: StringFieldUpdateOperationsInput | string
-    contactPerson?: NullableStringFieldUpdateOperationsInput | string | null
     registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
-    companySector?: NullableEnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector | null
-    companySize?: NullableEnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize | null
+    companySector?: EnumCompanySectorFieldUpdateOperationsInput | $Enums.CompanySector
+    companySize?: EnumCompanySizeFieldUpdateOperationsInput | $Enums.CompanySize
     website?: NullableStringFieldUpdateOperationsInput | string | null
-    designation?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
-    altContact?: NullableStringFieldUpdateOperationsInput | string | null
-    businessLicense?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: StringFieldUpdateOperationsInput | string
+    country?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    designation?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requirements?: RequirementUncheckedUpdateManyWithoutClientNestedInput
   }
 
-  export type UserUpsertWithoutClientDocumentInput = {
-    update: XOR<UserUpdateWithoutClientDocumentInput, UserUncheckedUpdateWithoutClientDocumentInput>
-    create: XOR<UserCreateWithoutClientDocumentInput, UserUncheckedCreateWithoutClientDocumentInput>
+  export type UserUpsertWithoutClientDocumentsInput = {
+    update: XOR<UserUpdateWithoutClientDocumentsInput, UserUncheckedUpdateWithoutClientDocumentsInput>
+    create: XOR<UserCreateWithoutClientDocumentsInput, UserUncheckedCreateWithoutClientDocumentsInput>
     where?: UserWhereInput
   }
 
-  export type UserUpdateToOneWithWhereWithoutClientDocumentInput = {
+  export type UserUpdateToOneWithWhereWithoutClientDocumentsInput = {
     where?: UserWhereInput
-    data: XOR<UserUpdateWithoutClientDocumentInput, UserUncheckedUpdateWithoutClientDocumentInput>
+    data: XOR<UserUpdateWithoutClientDocumentsInput, UserUncheckedUpdateWithoutClientDocumentsInput>
   }
 
-  export type UserUpdateWithoutClientDocumentInput = {
+  export type UserUpdateWithoutClientDocumentsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -28450,24 +30113,28 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUpdateOneWithoutUserNestedInput
-    agency?: AgencyUpdateOneWithoutUserNestedInput
-    admin?: AdminUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUpdateOneWithoutUserNestedInput
     createdBy?: UserUpdateOneWithoutCreatedUsersNestedInput
     createdUsers?: UserUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
-    AgencyDocument?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
+    agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
   }
 
-  export type UserUncheckedUpdateWithoutClientDocumentInput = {
+  export type UserUncheckedUpdateWithoutClientDocumentsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -28476,17 +30143,18 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUncheckedUpdateOneWithoutUserNestedInput
-    agency?: AgencyUncheckedUpdateOneWithoutUserNestedInput
-    admin?: AdminUncheckedUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUncheckedUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUncheckedUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUncheckedUpdateOneWithoutUserNestedInput
     createdUsers?: UserUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
-    AgencyDocument?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
+    agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
   export type AgencyCreateWithoutDocumentsInput = {
@@ -28497,15 +30165,15 @@ export namespace Prisma {
     licenseExpiry: Date | string
     country: string
     regions?: AgencyCreateregionsInput | string[]
-    contactPerson: string
-    phone: string
-    email?: string | null
     website?: string | null
+    address: string
+    city: string
+    postalCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutAgencyInput
+    user: UserCreateNestedOneWithoutAgencyProfileInput
     labourProfiles?: LabourProfileCreateNestedManyWithoutAgencyInput
-    requirements?: RequirementCreateNestedManyWithoutAssignedToInput
+    requirements?: RequirementCreateNestedManyWithoutAssignedAgencyInput
   }
 
   export type AgencyUncheckedCreateWithoutDocumentsInput = {
@@ -28517,14 +30185,14 @@ export namespace Prisma {
     licenseExpiry: Date | string
     country: string
     regions?: AgencyCreateregionsInput | string[]
-    contactPerson: string
-    phone: string
-    email?: string | null
     website?: string | null
+    address: string
+    city: string
+    postalCode?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutAgencyInput
-    requirements?: RequirementUncheckedCreateNestedManyWithoutAssignedToInput
+    requirements?: RequirementUncheckedCreateNestedManyWithoutAssignedAgencyInput
   }
 
   export type AgencyCreateOrConnectWithoutDocumentsInput = {
@@ -28532,11 +30200,14 @@ export namespace Prisma {
     create: XOR<AgencyCreateWithoutDocumentsInput, AgencyUncheckedCreateWithoutDocumentsInput>
   }
 
-  export type UserCreateWithoutAgencyDocumentInput = {
+  export type UserCreateWithoutAgencyDocumentsInput = {
     id?: string
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -28545,24 +30216,28 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
-    client?: ClientCreateNestedOneWithoutUserInput
-    agency?: AgencyCreateNestedOneWithoutUserInput
-    admin?: AdminCreateNestedOneWithoutUserInput
+    clientProfile?: ClientCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyCreateNestedOneWithoutUserInput
+    adminProfile?: AdminCreateNestedOneWithoutUserInput
     createdBy?: UserCreateNestedOneWithoutCreatedUsersInput
     createdUsers?: UserCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
   }
 
-  export type UserUncheckedCreateWithoutAgencyDocumentInput = {
+  export type UserUncheckedCreateWithoutAgencyDocumentsInput = {
     id?: string
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -28571,22 +30246,23 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
     createdById?: string | null
-    client?: ClientUncheckedCreateNestedOneWithoutUserInput
-    agency?: AgencyUncheckedCreateNestedOneWithoutUserInput
-    admin?: AdminUncheckedCreateNestedOneWithoutUserInput
+    clientProfile?: ClientUncheckedCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyUncheckedCreateNestedOneWithoutUserInput
+    adminProfile?: AdminUncheckedCreateNestedOneWithoutUserInput
     createdUsers?: UserUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
-  export type UserCreateOrConnectWithoutAgencyDocumentInput = {
+  export type UserCreateOrConnectWithoutAgencyDocumentsInput = {
     where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutAgencyDocumentInput, UserUncheckedCreateWithoutAgencyDocumentInput>
+    create: XOR<UserCreateWithoutAgencyDocumentsInput, UserUncheckedCreateWithoutAgencyDocumentsInput>
   }
 
   export type AgencyUpsertWithoutDocumentsInput = {
@@ -28608,15 +30284,15 @@ export namespace Prisma {
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
     regions?: AgencyUpdateregionsInput | string[]
-    contactPerson?: StringFieldUpdateOperationsInput | string
-    phone?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutAgencyNestedInput
+    user?: UserUpdateOneRequiredWithoutAgencyProfileNestedInput
     labourProfiles?: LabourProfileUpdateManyWithoutAgencyNestedInput
-    requirements?: RequirementUpdateManyWithoutAssignedToNestedInput
+    requirements?: RequirementUpdateManyWithoutAssignedAgencyNestedInput
   }
 
   export type AgencyUncheckedUpdateWithoutDocumentsInput = {
@@ -28628,32 +30304,35 @@ export namespace Prisma {
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
     regions?: AgencyUpdateregionsInput | string[]
-    contactPerson?: StringFieldUpdateOperationsInput | string
-    phone?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
     website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     labourProfiles?: LabourProfileUncheckedUpdateManyWithoutAgencyNestedInput
-    requirements?: RequirementUncheckedUpdateManyWithoutAssignedToNestedInput
+    requirements?: RequirementUncheckedUpdateManyWithoutAssignedAgencyNestedInput
   }
 
-  export type UserUpsertWithoutAgencyDocumentInput = {
-    update: XOR<UserUpdateWithoutAgencyDocumentInput, UserUncheckedUpdateWithoutAgencyDocumentInput>
-    create: XOR<UserCreateWithoutAgencyDocumentInput, UserUncheckedCreateWithoutAgencyDocumentInput>
+  export type UserUpsertWithoutAgencyDocumentsInput = {
+    update: XOR<UserUpdateWithoutAgencyDocumentsInput, UserUncheckedUpdateWithoutAgencyDocumentsInput>
+    create: XOR<UserCreateWithoutAgencyDocumentsInput, UserUncheckedCreateWithoutAgencyDocumentsInput>
     where?: UserWhereInput
   }
 
-  export type UserUpdateToOneWithWhereWithoutAgencyDocumentInput = {
+  export type UserUpdateToOneWithWhereWithoutAgencyDocumentsInput = {
     where?: UserWhereInput
-    data: XOR<UserUpdateWithoutAgencyDocumentInput, UserUncheckedUpdateWithoutAgencyDocumentInput>
+    data: XOR<UserUpdateWithoutAgencyDocumentsInput, UserUncheckedUpdateWithoutAgencyDocumentsInput>
   }
 
-  export type UserUpdateWithoutAgencyDocumentInput = {
+  export type UserUpdateWithoutAgencyDocumentsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -28662,24 +30341,28 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUpdateOneWithoutUserNestedInput
-    agency?: AgencyUpdateOneWithoutUserNestedInput
-    admin?: AdminUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUpdateOneWithoutUserNestedInput
     createdBy?: UserUpdateOneWithoutCreatedUsersNestedInput
     createdUsers?: UserUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
   }
 
-  export type UserUncheckedUpdateWithoutAgencyDocumentInput = {
+  export type UserUncheckedUpdateWithoutAgencyDocumentsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -28688,17 +30371,18 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUncheckedUpdateOneWithoutUserNestedInput
-    agency?: AgencyUncheckedUpdateOneWithoutUserNestedInput
-    admin?: AdminUncheckedUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUncheckedUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUncheckedUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUncheckedUpdateOneWithoutUserNestedInput
     createdUsers?: UserUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
   export type RequirementCreateWithoutDocumentsInput = {
@@ -28706,18 +30390,20 @@ export namespace Prisma {
     projectLocation?: string | null
     startDate?: Date | string | null
     contractDuration?: $Enums.ContractDuration | null
-    previousExperience?: $Enums.PreviousExperience | null
-    ticketDetails?: $Enums.TicketDetails | null
-    totalExperienceYears?: number | null
-    preferredAge?: number | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
+    minExperience?: $Enums.ExperienceLevel | null
+    maxAge?: number | null
+    ticketType?: $Enums.TicketType | null
+    ticketProvided?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
-    jobRoles?: JobRoleCreateNestedManyWithoutRequirementInput
+    submittedAt?: Date | string | null
+    reviewedAt?: Date | string | null
     client: ClientCreateNestedOneWithoutRequirementsInput
-    assignedTo?: AgencyCreateNestedOneWithoutRequirementsInput
+    assignedAgency?: AgencyCreateNestedOneWithoutRequirementsInput
+    jobRoles?: JobRoleCreateNestedManyWithoutRequirementInput
     labourProfiles?: LabourProfileCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureCreateNestedManyWithoutRequirementInput
   }
@@ -28727,17 +30413,19 @@ export namespace Prisma {
     projectLocation?: string | null
     startDate?: Date | string | null
     contractDuration?: $Enums.ContractDuration | null
-    previousExperience?: $Enums.PreviousExperience | null
-    ticketDetails?: $Enums.TicketDetails | null
-    totalExperienceYears?: number | null
-    preferredAge?: number | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
+    minExperience?: $Enums.ExperienceLevel | null
+    maxAge?: number | null
+    ticketType?: $Enums.TicketType | null
+    ticketProvided?: boolean
     clientId: string
-    assignedToId?: string | null
+    assignedAgencyId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    submittedAt?: Date | string | null
+    reviewedAt?: Date | string | null
     jobRoles?: JobRoleUncheckedCreateNestedManyWithoutRequirementInput
     labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureUncheckedCreateNestedManyWithoutRequirementInput
@@ -28748,11 +30436,14 @@ export namespace Prisma {
     create: XOR<RequirementCreateWithoutDocumentsInput, RequirementUncheckedCreateWithoutDocumentsInput>
   }
 
-  export type UserCreateWithoutRequirementDocumentInput = {
+  export type UserCreateWithoutRequirementDocumentsInput = {
     id?: string
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -28761,24 +30452,28 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
-    client?: ClientCreateNestedOneWithoutUserInput
-    agency?: AgencyCreateNestedOneWithoutUserInput
-    admin?: AdminCreateNestedOneWithoutUserInput
+    clientProfile?: ClientCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyCreateNestedOneWithoutUserInput
+    adminProfile?: AdminCreateNestedOneWithoutUserInput
     createdBy?: UserCreateNestedOneWithoutCreatedUsersInput
     createdUsers?: UserCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    Notification?: NotificationCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
   }
 
-  export type UserUncheckedCreateWithoutRequirementDocumentInput = {
+  export type UserUncheckedCreateWithoutRequirementDocumentsInput = {
     id?: string
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -28787,22 +30482,23 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
     createdById?: string | null
-    client?: ClientUncheckedCreateNestedOneWithoutUserInput
-    agency?: AgencyUncheckedCreateNestedOneWithoutUserInput
-    admin?: AdminUncheckedCreateNestedOneWithoutUserInput
+    clientProfile?: ClientUncheckedCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyUncheckedCreateNestedOneWithoutUserInput
+    adminProfile?: AdminUncheckedCreateNestedOneWithoutUserInput
     createdUsers?: UserUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    Notification?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
   }
 
-  export type UserCreateOrConnectWithoutRequirementDocumentInput = {
+  export type UserCreateOrConnectWithoutRequirementDocumentsInput = {
     where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutRequirementDocumentInput, UserUncheckedCreateWithoutRequirementDocumentInput>
+    create: XOR<UserCreateWithoutRequirementDocumentsInput, UserUncheckedCreateWithoutRequirementDocumentsInput>
   }
 
   export type RequirementUpsertWithoutDocumentsInput = {
@@ -28821,18 +30517,20 @@ export namespace Prisma {
     projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     client?: ClientUpdateOneRequiredWithoutRequirementsNestedInput
-    assignedTo?: AgencyUpdateOneWithoutRequirementsNestedInput
+    assignedAgency?: AgencyUpdateOneWithoutRequirementsNestedInput
+    jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
     labourProfiles?: LabourProfileUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUpdateManyWithoutRequirementNestedInput
   }
@@ -28842,38 +30540,43 @@ export namespace Prisma {
     projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
     clientId?: StringFieldUpdateOperationsInput | string
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    assignedAgencyId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     jobRoles?: JobRoleUncheckedUpdateManyWithoutRequirementNestedInput
     labourProfiles?: LabourProfileUncheckedUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUncheckedUpdateManyWithoutRequirementNestedInput
   }
 
-  export type UserUpsertWithoutRequirementDocumentInput = {
-    update: XOR<UserUpdateWithoutRequirementDocumentInput, UserUncheckedUpdateWithoutRequirementDocumentInput>
-    create: XOR<UserCreateWithoutRequirementDocumentInput, UserUncheckedCreateWithoutRequirementDocumentInput>
+  export type UserUpsertWithoutRequirementDocumentsInput = {
+    update: XOR<UserUpdateWithoutRequirementDocumentsInput, UserUncheckedUpdateWithoutRequirementDocumentsInput>
+    create: XOR<UserCreateWithoutRequirementDocumentsInput, UserUncheckedCreateWithoutRequirementDocumentsInput>
     where?: UserWhereInput
   }
 
-  export type UserUpdateToOneWithWhereWithoutRequirementDocumentInput = {
+  export type UserUpdateToOneWithWhereWithoutRequirementDocumentsInput = {
     where?: UserWhereInput
-    data: XOR<UserUpdateWithoutRequirementDocumentInput, UserUncheckedUpdateWithoutRequirementDocumentInput>
+    data: XOR<UserUpdateWithoutRequirementDocumentsInput, UserUncheckedUpdateWithoutRequirementDocumentsInput>
   }
 
-  export type UserUpdateWithoutRequirementDocumentInput = {
+  export type UserUpdateWithoutRequirementDocumentsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -28882,24 +30585,28 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUpdateOneWithoutUserNestedInput
-    agency?: AgencyUpdateOneWithoutUserNestedInput
-    admin?: AdminUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUpdateOneWithoutUserNestedInput
     createdBy?: UserUpdateOneWithoutCreatedUsersNestedInput
     createdUsers?: UserUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    Notification?: NotificationUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
   }
 
-  export type UserUncheckedUpdateWithoutRequirementDocumentInput = {
+  export type UserUncheckedUpdateWithoutRequirementDocumentsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -28908,17 +30615,18 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUncheckedUpdateOneWithoutUserNestedInput
-    agency?: AgencyUncheckedUpdateOneWithoutUserNestedInput
-    admin?: AdminUncheckedUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUncheckedUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUncheckedUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUncheckedUpdateOneWithoutUserNestedInput
     createdUsers?: UserUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    Notification?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserCreateWithoutAuditLogsInput = {
@@ -28926,6 +30634,9 @@ export namespace Prisma {
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -28934,17 +30645,18 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
-    client?: ClientCreateNestedOneWithoutUserInput
-    agency?: AgencyCreateNestedOneWithoutUserInput
-    admin?: AdminCreateNestedOneWithoutUserInput
+    clientProfile?: ClientCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyCreateNestedOneWithoutUserInput
+    adminProfile?: AdminCreateNestedOneWithoutUserInput
     createdBy?: UserCreateNestedOneWithoutCreatedUsersInput
     createdUsers?: UserCreateNestedManyWithoutCreatedByInput
-    LabourStatusLog?: LabourStatusLogCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
   }
 
   export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -28952,6 +30664,9 @@ export namespace Prisma {
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -28960,17 +30675,18 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
     createdById?: string | null
-    client?: ClientUncheckedCreateNestedOneWithoutUserInput
-    agency?: AgencyUncheckedCreateNestedOneWithoutUserInput
-    admin?: AdminUncheckedCreateNestedOneWithoutUserInput
+    clientProfile?: ClientUncheckedCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyUncheckedCreateNestedOneWithoutUserInput
+    adminProfile?: AdminUncheckedCreateNestedOneWithoutUserInput
     createdUsers?: UserUncheckedCreateNestedManyWithoutCreatedByInput
-    LabourStatusLog?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
-    Notification?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
   export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -28994,6 +30710,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -29002,17 +30721,18 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUpdateOneWithoutUserNestedInput
-    agency?: AgencyUpdateOneWithoutUserNestedInput
-    admin?: AdminUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUpdateOneWithoutUserNestedInput
     createdBy?: UserUpdateOneWithoutCreatedUsersNestedInput
     createdUsers?: UserUpdateManyWithoutCreatedByNestedInput
-    LabourStatusLog?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -29020,6 +30740,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -29028,24 +30751,28 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUncheckedUpdateOneWithoutUserNestedInput
-    agency?: AgencyUncheckedUpdateOneWithoutUserNestedInput
-    admin?: AdminUncheckedUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUncheckedUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUncheckedUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUncheckedUpdateOneWithoutUserNestedInput
     createdUsers?: UserUncheckedUpdateManyWithoutCreatedByNestedInput
-    LabourStatusLog?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
-  export type UserCreateWithoutNotificationInput = {
+  export type UserCreateWithoutNotificationsInput = {
     id?: string
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -29054,24 +30781,28 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
-    client?: ClientCreateNestedOneWithoutUserInput
-    agency?: AgencyCreateNestedOneWithoutUserInput
-    admin?: AdminCreateNestedOneWithoutUserInput
+    clientProfile?: ClientCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyCreateNestedOneWithoutUserInput
+    adminProfile?: AdminCreateNestedOneWithoutUserInput
     createdBy?: UserCreateNestedOneWithoutCreatedUsersInput
     createdUsers?: UserCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
+    statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
   }
 
-  export type UserUncheckedCreateWithoutNotificationInput = {
+  export type UserUncheckedCreateWithoutNotificationsInput = {
     id?: string
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -29080,40 +30811,44 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
     createdById?: string | null
-    client?: ClientUncheckedCreateNestedOneWithoutUserInput
-    agency?: AgencyUncheckedCreateNestedOneWithoutUserInput
-    admin?: AdminUncheckedCreateNestedOneWithoutUserInput
+    clientProfile?: ClientUncheckedCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyUncheckedCreateNestedOneWithoutUserInput
+    adminProfile?: AdminUncheckedCreateNestedOneWithoutUserInput
     createdUsers?: UserUncheckedCreateNestedManyWithoutCreatedByInput
     auditLogs?: AuditLogUncheckedCreateNestedManyWithoutPerformedByInput
-    LabourStatusLog?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
-    ClientDocument?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    AgencyDocument?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    RequirementDocument?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
+    statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
   }
 
-  export type UserCreateOrConnectWithoutNotificationInput = {
+  export type UserCreateOrConnectWithoutNotificationsInput = {
     where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutNotificationInput, UserUncheckedCreateWithoutNotificationInput>
+    create: XOR<UserCreateWithoutNotificationsInput, UserUncheckedCreateWithoutNotificationsInput>
   }
 
-  export type UserUpsertWithoutNotificationInput = {
-    update: XOR<UserUpdateWithoutNotificationInput, UserUncheckedUpdateWithoutNotificationInput>
-    create: XOR<UserCreateWithoutNotificationInput, UserUncheckedCreateWithoutNotificationInput>
+  export type UserUpsertWithoutNotificationsInput = {
+    update: XOR<UserUpdateWithoutNotificationsInput, UserUncheckedUpdateWithoutNotificationsInput>
+    create: XOR<UserCreateWithoutNotificationsInput, UserUncheckedCreateWithoutNotificationsInput>
     where?: UserWhereInput
   }
 
-  export type UserUpdateToOneWithWhereWithoutNotificationInput = {
+  export type UserUpdateToOneWithWhereWithoutNotificationsInput = {
     where?: UserWhereInput
-    data: XOR<UserUpdateWithoutNotificationInput, UserUncheckedUpdateWithoutNotificationInput>
+    data: XOR<UserUpdateWithoutNotificationsInput, UserUncheckedUpdateWithoutNotificationsInput>
   }
 
-  export type UserUpdateWithoutNotificationInput = {
+  export type UserUpdateWithoutNotificationsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -29122,24 +30857,28 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUpdateOneWithoutUserNestedInput
-    agency?: AgencyUpdateOneWithoutUserNestedInput
-    admin?: AdminUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUpdateOneWithoutUserNestedInput
     createdBy?: UserUpdateOneWithoutCreatedUsersNestedInput
     createdUsers?: UserUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
+    statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
   }
 
-  export type UserUncheckedUpdateWithoutNotificationInput = {
+  export type UserUncheckedUpdateWithoutNotificationsInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -29148,17 +30887,18 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
     createdById?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUncheckedUpdateOneWithoutUserNestedInput
-    agency?: AgencyUncheckedUpdateOneWithoutUserNestedInput
-    admin?: AdminUncheckedUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUncheckedUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUncheckedUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUncheckedUpdateOneWithoutUserNestedInput
     createdUsers?: UserUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
+    statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
   export type UserCreateManyCreatedByInput = {
@@ -29166,6 +30906,9 @@ export namespace Prisma {
     name: string
     email: string
     password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
     role: $Enums.UserRole
     status?: $Enums.AccountStatus
     resetRequired?: boolean
@@ -29174,6 +30917,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     deleteAt?: Date | string | null
     deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
     deletionRequestedBy?: string | null
   }
 
@@ -29192,10 +30936,23 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
+  export type NotificationCreateManyRecipientInput = {
+    id?: string
+    title: string
+    message: string
+    type: $Enums.NotificationType
+    read?: boolean
+    actionUrl?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    readAt?: Date | string | null
+  }
+
   export type LabourStatusLogCreateManyChangedByInput = {
     id?: string
-    status: $Enums.LabourStatus
+    status: $Enums.LabourProfileStatus
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     labourProfileId: string
     createdAt?: Date | string
   }
@@ -29204,8 +30961,11 @@ export namespace Prisma {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
+    description?: string | null
     verified?: boolean
     comments?: string | null
+    expiryDate?: Date | string | null
     clientId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -29215,8 +30975,11 @@ export namespace Prisma {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
+    description?: string | null
     verified?: boolean
     comments?: string | null
+    expiryDate?: Date | string | null
     agencyId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -29226,21 +30989,11 @@ export namespace Prisma {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
     description?: string | null
     requirementId: string
     createdAt?: Date | string
-  }
-
-  export type NotificationCreateManyRecipientInput = {
-    id?: string
-    title: string
-    message: string
-    type: string
-    read?: boolean
-    actionUrl?: string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: Date | string
-    readAt?: Date | string | null
+    updatedAt?: Date | string
   }
 
   export type UserUpdateWithoutCreatedByInput = {
@@ -29248,6 +31001,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -29256,17 +31012,18 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUpdateOneWithoutUserNestedInput
-    agency?: AgencyUpdateOneWithoutUserNestedInput
-    admin?: AdminUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUpdateOneWithoutUserNestedInput
     createdUsers?: UserUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCreatedByInput = {
@@ -29274,6 +31031,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -29282,17 +31042,18 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
-    client?: ClientUncheckedUpdateOneWithoutUserNestedInput
-    agency?: AgencyUncheckedUpdateOneWithoutUserNestedInput
-    admin?: AdminUncheckedUpdateOneWithoutUserNestedInput
+    clientProfile?: ClientUncheckedUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUncheckedUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUncheckedUpdateOneWithoutUserNestedInput
     createdUsers?: UserUncheckedUpdateManyWithoutCreatedByNestedInput
     auditLogs?: AuditLogUncheckedUpdateManyWithoutPerformedByNestedInput
-    LabourStatusLog?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
-    ClientDocument?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    AgencyDocument?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    RequirementDocument?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
-    Notification?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutCreatedByInput = {
@@ -29300,6 +31061,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
     role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
     status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
     resetRequired?: BoolFieldUpdateOperationsInput | boolean
@@ -29308,6 +31072,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
     deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
@@ -29356,128 +31121,11 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type LabourStatusLogUpdateWithoutChangedByInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
-    comments?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    labourProfile?: LabourProfileUpdateOneRequiredWithoutStatusLogsNestedInput
-  }
-
-  export type LabourStatusLogUncheckedUpdateWithoutChangedByInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
-    comments?: NullableStringFieldUpdateOperationsInput | string | null
-    labourProfileId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type LabourStatusLogUncheckedUpdateManyWithoutChangedByInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
-    comments?: NullableStringFieldUpdateOperationsInput | string | null
-    labourProfileId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ClientDocumentUpdateWithoutVerifiedByInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    verified?: BoolFieldUpdateOperationsInput | boolean
-    comments?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    client?: ClientUpdateOneRequiredWithoutDocumentsNestedInput
-  }
-
-  export type ClientDocumentUncheckedUpdateWithoutVerifiedByInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    verified?: BoolFieldUpdateOperationsInput | boolean
-    comments?: NullableStringFieldUpdateOperationsInput | string | null
-    clientId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type ClientDocumentUncheckedUpdateManyWithoutVerifiedByInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    verified?: BoolFieldUpdateOperationsInput | boolean
-    comments?: NullableStringFieldUpdateOperationsInput | string | null
-    clientId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type AgencyDocumentUpdateWithoutVerifiedByInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    verified?: BoolFieldUpdateOperationsInput | boolean
-    comments?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    agency?: AgencyUpdateOneRequiredWithoutDocumentsNestedInput
-  }
-
-  export type AgencyDocumentUncheckedUpdateWithoutVerifiedByInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    verified?: BoolFieldUpdateOperationsInput | boolean
-    comments?: NullableStringFieldUpdateOperationsInput | string | null
-    agencyId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type AgencyDocumentUncheckedUpdateManyWithoutVerifiedByInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    verified?: BoolFieldUpdateOperationsInput | boolean
-    comments?: NullableStringFieldUpdateOperationsInput | string | null
-    agencyId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type RequirementDocumentUpdateWithoutUploadedByInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    requirement?: RequirementUpdateOneRequiredWithoutDocumentsNestedInput
-  }
-
-  export type RequirementDocumentUncheckedUpdateWithoutUploadedByInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    requirementId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type RequirementDocumentUncheckedUpdateManyWithoutUploadedByInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    requirementId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
   export type NotificationUpdateWithoutRecipientInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
+    type?: EnumNotificationTypeFieldUpdateOperationsInput | $Enums.NotificationType
     read?: BoolFieldUpdateOperationsInput | boolean
     actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
@@ -29489,7 +31137,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
+    type?: EnumNotificationTypeFieldUpdateOperationsInput | $Enums.NotificationType
     read?: BoolFieldUpdateOperationsInput | boolean
     actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
@@ -29501,7 +31149,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
     message?: StringFieldUpdateOperationsInput | string
-    type?: StringFieldUpdateOperationsInput | string
+    type?: EnumNotificationTypeFieldUpdateOperationsInput | $Enums.NotificationType
     read?: BoolFieldUpdateOperationsInput | boolean
     actionUrl?: NullableStringFieldUpdateOperationsInput | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
@@ -29509,29 +31157,178 @@ export namespace Prisma {
     readAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
+  export type LabourStatusLogUpdateWithoutChangedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    labourProfile?: LabourProfileUpdateOneRequiredWithoutStatusLogsNestedInput
+  }
+
+  export type LabourStatusLogUncheckedUpdateWithoutChangedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    labourProfileId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LabourStatusLogUncheckedUpdateManyWithoutChangedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    labourProfileId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ClientDocumentUpdateWithoutVerifiedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
+    url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    client?: ClientUpdateOneRequiredWithoutDocumentsNestedInput
+  }
+
+  export type ClientDocumentUncheckedUpdateWithoutVerifiedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
+    url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    clientId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ClientDocumentUncheckedUpdateManyWithoutVerifiedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
+    url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    clientId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AgencyDocumentUpdateWithoutVerifiedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
+    url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    agency?: AgencyUpdateOneRequiredWithoutDocumentsNestedInput
+  }
+
+  export type AgencyDocumentUncheckedUpdateWithoutVerifiedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
+    url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    agencyId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AgencyDocumentUncheckedUpdateManyWithoutVerifiedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
+    url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    agencyId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RequirementDocumentUpdateWithoutUploadedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
+    url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    requirement?: RequirementUpdateOneRequiredWithoutDocumentsNestedInput
+  }
+
+  export type RequirementDocumentUncheckedUpdateWithoutUploadedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
+    url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    requirementId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RequirementDocumentUncheckedUpdateManyWithoutUploadedByInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
+    url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    requirementId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type RequirementCreateManyClientInput = {
     id?: string
     projectLocation?: string | null
     startDate?: Date | string | null
     contractDuration?: $Enums.ContractDuration | null
-    previousExperience?: $Enums.PreviousExperience | null
-    ticketDetails?: $Enums.TicketDetails | null
-    totalExperienceYears?: number | null
-    preferredAge?: number | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
-    assignedToId?: string | null
+    minExperience?: $Enums.ExperienceLevel | null
+    maxAge?: number | null
+    ticketType?: $Enums.TicketType | null
+    ticketProvided?: boolean
+    assignedAgencyId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    submittedAt?: Date | string | null
+    reviewedAt?: Date | string | null
   }
 
   export type ClientDocumentCreateManyClientInput = {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
+    description?: string | null
     verified?: boolean
     comments?: string | null
+    expiryDate?: Date | string | null
     verifiedById?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -29542,17 +31339,19 @@ export namespace Prisma {
     projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    assignedAgency?: AgencyUpdateOneWithoutRequirementsNestedInput
     jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
-    assignedTo?: AgencyUpdateOneWithoutRequirementsNestedInput
     labourProfiles?: LabourProfileUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUpdateManyWithoutRequirementNestedInput
     documents?: RequirementDocumentUpdateManyWithoutRequirementNestedInput
@@ -29563,16 +31362,18 @@ export namespace Prisma {
     projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
+    assignedAgencyId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     jobRoles?: JobRoleUncheckedUpdateManyWithoutRequirementNestedInput
     labourProfiles?: LabourProfileUncheckedUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUncheckedUpdateManyWithoutRequirementNestedInput
@@ -29584,35 +31385,43 @@ export namespace Prisma {
     projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
-    assignedToId?: NullableStringFieldUpdateOperationsInput | string | null
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
+    assignedAgencyId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type ClientDocumentUpdateWithoutClientInput = {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     verified?: BoolFieldUpdateOperationsInput | boolean
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    verifiedBy?: UserUpdateOneWithoutClientDocumentNestedInput
+    verifiedBy?: UserUpdateOneWithoutClientDocumentsNestedInput
   }
 
   export type ClientDocumentUncheckedUpdateWithoutClientInput = {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     verified?: BoolFieldUpdateOperationsInput | boolean
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     verifiedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -29622,107 +31431,120 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
     verified?: BoolFieldUpdateOperationsInput | boolean
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     verifiedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type AgencyDocumentCreateManyAgencyInput = {
-    id?: string
-    type: $Enums.DocumentType
-    url: string
-    verified?: boolean
-    comments?: string | null
-    verifiedById?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
   }
 
   export type LabourProfileCreateManyAgencyInput = {
     id?: string
     name: string
     age: number
-    gender: string
+    gender: $Enums.Gender
     nationality: string
+    maritalStatus?: string | null
     skills?: LabourProfileCreateskillsInput | string[]
     experienceYears: number
     education?: string | null
-    language?: LabourProfileCreatelanguageInput | string[]
-    status?: $Enums.LabourStatus
+    currentPosition?: string | null
+    currentCompany?: string | null
+    languages?: LabourProfileCreatelanguagesInput | string[]
+    englishProficiency?: string | null
+    email?: string | null
+    phone: string
+    address?: string | null
+    city?: string | null
+    country?: string | null
     cvUrl: string
-    passportCopy?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    medicalStatus?: string | null
+    medicalExpiry?: Date | string | null
+    photo?: string | null
     otherDocs?: LabourProfileCreateotherDocsInput | string[]
+    status?: $Enums.LabourProfileStatus
+    statusReason?: string | null
     requirementId: string
+    deploymentDate?: Date | string | null
+    contractStartDate?: Date | string | null
+    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
 
-  export type RequirementCreateManyAssignedToInput = {
+  export type RequirementCreateManyAssignedAgencyInput = {
     id?: string
     projectLocation?: string | null
     startDate?: Date | string | null
     contractDuration?: $Enums.ContractDuration | null
-    previousExperience?: $Enums.PreviousExperience | null
-    ticketDetails?: $Enums.TicketDetails | null
-    totalExperienceYears?: number | null
-    preferredAge?: number | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
+    minExperience?: $Enums.ExperienceLevel | null
+    maxAge?: number | null
+    ticketType?: $Enums.TicketType | null
+    ticketProvided?: boolean
     clientId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    submittedAt?: Date | string | null
+    reviewedAt?: Date | string | null
   }
 
-  export type AgencyDocumentUpdateWithoutAgencyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    verified?: BoolFieldUpdateOperationsInput | boolean
-    comments?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    verifiedBy?: UserUpdateOneWithoutAgencyDocumentNestedInput
-  }
-
-  export type AgencyDocumentUncheckedUpdateWithoutAgencyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    verified?: BoolFieldUpdateOperationsInput | boolean
-    comments?: NullableStringFieldUpdateOperationsInput | string | null
-    verifiedById?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type AgencyDocumentUncheckedUpdateManyWithoutAgencyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    verified?: BoolFieldUpdateOperationsInput | boolean
-    comments?: NullableStringFieldUpdateOperationsInput | string | null
-    verifiedById?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  export type AgencyDocumentCreateManyAgencyInput = {
+    id?: string
+    type: $Enums.DocumentType
+    url: string
+    name?: string | null
+    description?: string | null
+    verified?: boolean
+    comments?: string | null
+    expiryDate?: Date | string | null
+    verifiedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type LabourProfileUpdateWithoutAgencyInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     age?: IntFieldUpdateOperationsInput | number
-    gender?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
+    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: LabourProfileUpdateskillsInput | string[]
     experienceYears?: IntFieldUpdateOperationsInput | number
     education?: NullableStringFieldUpdateOperationsInput | string | null
-    language?: LabourProfileUpdatelanguageInput | string[]
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: LabourProfileUpdatelanguagesInput | string[]
+    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: StringFieldUpdateOperationsInput | string
-    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    photo?: NullableStringFieldUpdateOperationsInput | string | null
     otherDocs?: LabourProfileUpdateotherDocsInput | string[]
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
+    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requirement?: RequirementUpdateOneRequiredWithoutLabourProfilesNestedInput
@@ -29734,17 +31556,36 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     age?: IntFieldUpdateOperationsInput | number
-    gender?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
+    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: LabourProfileUpdateskillsInput | string[]
     experienceYears?: IntFieldUpdateOperationsInput | number
     education?: NullableStringFieldUpdateOperationsInput | string | null
-    language?: LabourProfileUpdatelanguageInput | string[]
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: LabourProfileUpdatelanguagesInput | string[]
+    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: StringFieldUpdateOperationsInput | string
-    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    photo?: NullableStringFieldUpdateOperationsInput | string | null
     otherDocs?: LabourProfileUpdateotherDocsInput | string[]
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
     requirementId?: StringFieldUpdateOperationsInput | string
+    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutLabourProfileNestedInput
@@ -29755,76 +31596,143 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     age?: IntFieldUpdateOperationsInput | number
-    gender?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
+    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: LabourProfileUpdateskillsInput | string[]
     experienceYears?: IntFieldUpdateOperationsInput | number
     education?: NullableStringFieldUpdateOperationsInput | string | null
-    language?: LabourProfileUpdatelanguageInput | string[]
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: LabourProfileUpdatelanguagesInput | string[]
+    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: StringFieldUpdateOperationsInput | string
-    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    photo?: NullableStringFieldUpdateOperationsInput | string | null
     otherDocs?: LabourProfileUpdateotherDocsInput | string[]
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
     requirementId?: StringFieldUpdateOperationsInput | string
+    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type RequirementUpdateWithoutAssignedToInput = {
+  export type RequirementUpdateWithoutAssignedAgencyInput = {
     id?: StringFieldUpdateOperationsInput | string
     projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     client?: ClientUpdateOneRequiredWithoutRequirementsNestedInput
+    jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
     labourProfiles?: LabourProfileUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUpdateManyWithoutRequirementNestedInput
     documents?: RequirementDocumentUpdateManyWithoutRequirementNestedInput
   }
 
-  export type RequirementUncheckedUpdateWithoutAssignedToInput = {
+  export type RequirementUncheckedUpdateWithoutAssignedAgencyInput = {
     id?: StringFieldUpdateOperationsInput | string
     projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
     clientId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     jobRoles?: JobRoleUncheckedUpdateManyWithoutRequirementNestedInput
     labourProfiles?: LabourProfileUncheckedUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUncheckedUpdateManyWithoutRequirementNestedInput
     documents?: RequirementDocumentUncheckedUpdateManyWithoutRequirementNestedInput
   }
 
-  export type RequirementUncheckedUpdateManyWithoutAssignedToInput = {
+  export type RequirementUncheckedUpdateManyWithoutAssignedAgencyInput = {
     id?: StringFieldUpdateOperationsInput | string
     projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    previousExperience?: NullableEnumPreviousExperienceFieldUpdateOperationsInput | $Enums.PreviousExperience | null
-    ticketDetails?: NullableEnumTicketDetailsFieldUpdateOperationsInput | $Enums.TicketDetails | null
-    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
-    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
     clientId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type AgencyDocumentUpdateWithoutAgencyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
+    url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifiedBy?: UserUpdateOneWithoutAgencyDocumentsNestedInput
+  }
+
+  export type AgencyDocumentUncheckedUpdateWithoutAgencyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
+    url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    verifiedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AgencyDocumentUncheckedUpdateManyWithoutAgencyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
+    url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    verified?: BoolFieldUpdateOperationsInput | boolean
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    expiryDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    verifiedById?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -29832,9 +31740,10 @@ export namespace Prisma {
   export type JobRoleCreateManyRequirementInput = {
     id?: string
     title: string
-    quantity: number
+    quantity?: number
     nationality: string
-    salary: string
+    salary?: number | null
+    salaryCurrency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -29843,17 +31752,36 @@ export namespace Prisma {
     id?: string
     name: string
     age: number
-    gender: string
+    gender: $Enums.Gender
     nationality: string
+    maritalStatus?: string | null
     skills?: LabourProfileCreateskillsInput | string[]
     experienceYears: number
     education?: string | null
-    language?: LabourProfileCreatelanguageInput | string[]
-    status?: $Enums.LabourStatus
+    currentPosition?: string | null
+    currentCompany?: string | null
+    languages?: LabourProfileCreatelanguagesInput | string[]
+    englishProficiency?: string | null
+    email?: string | null
+    phone: string
+    address?: string | null
+    city?: string | null
+    country?: string | null
     cvUrl: string
-    passportCopy?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    medicalStatus?: string | null
+    medicalExpiry?: Date | string | null
+    photo?: string | null
     otherDocs?: LabourProfileCreateotherDocsInput | string[]
+    status?: $Enums.LabourProfileStatus
+    statusReason?: string | null
     agencyId: string
+    deploymentDate?: Date | string | null
+    contractStartDate?: Date | string | null
+    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -29862,10 +31790,11 @@ export namespace Prisma {
     id?: string
     name: string
     description: string
-    status?: string
+    status?: $Enums.ProcedureStatus
     dueDate?: Date | string | null
     completedDate?: Date | string | null
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     labourProfileId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -29875,9 +31804,11 @@ export namespace Prisma {
     id?: string
     type: $Enums.DocumentType
     url: string
+    name?: string | null
     description?: string | null
     uploadedById: string
     createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type JobRoleUpdateWithoutRequirementInput = {
@@ -29885,7 +31816,8 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
     nationality?: StringFieldUpdateOperationsInput | string
-    salary?: StringFieldUpdateOperationsInput | string
+    salary?: NullableFloatFieldUpdateOperationsInput | number | null
+    salaryCurrency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -29895,7 +31827,8 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
     nationality?: StringFieldUpdateOperationsInput | string
-    salary?: StringFieldUpdateOperationsInput | string
+    salary?: NullableFloatFieldUpdateOperationsInput | number | null
+    salaryCurrency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -29905,7 +31838,8 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
     nationality?: StringFieldUpdateOperationsInput | string
-    salary?: StringFieldUpdateOperationsInput | string
+    salary?: NullableFloatFieldUpdateOperationsInput | number | null
+    salaryCurrency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -29914,16 +31848,35 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     age?: IntFieldUpdateOperationsInput | number
-    gender?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
+    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: LabourProfileUpdateskillsInput | string[]
     experienceYears?: IntFieldUpdateOperationsInput | number
     education?: NullableStringFieldUpdateOperationsInput | string | null
-    language?: LabourProfileUpdatelanguageInput | string[]
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: LabourProfileUpdatelanguagesInput | string[]
+    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: StringFieldUpdateOperationsInput | string
-    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    photo?: NullableStringFieldUpdateOperationsInput | string | null
     otherDocs?: LabourProfileUpdateotherDocsInput | string[]
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
+    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     agency?: AgencyUpdateOneRequiredWithoutLabourProfilesNestedInput
@@ -29935,17 +31888,36 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     age?: IntFieldUpdateOperationsInput | number
-    gender?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
+    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: LabourProfileUpdateskillsInput | string[]
     experienceYears?: IntFieldUpdateOperationsInput | number
     education?: NullableStringFieldUpdateOperationsInput | string | null
-    language?: LabourProfileUpdatelanguageInput | string[]
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: LabourProfileUpdatelanguagesInput | string[]
+    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: StringFieldUpdateOperationsInput | string
-    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    photo?: NullableStringFieldUpdateOperationsInput | string | null
     otherDocs?: LabourProfileUpdateotherDocsInput | string[]
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
     agencyId?: StringFieldUpdateOperationsInput | string
+    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutLabourProfileNestedInput
@@ -29956,17 +31928,36 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     age?: IntFieldUpdateOperationsInput | number
-    gender?: StringFieldUpdateOperationsInput | string
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
+    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
     skills?: LabourProfileUpdateskillsInput | string[]
     experienceYears?: IntFieldUpdateOperationsInput | number
     education?: NullableStringFieldUpdateOperationsInput | string | null
-    language?: LabourProfileUpdatelanguageInput | string[]
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
+    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
+    languages?: LabourProfileUpdatelanguagesInput | string[]
+    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    country?: NullableStringFieldUpdateOperationsInput | string | null
     cvUrl?: StringFieldUpdateOperationsInput | string
-    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    photo?: NullableStringFieldUpdateOperationsInput | string | null
     otherDocs?: LabourProfileUpdateotherDocsInput | string[]
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
     agencyId?: StringFieldUpdateOperationsInput | string
+    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -29975,10 +31966,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumProcedureStatusFieldUpdateOperationsInput | $Enums.ProcedureStatus
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     labourProfile?: LabourProfileUpdateOneWithoutProceduresNestedInput
@@ -29988,10 +31980,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumProcedureStatusFieldUpdateOperationsInput | $Enums.ProcedureStatus
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     labourProfileId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30001,10 +31994,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumProcedureStatusFieldUpdateOperationsInput | $Enums.ProcedureStatus
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     labourProfileId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30014,33 +32008,40 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    uploadedBy?: UserUpdateOneRequiredWithoutRequirementDocumentNestedInput
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    uploadedBy?: UserUpdateOneRequiredWithoutRequirementDocumentsNestedInput
   }
 
   export type RequirementDocumentUncheckedUpdateWithoutRequirementInput = {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     uploadedById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type RequirementDocumentUncheckedUpdateManyWithoutRequirementInput = {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
     url?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
     description?: NullableStringFieldUpdateOperationsInput | string | null
     uploadedById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type LabourStatusLogCreateManyLabourProfileInput = {
     id?: string
-    status: $Enums.LabourStatus
+    status: $Enums.LabourProfileStatus
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     changedById: string
     createdAt?: Date | string
   }
@@ -30049,10 +32050,11 @@ export namespace Prisma {
     id?: string
     name: string
     description: string
-    status?: string
+    status?: $Enums.ProcedureStatus
     dueDate?: Date | string | null
     completedDate?: Date | string | null
     comments?: string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     requirementId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -30060,24 +32062,27 @@ export namespace Prisma {
 
   export type LabourStatusLogUpdateWithoutLabourProfileInput = {
     id?: StringFieldUpdateOperationsInput | string
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    changedBy?: UserUpdateOneRequiredWithoutLabourStatusLogNestedInput
+    changedBy?: UserUpdateOneRequiredWithoutStatusLogsNestedInput
   }
 
   export type LabourStatusLogUncheckedUpdateWithoutLabourProfileInput = {
     id?: StringFieldUpdateOperationsInput | string
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     changedById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type LabourStatusLogUncheckedUpdateManyWithoutLabourProfileInput = {
     id?: StringFieldUpdateOperationsInput | string
-    status?: EnumLabourStatusFieldUpdateOperationsInput | $Enums.LabourStatus
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     changedById?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -30086,10 +32091,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumProcedureStatusFieldUpdateOperationsInput | $Enums.ProcedureStatus
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requirement?: RequirementUpdateOneWithoutProceduresNestedInput
@@ -30099,10 +32105,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumProcedureStatusFieldUpdateOperationsInput | $Enums.ProcedureStatus
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     requirementId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -30112,10 +32119,11 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     description?: StringFieldUpdateOperationsInput | string
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumProcedureStatusFieldUpdateOperationsInput | $Enums.ProcedureStatus
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     completedDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     comments?: NullableStringFieldUpdateOperationsInput | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     requirementId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

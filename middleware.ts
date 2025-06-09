@@ -67,7 +67,7 @@ export async function middleware(request: NextRequest) {
   }
 
   if (token.status !== "VERIFIED") {
-    return redirectToVerification(request);
+    return redirectToVerification(request, token.email as string);
   }
 
   if (token.resetRequired && pathname !== "/auth/reset-password") {
@@ -83,8 +83,6 @@ export async function middleware(request: NextRequest) {
 
   return handleRoleBasedRouting(token.role as UserRole, pathname, request);
 }
-
-// Helper functions
 
 function shouldSkipMiddleware(pathname: string): boolean {
   return (
@@ -123,8 +121,12 @@ function redirectToLogin(request: NextRequest, error?: string): NextResponse {
   return NextResponse.redirect(loginUrl);
 }
 
-function redirectToVerification(request: NextRequest): NextResponse {
+function redirectToVerification(
+  request: NextRequest,
+  email: string
+): NextResponse {
   const verifyUrl = new URL("/auth/verify-account", request.url);
+  verifyUrl.searchParams.set("email", email);
   verifyUrl.searchParams.set("callbackUrl", request.nextUrl.href);
   return NextResponse.redirect(verifyUrl);
 }

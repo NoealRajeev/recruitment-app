@@ -1,4 +1,3 @@
-// app/(public)/auth/verify-account/page.tsx
 "use client";
 import { Card } from "@/components/shared/Card";
 import { Button } from "@/components/ui/Button";
@@ -17,8 +16,9 @@ export default function VerifyAccount() {
   const [userStatus, setUserStatus] = useState<AccountStatus | null>(null);
   const { language, setLanguage, t } = useLanguage();
 
-  // Form state for agency documents
+  // Form state for documents
   const [formData, setFormData] = useState({
+    crFile: null as File | null,
     licenseFile: null as File | null,
     insuranceFile: null as File | null,
     idProof: null as File | null,
@@ -37,7 +37,6 @@ export default function VerifyAccount() {
 
   const fetchUserData = async (email: string) => {
     try {
-      // Replace with your actual API endpoint
       const response = await fetch(
         `/api/users?email=${encodeURIComponent(email)}`
       );
@@ -77,13 +76,23 @@ export default function VerifyAccount() {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("email", email);
-      if (formData.licenseFile)
-        formDataToSend.append("licenseFile", formData.licenseFile);
-      if (formData.insuranceFile)
-        formDataToSend.append("insuranceFile", formData.insuranceFile);
-      if (formData.idProof) formDataToSend.append("idProof", formData.idProof);
-      if (formData.addressProof)
-        formDataToSend.append("addressProof", formData.addressProof);
+
+      // Append files based on user role
+      if (userRole === UserRole.RECRUITMENT_AGENCY) {
+        if (formData.licenseFile)
+          formDataToSend.append("licenseFile", formData.licenseFile);
+        if (formData.insuranceFile)
+          formDataToSend.append("insuranceFile", formData.insuranceFile);
+        if (formData.idProof)
+          formDataToSend.append("idProof", formData.idProof);
+        if (formData.addressProof)
+          formDataToSend.append("addressProof", formData.addressProof);
+      } else if (userRole === UserRole.CLIENT_ADMIN) {
+        if (formData.crFile) formDataToSend.append("crFile", formData.crFile);
+        if (formData.licenseFile)
+          formDataToSend.append("licenseFile", formData.licenseFile);
+      }
+
       formData.otherDocuments.forEach((file, index) => {
         formDataToSend.append(`otherDocuments[${index}]`, file);
       });
@@ -158,8 +167,8 @@ export default function VerifyAccount() {
     );
   }
 
-  // Show document upload form for agencies
-  if (userRole === UserRole.RECRUITMENT_AGENCY) {
+  // Show document upload form for users with PENDING_SUBMISSION status
+  if (userStatus === "PENDING_SUBMISSION") {
     return (
       <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
         <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
@@ -187,42 +196,69 @@ export default function VerifyAccount() {
               </div>
 
               <div className="grid grid-cols-1 gap-8 mt-6">
-                <div className="space-y-4">
-                  <Input
-                    label={t.businessLicense}
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange(e, "licenseFile")}
-                    required
-                    id="licenseFile"
-                  />
-                  <Input
-                    label={t.insuranceCertificate}
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange(e, "insuranceFile")}
-                    required
-                    id="insuranceFile"
-                  />
-                  <Input
-                    label={t.idProof}
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange(e, "idProof")}
-                    required
-                    id="idProof"
-                  />
-                </div>
+                {/* Show different documents based on user role */}
+                {userRole === UserRole.RECRUITMENT_AGENCY ? (
+                  <>
+                    <div className="space-y-4">
+                      <Input
+                        label={t.businessLicense}
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange(e, "licenseFile")}
+                        required
+                        id="licenseFile"
+                      />
+                      <Input
+                        label={t.insuranceCertificate}
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange(e, "insuranceFile")}
+                        required
+                        id="insuranceFile"
+                      />
+                      <Input
+                        label={t.idProof}
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange(e, "idProof")}
+                        required
+                        id="idProof"
+                      />
+                    </div>
+
+                    <div className="space-y-4">
+                      <Input
+                        label={t.addressProof}
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange(e, "addressProof")}
+                        required
+                        id="addressProof"
+                      />
+                    </div>
+                  </>
+                ) : userRole === UserRole.CLIENT_ADMIN ? (
+                  <div className="space-y-4">
+                    <Input
+                      label={t.companyRegistration}
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => handleFileChange(e, "crFile")}
+                      required
+                      id="crFile"
+                    />
+                    <Input
+                      label={t.businessLicense}
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => handleFileChange(e, "licenseFile")}
+                      required
+                      id="licenseFile"
+                    />
+                  </div>
+                ) : null}
 
                 <div className="space-y-4">
-                  <Input
-                    label={t.addressProof}
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange(e, "addressProof")}
-                    required
-                    id="addressProof"
-                  />
                   <Input
                     label={t.otherDocuments}
                     type="file"
@@ -239,10 +275,13 @@ export default function VerifyAccount() {
                   onClick={handleSubmit}
                   disabled={
                     isSubmitting ||
-                    !formData.licenseFile ||
-                    !formData.insuranceFile ||
-                    !formData.idProof ||
-                    !formData.addressProof
+                    (userRole === UserRole.RECRUITMENT_AGENCY &&
+                      (!formData.licenseFile ||
+                        !formData.insuranceFile ||
+                        !formData.idProof ||
+                        !formData.addressProof)) ||
+                    (userRole === UserRole.CLIENT_ADMIN &&
+                      (!formData.crFile || !formData.licenseFile))
                   }
                   className="px-8 py-2 w-full max-w-xs"
                 >
@@ -282,7 +321,7 @@ export default function VerifyAccount() {
     );
   }
 
-  // Default view for clients or while loading
+  // Default view for users not in PENDING_SUBMISSION status
   return (
     <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
       <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative ">
@@ -316,10 +355,20 @@ export default function VerifyAccount() {
               </svg>
             </div>
             <h1 className="text-2xl font-semibold text-gray-800 mb-2">
-              {t.registrationSubmitted}
+              {userStatus === "PENDING_REVIEW"
+                ? t.registrationSubmitted
+                : t.verificationComplete}
             </h1>
-            <p className="text-gray-600 mb-4">{t.registrationUnderReview}</p>
-            <p className="text-gray-500 text-sm mb-6">{t.reviewProcessTime}</p>
+            <p className="text-gray-600 mb-4">
+              {userStatus === "PENDING_REVIEW"
+                ? t.registrationUnderReview
+                : t.accountVerified}
+            </p>
+            {userStatus === "PENDING_REVIEW" && (
+              <p className="text-gray-500 text-sm mb-6">
+                {t.reviewProcessTime}
+              </p>
+            )}
             <Button
               onClick={() => router.push("/")}
               className="w-full max-w-xs mx-auto"

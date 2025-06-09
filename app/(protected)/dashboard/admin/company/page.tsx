@@ -1,302 +1,383 @@
 "use client";
-
+import { Card } from "@/components/shared/Card";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { Info, ArrowLeft, ArrowRight, ListFilter } from "lucide-react";
-import { useToast } from "@/context/toast-provider";
-import { updateCompanyStatus } from "@/lib/api/client";
-import CompanyCardContent from "@/components/shared/Cards/CompanyCardContent";
-import { ClientWithUser } from "@/types";
+import { AccountStatus, UserRole } from "@prisma/client";
+import { useLanguage } from "@/context/LanguageContext";
 
-export default function Company() {
-  const [pendingIndex, setPendingIndex] = useState(0);
-  const [pendingCompanies, setPendingCompanies] = useState<ClientWithUser[]>(
-    []
-  );
-  const [verifiedCompanies, setVerifiedCompanies] = useState<ClientWithUser[]>(
-    []
-  );
-  const [loading, setLoading] = useState(true);
+export default function VerifyAccount() {
   const router = useRouter();
-  const { toast } = useToast();
+  const searchParams = useSearchParams();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [email, setEmail] = useState("");
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [userStatus, setUserStatus] = useState<AccountStatus | null>(null);
+  const { language, setLanguage, t } = useLanguage();
 
-  const fetchCompanies = async () => {
-    try {
-      setLoading(true);
-      const [pendingRes, verifiedRes] = await Promise.all([
-        fetch("/api/clients?status=PENDING_REVIEW"),
-        fetch("/api/clients?status=VERIFIED"),
-      ]);
+  // Form state for documents
+  const [formData, setFormData] = useState({
+    crFile: null as File | null,
+    licenseFile: null as File | null,
+    insuranceFile: null as File | null,
+    idProof: null as File | null,
+    addressProof: null as File | null,
+    otherDocuments: [] as File[],
+  });
 
-      if (!pendingRes.ok || !verifiedRes.ok) {
-        throw new Error("Failed to fetch companies");
-      }
-
-      const [pendingData, verifiedData] = await Promise.all([
-        pendingRes.json(),
-        verifiedRes.json(),
-      ]);
-
-      setPendingCompanies(pendingData);
-      setVerifiedCompanies(verifiedData);
-    } catch (error) {
-      console.error("Error fetching companies:", error);
-      toast({
-        type: "error",
-        message: "Failed to load companies. Please try again.",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Fetch user data based on email from URL
   useEffect(() => {
-    fetchCompanies();
-  }, []);
+    const emailParam = searchParams.get("email");
+    if (emailParam) {
+      setEmail(emailParam);
+      fetchUserData(emailParam);
+    }
+  }, [searchParams]);
 
-  const handleUpdateStatus = async (
-    clientId: string,
-    status: "VERIFIED" | "REJECTED" | "PENDING_SUBMISSION"
-  ) => {
+  const fetchUserData = async (email: string) => {
     try {
-      const reason =
-        status === "VERIFIED"
-          ? "Approved by admin after review"
-          : "Rejected by admin after review";
-
-      await updateCompanyStatus(clientId, status, reason, toast);
-
-      // Update local state
-      if (status === "VERIFIED") {
-        const updatedCompany = pendingCompanies.find((c) => c.id === clientId);
-        if (updatedCompany) {
-          setVerifiedCompanies((prev) => [
-            ...prev,
-            {
-              ...updatedCompany,
-              user: { ...updatedCompany.user, status: "VERIFIED" },
-            },
-          ]);
-        }
-      }
-
-      setPendingCompanies((prev) => prev.filter((c) => c.id !== clientId));
-      setPendingIndex((prev) =>
-        Math.max(0, Math.min(prev, pendingCompanies.length - 3))
+      const response = await fetch(
+        `/api/users?email=${encodeURIComponent(email)}`
       );
-
-      toast({
-        type: "success",
-        message: `Company ${status.toLowerCase()} successfully`,
-      });
+      if (response.ok) {
+        const userData = await response.json();
+        setUserRole(userData.role);
+        setUserStatus(userData.status);
+      }
     } catch (error) {
-      console.error("Error updating status:", error);
-      // Error toast is handled in updateCompanyStatus
+      console.error("Failed to fetch user data:", error);
     }
   };
 
-  const visibleCompanies = pendingCompanies.slice(
-    pendingIndex,
-    pendingIndex + 2
-  );
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: keyof typeof formData
+  ) => {
+    if (e.target.files) {
+      if (field === "otherDocuments") {
+        setFormData((prev) => ({
+          ...prev,
+          otherDocuments: Array.from(e.target.files || []),
+        }));
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          [field]: e.target.files?.[0] || null,
+        }));
+      }
+    }
+  };
 
-  if (loading) {
+  const handleSubmit = async () => {
+    if (!email) return;
+
+    setIsSubmitting(true);
+    try {
+      const formDataToSend = new FormData();
+      formDataToSend.append("email", email);
+
+      // Append files based on user role
+      if (userRole === UserRole.RECRUITMENT_AGENCY) {
+        if (formData.licenseFile)
+          formDataToSend.append("licenseFile", formData.licenseFile);
+        if (formData.insuranceFile)
+          formDataToSend.append("insuranceFile", formData.insuranceFile);
+        if (formData.idProof)
+          formDataToSend.append("idProof", formData.idProof);
+        if (formData.addressProof)
+          formDataToSend.append("addressProof", formData.addressProof);
+      } else if (userRole === UserRole.CLIENT_ADMIN) {
+        if (formData.crFile) formDataToSend.append("crFile", formData.crFile);
+        if (formData.licenseFile)
+          formDataToSend.append("licenseFile", formData.licenseFile);
+      }
+
+      formData.otherDocuments.forEach((file, index) => {
+        formDataToSend.append(`otherDocuments[${index}]`, file);
+      });
+
+      const response = await fetch("/api/verify-account", {
+        method: "POST",
+        body: formDataToSend,
+      });
+
+      if (response.ok) {
+        router.push("/auth/verify-account?status=submitted");
+      } else {
+        throw new Error("Submission failed");
+      }
+    } catch (error) {
+      console.error("Submission failed:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // If documents have been submitted, show success message
+  if (userStatus === "SUBMITTED") {
     return (
-      <div className="px-6 py-8 flex justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#3D1673]"></div>
+      <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
+        <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
+          <div className="flex-1 mx-16 rounded-lg py-8 flex flex-col justify-between">
+            <div className="absolute top-6 right-6">
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as "en" | "ar")}
+                className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                aria-label="Select language"
+              >
+                <option value="en">English</option>
+                <option value="ar">العربية</option>
+              </select>
+            </div>
+            <Card className="p-6 text-center">
+              <div className="mb-6">
+                <svg
+                  className="mx-auto h-16 w-16 text-green-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-semibold text-gray-800 mb-2">
+                {t.documentsSubmitted}
+              </h1>
+              <p className="text-gray-600 mb-6">
+                {t.documentsSubmittedMessage}
+              </p>
+              <Button
+                onClick={() => router.push("/")}
+                className="w-full max-w-xs mx-auto"
+              >
+                {t.returnToHome}
+              </Button>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="px-6 space-y-8">
-      {/* Header and Filter
-      <div className="flex justify-between items-center">
-        <ListFilter className="text-[#3D1673] cursor-pointer" />
-      </div> */}
-
-      {/* Pending Companies */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Pending Review</h2>
-        {pendingCompanies.length === 0 ? (
-          <p className="text-gray-500">No companies pending review</p>
-        ) : (
-          <>
-            <div className="space-y-4">
-              {visibleCompanies.map((company) => (
-                <CompanyCard
-                  key={company.id}
-                  company={company}
-                  onStatusUpdate={handleUpdateStatus}
-                />
-              ))}
-            </div>
-            <PaginationControls
-              currentIndex={pendingIndex}
-              totalItems={pendingCompanies.length}
-              itemsPerPage={2}
-              onPrev={() => setPendingIndex((prev) => Math.max(0, prev - 1))}
-              onNext={() =>
-                setPendingIndex((prev) =>
-                  Math.min(pendingCompanies.length - 2, prev + 1)
-                )
-              }
-            />
-          </>
-        )}
-      </section>
-
-      {/* Verified Companies */}
-      <section>
-        <h2 className="text-xl font-semibold mb-4">Verified Companies</h2>
-        {verifiedCompanies.length === 0 ? (
-          <p className="text-gray-500">No verified companies found</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
-            {verifiedCompanies.map((company) => (
-              <CompanyCardContent
-                key={company.id}
-                companyName={company.companyName}
-                email={company.user.email}
-                phoneNo={company.phone || "N/A"}
-                noSub={company.requirements?.length.toString() || "0"}
-                logoUrl={company.image || "/default-company.png"}
-                onClick={() => router.push(`/companies/${company.id}`)}
-              />
-            ))}
-          </div>
-        )}
-      </section>
-    </div>
-  );
-}
-
-function CompanyCard({
-  company,
-  onStatusUpdate,
-}: {
-  company: ClientWithUser;
-  onStatusUpdate: (
-    id: string,
-    status: "PENDING_SUBMISSION" | "REJECTED"
-  ) => void;
-}) {
-  return (
-    <div className="flex w-full">
-      <div className="bg-[#EDDDF3] p-6 rounded-xl flex flex-col lg:flex-row justify-between gap-6 items-center shadow-md text-[#2C0053] w-full">
-        {/* Company Info */}
-        <div className="flex items-center gap-5">
-          {company.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={company.image}
-              alt={company.companyName}
-              className="w-16 h-16 object-contain rounded-full"
-            />
-          ) : (
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-              <span className="text-lg font-bold text-gray-500">
-                {company.companyName.charAt(0)}
-              </span>
-            </div>
-          )}
-          <div>
-            <h2 className="text-xl font-bold text-[#524B6B]">
-              {company.companyName}
-            </h2>
-            <p className="text-sm text-[#524B6B]">
-              Registration: {company.registrationNo || "N/A"}
-            </p>
-            <p className="text-sm text-[#524B6B]">
-              Sector: {company.companySector || "N/A"}
-            </p>
-            {company.website && (
-              <a
-                href={company.website}
-                className="text-sm text-blue-600 hover:underline"
-                target="_blank"
-                rel="noopener noreferrer"
+  // Show document upload form for users with PENDING_SUBMISSION status
+  if (userStatus === "PENDING_SUBMISSION") {
+    return (
+      <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
+        <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
+          <div className="flex-1 mx-16 rounded-lg py-8 flex flex-col justify-between">
+            <div className="absolute top-6 right-6">
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as "en" | "ar")}
+                className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                aria-label="Select language"
               >
-                Visit Website
-              </a>
-            )}
-          </div>
-        </div>
+                <option value="en">English</option>
+                <option value="ar">العربية</option>
+              </select>
+            </div>
+            <Card className="p-6">
+              <div className="text-center mb-6">
+                <h1 className="text-2xl font-semibold mb-1">
+                  {t.completeYourRegistration}
+                </h1>
+                <p className="text-gray-600">
+                  {t.uploadRequiredDocuments}{" "}
+                  <span className="font-medium">{email}</span>
+                </p>
+              </div>
 
-        {/* Contact Info */}
-        <div className="text-sm text-[#524B6B]">
-          <h3 className="text-lg font-bold mb-2">Contact</h3>
-          <p>{company.user.name}</p>
-          <p>{company.user.email}</p>
-          <p>{company.phone || "N/A"}</p>
-        </div>
+              <div className="grid grid-cols-1 gap-8 mt-6">
+                {/* Show different documents based on user role */}
+                {userRole === UserRole.RECRUITMENT_AGENCY ? (
+                  <>
+                    <div className="space-y-4">
+                      <Input
+                        label={t.businessLicense}
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange(e, "licenseFile")}
+                        required
+                        id="licenseFile"
+                      />
+                      <Input
+                        label={t.insuranceCertificate}
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange(e, "insuranceFile")}
+                        required
+                        id="insuranceFile"
+                      />
+                      <Input
+                        label={t.idProof}
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange(e, "idProof")}
+                        required
+                        id="idProof"
+                      />
+                    </div>
 
-        {/* Status */}
-        <div className="flex flex-col items-center">
-          <div className="text-center">
-            <Info className="hidden md:inline text-white bg-black/80 rounded-full h-10 w-10 mb-3" />
-            <span className="text-red-700 px-3 py-1 text-xs">Pending</span>
+                    <div className="space-y-4">
+                      <Input
+                        label={t.addressProof}
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleFileChange(e, "addressProof")}
+                        required
+                        id="addressProof"
+                      />
+                    </div>
+                  </>
+                ) : userRole === UserRole.CLIENT_ADMIN ? (
+                  <div className="space-y-4">
+                    <Input
+                      label={t.companyRegistration}
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => handleFileChange(e, "crFile")}
+                      required
+                      id="crFile"
+                    />
+                    <Input
+                      label={t.businessLicense}
+                      type="file"
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => handleFileChange(e, "licenseFile")}
+                      required
+                      id="licenseFile"
+                    />
+                  </div>
+                ) : null}
+
+                <div className="space-y-4">
+                  <Input
+                    label={t.otherDocuments}
+                    type="file"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => handleFileChange(e, "otherDocuments")}
+                    id="otherDocuments"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-8 flex justify-center">
+                <Button
+                  onClick={handleSubmit}
+                  disabled={
+                    isSubmitting ||
+                    (userRole === UserRole.RECRUITMENT_AGENCY &&
+                      (!formData.licenseFile ||
+                        !formData.insuranceFile ||
+                        !formData.idProof ||
+                        !formData.addressProof)) ||
+                    (userRole === UserRole.CLIENT_ADMIN &&
+                      (!formData.crFile || !formData.licenseFile))
+                  }
+                  className="px-8 py-2 w-full max-w-xs"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      {t.submitting}
+                    </>
+                  ) : (
+                    t.submitDocuments
+                  )}
+                </Button>
+              </div>
+            </Card>
           </div>
         </div>
       </div>
+    );
+  }
 
-      {/* Action Buttons */}
-      <div className="flex flex-col justify-evenly ml-4">
-        <button
-          className="bg-[#3D1673] text-white px-4 py-1.5 rounded-md hover:bg-[#2b0e54]"
-          onClick={() => onStatusUpdate(company.id, "PENDING_SUBMISSION")}
-        >
-          Approve
-        </button>
-        <button
-          className="bg-red-600 text-white px-4 py-1.5 rounded-md hover:bg-red-700 mt-2"
-          onClick={() => onStatusUpdate(company.id, "REJECTED")}
-        >
-          Reject
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function PaginationControls({
-  currentIndex,
-  totalItems,
-  itemsPerPage,
-  onPrev,
-  onNext,
-}: {
-  currentIndex: number;
-  totalItems: number;
-  itemsPerPage: number;
-  onPrev: () => void;
-  onNext: () => void;
-}) {
-  const canPrev = currentIndex > 0;
-  const canNext = currentIndex + itemsPerPage < totalItems;
-
+  // Default view for users not in PENDING_SUBMISSION status
   return (
-    <div className="flex justify-between items-center mt-4">
-      <button
-        onClick={onPrev}
-        disabled={!canPrev}
-        className={`flex items-center gap-1 ${canPrev ? "text-[#3D1673] hover:text-[#2b0e54]" : "text-gray-400 cursor-not-allowed"}`}
-      >
-        <ArrowLeft className={canPrev ? "" : "opacity-50"} />
-        Previous
-      </button>
-      <span className="text-sm text-gray-600">
-        {Math.min(currentIndex + 1, totalItems)}-
-        {Math.min(currentIndex + itemsPerPage, totalItems)} of {totalItems}
-      </span>
-      <button
-        onClick={onNext}
-        disabled={!canNext}
-        className={`flex items-center gap-1 ${canNext ? "text-[#3D1673] hover:text-[#2b0e54]" : "text-gray-400 cursor-not-allowed"}`}
-      >
-        Next
-        <ArrowRight className={canNext ? "" : "opacity-50"} />
-      </button>
+    <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
+      <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative ">
+        <div className="flex-1 mx-16 rounded-lg py-8 flex flex-col justify-between">
+          <div className="absolute top-6 right-6">
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value as "en" | "ar")}
+              className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+              aria-label="Select language"
+            >
+              <option value="en">English</option>
+              <option value="ar">العربية</option>
+            </select>
+          </div>
+          <Card className="p-6 text-center">
+            <div className="mb-6">
+              <svg
+                className="mx-auto h-16 w-16 text-[#2C0053]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <h1 className="text-2xl font-semibold text-gray-800 mb-2">
+              {userStatus === "PENDING_REVIEW"
+                ? t.registrationSubmitted
+                : t.verificationComplete}
+            </h1>
+            <p className="text-gray-600 mb-4">
+              {userStatus === "PENDING_REVIEW"
+                ? t.registrationUnderReview
+                : t.accountVerified}
+            </p>
+            {userStatus === "PENDING_REVIEW" && (
+              <p className="text-gray-500 text-sm mb-6">
+                {t.reviewProcessTime}
+              </p>
+            )}
+            <Button
+              onClick={() => router.push("/")}
+              className="w-full max-w-xs mx-auto"
+            >
+              {t.returnToHome}
+            </Button>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

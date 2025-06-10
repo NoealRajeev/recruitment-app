@@ -19,21 +19,16 @@ type ClientWithUser = {
   requirements: {
     id: string;
   }[];
+  documents?: ClientDocument[];
 };
 
-export interface ClientDocument {
+type ClientDocument = {
   id: string;
-  type: DocumentType;
+  type: string;
   url: string;
-  name?: string;
-  description?: string;
   verified: boolean;
-  comments?: string;
-  expiryDate?: Date;
   createdAt: Date;
-  updatedAt: Date;
-}
-
+};
 export type AuditLog = {
   id: string;
   action: AuditAction;

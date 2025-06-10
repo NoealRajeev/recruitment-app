@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { AccountStatus, UserRole } from "@prisma/client";
 import { useLanguage } from "@/context/LanguageContext";
+import { useToast } from "@/context/toast-provider";
 
 export default function VerifyAccount() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function VerifyAccount() {
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [userStatus, setUserStatus] = useState<AccountStatus | null>(null);
   const { language, setLanguage, t } = useLanguage();
+  const { toast } = useToast();
 
   // Form state for documents
   const [formData, setFormData] = useState({
@@ -70,12 +72,13 @@ export default function VerifyAccount() {
   };
 
   const handleSubmit = async () => {
-    if (!email) return;
+    if (!email || !userRole) return;
 
     setIsSubmitting(true);
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("email", email);
+      formDataToSend.append("userRole", userRole);
 
       // Append files based on user role
       if (userRole === UserRole.RECRUITMENT_AGENCY) {
@@ -94,7 +97,7 @@ export default function VerifyAccount() {
       }
 
       formData.otherDocuments.forEach((file, index) => {
-        formDataToSend.append(`otherDocuments[${index}]`, file);
+        formDataToSend.append(`otherDocuments`, file);
       });
 
       const response = await fetch("/api/verify-account", {
@@ -103,19 +106,33 @@ export default function VerifyAccount() {
       });
 
       if (response.ok) {
+        toast({
+          type: "success",
+          message: "Document Submitted",
+        });
         router.push("/auth/verify-account?status=submitted");
       } else {
-        throw new Error("Submission failed");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Submission failed");
       }
     } catch (error) {
+      toast({
+        type: "error",
+        message:
+          error instanceof Error ? error.message : "Failed to submit documents",
+      });
       console.error("Submission failed:", error);
+      // You might want to show an error message to the user here
     } finally {
       setIsSubmitting(false);
     }
   };
 
   // If documents have been submitted, show success message
-  if (userStatus === "SUBMITTED") {
+  if (
+    userStatus === "SUBMITTED" ||
+    searchParams.get("status") === "submitted"
+  ) {
     return (
       <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
         <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">

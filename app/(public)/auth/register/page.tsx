@@ -462,7 +462,9 @@ export default function RegisterPage() {
       });
 
       // Redirect to pending review page
-      router.push("/auth/verify-account");
+      router.push(
+        `/auth/verify-account?email=${encodeURIComponent(formData.email)}`
+      );
     } catch (error) {
       console.error("Registration failed:", error);
       toast({

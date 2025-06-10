@@ -86,7 +86,9 @@ export default function LoginPage() {
       if (result?.error) {
         if (result.error === "Account not verified") {
           // Redirect to verification page with email as query param
-          router.push("/auth/verify-account");
+          router.push(
+            `/auth/verify-account?email=${encodeURIComponent(formData.email)}`
+          );
           return;
         }
         throw new Error(result.error);

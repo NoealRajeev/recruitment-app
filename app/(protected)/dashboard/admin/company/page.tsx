@@ -1,15 +1,47 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Info, ArrowLeft, ArrowRight } from "lucide-react";
 import { useToast } from "@/context/toast-provider";
 import { updateCompanyStatus } from "@/lib/api/client";
 import CompanyCardContent from "@/components/shared/Cards/CompanyCardContent";
-import { ClientDocument, ClientWithUser } from "@/types";
 import { Modal } from "@/components/ui/Modal";
 import { DocumentViewer } from "@/components/shared/DocumentViewer";
 import { Button } from "@/components/ui/Button";
+import { AccountStatus } from "@/lib/generated/prisma";
+
+interface ClientDocument {
+  id: string;
+  type: string;
+  url: string;
+  verified: boolean;
+  createdAt: Date;
+}
+
+interface ClientWithUser {
+  id: string;
+  companyName: string;
+  registrationNo: string | null;
+  companySector: string | null;
+  companySize: string | null;
+  website: string | null;
+  designation: string | null;
+  phone: string | null;
+  image: string | null;
+  createdAt: Date | null;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    status: string;
+  };
+  requirements: {
+    id: string;
+  }[];
+  documents?: ClientDocument[];
+}
 
 export default function Company() {
   const [pendingIndex, setPendingIndex] = useState(0);
@@ -27,14 +59,14 @@ export default function Company() {
   const [selectedCompany, setSelectedCompany] = useState<ClientWithUser | null>(
     null
   );
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [companyDocuments, setCompanyDocuments] = useState<ClientDocument[]>(
     []
   );
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
-  const fetchCompanies = async () => {
+  const fetchCompanies = useCallback(async () => {
     try {
       setLoading(true);
       const [pendingRes, verifiedRes, submittedRes] = await Promise.all([
@@ -53,9 +85,25 @@ export default function Company() {
         submittedRes.json(),
       ]);
 
+      // For submitted companies, fetch their documents
+      const submittedWithDocs = await Promise.all(
+        submittedData.map(async (client: ClientWithUser) => {
+          if (client.user.status === AccountStatus.SUBMITTED) {
+            const docsResponse = await fetch(
+              `/api/clients/${client.id}/documents`
+            );
+            if (docsResponse.ok) {
+              const documents = await docsResponse.json();
+              return { ...client, documents };
+            }
+          }
+          return client;
+        })
+      );
+
       setPendingCompanies(pendingData);
       setVerifiedCompanies(verifiedData);
-      setSubmittedCompanies(submittedData);
+      setSubmittedCompanies(submittedWithDocs);
     } catch (error) {
       console.error("Error fetching companies:", error);
       toast({
@@ -65,7 +113,7 @@ export default function Company() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   const fetchCompanyDocuments = async (companyId: string) => {
     try {
@@ -86,7 +134,7 @@ export default function Company() {
 
   useEffect(() => {
     fetchCompanies();
-  }, []);
+  }, [fetchCompanies]);
 
   const handleUpdateStatus = async (
     clientId: string,
@@ -112,19 +160,7 @@ export default function Company() {
             },
           ]);
         }
-      } else if (status === "PENDING_SUBMISSION") {
-        const updatedCompany = pendingCompanies.find((c) => c.id === clientId);
-        if (updatedCompany) {
-          setSubmittedCompanies((prev) => [
-            ...prev,
-            {
-              ...updatedCompany,
-              user: { ...updatedCompany.user, status: "SUBMITTED" },
-            },
-          ]);
-        }
       }
-
       setPendingCompanies((prev) => prev.filter((c) => c.id !== clientId));
       setPendingIndex((prev) =>
         Math.max(0, Math.min(prev, pendingCompanies.length - 3))
@@ -386,7 +422,7 @@ function CompanyCard({
           <h3 className="text-lg font-bold mb-2">Contact</h3>
           <p>{company.user.name}</p>
           <p>{company.user.email}</p>
-          <p>{company.phone || "N/A"}</p>
+          <p>{company.user.phone}</p>
         </div>
 
         {/* Status */}

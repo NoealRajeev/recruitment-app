@@ -2,7 +2,6 @@
 
 # dependencies
 /node_modules
-/public/upload
 /.pnp
 .pnp.*
 .yarn/*
@@ -22,6 +21,7 @@
 /build
 .env
 
+/public/uploads/*
 # misc
 .DS_Store
 *.pem

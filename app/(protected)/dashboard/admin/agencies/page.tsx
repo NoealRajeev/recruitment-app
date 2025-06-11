@@ -1,7 +1,7 @@
 // app/(protected)/dashboard/admin/agencies/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/shared/Card";
@@ -14,7 +14,8 @@ import { AccountStatus, UserRole } from "@prisma/client";
 import { useToast } from "@/context/toast-provider";
 import { DocumentViewer } from "@/components/shared/DocumentViewer";
 import { Select } from "@/components/ui/select";
-
+import logSecurityEvent from "@/lib/utils/helpers";
+import { Pagination } from "@/components/ui/Pagination";
 interface AgencyDocument {
   id: string;
   type: string;
@@ -60,27 +61,31 @@ interface RegistrationFormData {
   website: string;
 }
 
+// Constants moved to separate file
+const COUNTRY_CODES = [
+  { code: "+974", name: "Qatar" },
+  { code: "+971", name: "UAE" },
+  { code: "+966", name: "Saudi Arabia" },
+  { code: "+965", name: "Kuwait" },
+  { code: "+973", name: "Bahrain" },
+  { code: "+968", name: "Oman" },
+  { code: "+20", name: "Egypt" },
+  { code: "+91", name: "India" },
+  { code: "+92", name: "Pakistan" },
+  { code: "+94", name: "Sri Lanka" },
+  { code: "+880", name: "Bangladesh" },
+  { code: "+95", name: "Myanmar" },
+  { code: "+977", name: "Nepal" },
+] as const;
+
+const ITEMS_PER_PAGE = 10;
+
 export default function Agencies() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { toast } = useToast();
-  const countryCodes = [
-    { code: "+974", name: "Qatar" },
-    { code: "+971", name: "UAE" },
-    { code: "+966", name: "Saudi Arabia" },
-    { code: "+965", name: "Kuwait" },
-    { code: "+973", name: "Bahrain" },
-    { code: "+968", name: "Oman" },
-    { code: "+20", name: "Egypt" },
-    { code: "+91", name: "India" },
-    { code: "+92", name: "Pakistan" },
-    { code: "+94", name: "Sri Lanka" },
-    { code: "+880", name: "Bangladesh" },
-    { code: "+95", name: "Myanmar" },
-    { code: "+977", name: "Nepal" },
-  ];
 
-  // Update the initial state in your component
+  // State management
   const [registrationData, setRegistrationData] =
     useState<RegistrationFormData>({
       agencyName: "",
@@ -91,7 +96,7 @@ export default function Agencies() {
       contactPerson: "",
       email: "",
       phone: "",
-      countryCode: "+974", // Default country code
+      countryCode: "+974",
       address: "",
       city: "",
       postalCode: "",
@@ -107,6 +112,57 @@ export default function Agencies() {
   const [rejectionReason, setRejectionReason] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [agencyToDelete, setAgencyToDelete] = useState<Agency | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Memoized utility functions
+  const isOlderThan12Hours = useCallback((date: Date) => {
+    const now = new Date();
+    const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
+    return date < twelveHoursAgo;
+  }, []);
+
+  const getRemainingTime = useCallback((deleteAt?: Date): string => {
+    if (!deleteAt) return "No deletion scheduled";
+
+    const now = new Date();
+    const diffInMs = deleteAt.getTime() - now.getTime();
+
+    if (diffInMs <= 0) return "Pending deletion";
+
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    const diffInMinutes = Math.floor(
+      (diffInMs % (1000 * 60 * 60)) / (1000 * 60)
+    );
+
+    return `${diffInHours}h ${diffInMinutes}m remaining`;
+  }, []);
+
+  const formatTimeAgo = useCallback((date: Date) => {
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return `${diffInSeconds} sec ago`;
+    if (diffInSeconds < 3600)
+      return `${Math.floor(diffInSeconds / 60)} min ago`;
+    if (diffInSeconds < 86400)
+      return `${Math.floor(diffInSeconds / 3600)} hrs ago`;
+    return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  }, []);
+
+  const getStatusColor = useCallback((status: AccountStatus) => {
+    switch (status) {
+      case AccountStatus.PENDING_REVIEW:
+        return "text-[#C86300]/70";
+      case AccountStatus.REJECTED:
+        return "text-[#ED1C24]/70";
+      case AccountStatus.NOT_VERIFIED:
+        return "text-[#150B3D]/70";
+      case AccountStatus.VERIFIED:
+        return "text-[#00C853]/70";
+      default:
+        return "text-[#150B3D]/70";
+    }
+  }, []);
 
   // Fetch agencies from API
   useEffect(() => {
@@ -149,11 +205,17 @@ export default function Agencies() {
         );
 
         setAgencies(agenciesWithDocuments);
+        logSecurityEvent("AGENCIES_FETCHED", {
+          count: agenciesWithDocuments.length,
+        });
       } catch (error) {
         console.error("Error fetching agencies:", error);
         toast({
           type: "error",
           message: "Failed to load agencies",
+        });
+        logSecurityEvent("AGENCIES_FETCH_FAILED", {
+          error: error instanceof Error ? error.message : "Unknown error",
         });
       } finally {
         setIsLoading(false);
@@ -163,53 +225,27 @@ export default function Agencies() {
     fetchAgencies();
   }, [status, session, router, toast]);
 
-  const isOlderThan12Hours = (date: Date) => {
-    const now = new Date();
-    const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
-    return date < twelveHoursAgo;
-  };
-  // Update the getRemainingTime function to always return a string
-  const getRemainingTime = (deleteAt?: Date): string => {
-    if (!deleteAt) return "No deletion scheduled";
+  // Filtered and paginated agencies
+  const filteredAgencies = useMemo(() => {
+    return agencies.filter((agency) => {
+      if (
+        agency.user.status === AccountStatus.VERIFIED &&
+        isOlderThan12Hours(new Date(agency.createdAt))
+      ) {
+        return false;
+      }
 
-    const now = new Date();
-    const diffInMs = deleteAt.getTime() - now.getTime();
+      if (activeTab === "all") return true;
+      return agency.user.status === (activeTab.toUpperCase() as AccountStatus);
+    });
+  }, [agencies, activeTab, isOlderThan12Hours]);
 
-    if (diffInMs <= 0) return "Pending deletion";
+  const paginatedAgencies = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredAgencies.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredAgencies, currentPage]);
 
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-    const diffInMinutes = Math.floor(
-      (diffInMs % (1000 * 60 * 60)) / (1000 * 60)
-    );
-
-    return `${diffInHours}h ${diffInMinutes}m remaining`;
-  };
-
-  const formatTimeAgo = (date: Date) => {
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (diffInSeconds < 60) return `${diffInSeconds} sec ago`;
-    if (diffInSeconds < 3600)
-      return `${Math.floor(diffInSeconds / 60)} min ago`;
-    if (diffInSeconds < 86400)
-      return `${Math.floor(diffInSeconds / 3600)} hrs ago`;
-    return `${Math.floor(diffInSeconds / 86400)} days ago`;
-  };
-
-  const filteredAgencies = agencies.filter((agency) => {
-    if (
-      agency.user.status === AccountStatus.VERIFIED &&
-      isOlderThan12Hours(new Date(agency.createdAt))
-    ) {
-      return false;
-    }
-
-    if (activeTab === "all") return true;
-    return agency.user.status === (activeTab.toUpperCase() as AccountStatus);
-  });
-
-  // Handle immediate deletion (1 hour window)
+  // Event handlers
   const handleImmediateDelete = async (agencyId: string) => {
     try {
       const response = await fetch(
@@ -231,12 +267,20 @@ export default function Agencies() {
         type: "success",
         message: "Account will be permanently deleted in 1 hour",
       });
+      logSecurityEvent("AGENCY_DELETED", {
+        agencyId,
+        deletionType: "IMMEDIATE",
+      });
     } catch (error) {
       console.error("Error deleting account:", error);
       toast({
         type: "error",
         message:
           error instanceof Error ? error.message : "Failed to delete account",
+      });
+      logSecurityEvent("AGENCY_DELETE_FAILED", {
+        agencyId,
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
@@ -282,17 +326,26 @@ export default function Agencies() {
         contactPerson: "",
         email: "",
         phone: "",
+        countryCode: "+974",
+        address: "",
+        city: "",
+        postalCode: "",
+        website: "",
       });
 
       toast({
         type: "success",
         message: "Agency registered successfully",
       });
+      logSecurityEvent("AGENCY_REGISTERED", { agencyId: newAgency.id });
     } catch (error) {
       console.error("Registration error:", error);
       toast({
         type: "error",
         message: error instanceof Error ? error.message : "Registration failed",
+      });
+      logSecurityEvent("AGENCY_REGISTRATION_FAILED", {
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
@@ -337,11 +390,20 @@ export default function Agencies() {
         type: "success",
         message: `Agency status updated to ${newStatus.toLowerCase()}`,
       });
+      logSecurityEvent("AGENCY_STATUS_UPDATED", {
+        agencyId,
+        newStatus,
+        reason: reason || "No reason provided",
+      });
     } catch (error) {
       console.error("Status update error:", error);
       toast({
         type: "error",
         message: "Failed to update agency status",
+      });
+      logSecurityEvent("AGENCY_STATUS_UPDATE_FAILED", {
+        agencyId,
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };
@@ -367,6 +429,7 @@ export default function Agencies() {
         type: "success",
         message: "Account recovery successful",
       });
+      logSecurityEvent("AGENCY_RECOVERED", { agencyId });
     } catch (error) {
       console.error("Error recovering account:", error);
       toast({
@@ -374,28 +437,20 @@ export default function Agencies() {
         message:
           error instanceof Error ? error.message : "Failed to recover account",
       });
-    }
-  };
-
-  const getStatusColor = (status: AccountStatus) => {
-    switch (status) {
-      case AccountStatus.PENDING_REVIEW:
-        return "text-[#C86300]/70";
-      case AccountStatus.REJECTED:
-        return "text-[#ED1C24]/70";
-      case AccountStatus.NOT_VERIFIED:
-        return "text-[#150B3D]/70";
-      case AccountStatus.VERIFIED:
-        return "text-[#00C853]/70";
-      default:
-        return "text-[#150B3D]/70";
+      logSecurityEvent("AGENCY_RECOVERY_FAILED", {
+        agencyId,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   };
 
   if (status === "loading" || isLoading) {
     return (
       <div className="px-6 flex justify-center items-center min-h-screen bg-[#F8F6FB]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#3D1673]" />
+        <div
+          className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#3D1673]"
+          aria-label="Loading..."
+        />
       </div>
     );
   }
@@ -425,6 +480,7 @@ export default function Agencies() {
               onChange={handleRegistrationChange}
               placeholder="Enter agency name"
               required
+              aria-required="true"
             />
             <Input
               variant="horizontal"
@@ -434,6 +490,7 @@ export default function Agencies() {
               onChange={handleRegistrationChange}
               placeholder="Enter registration number"
               required
+              aria-required="true"
             />
             <Input
               variant="horizontal"
@@ -443,6 +500,7 @@ export default function Agencies() {
               onChange={handleRegistrationChange}
               placeholder="Enter license number"
               required
+              aria-required="true"
             />
             <Input
               variant="horizontal"
@@ -452,6 +510,7 @@ export default function Agencies() {
               value={registrationData.licenseExpiry}
               onChange={handleRegistrationChange}
               required
+              aria-required="true"
             />
             <Input
               variant="horizontal"
@@ -461,58 +520,73 @@ export default function Agencies() {
               onChange={handleRegistrationChange}
               placeholder="Enter full address"
               required
+              aria-required="true"
             />
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                variant="horizontal"
-                label="City :"
-                name="city"
-                value={registrationData.city}
-                onChange={handleRegistrationChange}
-                placeholder="Enter city"
-                required
-              />
-              <Input
-                variant="horizontal"
-                label="Postal Code :"
-                name="postalCode"
-                value={registrationData.postalCode}
-                onChange={handleRegistrationChange}
-                placeholder="Enter postal code"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-1/4">
-                <Select
-                  label="Country Code :"
-                  name="countryCode"
-                  value={registrationData.countryCode}
-                  onChange={(e) =>
-                    setRegistrationData({
-                      ...registrationData,
-                      countryCode: e.target.value,
-                    })
-                  }
-                  options={countryCodes.map((cc) => ({
-                    value: cc.code,
-                    label: `${cc.code} (${cc.name})`,
-                  }))}
-                  required
-                />
-              </div>
+            <Input
+              variant="horizontal"
+              label="City :"
+              name="city"
+              value={registrationData.city}
+              onChange={handleRegistrationChange}
+              placeholder="Enter city"
+              required
+              aria-required="true"
+            />
+            <Input
+              variant="horizontal"
+              label="Postal Code :"
+              name="postalCode"
+              value={registrationData.postalCode}
+              onChange={handleRegistrationChange}
+              placeholder="Enter postal code"
+            />
+            <div className="flex items-center gap-14">
+              <label
+                htmlFor="phone"
+                className="w-1/4 text-sm font-medium text-gray-700"
+              >
+                Phone Number :<span className="text-red-500 ml-1">*</span>
+              </label>
+
               <div className="flex-1">
-                <Input
-                  variant="horizontal"
-                  label="Phone Number :"
-                  name="phone"
-                  type="tel"
-                  value={registrationData.phone}
-                  onChange={handleRegistrationChange}
-                  placeholder="Enter phone number"
-                  required
-                />
+                <div className="flex border rounded-md overflow-hidden">
+                  {/* Country Code */}
+                  <select
+                    name="countryCode"
+                    value={registrationData.countryCode}
+                    onChange={(e) =>
+                      setRegistrationData({
+                        ...registrationData,
+                        countryCode: e.target.value,
+                      })
+                    }
+                    className="px-3 py-2 text-sm text-gray-700 outline-none"
+                    required
+                    aria-required="true"
+                  >
+                    {COUNTRY_CODES.map((cc) => (
+                      <option key={cc.code} value={cc.code}>
+                        {cc.code} ({cc.name})
+                      </option>
+                    ))}
+                  </select>
+
+                  {/* Phone Input */}
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={registrationData.phone}
+                    onChange={handleRegistrationChange}
+                    placeholder="Enter phone number"
+                    className="flex-1 px-3 py-2 text-sm outline-none"
+                    required
+                    aria-required="true"
+                  />
+                </div>
               </div>
             </div>
+
             <Input
               variant="horizontal"
               label="Email Address :"
@@ -522,21 +596,13 @@ export default function Agencies() {
               onChange={handleRegistrationChange}
               placeholder="Enter email address"
               required
-            />
-            <Input
-              variant="horizontal"
-              label="Phone Number :"
-              name="phone"
-              type="tel"
-              value={registrationData.phone}
-              onChange={handleRegistrationChange}
-              placeholder="Enter phone number"
-              required
+              aria-required="true"
             />
             <div className="flex justify-center mt-4">
               <Button
                 onClick={handleRegistration}
                 className="w-1/3 bg-[#3D1673] hover:bg-[#2b0e54] text-white py-2 px-4 rounded-md"
+                aria-label="Register agency"
               >
                 Register
               </Button>
@@ -546,28 +612,36 @@ export default function Agencies() {
 
         {/* Verification Card */}
         <Card className="p-6 bg-[#EDDDF3]">
-          <div className="flex space-x-4 mb-4">
+          <div className="flex space-x-4 mb-4" role="tablist">
             <Button
               variant={activeTab === "all" ? "default" : "outline"}
               onClick={() => setActiveTab("all")}
+              role="tab"
+              aria-selected={activeTab === "all"}
             >
               All
             </Button>
             <Button
               variant={activeTab === "pending" ? "default" : "outline"}
               onClick={() => setActiveTab("pending")}
+              role="tab"
+              aria-selected={activeTab === "pending"}
             >
               Pending
             </Button>
             <Button
               variant={activeTab === "verified" ? "default" : "outline"}
               onClick={() => setActiveTab("verified")}
+              role="tab"
+              aria-selected={activeTab === "verified"}
             >
               Verified
             </Button>
             <Button
               variant={activeTab === "rejected" ? "default" : "outline"}
               onClick={() => setActiveTab("rejected")}
+              role="tab"
+              aria-selected={activeTab === "rejected"}
             >
               Rejected
             </Button>
@@ -591,7 +665,7 @@ export default function Agencies() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-transparent">
-                {filteredAgencies.map((agency) => (
+                {paginatedAgencies.map((agency) => (
                   <tr
                     key={agency.id}
                     className={`hover:bg-blue-25 ${
@@ -600,6 +674,7 @@ export default function Agencies() {
                         : ""
                     }`}
                     onClick={() => handleRowClick(agency)}
+                    aria-label={`Agency ${agency.agencyName}`}
                   >
                     <td className="py-2 px-3 text-sm text-[#150B3D]/70">
                       {agency.agencyName}
@@ -631,6 +706,7 @@ export default function Agencies() {
                                 AccountStatus.VERIFIED
                               );
                             }}
+                            aria-label={`Approve ${agency.agencyName}`}
                           >
                             Approve
                           </Button>
@@ -642,6 +718,7 @@ export default function Agencies() {
                               setSelectedAgency(agency);
                               setIsModalOpen(true);
                             }}
+                            aria-label={`Reject ${agency.agencyName}`}
                           >
                             Reject
                           </Button>
@@ -658,6 +735,7 @@ export default function Agencies() {
                                 AccountStatus.PENDING_REVIEW
                               );
                             }}
+                            aria-label={`Re-review ${agency.agencyName}`}
                           >
                             Re-review
                           </Button>
@@ -669,6 +747,7 @@ export default function Agencies() {
                             }}
                             className="text-red-500 hover:text-red-700"
                             title="Delete account"
+                            aria-label={`Delete ${agency.agencyName}`}
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -683,6 +762,7 @@ export default function Agencies() {
                           }}
                           className="text-red-500 hover:text-red-700"
                           title="Delete account"
+                          aria-label={`Delete ${agency.agencyName}`}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -696,6 +776,7 @@ export default function Agencies() {
                           }}
                           className="text-red-500 hover:text-red-700"
                           title="Delete account"
+                          aria-label={`Delete ${agency.agencyName}`}
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -705,6 +786,17 @@ export default function Agencies() {
                 ))}
               </tbody>
             </table>
+            {filteredAgencies.length > ITEMS_PER_PAGE && (
+              <div className="mt-4 flex justify-center">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={Math.ceil(
+                    filteredAgencies.length / ITEMS_PER_PAGE
+                  )}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
           </div>
         </Card>
       </div>
@@ -727,6 +819,7 @@ export default function Agencies() {
               onChange={(e) => setRejectionReason(e.target.value)}
               placeholder="Enter reason for rejection (optional)"
               className="flex-1"
+              aria-label="Rejection reason"
             />
             <div className="flex space-x-4">
               <Button
@@ -735,6 +828,7 @@ export default function Agencies() {
                   setIsModalOpen(false);
                   setSelectedAgency(null);
                 }}
+                aria-label="Cancel review"
               >
                 Cancel
               </Button>
@@ -747,6 +841,7 @@ export default function Agencies() {
                     );
                   }
                 }}
+                aria-label="Approve agency"
               >
                 Approve
               </Button>
@@ -762,12 +857,14 @@ export default function Agencies() {
                   }
                 }}
                 disabled={!rejectionReason}
+                aria-label="Reject agency"
               >
                 Reject
               </Button>
             </div>
           </div>
         }
+        aria-labelledby="document-viewer-modal-title"
       >
         {selectedAgency && (
           <div className="space-y-6">
@@ -814,6 +911,7 @@ export default function Agencies() {
             <Button
               variant="outline"
               onClick={() => setIsDeleteModalOpen(false)}
+              aria-label="Cancel deletion"
             >
               Cancel
             </Button>
@@ -824,11 +922,13 @@ export default function Agencies() {
                   handleImmediateDelete(agencyToDelete.id);
                 }
               }}
+              aria-label="Confirm deletion"
             >
               Delete Account (1h window)
             </Button>
           </div>
         }
+        aria-labelledby="delete-confirmation-modal-title"
       >
         <p className="text-gray-600">
           This account will be permanently deleted after 1 hour. You can recover
@@ -840,6 +940,7 @@ export default function Agencies() {
               size="sm"
               variant="outline"
               onClick={() => handleRecoverAccount(agencyToDelete.id)}
+              aria-label="Recover account"
             >
               <Undo2 className="h-4 w-4 mr-2" />
               Recover Account
@@ -877,6 +978,7 @@ export default function Agencies() {
                   onClick={() =>
                     router.push(`/dashboard/admin/agencies/${agency.id}`)
                   }
+                  aria-label={`View details for ${agency.agencyName}`}
                 />
                 {agency.user.status === AccountStatus.REJECTED && (
                   <div className="absolute top-2 right-2">
@@ -901,6 +1003,7 @@ export default function Agencies() {
                       }}
                       className="text-green-600 hover:text-green-800"
                       title="Recover account"
+                      aria-label={`Recover ${agency.agencyName}`}
                     >
                       <Undo2 className="h-4 w-4" />
                     </button>

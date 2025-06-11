@@ -1,3 +1,4 @@
+// lip/utils/helpers.ts
 export default function logSecurityEvent(
   event: string,
   metadata: Record<string, unknown>

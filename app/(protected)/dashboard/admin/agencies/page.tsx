@@ -13,6 +13,7 @@ import { Trash2, Undo2 } from "lucide-react";
 import { AccountStatus, UserRole } from "@prisma/client";
 import { useToast } from "@/context/toast-provider";
 import { DocumentViewer } from "@/components/shared/DocumentViewer";
+import { Select } from "@/components/ui/select";
 
 interface AgencyDocument {
   id: string;
@@ -52,12 +53,34 @@ interface RegistrationFormData {
   contactPerson: string;
   email: string;
   phone: string;
+  countryCode: string;
+  address: string;
+  city: string;
+  postalCode: string;
+  website: string;
 }
 
 export default function Agencies() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { toast } = useToast();
+  const countryCodes = [
+    { code: "+974", name: "Qatar" },
+    { code: "+971", name: "UAE" },
+    { code: "+966", name: "Saudi Arabia" },
+    { code: "+965", name: "Kuwait" },
+    { code: "+973", name: "Bahrain" },
+    { code: "+968", name: "Oman" },
+    { code: "+20", name: "Egypt" },
+    { code: "+91", name: "India" },
+    { code: "+92", name: "Pakistan" },
+    { code: "+94", name: "Sri Lanka" },
+    { code: "+880", name: "Bangladesh" },
+    { code: "+95", name: "Myanmar" },
+    { code: "+977", name: "Nepal" },
+  ];
+
+  // Update the initial state in your component
   const [registrationData, setRegistrationData] =
     useState<RegistrationFormData>({
       agencyName: "",
@@ -68,6 +91,11 @@ export default function Agencies() {
       contactPerson: "",
       email: "",
       phone: "",
+      countryCode: "+974", // Default country code
+      address: "",
+      city: "",
+      postalCode: "",
+      website: "",
     });
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -427,22 +455,64 @@ export default function Agencies() {
             />
             <Input
               variant="horizontal"
-              label="Country of Operation :"
-              name="country"
-              value={registrationData.country}
+              label="Address :"
+              name="address"
+              value={registrationData.address}
               onChange={handleRegistrationChange}
-              placeholder="Enter country"
+              placeholder="Enter full address"
               required
             />
-            <Input
-              variant="horizontal"
-              label="Contact Person :"
-              name="contactPerson"
-              value={registrationData.contactPerson}
-              onChange={handleRegistrationChange}
-              placeholder="Enter full name"
-              required
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                variant="horizontal"
+                label="City :"
+                name="city"
+                value={registrationData.city}
+                onChange={handleRegistrationChange}
+                placeholder="Enter city"
+                required
+              />
+              <Input
+                variant="horizontal"
+                label="Postal Code :"
+                name="postalCode"
+                value={registrationData.postalCode}
+                onChange={handleRegistrationChange}
+                placeholder="Enter postal code"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-1/4">
+                <Select
+                  label="Country Code :"
+                  name="countryCode"
+                  value={registrationData.countryCode}
+                  onChange={(e) =>
+                    setRegistrationData({
+                      ...registrationData,
+                      countryCode: e.target.value,
+                    })
+                  }
+                  options={countryCodes.map((cc) => ({
+                    value: cc.code,
+                    label: `${cc.code} (${cc.name})`,
+                  }))}
+                  required
+                />
+              </div>
+              <div className="flex-1">
+                <Input
+                  variant="horizontal"
+                  label="Phone Number :"
+                  name="phone"
+                  type="tel"
+                  value={registrationData.phone}
+                  onChange={handleRegistrationChange}
+                  placeholder="Enter phone number"
+                  required
+                />
+              </div>
+            </div>
             <Input
               variant="horizontal"
               label="Email Address :"

@@ -43,9 +43,11 @@ export default function CompanyCardContent({
           <p className="text-[12px] text-[#524B6B] mt-[2px] leading-snug">
             {phoneNo}
           </p>
-          <p className="text-[11px] text-[#AAA6B9] mt-1 leading-snug">
-            Total Submissions: {noSub}
-          </p>
+          {noSub?.trim() && (
+            <p className="text-[11px] text-[#AAA6B9] mt-1 leading-snug">
+              Total Submissions: {noSub}
+            </p>
+          )}
         </div>
 
         {/* Menu Icon */}

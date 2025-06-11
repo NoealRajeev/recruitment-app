@@ -46,6 +46,9 @@ interface ClientWithUser {
 export default function Company() {
   const [pendingIndex, setPendingIndex] = useState(0);
   const [verifiedIndex, setVerifiedIndex] = useState(0);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [showRejectInput, setShowRejectInput] = useState(false);
+
   const [pendingCompanies, setPendingCompanies] = useState<ClientWithUser[]>(
     []
   );
@@ -235,7 +238,7 @@ export default function Company() {
       {/* Submitted Companies (Documents Submitted) */}
       <section className="space-y-4">
         <h2 className="text-xl font-semibold flex items-center gap-2">
-          Documents Submissions Pending
+          Documents Review Pending
         </h2>
         {submittedCompanies.length === 0 ? (
           <p className="text-gray-500">No companies with submitted documents</p>
@@ -251,9 +254,9 @@ export default function Company() {
                   <CompanyCardContent
                     companyName={company.companyName}
                     email={company.user.email}
+                    phoneNo={company.user.phone || "N/A"}
                     logoUrl={company.image || "/default-company.png"}
                     onClick={() => {}}
-                    phoneNo={""}
                     noSub={""}
                   />
                 </div>
@@ -305,33 +308,92 @@ export default function Company() {
           setIsModalOpen(false);
           setSelectedCompany(null);
           setCompanyDocuments([]);
+          setRejectionReason("");
+          setShowRejectInput(false);
         }}
         title={`Review Documents - ${selectedCompany?.companyName || ""}`}
         size="xl"
         showFooter={true}
         footerContent={
-          <div className="flex justify-end space-x-4 w-full">
-            <div className="flex space-x-4">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setIsModalOpen(false);
-                  setSelectedCompany(null);
-                  setCompanyDocuments([]);
-                }}
-              >
-                Close
-              </Button>
-              {selectedCompany && (
-                <Button
-                  onClick={() => {
-                    handleUpdateStatus(selectedCompany.id, "VERIFIED");
-                    setIsModalOpen(false);
-                    setCompanyDocuments([]);
-                  }}
+          <div className="flex flex-col w-full space-y-4">
+            {showRejectInput && (
+              <div className="w-full">
+                <label
+                  htmlFor="rejectionReason"
+                  className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Approve
-                </Button>
+                  Rejection Reason (required)
+                </label>
+                <textarea
+                  id="rejectionReason"
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Enter reason for rejection"
+                  className="w-full p-2 border border-gray-300 rounded-md min-h-[80px]"
+                  required
+                />
+              </div>
+            )}
+            <div className="flex justify-end space-x-4">
+              {showRejectInput ? (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setShowRejectInput(false);
+                      setRejectionReason("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (!rejectionReason.trim()) {
+                        toast({
+                          type: "error",
+                          message: "Please provide a rejection reason",
+                        });
+                        return;
+                      }
+                      handleUpdateStatus(selectedCompany!.id, "REJECTED");
+                      setIsModalOpen(false);
+                      setCompanyDocuments([]);
+                      setRejectionReason("");
+                      setShowRejectInput(false);
+                    }}
+                    disabled={!rejectionReason.trim()}
+                  >
+                    Confirm Reject
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setIsModalOpen(false);
+                      setSelectedCompany(null);
+                      setCompanyDocuments([]);
+                    }}
+                  >
+                    Close
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => setShowRejectInput(true)}
+                  >
+                    Reject
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      handleUpdateStatus(selectedCompany!.id, "VERIFIED");
+                      setIsModalOpen(false);
+                      setCompanyDocuments([]);
+                    }}
+                  >
+                    Approve
+                  </Button>
+                </>
               )}
             </div>
           </div>

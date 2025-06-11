@@ -5,6 +5,7 @@ import { hash } from "bcryptjs";
 import { z } from "zod";
 import { randomBytes } from "crypto";
 import { CompanySector, CompanySize } from "@/lib/generated/prisma";
+import { faker } from "@faker-js/faker";
 
 const RegistrationSchema = z.object({
   companyName: z.string().min(2, "Company name is required"),
@@ -108,6 +109,7 @@ export async function POST(request: Request) {
             ? `${altCountryCode || countryCode}${altContact}`
             : null,
           password: hashedPassword,
+          profilePicture: faker.image.avatar(),
           role: "CLIENT_ADMIN",
           status: "PENDING_REVIEW",
           resetRequired: true,

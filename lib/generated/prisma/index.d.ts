@@ -235,8 +235,11 @@ export const AuditAction: {
   AGENCY_UPDATED: 'AGENCY_UPDATED',
   AGENCY_VERIFIED: 'AGENCY_VERIFIED',
   AGENCY_REJECTED: 'AGENCY_REJECTED',
+  AGENCY_DELETION_REQUESTED: 'AGENCY_DELETION_REQUESTED',
   REQUIREMENT_CREATED: 'REQUIREMENT_CREATED',
   REQUIREMENT_UPDATED: 'REQUIREMENT_UPDATED',
+  REQUIREMENT_DELETE: 'REQUIREMENT_DELETE',
+  REQUIREMENT_REJECTED: 'REQUIREMENT_REJECTED',
   REQUIREMENT_STATUS_CHANGED: 'REQUIREMENT_STATUS_CHANGED',
   REQUIREMENT_ASSIGNED: 'REQUIREMENT_ASSIGNED',
   DRAFT_CREATED: 'DRAFT_CREATED',
@@ -5383,7 +5386,6 @@ export namespace Prisma {
     licenseNumber: number
     licenseExpiry: number
     country: number
-    regions: number
     website: number
     address: number
     city: number
@@ -5434,7 +5436,6 @@ export namespace Prisma {
     licenseNumber?: true
     licenseExpiry?: true
     country?: true
-    regions?: true
     website?: true
     address?: true
     city?: true
@@ -5524,7 +5525,6 @@ export namespace Prisma {
     licenseNumber: string
     licenseExpiry: Date
     country: string
-    regions: string[]
     website: string | null
     address: string
     city: string
@@ -5558,7 +5558,6 @@ export namespace Prisma {
     licenseNumber?: boolean
     licenseExpiry?: boolean
     country?: boolean
-    regions?: boolean
     website?: boolean
     address?: boolean
     city?: boolean
@@ -5580,7 +5579,6 @@ export namespace Prisma {
     licenseNumber?: boolean
     licenseExpiry?: boolean
     country?: boolean
-    regions?: boolean
     website?: boolean
     address?: boolean
     city?: boolean
@@ -5598,7 +5596,6 @@ export namespace Prisma {
     licenseNumber?: boolean
     licenseExpiry?: boolean
     country?: boolean
-    regions?: boolean
     website?: boolean
     address?: boolean
     city?: boolean
@@ -5616,7 +5613,6 @@ export namespace Prisma {
     licenseNumber?: boolean
     licenseExpiry?: boolean
     country?: boolean
-    regions?: boolean
     website?: boolean
     address?: boolean
     city?: boolean
@@ -5625,7 +5621,7 @@ export namespace Prisma {
     updatedAt?: boolean
   }
 
-  export type AgencyOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "agencyName" | "registrationNo" | "licenseNumber" | "licenseExpiry" | "country" | "regions" | "website" | "address" | "city" | "postalCode" | "createdAt" | "updatedAt", ExtArgs["result"]["agency"]>
+  export type AgencyOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "agencyName" | "registrationNo" | "licenseNumber" | "licenseExpiry" | "country" | "website" | "address" | "city" | "postalCode" | "createdAt" | "updatedAt", ExtArgs["result"]["agency"]>
   export type AgencyInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
     labourProfiles?: boolean | Agency$labourProfilesArgs<ExtArgs>
@@ -5656,7 +5652,6 @@ export namespace Prisma {
       licenseNumber: string
       licenseExpiry: Date
       country: string
-      regions: string[]
       website: string | null
       address: string
       city: string
@@ -6097,7 +6092,6 @@ export namespace Prisma {
     readonly licenseNumber: FieldRef<"Agency", 'String'>
     readonly licenseExpiry: FieldRef<"Agency", 'DateTime'>
     readonly country: FieldRef<"Agency", 'String'>
-    readonly regions: FieldRef<"Agency", 'String[]'>
     readonly website: FieldRef<"Agency", 'String'>
     readonly address: FieldRef<"Agency", 'String'>
     readonly city: FieldRef<"Agency", 'String'>
@@ -7692,9 +7686,6 @@ export namespace Prisma {
 
   export type RequirementMinAggregateOutputType = {
     id: string | null
-    projectLocation: string | null
-    startDate: Date | null
-    contractDuration: $Enums.ContractDuration | null
     specialNotes: string | null
     status: $Enums.RequirementStatus | null
     minExperience: $Enums.ExperienceLevel | null
@@ -7711,9 +7702,6 @@ export namespace Prisma {
 
   export type RequirementMaxAggregateOutputType = {
     id: string | null
-    projectLocation: string | null
-    startDate: Date | null
-    contractDuration: $Enums.ContractDuration | null
     specialNotes: string | null
     status: $Enums.RequirementStatus | null
     minExperience: $Enums.ExperienceLevel | null
@@ -7730,9 +7718,6 @@ export namespace Prisma {
 
   export type RequirementCountAggregateOutputType = {
     id: number
-    projectLocation: number
-    startDate: number
-    contractDuration: number
     specialNotes: number
     status: number
     languages: number
@@ -7760,9 +7745,6 @@ export namespace Prisma {
 
   export type RequirementMinAggregateInputType = {
     id?: true
-    projectLocation?: true
-    startDate?: true
-    contractDuration?: true
     specialNotes?: true
     status?: true
     minExperience?: true
@@ -7779,9 +7761,6 @@ export namespace Prisma {
 
   export type RequirementMaxAggregateInputType = {
     id?: true
-    projectLocation?: true
-    startDate?: true
-    contractDuration?: true
     specialNotes?: true
     status?: true
     minExperience?: true
@@ -7798,9 +7777,6 @@ export namespace Prisma {
 
   export type RequirementCountAggregateInputType = {
     id?: true
-    projectLocation?: true
-    startDate?: true
-    contractDuration?: true
     specialNotes?: true
     status?: true
     languages?: true
@@ -7905,9 +7881,6 @@ export namespace Prisma {
 
   export type RequirementGroupByOutputType = {
     id: string
-    projectLocation: string | null
-    startDate: Date | null
-    contractDuration: $Enums.ContractDuration | null
     specialNotes: string | null
     status: $Enums.RequirementStatus
     languages: string[]
@@ -7944,9 +7917,6 @@ export namespace Prisma {
 
   export type RequirementSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    projectLocation?: boolean
-    startDate?: boolean
-    contractDuration?: boolean
     specialNotes?: boolean
     status?: boolean
     languages?: boolean
@@ -7971,9 +7941,6 @@ export namespace Prisma {
 
   export type RequirementSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    projectLocation?: boolean
-    startDate?: boolean
-    contractDuration?: boolean
     specialNotes?: boolean
     status?: boolean
     languages?: boolean
@@ -7993,9 +7960,6 @@ export namespace Prisma {
 
   export type RequirementSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    projectLocation?: boolean
-    startDate?: boolean
-    contractDuration?: boolean
     specialNotes?: boolean
     status?: boolean
     languages?: boolean
@@ -8015,9 +7979,6 @@ export namespace Prisma {
 
   export type RequirementSelectScalar = {
     id?: boolean
-    projectLocation?: boolean
-    startDate?: boolean
-    contractDuration?: boolean
     specialNotes?: boolean
     status?: boolean
     languages?: boolean
@@ -8033,7 +7994,7 @@ export namespace Prisma {
     reviewedAt?: boolean
   }
 
-  export type RequirementOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "projectLocation" | "startDate" | "contractDuration" | "specialNotes" | "status" | "languages" | "minExperience" | "maxAge" | "ticketType" | "ticketProvided" | "clientId" | "assignedAgencyId" | "createdAt" | "updatedAt" | "submittedAt" | "reviewedAt", ExtArgs["result"]["requirement"]>
+  export type RequirementOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "specialNotes" | "status" | "languages" | "minExperience" | "maxAge" | "ticketType" | "ticketProvided" | "clientId" | "assignedAgencyId" | "createdAt" | "updatedAt" | "submittedAt" | "reviewedAt", ExtArgs["result"]["requirement"]>
   export type RequirementInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     client?: boolean | ClientDefaultArgs<ExtArgs>
     assignedAgency?: boolean | Requirement$assignedAgencyArgs<ExtArgs>
@@ -8064,9 +8025,6 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      projectLocation: string | null
-      startDate: Date | null
-      contractDuration: $Enums.ContractDuration | null
       specialNotes: string | null
       status: $Enums.RequirementStatus
       languages: string[]
@@ -8510,9 +8468,6 @@ export namespace Prisma {
    */
   interface RequirementFieldRefs {
     readonly id: FieldRef<"Requirement", 'String'>
-    readonly projectLocation: FieldRef<"Requirement", 'String'>
-    readonly startDate: FieldRef<"Requirement", 'DateTime'>
-    readonly contractDuration: FieldRef<"Requirement", 'ContractDuration'>
     readonly specialNotes: FieldRef<"Requirement", 'String'>
     readonly status: FieldRef<"Requirement", 'RequirementStatus'>
     readonly languages: FieldRef<"Requirement", 'String[]'>
@@ -9084,6 +9039,8 @@ export namespace Prisma {
     nationality: string | null
     salary: number | null
     salaryCurrency: string | null
+    startDate: Date | null
+    contractDuration: $Enums.ContractDuration | null
     requirementId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -9096,6 +9053,8 @@ export namespace Prisma {
     nationality: string | null
     salary: number | null
     salaryCurrency: string | null
+    startDate: Date | null
+    contractDuration: $Enums.ContractDuration | null
     requirementId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -9108,6 +9067,8 @@ export namespace Prisma {
     nationality: number
     salary: number
     salaryCurrency: number
+    startDate: number
+    contractDuration: number
     requirementId: number
     createdAt: number
     updatedAt: number
@@ -9132,6 +9093,8 @@ export namespace Prisma {
     nationality?: true
     salary?: true
     salaryCurrency?: true
+    startDate?: true
+    contractDuration?: true
     requirementId?: true
     createdAt?: true
     updatedAt?: true
@@ -9144,6 +9107,8 @@ export namespace Prisma {
     nationality?: true
     salary?: true
     salaryCurrency?: true
+    startDate?: true
+    contractDuration?: true
     requirementId?: true
     createdAt?: true
     updatedAt?: true
@@ -9156,6 +9121,8 @@ export namespace Prisma {
     nationality?: true
     salary?: true
     salaryCurrency?: true
+    startDate?: true
+    contractDuration?: true
     requirementId?: true
     createdAt?: true
     updatedAt?: true
@@ -9255,6 +9222,8 @@ export namespace Prisma {
     nationality: string
     salary: number | null
     salaryCurrency: string
+    startDate: Date | null
+    contractDuration: $Enums.ContractDuration | null
     requirementId: string
     createdAt: Date
     updatedAt: Date
@@ -9286,6 +9255,8 @@ export namespace Prisma {
     nationality?: boolean
     salary?: boolean
     salaryCurrency?: boolean
+    startDate?: boolean
+    contractDuration?: boolean
     requirementId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -9299,6 +9270,8 @@ export namespace Prisma {
     nationality?: boolean
     salary?: boolean
     salaryCurrency?: boolean
+    startDate?: boolean
+    contractDuration?: boolean
     requirementId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -9312,6 +9285,8 @@ export namespace Prisma {
     nationality?: boolean
     salary?: boolean
     salaryCurrency?: boolean
+    startDate?: boolean
+    contractDuration?: boolean
     requirementId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -9325,12 +9300,14 @@ export namespace Prisma {
     nationality?: boolean
     salary?: boolean
     salaryCurrency?: boolean
+    startDate?: boolean
+    contractDuration?: boolean
     requirementId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type JobRoleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "quantity" | "nationality" | "salary" | "salaryCurrency" | "requirementId" | "createdAt" | "updatedAt", ExtArgs["result"]["jobRole"]>
+  export type JobRoleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "quantity" | "nationality" | "salary" | "salaryCurrency" | "startDate" | "contractDuration" | "requirementId" | "createdAt" | "updatedAt", ExtArgs["result"]["jobRole"]>
   export type JobRoleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     requirement?: boolean | RequirementDefaultArgs<ExtArgs>
   }
@@ -9353,6 +9330,8 @@ export namespace Prisma {
       nationality: string
       salary: number | null
       salaryCurrency: string
+      startDate: Date | null
+      contractDuration: $Enums.ContractDuration | null
       requirementId: string
       createdAt: Date
       updatedAt: Date
@@ -9786,6 +9765,8 @@ export namespace Prisma {
     readonly nationality: FieldRef<"JobRole", 'String'>
     readonly salary: FieldRef<"JobRole", 'Float'>
     readonly salaryCurrency: FieldRef<"JobRole", 'String'>
+    readonly startDate: FieldRef<"JobRole", 'DateTime'>
+    readonly contractDuration: FieldRef<"JobRole", 'ContractDuration'>
     readonly requirementId: FieldRef<"JobRole", 'String'>
     readonly createdAt: FieldRef<"JobRole", 'DateTime'>
     readonly updatedAt: FieldRef<"JobRole", 'DateTime'>
@@ -19840,7 +19821,6 @@ export namespace Prisma {
     licenseNumber: 'licenseNumber',
     licenseExpiry: 'licenseExpiry',
     country: 'country',
-    regions: 'regions',
     website: 'website',
     address: 'address',
     city: 'city',
@@ -19867,9 +19847,6 @@ export namespace Prisma {
 
   export const RequirementScalarFieldEnum: {
     id: 'id',
-    projectLocation: 'projectLocation',
-    startDate: 'startDate',
-    contractDuration: 'contractDuration',
     specialNotes: 'specialNotes',
     status: 'status',
     languages: 'languages',
@@ -19895,6 +19872,8 @@ export namespace Prisma {
     nationality: 'nationality',
     salary: 'salary',
     salaryCurrency: 'salaryCurrency',
+    startDate: 'startDate',
+    contractDuration: 'contractDuration',
     requirementId: 'requirementId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -20228,20 +20207,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'ContractDuration'
-   */
-  export type EnumContractDurationFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ContractDuration'>
-    
-
-
-  /**
-   * Reference to a field of type 'ContractDuration[]'
-   */
-  export type ListEnumContractDurationFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ContractDuration[]'>
-    
-
-
-  /**
    * Reference to a field of type 'RequirementStatus'
    */
   export type EnumRequirementStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RequirementStatus'>
@@ -20308,6 +20273,20 @@ export namespace Prisma {
    * Reference to a field of type 'Float[]'
    */
   export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'ContractDuration'
+   */
+  export type EnumContractDurationFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ContractDuration'>
+    
+
+
+  /**
+   * Reference to a field of type 'ContractDuration[]'
+   */
+  export type ListEnumContractDurationFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ContractDuration[]'>
     
 
 
@@ -20665,7 +20644,6 @@ export namespace Prisma {
     licenseNumber?: StringFilter<"Agency"> | string
     licenseExpiry?: DateTimeFilter<"Agency"> | Date | string
     country?: StringFilter<"Agency"> | string
-    regions?: StringNullableListFilter<"Agency">
     website?: StringNullableFilter<"Agency"> | string | null
     address?: StringFilter<"Agency"> | string
     city?: StringFilter<"Agency"> | string
@@ -20686,7 +20664,6 @@ export namespace Prisma {
     licenseNumber?: SortOrder
     licenseExpiry?: SortOrder
     country?: SortOrder
-    regions?: SortOrder
     website?: SortOrderInput | SortOrder
     address?: SortOrder
     city?: SortOrder
@@ -20710,7 +20687,6 @@ export namespace Prisma {
     licenseNumber?: StringFilter<"Agency"> | string
     licenseExpiry?: DateTimeFilter<"Agency"> | Date | string
     country?: StringFilter<"Agency"> | string
-    regions?: StringNullableListFilter<"Agency">
     website?: StringNullableFilter<"Agency"> | string | null
     address?: StringFilter<"Agency"> | string
     city?: StringFilter<"Agency"> | string
@@ -20731,7 +20707,6 @@ export namespace Prisma {
     licenseNumber?: SortOrder
     licenseExpiry?: SortOrder
     country?: SortOrder
-    regions?: SortOrder
     website?: SortOrderInput | SortOrder
     address?: SortOrder
     city?: SortOrder
@@ -20754,7 +20729,6 @@ export namespace Prisma {
     licenseNumber?: StringWithAggregatesFilter<"Agency"> | string
     licenseExpiry?: DateTimeWithAggregatesFilter<"Agency"> | Date | string
     country?: StringWithAggregatesFilter<"Agency"> | string
-    regions?: StringNullableListFilter<"Agency">
     website?: StringNullableWithAggregatesFilter<"Agency"> | string | null
     address?: StringWithAggregatesFilter<"Agency"> | string
     city?: StringWithAggregatesFilter<"Agency"> | string
@@ -20833,9 +20807,6 @@ export namespace Prisma {
     OR?: RequirementWhereInput[]
     NOT?: RequirementWhereInput | RequirementWhereInput[]
     id?: StringFilter<"Requirement"> | string
-    projectLocation?: StringNullableFilter<"Requirement"> | string | null
-    startDate?: DateTimeNullableFilter<"Requirement"> | Date | string | null
-    contractDuration?: EnumContractDurationNullableFilter<"Requirement"> | $Enums.ContractDuration | null
     specialNotes?: StringNullableFilter<"Requirement"> | string | null
     status?: EnumRequirementStatusFilter<"Requirement"> | $Enums.RequirementStatus
     languages?: StringNullableListFilter<"Requirement">
@@ -20859,9 +20830,6 @@ export namespace Prisma {
 
   export type RequirementOrderByWithRelationInput = {
     id?: SortOrder
-    projectLocation?: SortOrderInput | SortOrder
-    startDate?: SortOrderInput | SortOrder
-    contractDuration?: SortOrderInput | SortOrder
     specialNotes?: SortOrderInput | SortOrder
     status?: SortOrder
     languages?: SortOrder
@@ -20888,9 +20856,6 @@ export namespace Prisma {
     AND?: RequirementWhereInput | RequirementWhereInput[]
     OR?: RequirementWhereInput[]
     NOT?: RequirementWhereInput | RequirementWhereInput[]
-    projectLocation?: StringNullableFilter<"Requirement"> | string | null
-    startDate?: DateTimeNullableFilter<"Requirement"> | Date | string | null
-    contractDuration?: EnumContractDurationNullableFilter<"Requirement"> | $Enums.ContractDuration | null
     specialNotes?: StringNullableFilter<"Requirement"> | string | null
     status?: EnumRequirementStatusFilter<"Requirement"> | $Enums.RequirementStatus
     languages?: StringNullableListFilter<"Requirement">
@@ -20914,9 +20879,6 @@ export namespace Prisma {
 
   export type RequirementOrderByWithAggregationInput = {
     id?: SortOrder
-    projectLocation?: SortOrderInput | SortOrder
-    startDate?: SortOrderInput | SortOrder
-    contractDuration?: SortOrderInput | SortOrder
     specialNotes?: SortOrderInput | SortOrder
     status?: SortOrder
     languages?: SortOrder
@@ -20942,9 +20904,6 @@ export namespace Prisma {
     OR?: RequirementScalarWhereWithAggregatesInput[]
     NOT?: RequirementScalarWhereWithAggregatesInput | RequirementScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Requirement"> | string
-    projectLocation?: StringNullableWithAggregatesFilter<"Requirement"> | string | null
-    startDate?: DateTimeNullableWithAggregatesFilter<"Requirement"> | Date | string | null
-    contractDuration?: EnumContractDurationNullableWithAggregatesFilter<"Requirement"> | $Enums.ContractDuration | null
     specialNotes?: StringNullableWithAggregatesFilter<"Requirement"> | string | null
     status?: EnumRequirementStatusWithAggregatesFilter<"Requirement"> | $Enums.RequirementStatus
     languages?: StringNullableListFilter<"Requirement">
@@ -20970,6 +20929,8 @@ export namespace Prisma {
     nationality?: StringFilter<"JobRole"> | string
     salary?: FloatNullableFilter<"JobRole"> | number | null
     salaryCurrency?: StringFilter<"JobRole"> | string
+    startDate?: DateTimeNullableFilter<"JobRole"> | Date | string | null
+    contractDuration?: EnumContractDurationNullableFilter<"JobRole"> | $Enums.ContractDuration | null
     requirementId?: StringFilter<"JobRole"> | string
     createdAt?: DateTimeFilter<"JobRole"> | Date | string
     updatedAt?: DateTimeFilter<"JobRole"> | Date | string
@@ -20983,6 +20944,8 @@ export namespace Prisma {
     nationality?: SortOrder
     salary?: SortOrderInput | SortOrder
     salaryCurrency?: SortOrder
+    startDate?: SortOrderInput | SortOrder
+    contractDuration?: SortOrderInput | SortOrder
     requirementId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -20999,6 +20962,8 @@ export namespace Prisma {
     nationality?: StringFilter<"JobRole"> | string
     salary?: FloatNullableFilter<"JobRole"> | number | null
     salaryCurrency?: StringFilter<"JobRole"> | string
+    startDate?: DateTimeNullableFilter<"JobRole"> | Date | string | null
+    contractDuration?: EnumContractDurationNullableFilter<"JobRole"> | $Enums.ContractDuration | null
     requirementId?: StringFilter<"JobRole"> | string
     createdAt?: DateTimeFilter<"JobRole"> | Date | string
     updatedAt?: DateTimeFilter<"JobRole"> | Date | string
@@ -21012,6 +20977,8 @@ export namespace Prisma {
     nationality?: SortOrder
     salary?: SortOrderInput | SortOrder
     salaryCurrency?: SortOrder
+    startDate?: SortOrderInput | SortOrder
+    contractDuration?: SortOrderInput | SortOrder
     requirementId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -21032,6 +20999,8 @@ export namespace Prisma {
     nationality?: StringWithAggregatesFilter<"JobRole"> | string
     salary?: FloatNullableWithAggregatesFilter<"JobRole"> | number | null
     salaryCurrency?: StringWithAggregatesFilter<"JobRole"> | string
+    startDate?: DateTimeNullableWithAggregatesFilter<"JobRole"> | Date | string | null
+    contractDuration?: EnumContractDurationNullableWithAggregatesFilter<"JobRole"> | $Enums.ContractDuration | null
     requirementId?: StringWithAggregatesFilter<"JobRole"> | string
     createdAt?: DateTimeWithAggregatesFilter<"JobRole"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"JobRole"> | Date | string
@@ -22177,7 +22146,6 @@ export namespace Prisma {
     licenseNumber: string
     licenseExpiry: Date | string
     country: string
-    regions?: AgencyCreateregionsInput | string[]
     website?: string | null
     address: string
     city: string
@@ -22198,7 +22166,6 @@ export namespace Prisma {
     licenseNumber: string
     licenseExpiry: Date | string
     country: string
-    regions?: AgencyCreateregionsInput | string[]
     website?: string | null
     address: string
     city: string
@@ -22217,7 +22184,6 @@ export namespace Prisma {
     licenseNumber?: StringFieldUpdateOperationsInput | string
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
-    regions?: AgencyUpdateregionsInput | string[]
     website?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     city?: StringFieldUpdateOperationsInput | string
@@ -22238,7 +22204,6 @@ export namespace Prisma {
     licenseNumber?: StringFieldUpdateOperationsInput | string
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
-    regions?: AgencyUpdateregionsInput | string[]
     website?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     city?: StringFieldUpdateOperationsInput | string
@@ -22258,7 +22223,6 @@ export namespace Prisma {
     licenseNumber: string
     licenseExpiry: Date | string
     country: string
-    regions?: AgencyCreateregionsInput | string[]
     website?: string | null
     address: string
     city: string
@@ -22274,7 +22238,6 @@ export namespace Prisma {
     licenseNumber?: StringFieldUpdateOperationsInput | string
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
-    regions?: AgencyUpdateregionsInput | string[]
     website?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     city?: StringFieldUpdateOperationsInput | string
@@ -22291,7 +22254,6 @@ export namespace Prisma {
     licenseNumber?: StringFieldUpdateOperationsInput | string
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
-    regions?: AgencyUpdateregionsInput | string[]
     website?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     city?: StringFieldUpdateOperationsInput | string
@@ -22371,9 +22333,6 @@ export namespace Prisma {
 
   export type RequirementCreateInput = {
     id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
@@ -22395,9 +22354,6 @@ export namespace Prisma {
 
   export type RequirementUncheckedCreateInput = {
     id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
@@ -22419,9 +22375,6 @@ export namespace Prisma {
 
   export type RequirementUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -22443,9 +22396,6 @@ export namespace Prisma {
 
   export type RequirementUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -22467,9 +22417,6 @@ export namespace Prisma {
 
   export type RequirementCreateManyInput = {
     id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
@@ -22487,9 +22434,6 @@ export namespace Prisma {
 
   export type RequirementUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -22505,9 +22449,6 @@ export namespace Prisma {
 
   export type RequirementUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -22530,6 +22471,8 @@ export namespace Prisma {
     nationality: string
     salary?: number | null
     salaryCurrency?: string
+    startDate?: Date | string | null
+    contractDuration?: $Enums.ContractDuration | null
     createdAt?: Date | string
     updatedAt?: Date | string
     requirement: RequirementCreateNestedOneWithoutJobRolesInput
@@ -22542,6 +22485,8 @@ export namespace Prisma {
     nationality: string
     salary?: number | null
     salaryCurrency?: string
+    startDate?: Date | string | null
+    contractDuration?: $Enums.ContractDuration | null
     requirementId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -22554,6 +22499,8 @@ export namespace Prisma {
     nationality?: StringFieldUpdateOperationsInput | string
     salary?: NullableFloatFieldUpdateOperationsInput | number | null
     salaryCurrency?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requirement?: RequirementUpdateOneRequiredWithoutJobRolesNestedInput
@@ -22566,6 +22513,8 @@ export namespace Prisma {
     nationality?: StringFieldUpdateOperationsInput | string
     salary?: NullableFloatFieldUpdateOperationsInput | number | null
     salaryCurrency?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     requirementId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22578,6 +22527,8 @@ export namespace Prisma {
     nationality: string
     salary?: number | null
     salaryCurrency?: string
+    startDate?: Date | string | null
+    contractDuration?: $Enums.ContractDuration | null
     requirementId: string
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -22590,6 +22541,8 @@ export namespace Prisma {
     nationality?: StringFieldUpdateOperationsInput | string
     salary?: NullableFloatFieldUpdateOperationsInput | number | null
     salaryCurrency?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -22601,6 +22554,8 @@ export namespace Prisma {
     nationality?: StringFieldUpdateOperationsInput | string
     salary?: NullableFloatFieldUpdateOperationsInput | number | null
     salaryCurrency?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     requirementId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -23983,14 +23938,6 @@ export namespace Prisma {
     _max?: NestedEnumCompanySizeFilter<$PrismaModel>
   }
 
-  export type StringNullableListFilter<$PrismaModel = never> = {
-    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    has?: string | StringFieldRefInput<$PrismaModel> | null
-    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
-    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
-    isEmpty?: boolean
-  }
-
   export type LabourProfileListRelationFilter = {
     every?: LabourProfileWhereInput
     some?: LabourProfileWhereInput
@@ -24009,7 +23956,6 @@ export namespace Prisma {
     licenseNumber?: SortOrder
     licenseExpiry?: SortOrder
     country?: SortOrder
-    regions?: SortOrder
     website?: SortOrder
     address?: SortOrder
     city?: SortOrder
@@ -24127,18 +24073,19 @@ export namespace Prisma {
     _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
-  export type EnumContractDurationNullableFilter<$PrismaModel = never> = {
-    equals?: $Enums.ContractDuration | EnumContractDurationFieldRefInput<$PrismaModel> | null
-    in?: $Enums.ContractDuration[] | ListEnumContractDurationFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.ContractDuration[] | ListEnumContractDurationFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumContractDurationNullableFilter<$PrismaModel> | $Enums.ContractDuration | null
-  }
-
   export type EnumRequirementStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.RequirementStatus | EnumRequirementStatusFieldRefInput<$PrismaModel>
     in?: $Enums.RequirementStatus[] | ListEnumRequirementStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.RequirementStatus[] | ListEnumRequirementStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumRequirementStatusFilter<$PrismaModel> | $Enums.RequirementStatus
+  }
+
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
   }
 
   export type EnumExperienceLevelNullableFilter<$PrismaModel = never> = {
@@ -24193,9 +24140,6 @@ export namespace Prisma {
 
   export type RequirementCountOrderByAggregateInput = {
     id?: SortOrder
-    projectLocation?: SortOrder
-    startDate?: SortOrder
-    contractDuration?: SortOrder
     specialNotes?: SortOrder
     status?: SortOrder
     languages?: SortOrder
@@ -24217,9 +24161,6 @@ export namespace Prisma {
 
   export type RequirementMaxOrderByAggregateInput = {
     id?: SortOrder
-    projectLocation?: SortOrder
-    startDate?: SortOrder
-    contractDuration?: SortOrder
     specialNotes?: SortOrder
     status?: SortOrder
     minExperience?: SortOrder
@@ -24236,9 +24177,6 @@ export namespace Prisma {
 
   export type RequirementMinOrderByAggregateInput = {
     id?: SortOrder
-    projectLocation?: SortOrder
-    startDate?: SortOrder
-    contractDuration?: SortOrder
     specialNotes?: SortOrder
     status?: SortOrder
     minExperience?: SortOrder
@@ -24255,16 +24193,6 @@ export namespace Prisma {
 
   export type RequirementSumOrderByAggregateInput = {
     maxAge?: SortOrder
-  }
-
-  export type EnumContractDurationNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.ContractDuration | EnumContractDurationFieldRefInput<$PrismaModel> | null
-    in?: $Enums.ContractDuration[] | ListEnumContractDurationFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.ContractDuration[] | ListEnumContractDurationFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumContractDurationNullableWithAggregatesFilter<$PrismaModel> | $Enums.ContractDuration | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedEnumContractDurationNullableFilter<$PrismaModel>
-    _max?: NestedEnumContractDurationNullableFilter<$PrismaModel>
   }
 
   export type EnumRequirementStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -24335,6 +24263,13 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
+  export type EnumContractDurationNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.ContractDuration | EnumContractDurationFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ContractDuration[] | ListEnumContractDurationFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ContractDuration[] | ListEnumContractDurationFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumContractDurationNullableFilter<$PrismaModel> | $Enums.ContractDuration | null
+  }
+
   export type RequirementScalarRelationFilter = {
     is?: RequirementWhereInput
     isNot?: RequirementWhereInput
@@ -24347,6 +24282,8 @@ export namespace Prisma {
     nationality?: SortOrder
     salary?: SortOrder
     salaryCurrency?: SortOrder
+    startDate?: SortOrder
+    contractDuration?: SortOrder
     requirementId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -24364,6 +24301,8 @@ export namespace Prisma {
     nationality?: SortOrder
     salary?: SortOrder
     salaryCurrency?: SortOrder
+    startDate?: SortOrder
+    contractDuration?: SortOrder
     requirementId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -24376,6 +24315,8 @@ export namespace Prisma {
     nationality?: SortOrder
     salary?: SortOrder
     salaryCurrency?: SortOrder
+    startDate?: SortOrder
+    contractDuration?: SortOrder
     requirementId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -24416,6 +24357,16 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type EnumContractDurationNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ContractDuration | EnumContractDurationFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ContractDuration[] | ListEnumContractDurationFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ContractDuration[] | ListEnumContractDurationFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumContractDurationNullableWithAggregatesFilter<$PrismaModel> | $Enums.ContractDuration | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumContractDurationNullableFilter<$PrismaModel>
+    _max?: NestedEnumContractDurationNullableFilter<$PrismaModel>
   }
 
   export type EnumGenderFilter<$PrismaModel = never> = {
@@ -25481,10 +25432,6 @@ export namespace Prisma {
     deleteMany?: ClientDocumentScalarWhereInput | ClientDocumentScalarWhereInput[]
   }
 
-  export type AgencyCreateregionsInput = {
-    set: string[]
-  }
-
   export type UserCreateNestedOneWithoutAgencyProfileInput = {
     create?: XOR<UserCreateWithoutAgencyProfileInput, UserUncheckedCreateWithoutAgencyProfileInput>
     connectOrCreate?: UserCreateOrConnectWithoutAgencyProfileInput
@@ -25531,11 +25478,6 @@ export namespace Prisma {
     connectOrCreate?: AgencyDocumentCreateOrConnectWithoutAgencyInput | AgencyDocumentCreateOrConnectWithoutAgencyInput[]
     createMany?: AgencyDocumentCreateManyAgencyInputEnvelope
     connect?: AgencyDocumentWhereUniqueInput | AgencyDocumentWhereUniqueInput[]
-  }
-
-  export type AgencyUpdateregionsInput = {
-    set?: string[]
-    push?: string | string[]
   }
 
   export type UserUpdateOneRequiredWithoutAgencyProfileNestedInput = {
@@ -25716,10 +25658,6 @@ export namespace Prisma {
     connect?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
   }
 
-  export type NullableEnumContractDurationFieldUpdateOperationsInput = {
-    set?: $Enums.ContractDuration | null
-  }
-
   export type EnumRequirementStatusFieldUpdateOperationsInput = {
     set?: $Enums.RequirementStatus
   }
@@ -25895,6 +25833,10 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type NullableEnumContractDurationFieldUpdateOperationsInput = {
+    set?: $Enums.ContractDuration | null
   }
 
   export type RequirementUpdateOneRequiredWithoutJobRolesNestedInput = {
@@ -26508,13 +26450,6 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
-  export type NestedEnumContractDurationNullableFilter<$PrismaModel = never> = {
-    equals?: $Enums.ContractDuration | EnumContractDurationFieldRefInput<$PrismaModel> | null
-    in?: $Enums.ContractDuration[] | ListEnumContractDurationFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.ContractDuration[] | ListEnumContractDurationFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumContractDurationNullableFilter<$PrismaModel> | $Enums.ContractDuration | null
-  }
-
   export type NestedEnumRequirementStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.RequirementStatus | EnumRequirementStatusFieldRefInput<$PrismaModel>
     in?: $Enums.RequirementStatus[] | ListEnumRequirementStatusFieldRefInput<$PrismaModel>
@@ -26534,16 +26469,6 @@ export namespace Prisma {
     in?: $Enums.TicketType[] | ListEnumTicketTypeFieldRefInput<$PrismaModel> | null
     notIn?: $Enums.TicketType[] | ListEnumTicketTypeFieldRefInput<$PrismaModel> | null
     not?: NestedEnumTicketTypeNullableFilter<$PrismaModel> | $Enums.TicketType | null
-  }
-
-  export type NestedEnumContractDurationNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: $Enums.ContractDuration | EnumContractDurationFieldRefInput<$PrismaModel> | null
-    in?: $Enums.ContractDuration[] | ListEnumContractDurationFieldRefInput<$PrismaModel> | null
-    notIn?: $Enums.ContractDuration[] | ListEnumContractDurationFieldRefInput<$PrismaModel> | null
-    not?: NestedEnumContractDurationNullableWithAggregatesFilter<$PrismaModel> | $Enums.ContractDuration | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedEnumContractDurationNullableFilter<$PrismaModel>
-    _max?: NestedEnumContractDurationNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumRequirementStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -26603,6 +26528,13 @@ export namespace Prisma {
     _max?: NestedEnumTicketTypeNullableFilter<$PrismaModel>
   }
 
+  export type NestedEnumContractDurationNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.ContractDuration | EnumContractDurationFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ContractDuration[] | ListEnumContractDurationFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ContractDuration[] | ListEnumContractDurationFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumContractDurationNullableFilter<$PrismaModel> | $Enums.ContractDuration | null
+  }
+
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[] | ListIntFieldRefInput<$PrismaModel>
@@ -26644,6 +26576,16 @@ export namespace Prisma {
     _sum?: NestedFloatNullableFilter<$PrismaModel>
     _min?: NestedFloatNullableFilter<$PrismaModel>
     _max?: NestedFloatNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumContractDurationNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.ContractDuration | EnumContractDurationFieldRefInput<$PrismaModel> | null
+    in?: $Enums.ContractDuration[] | ListEnumContractDurationFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.ContractDuration[] | ListEnumContractDurationFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumContractDurationNullableWithAggregatesFilter<$PrismaModel> | $Enums.ContractDuration | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumContractDurationNullableFilter<$PrismaModel>
+    _max?: NestedEnumContractDurationNullableFilter<$PrismaModel>
   }
 
   export type NestedEnumGenderFilter<$PrismaModel = never> = {
@@ -26796,7 +26738,6 @@ export namespace Prisma {
     licenseNumber: string
     licenseExpiry: Date | string
     country: string
-    regions?: AgencyCreateregionsInput | string[]
     website?: string | null
     address: string
     city: string
@@ -26815,7 +26756,6 @@ export namespace Prisma {
     licenseNumber: string
     licenseExpiry: Date | string
     country: string
-    regions?: AgencyCreateregionsInput | string[]
     website?: string | null
     address: string
     city: string
@@ -27265,7 +27205,6 @@ export namespace Prisma {
     licenseNumber?: StringFieldUpdateOperationsInput | string
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
-    regions?: AgencyUpdateregionsInput | string[]
     website?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     city?: StringFieldUpdateOperationsInput | string
@@ -27284,7 +27223,6 @@ export namespace Prisma {
     licenseNumber?: StringFieldUpdateOperationsInput | string
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
-    regions?: AgencyUpdateregionsInput | string[]
     website?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     city?: StringFieldUpdateOperationsInput | string
@@ -27698,9 +27636,6 @@ export namespace Prisma {
 
   export type RequirementCreateWithoutClientInput = {
     id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
@@ -27721,9 +27656,6 @@ export namespace Prisma {
 
   export type RequirementUncheckedCreateWithoutClientInput = {
     id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
@@ -27882,9 +27814,6 @@ export namespace Prisma {
     OR?: RequirementScalarWhereInput[]
     NOT?: RequirementScalarWhereInput | RequirementScalarWhereInput[]
     id?: StringFilter<"Requirement"> | string
-    projectLocation?: StringNullableFilter<"Requirement"> | string | null
-    startDate?: DateTimeNullableFilter<"Requirement"> | Date | string | null
-    contractDuration?: EnumContractDurationNullableFilter<"Requirement"> | $Enums.ContractDuration | null
     specialNotes?: StringNullableFilter<"Requirement"> | string | null
     status?: EnumRequirementStatusFilter<"Requirement"> | $Enums.RequirementStatus
     languages?: StringNullableListFilter<"Requirement">
@@ -28073,9 +28002,6 @@ export namespace Prisma {
 
   export type RequirementCreateWithoutAssignedAgencyInput = {
     id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
@@ -28096,9 +28022,6 @@ export namespace Prisma {
 
   export type RequirementUncheckedCreateWithoutAssignedAgencyInput = {
     id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
@@ -28510,7 +28433,6 @@ export namespace Prisma {
     licenseNumber: string
     licenseExpiry: Date | string
     country: string
-    regions?: AgencyCreateregionsInput | string[]
     website?: string | null
     address: string
     city: string
@@ -28530,7 +28452,6 @@ export namespace Prisma {
     licenseNumber: string
     licenseExpiry: Date | string
     country: string
-    regions?: AgencyCreateregionsInput | string[]
     website?: string | null
     address: string
     city: string
@@ -28553,6 +28474,8 @@ export namespace Prisma {
     nationality: string
     salary?: number | null
     salaryCurrency?: string
+    startDate?: Date | string | null
+    contractDuration?: $Enums.ContractDuration | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -28564,6 +28487,8 @@ export namespace Prisma {
     nationality: string
     salary?: number | null
     salaryCurrency?: string
+    startDate?: Date | string | null
+    contractDuration?: $Enums.ContractDuration | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -28803,7 +28728,6 @@ export namespace Prisma {
     licenseNumber?: StringFieldUpdateOperationsInput | string
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
-    regions?: AgencyUpdateregionsInput | string[]
     website?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     city?: StringFieldUpdateOperationsInput | string
@@ -28823,7 +28747,6 @@ export namespace Prisma {
     licenseNumber?: StringFieldUpdateOperationsInput | string
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
-    regions?: AgencyUpdateregionsInput | string[]
     website?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     city?: StringFieldUpdateOperationsInput | string
@@ -28860,6 +28783,8 @@ export namespace Prisma {
     nationality?: StringFilter<"JobRole"> | string
     salary?: FloatNullableFilter<"JobRole"> | number | null
     salaryCurrency?: StringFilter<"JobRole"> | string
+    startDate?: DateTimeNullableFilter<"JobRole"> | Date | string | null
+    contractDuration?: EnumContractDurationNullableFilter<"JobRole"> | $Enums.ContractDuration | null
     requirementId?: StringFilter<"JobRole"> | string
     createdAt?: DateTimeFilter<"JobRole"> | Date | string
     updatedAt?: DateTimeFilter<"JobRole"> | Date | string
@@ -28933,9 +28858,6 @@ export namespace Prisma {
 
   export type RequirementCreateWithoutJobRolesInput = {
     id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
@@ -28956,9 +28878,6 @@ export namespace Prisma {
 
   export type RequirementUncheckedCreateWithoutJobRolesInput = {
     id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
@@ -28995,9 +28914,6 @@ export namespace Prisma {
 
   export type RequirementUpdateWithoutJobRolesInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -29018,9 +28934,6 @@ export namespace Prisma {
 
   export type RequirementUncheckedUpdateWithoutJobRolesInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -29041,9 +28954,6 @@ export namespace Prisma {
 
   export type RequirementCreateWithoutLabourProfilesInput = {
     id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
@@ -29064,9 +28974,6 @@ export namespace Prisma {
 
   export type RequirementUncheckedCreateWithoutLabourProfilesInput = {
     id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
@@ -29097,7 +29004,6 @@ export namespace Prisma {
     licenseNumber: string
     licenseExpiry: Date | string
     country: string
-    regions?: AgencyCreateregionsInput | string[]
     website?: string | null
     address: string
     city: string
@@ -29117,7 +29023,6 @@ export namespace Prisma {
     licenseNumber: string
     licenseExpiry: Date | string
     country: string
-    regions?: AgencyCreateregionsInput | string[]
     website?: string | null
     address: string
     city: string
@@ -29212,9 +29117,6 @@ export namespace Prisma {
 
   export type RequirementUpdateWithoutLabourProfilesInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -29235,9 +29137,6 @@ export namespace Prisma {
 
   export type RequirementUncheckedUpdateWithoutLabourProfilesInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -29274,7 +29173,6 @@ export namespace Prisma {
     licenseNumber?: StringFieldUpdateOperationsInput | string
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
-    regions?: AgencyUpdateregionsInput | string[]
     website?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     city?: StringFieldUpdateOperationsInput | string
@@ -29294,7 +29192,6 @@ export namespace Prisma {
     licenseNumber?: StringFieldUpdateOperationsInput | string
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
-    regions?: AgencyUpdateregionsInput | string[]
     website?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     city?: StringFieldUpdateOperationsInput | string
@@ -29339,9 +29236,6 @@ export namespace Prisma {
 
   export type RequirementCreateWithoutProceduresInput = {
     id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
@@ -29362,9 +29256,6 @@ export namespace Prisma {
 
   export type RequirementUncheckedCreateWithoutProceduresInput = {
     id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
@@ -29486,9 +29377,6 @@ export namespace Prisma {
 
   export type RequirementUpdateWithoutProceduresInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -29509,9 +29397,6 @@ export namespace Prisma {
 
   export type RequirementUncheckedUpdateWithoutProceduresInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -30164,7 +30049,6 @@ export namespace Prisma {
     licenseNumber: string
     licenseExpiry: Date | string
     country: string
-    regions?: AgencyCreateregionsInput | string[]
     website?: string | null
     address: string
     city: string
@@ -30184,7 +30068,6 @@ export namespace Prisma {
     licenseNumber: string
     licenseExpiry: Date | string
     country: string
-    regions?: AgencyCreateregionsInput | string[]
     website?: string | null
     address: string
     city: string
@@ -30283,7 +30166,6 @@ export namespace Prisma {
     licenseNumber?: StringFieldUpdateOperationsInput | string
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
-    regions?: AgencyUpdateregionsInput | string[]
     website?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     city?: StringFieldUpdateOperationsInput | string
@@ -30303,7 +30185,6 @@ export namespace Prisma {
     licenseNumber?: StringFieldUpdateOperationsInput | string
     licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
     country?: StringFieldUpdateOperationsInput | string
-    regions?: AgencyUpdateregionsInput | string[]
     website?: NullableStringFieldUpdateOperationsInput | string | null
     address?: StringFieldUpdateOperationsInput | string
     city?: StringFieldUpdateOperationsInput | string
@@ -30387,9 +30268,6 @@ export namespace Prisma {
 
   export type RequirementCreateWithoutDocumentsInput = {
     id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
@@ -30410,9 +30288,6 @@ export namespace Prisma {
 
   export type RequirementUncheckedCreateWithoutDocumentsInput = {
     id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
@@ -30514,9 +30389,6 @@ export namespace Prisma {
 
   export type RequirementUpdateWithoutDocumentsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -30537,9 +30409,6 @@ export namespace Prisma {
 
   export type RequirementUncheckedUpdateWithoutDocumentsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -31303,9 +31172,6 @@ export namespace Prisma {
 
   export type RequirementCreateManyClientInput = {
     id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
@@ -31336,9 +31202,6 @@ export namespace Prisma {
 
   export type RequirementUpdateWithoutClientInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -31359,9 +31222,6 @@ export namespace Prisma {
 
   export type RequirementUncheckedUpdateWithoutClientInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -31382,9 +31242,6 @@ export namespace Prisma {
 
   export type RequirementUncheckedUpdateManyWithoutClientInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -31481,9 +31338,6 @@ export namespace Prisma {
 
   export type RequirementCreateManyAssignedAgencyInput = {
     id?: string
-    projectLocation?: string | null
-    startDate?: Date | string | null
-    contractDuration?: $Enums.ContractDuration | null
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
     languages?: RequirementCreatelanguagesInput | string[]
@@ -31632,9 +31486,6 @@ export namespace Prisma {
 
   export type RequirementUpdateWithoutAssignedAgencyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -31655,9 +31506,6 @@ export namespace Prisma {
 
   export type RequirementUncheckedUpdateWithoutAssignedAgencyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -31678,9 +31526,6 @@ export namespace Prisma {
 
   export type RequirementUncheckedUpdateManyWithoutAssignedAgencyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    projectLocation?: NullableStringFieldUpdateOperationsInput | string | null
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     languages?: RequirementUpdatelanguagesInput | string[]
@@ -31744,6 +31589,8 @@ export namespace Prisma {
     nationality: string
     salary?: number | null
     salaryCurrency?: string
+    startDate?: Date | string | null
+    contractDuration?: $Enums.ContractDuration | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -31818,6 +31665,8 @@ export namespace Prisma {
     nationality?: StringFieldUpdateOperationsInput | string
     salary?: NullableFloatFieldUpdateOperationsInput | number | null
     salaryCurrency?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -31829,6 +31678,8 @@ export namespace Prisma {
     nationality?: StringFieldUpdateOperationsInput | string
     salary?: NullableFloatFieldUpdateOperationsInput | number | null
     salaryCurrency?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -31840,6 +31691,8 @@ export namespace Prisma {
     nationality?: StringFieldUpdateOperationsInput | string
     salary?: NullableFloatFieldUpdateOperationsInput | number | null
     salaryCurrency?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

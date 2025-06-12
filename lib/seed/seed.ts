@@ -51,8 +51,6 @@ interface SeedUser {
       licenseNumber: string;
       licenseExpiry: Date;
       country: string;
-      regions: string[];
-      website?: string;
       address: string;
       city: string;
       postalCode?: string;
@@ -151,8 +149,6 @@ async function seedBaseData() {
           licenseNumber: "LIC-12345",
           licenseExpiry: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
           country: "United States",
-          regions: ["North America", "Europe"],
-          website: "https://globalrecruiters.com",
           address: "456 Recruitment Ave",
           city: "Chicago",
           postalCode: "60601",
@@ -233,8 +229,6 @@ async function seedUserWithProfile(userData: SeedUser) {
             licenseNumber: userData.profile.agency?.licenseNumber || "",
             licenseExpiry: userData.profile.agency?.licenseExpiry || new Date(),
             country: userData.profile.agency?.country || "",
-            regions: userData.profile.agency?.regions || [],
-            website: userData.profile.agency?.website,
             address: userData.profile.agency?.address || "",
             city: userData.profile.agency?.city || "",
             postalCode: userData.profile.agency?.postalCode,

@@ -13,9 +13,10 @@ import { Trash2, Undo2 } from "lucide-react";
 import { AccountStatus, UserRole } from "@prisma/client";
 import { useToast } from "@/context/toast-provider";
 import { DocumentViewer } from "@/components/shared/DocumentViewer";
-import { Select } from "@/components/ui/select";
 import logSecurityEvent from "@/lib/utils/helpers";
 import { Pagination } from "@/components/ui/Pagination";
+import { useLanguage } from "@/context/LanguageContext";
+import { HorizontalSelect } from "@/components/ui/HorizontalSelect";
 interface AgencyDocument {
   id: string;
   type: string;
@@ -27,7 +28,6 @@ interface AgencyDocument {
 interface Agency {
   id: string;
   agencyName: string;
-  email: string;
   registrationNo: string;
   licenseExpiry: Date;
   country: string;
@@ -40,7 +40,8 @@ interface Agency {
     id: string;
     email: string;
     status: AccountStatus;
-    deleteAt?: Date;
+    deleteAt?: Date | null;
+    deletionType?: string;
   };
   documents?: AgencyDocument[];
 }
@@ -51,14 +52,12 @@ interface RegistrationFormData {
   licenseNumber: string;
   licenseExpiry: string;
   country: string;
-  contactPerson: string;
   email: string;
   phone: string;
   countryCode: string;
   address: string;
   city: string;
   postalCode: string;
-  website: string;
 }
 
 // Constants moved to separate file
@@ -84,6 +83,7 @@ export default function Agencies() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   // State management
   const [registrationData, setRegistrationData] =
@@ -93,14 +93,12 @@ export default function Agencies() {
       licenseNumber: "",
       licenseExpiry: "",
       country: "",
-      contactPerson: "",
       email: "",
       phone: "",
       countryCode: "+974",
       address: "",
       city: "",
       postalCode: "",
-      website: "",
     });
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -188,19 +186,36 @@ export default function Agencies() {
 
         const data: Agency[] = await response.json();
 
-        // For each agency, fetch documents only if status is PENDING_REVIEW
+        // First normalize ALL data
+        const normalizedData = data.map((agency) => ({
+          ...agency,
+          user: {
+            ...agency.user,
+            deleteAt: agency.user.deleteAt || null, // Ensure deleteAt exists
+          },
+          documents: [], // Initialize empty documents array
+        }));
+
+        // Then fetch documents for pending agencies using the normalized data
         const agenciesWithDocuments = await Promise.all(
-          data.map(async (agency) => {
+          normalizedData.map(async (agency) => {
             if (agency.user.status === AccountStatus.PENDING_REVIEW) {
-              const docsResponse = await fetch(
-                `/api/agencies/${agency.id}/documents`
-              );
-              if (docsResponse.ok) {
-                const documents = await docsResponse.json();
-                return { ...agency, documents };
+              try {
+                const docsResponse = await fetch(
+                  `/api/agencies/${agency.id}/documents`
+                );
+                if (docsResponse.ok) {
+                  const documents = await docsResponse.json();
+                  return { ...agency, documents };
+                }
+              } catch (error) {
+                console.error(
+                  `Error fetching documents for agency ${agency.id}:`,
+                  error
+                );
               }
             }
-            return { ...agency, documents: [] };
+            return agency; // Return agency as-is (already has empty documents array)
           })
         );
 
@@ -240,6 +255,15 @@ export default function Agencies() {
     });
   }, [agencies, activeTab, isOlderThan12Hours]);
 
+  const countryOptions = useMemo(
+    () =>
+      t.nationalityOptions?.map((nat) => ({
+        value: nat,
+        label: nat,
+      })) || [],
+    [t.nationalityOptions]
+  );
+
   const paginatedAgencies = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredAgencies.slice(startIndex, startIndex + ITEMS_PER_PAGE);
@@ -255,14 +279,25 @@ export default function Agencies() {
         }
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to delete account");
-      }
+      if (!response.ok) throw new Error("Failed to delete account");
 
-      setAgencies(agencies.filter((agency) => agency.id !== agencyId));
+      const { id, user } = await response.json();
+
+      setAgencies((prev) =>
+        prev.map((agency) =>
+          agency.id === id
+            ? {
+                ...agency,
+                user: {
+                  ...agency.user,
+                  ...user,
+                },
+              }
+            : agency
+        )
+      );
+
       setIsDeleteModalOpen(false);
-      setAgencyToDelete(null);
-
       toast({
         type: "success",
         message: "Account will be permanently deleted in 1 hour",
@@ -323,14 +358,12 @@ export default function Agencies() {
         licenseNumber: "",
         licenseExpiry: "",
         country: "",
-        contactPerson: "",
         email: "",
         phone: "",
         countryCode: "+974",
         address: "",
         city: "",
         postalCode: "",
-        website: "",
       });
 
       toast({
@@ -514,31 +547,14 @@ export default function Agencies() {
             />
             <Input
               variant="horizontal"
-              label="Address :"
-              name="address"
-              value={registrationData.address}
+              label="Email Address :"
+              name="email"
+              type="email"
+              value={registrationData.email}
               onChange={handleRegistrationChange}
-              placeholder="Enter full address"
+              placeholder="Enter email address"
               required
               aria-required="true"
-            />
-            <Input
-              variant="horizontal"
-              label="City :"
-              name="city"
-              value={registrationData.city}
-              onChange={handleRegistrationChange}
-              placeholder="Enter city"
-              required
-              aria-required="true"
-            />
-            <Input
-              variant="horizontal"
-              label="Postal Code :"
-              name="postalCode"
-              value={registrationData.postalCode}
-              onChange={handleRegistrationChange}
-              placeholder="Enter postal code"
             />
             <div className="flex items-center gap-14">
               <label
@@ -586,17 +602,47 @@ export default function Agencies() {
                 </div>
               </div>
             </div>
-
             <Input
               variant="horizontal"
-              label="Email Address :"
-              name="email"
-              type="email"
-              value={registrationData.email}
+              label="Address :"
+              name="address"
+              value={registrationData.address}
               onChange={handleRegistrationChange}
-              placeholder="Enter email address"
+              placeholder="Enter full address"
               required
               aria-required="true"
+            />
+            <Input
+              variant="horizontal"
+              label="City :"
+              name="city"
+              value={registrationData.city}
+              onChange={handleRegistrationChange}
+              placeholder="Enter city"
+              required
+              aria-required="true"
+            />
+            <HorizontalSelect
+              label="Country :"
+              name="country"
+              value={registrationData.country}
+              onChange={(e) =>
+                setRegistrationData({
+                  ...registrationData,
+                  country: e.target.value,
+                })
+              }
+              options={countryOptions}
+              required
+              aria-required="true"
+            />
+            <Input
+              variant="horizontal"
+              label="Postal Code :"
+              name="postalCode"
+              value={registrationData.postalCode}
+              onChange={handleRegistrationChange}
+              placeholder="Enter postal code"
             />
             <div className="flex justify-center mt-4">
               <Button
@@ -685,7 +731,7 @@ export default function Agencies() {
                       )}
                     </td>
                     <td className="py-2 px-3 text-sm text-[#150B3D]/70">
-                      {agency.email}
+                      {agency.user.email}
                     </td>
                     <td
                       className={`py-2 px-3 text-sm font-medium ${getStatusColor(
@@ -966,8 +1012,8 @@ export default function Agencies() {
                 <AgencyCardContent
                   agencyName={agency.agencyName}
                   location={`${agency.country} • ${agency.registrationNo}`}
-                  logoUrl={agency.logoUrl || "/api/placeholder/48/48"}
-                  email={agency.email}
+                  logoUrl={agency.logoUrl || "/api/placeholder/48x48"}
+                  email={agency.user.email}
                   registerNo={agency.registrationNo}
                   time={
                     agency.user.status === AccountStatus.REJECTED &&
@@ -980,35 +1026,16 @@ export default function Agencies() {
                   }
                   aria-label={`View details for ${agency.agencyName}`}
                 />
-                {agency.user.status === AccountStatus.REJECTED && (
-                  <div className="absolute top-2 right-2">
+
+                {/* Status indicators container */}
+                <div className="absolute bottom-3 left-2 right-2 flex justify-between items-start">
+                  {/* Rejected status */}
+                  {agency.user.status === AccountStatus.REJECTED && (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                       Rejected
                     </span>
-                  </div>
-                )}
-                {agency.user.deleteAt && (
-                  <div className="absolute top-2 left-2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                      {getRemainingTime(new Date(agency.user.deleteAt))}
-                    </span>
-                  </div>
-                )}
-                {agency.user.status === AccountStatus.REJECTED && (
-                  <div className="absolute bottom-2 right-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRecoverAccount(agency.id);
-                      }}
-                      className="text-green-600 hover:text-green-800"
-                      title="Recover account"
-                      aria-label={`Recover ${agency.agencyName}`}
-                    >
-                      <Undo2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             ))}
         </div>

@@ -5,7 +5,7 @@ import { MoreVertical } from "lucide-react";
 
 interface CompanyCardContentProps {
   companyName: string;
-  logoUrl: string;
+  logoUrl?: string;
   email: string;
   phoneNo: string;
   noSub: string;
@@ -29,7 +29,15 @@ export default function CompanyCardContent({
       <CardContent className="p-0 flex items-start gap-8">
         {/* Logo */}
         <div className="relative h-15 w-15 rounded-full overflow-hidden">
-          <Image src={logoUrl} alt="Company Logo" fill />
+          {logoUrl ? (
+            <Image src={logoUrl} alt={companyName} fill />
+          ) : (
+            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+              <span className="text-lg font-bold text-gray-500">
+                {companyName.charAt(0)}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Info */}

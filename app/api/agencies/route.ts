@@ -20,6 +20,8 @@ export async function GET() {
             id: true,
             email: true,
             status: true,
+            deleteAt: true,
+            deletionType: true,
           },
         },
       },

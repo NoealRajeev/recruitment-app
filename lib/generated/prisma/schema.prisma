@@ -128,10 +128,13 @@ enum AuditAction {
   AGENCY_UPDATED
   AGENCY_VERIFIED
   AGENCY_REJECTED
+  AGENCY_DELETION_REQUESTED
 
   // Requirement related
   REQUIREMENT_CREATED
   REQUIREMENT_UPDATED
+  REQUIREMENT_DELETE
+  REQUIREMENT_REJECTED
   REQUIREMENT_STATUS_CHANGED
   REQUIREMENT_ASSIGNED
   DRAFT_CREATED
@@ -268,7 +271,6 @@ model Agency {
   licenseNumber  String   @db.VarChar(50)
   licenseExpiry  DateTime
   country        String   @db.VarChar(100)
-  regions        String[]
 
   // Contact Info
   website    String? @db.VarChar(255)
@@ -307,12 +309,9 @@ model Admin {
 }
 
 model Requirement {
-  id               String            @id @default(uuid())
-  projectLocation  String?
-  startDate        DateTime?
-  contractDuration ContractDuration?
-  specialNotes     String?
-  status           RequirementStatus @default(DRAFT)
+  id           String            @id @default(uuid())
+  specialNotes String?
+  status       RequirementStatus @default(DRAFT)
 
   // Language requirements
   languages String[]
@@ -344,21 +343,21 @@ model Requirement {
   // Indexes
   @@index([clientId])
   @@index([status])
-  @@index([startDate])
   @@index([createdAt])
   @@index([clientId, status])
   @@index([assignedAgencyId, status])
-  @@index([startDate, contractDuration])
   @@map("requirements")
 }
 
 model JobRole {
-  id             String @id @default(uuid())
-  title          String @db.VarChar(255)
-  quantity       Int    @default(1)
-  nationality    String @db.VarChar(100)
-  salary         Float?
-  salaryCurrency String @default("QAR") @db.VarChar(3)
+  id               String            @id @default(uuid())
+  title            String            @db.VarChar(255)
+  quantity         Int               @default(1)
+  nationality      String            @db.VarChar(100)
+  salary           Float?
+  salaryCurrency   String            @default("QAR") @db.VarChar(3)
+  startDate        DateTime?
+  contractDuration ContractDuration?
 
   // Relationships
   requirementId String
@@ -372,6 +371,8 @@ model JobRole {
   @@index([requirementId])
   @@index([nationality])
   @@index([salary])
+  @@index([startDate])
+  @@index([contractDuration])
   @@map("job_roles")
 }
 

@@ -32,9 +32,9 @@ export async function PUT(
           user: {
             update: {
               status,
-              ...(deletionType && {
-                deleteAt,
-                deletionType,
+              deleteAt: status === "REJECTED" ? deleteAt : null,
+              deletionType: status === "REJECTED" ? deletionType : null,
+              ...(status === "REJECTED" && {
                 deletionRequestedBy: session.user.id,
               }),
             },
@@ -49,13 +49,17 @@ export async function PUT(
       await tx.auditLog.create({
         data: {
           action:
-            status === "REJECTED" ? "COMPANY_REJECTED" : "COMPANY_UPDATED",
+            status === "REJECTED" ? "AGENCY_REJECTED" : "USER_STATUS_CHANGED",
           entityType: "AGENCY",
           entityId: id,
           performedById: session.user.id,
           description: `Agency status changed to ${status}`,
           oldData: { status: updatedAgency.user.status },
-          newData: { status, deleteAt, deletionType },
+          newData: {
+            status,
+            deleteAt: status === "REJECTED" ? deleteAt : null,
+            deletionType: status === "REJECTED" ? deletionType : null,
+          },
         },
       });
 

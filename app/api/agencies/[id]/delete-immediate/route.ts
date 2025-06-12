@@ -21,44 +21,53 @@ export async function DELETE(
 
   try {
     const result = await prisma.$transaction(async (tx) => {
-      // Set deletion in 1 hour
       const deleteAt = new Date();
       deleteAt.setHours(deleteAt.getHours() + 1);
 
-      const updatedAgency = await tx.agency.update({
-        where: { id: agencyId },
-        data: {
-          user: {
-            update: {
-              status: "REJECTED",
-              deleteAt,
-              deletionType: "IMMEDIATE",
-              deletionRequestedBy: session.user.id,
-            },
-          },
+      // Only update and return the changed fields
+      const updatedUser = await tx.user.update({
+        where: {
+          id: (
+            await tx.agency.findUnique({
+              where: { id: agencyId },
+              select: { userId: true },
+            })
+          )?.userId,
         },
-        include: {
-          user: true,
+        data: {
+          status: "REJECTED",
+          deleteAt,
+          deletionType: "IMMEDIATE",
+          deletionRequestedBy: session.user.id,
+        },
+        select: {
+          id: true,
+          status: true,
+          deleteAt: true,
+          deletionType: true,
         },
       });
 
       await tx.auditLog.create({
         data: {
-          action: "ACCOUNT_DELETION_REQUESTED",
+          action: "AGENCY_DELETION_REQUESTED",
           entityType: "AGENCY",
           entityId: agencyId,
           performedById: session.user.id,
           description: `Account marked for immediate deletion`,
-          oldData: { status: updatedAgency.user.status },
+          oldData: { status: updatedUser.status },
           newData: {
             status: "REJECTED",
-            deleteAt,
+            deleteAt: deleteAt,
             deletionType: "IMMEDIATE",
           },
         },
       });
 
-      return updatedAgency;
+      return {
+        id: agencyId,
+        user: updatedUser,
+      };
     });
 
     return NextResponse.json(result);

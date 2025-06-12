@@ -1,4 +1,4 @@
-type ClientWithUser = {
+interface ClientWithUser {
   id: string;
   companyName: string;
   registrationNo: string | null;
@@ -6,8 +6,6 @@ type ClientWithUser = {
   companySize: string | null;
   website: string | null;
   designation: string | null;
-  phone: string | null;
-  image: string | null;
   createdAt: Date | null;
   user: {
     id: string;
@@ -20,15 +18,15 @@ type ClientWithUser = {
     id: string;
   }[];
   documents?: ClientDocument[];
-};
+}
 
-type ClientDocument = {
+interface ClientDocument {
   id: string;
   type: string;
   url: string;
   verified: boolean;
   createdAt: Date;
-};
+}
 export type AuditLog = {
   id: string;
   action: AuditAction;
@@ -58,3 +56,27 @@ export type CompanySector =
   | "OTHER";
 
 export type CompanySize = "SMALL" | "MEDIUM" | "LARGE" | "ENTERPRISE";
+
+export interface AuthenticatedRequest extends NextRequest {
+  user: Session["user"];
+}
+
+export interface ValidatedRequest<Schema extends ZodTypeAny>
+  extends NextRequest {
+  data: zodInfer<Schema>;
+}
+
+export type Handler<Params = unknown> = (
+  req: NextRequest,
+  params?: Params
+) => Promise<NextResponse>;
+
+export type AuthenticatedHandler<Params = unknown> = (
+  req: AuthenticatedRequest,
+  params?: Params
+) => Promise<NextResponse>;
+
+export type ValidatedHandler<
+  Schema extends ZodTypeAny = ZodTypeAny,
+  Params = unknown,
+> = (req: ValidatedRequest<Schema>, params?: Params) => Promise<NextResponse>;

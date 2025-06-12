@@ -27,7 +27,6 @@ interface ClientWithUser {
   companySize: string | null;
   website: string | null;
   designation: string | null;
-  phone: string | null;
   image: string | null;
   createdAt: Date | null;
   user: {
@@ -255,7 +254,7 @@ export default function Company() {
                     companyName={company.companyName}
                     email={company.user.email}
                     phoneNo={company.user.phone || "N/A"}
-                    logoUrl={company.image || "/default-company.png"}
+                    logoUrl={company.image || ""}
                     onClick={() => {}}
                     noSub={""}
                   />
@@ -291,9 +290,9 @@ export default function Company() {
                 key={company.id}
                 companyName={company.companyName}
                 email={company.user.email}
-                phoneNo={company.phone || "N/A"}
+                phoneNo={company.user.phone || "N/A"}
                 noSub={company.requirements?.length.toString() || "0"}
-                logoUrl={company.image || "/default-company.png"}
+                logoUrl={company.image || ""}
                 onClick={() => router.push(`/companies/${company.id}`)}
               />
             ))}

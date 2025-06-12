@@ -4,7 +4,6 @@ import prisma from "@/lib/prisma";
 import {
   RequirementStatus,
   AuditAction,
-  ContractDuration,
   ExperienceLevel,
   TicketType,
 } from "@/lib/generated/prisma";
@@ -29,9 +28,6 @@ const BaseRequirementSchema = z.object({
 
 // Extended schema for full requirement submission
 const FullRequirementSchema = BaseRequirementSchema.extend({
-  projectLocation: z.string().min(1, "Project location is required").optional(),
-  startDate: z.string().datetime().optional(),
-  contractDuration: z.nativeEnum(ContractDuration).optional(),
   specialNotes: z.string().optional(),
   status: z.nativeEnum(RequirementStatus).optional(),
   languages: z.array(z.string()).optional(),
@@ -130,16 +126,6 @@ export async function POST(request: Request) {
       // Create the requirement with available data
       const requirement = await tx.requirement.create({
         data: {
-          projectLocation: hasFullData
-            ? fullValidation.data.projectLocation
-            : null,
-          startDate:
-            hasFullData && fullValidation.data.startDate
-              ? new Date(fullValidation.data.startDate)
-              : null,
-          contractDuration: hasFullData
-            ? fullValidation.data.contractDuration
-            : null,
           specialNotes: hasFullData ? fullValidation.data.specialNotes : null,
           status,
           languages: hasFullData ? fullValidation.data.languages || [] : [],

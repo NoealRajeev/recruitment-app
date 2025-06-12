@@ -108,10 +108,16 @@ export async function POST(request: Request) {
         );
       }
 
-      // 4. Update user status
+      // 4. Determine new status based on user role
+      const newStatus =
+        userRole === UserRole.RECRUITMENT_AGENCY
+          ? "PENDING_REVIEW"
+          : "SUBMITTED";
+
+      // 5. Update user status
       const updatedUser = await tx.user.update({
         where: { id: user.id },
-        data: { status: "SUBMITTED" },
+        data: { status: newStatus },
         select: {
           id: true,
           status: true,

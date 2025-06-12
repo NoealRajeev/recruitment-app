@@ -10,65 +10,47 @@ import { useLanguage } from "@/context/LanguageContext";
 import { format } from "date-fns";
 import {
   ContractDuration,
-  PreviousExperience,
-  TicketDetails,
+  ExperienceLevel,
+  RequirementStatus,
+  TicketType,
 } from "@/lib/generated/prisma";
-import {
-  getContractDurationEnumMapping,
-  getDisplayContractDurationMapping,
-  getDisplayPreviousExperienceMapping,
-  getDisplayTicketDetailsMapping,
-  getPreviousExperienceEnumMapping,
-  getTicketDetailsEnumMapping,
-} from "@/lib/utils/enum-mappings";
-import { Select } from "@/components/ui/select";
+import { getContractDurationEnumMapping } from "@/lib/utils/enum-mappings";
 import { useToast } from "@/context/toast-provider";
 
 interface JobRole {
+  id?: string;
   title: string;
   quantity: number;
   nationality: string;
   salary: string;
+  salaryCurrency: string;
+  startDate: string;
+  contractDuration: ContractDuration | "";
 }
 
 interface FormData {
   jobRoles: JobRole[];
-  projectLocation: string;
-  startDate: string;
   contractDuration: ContractDuration | "";
   languageRequirements: string[];
-  previousExperience: PreviousExperience | "";
-  ticketDetails: TicketDetails | "";
-  totalExperienceYears?: number;
-  preferredAge?: number;
+  minExperience?: ExperienceLevel | "";
+  maxAge?: number;
   specialRequirements: string;
-}
-
-interface Errors {
-  [key: string]: string;
+  ticketType?: TicketType | "";
+  ticketProvided?: boolean;
 }
 
 interface Requirement {
   id: string;
   jobRoles: JobRole[];
-  status:
-    | "DRAFT"
-    | "SUBMITTED"
-    | "UNDER_REVIEW"
-    | "APPROVED"
-    | "REJECTED"
-    | "FULFILLED"
-    | "CLOSED";
+  status: RequirementStatus;
   createdAt: string;
-  startDate: string | null;
-  projectLocation: string;
   contractDuration: ContractDuration | null;
   languageRequirements: string[];
-  previousExperience: PreviousExperience | null;
-  ticketDetails: TicketDetails | null;
-  totalExperienceYears: number | null;
-  preferredAge: number | null;
-  specialRequirements: string;
+  minExperience: ExperienceLevel | null;
+  maxAge: number | null;
+  specialNotes: string | null;
+  ticketType: TicketType | null;
+  ticketProvided: boolean;
   client: {
     companyName: string;
     fullName: string;
@@ -76,6 +58,10 @@ interface Requirement {
     email: string;
     phone: string;
   };
+}
+
+interface Errors {
+  [key: string]: string;
 }
 
 interface ReviewFieldProps {
@@ -104,7 +90,7 @@ export default function Requirements() {
   const [isViewMode, setIsViewMode] = useState(false);
   const { toast } = useToast();
   const [editingRequirement, setEditingRequirement] =
-    useState<Requirement | null>(null); // Moved declaration up
+    useState<Requirement | null>(null);
   const { language, setLanguage, t } = useLanguage();
 
   // Memoize enum mappings based on language
@@ -112,29 +98,7 @@ export default function Requirements() {
     () => getContractDurationEnumMapping(language),
     [language]
   );
-  const ticketDetailsMapping = useMemo(
-    () => getTicketDetailsEnumMapping(language),
-    [language]
-  );
-  const previousExperienceMapping = useMemo(
-    () => getPreviousExperienceEnumMapping(language),
-    [language]
-  );
 
-  const displayContractDurationMapping = useMemo(
-    () => getDisplayContractDurationMapping(language),
-    [language]
-  );
-  const displayTicketDetailsMapping = useMemo(
-    () => getDisplayTicketDetailsMapping(language),
-    [language]
-  );
-  const displayPreviousExperienceMapping = useMemo(
-    () => getDisplayPreviousExperienceMapping(language),
-    [language]
-  );
-
-  // Update your options
   const contractDurationOptions = useMemo(
     () =>
       t.contractDurationOptions?.map((opt) => ({
@@ -146,25 +110,25 @@ export default function Requirements() {
     [t.contractDurationOptions, contractDurationMapping]
   );
 
-  const ticketDetailsOptions = useMemo(
-    () =>
-      t.ticketDetailsOptions?.map((opt) => ({
-        value:
-          ticketDetailsMapping[opt] || opt.toLowerCase().replace(/\s+/g, "-"),
-        label: opt,
-      })) || [],
-    [t.ticketDetailsOptions, ticketDetailsMapping]
+  const experienceLevelOptions = useMemo(
+    () => [
+      { value: "FRESH", label: "Fresh" },
+      { value: "ONE_YEAR", label: "1 Year" },
+      { value: "TWO_YEARS", label: "2 Years" },
+      { value: "THREE_YEARS", label: "3 Years" },
+      { value: "FOUR_YEARS", label: "4 Years" },
+      { value: "FIVE_PLUS_YEARS", label: "5+ Years" },
+    ],
+    []
   );
 
-  const previousExperienceOptions = useMemo(
-    () =>
-      t.previousExperienceOptions?.map((opt) => ({
-        value:
-          previousExperienceMapping[opt] ||
-          opt.toLowerCase().replace(/\s+/g, "-"),
-        label: opt,
-      })) || [],
-    [t.previousExperienceOptions, previousExperienceMapping]
+  const ticketTypeOptions = useMemo(
+    () => [
+      { value: "ONE_WAY", label: "One Way" },
+      { value: "TWO_WAY", label: "Two Way" },
+      { value: "NONE", label: "None" },
+    ],
+    []
   );
 
   const initialFormData: FormData = useMemo(
@@ -175,15 +139,20 @@ export default function Requirements() {
           quantity: 1,
           nationality: "",
           salary: "",
+          salaryCurrency: "QAR",
+          startDate: "",
+          contractDuration: "",
         },
       ],
       projectLocation: "",
       startDate: "",
       contractDuration: "",
       languageRequirements: [],
-      previousExperience: "",
-      ticketDetails: "",
+      minExperience: "",
+      maxAge: undefined,
       specialRequirements: "",
+      ticketType: "",
+      ticketProvided: false,
     }),
     []
   );
@@ -205,25 +174,32 @@ export default function Requirements() {
   useEffect(() => {
     const fetchRequirements = async () => {
       try {
+        setLoading(true);
         const response = await fetch("/api/requirements");
         if (response.ok) {
           const data = await response.json();
           const requirementsWithJobRoles = data.map((req: Requirement) => ({
             ...req,
-            jobRoles: req.jobRoles || [], // Default to empty array if undefined
-            languageRequirements: req.languageRequirements || [], // Also handle this if needed
+            jobRoles: req.jobRoles || [],
+            languageRequirements: req.languageRequirements || [],
           }));
           setRequirements(requirementsWithJobRoles);
+        } else {
+          throw new Error("Failed to fetch requirements");
         }
       } catch (error) {
         console.error("Error fetching requirements:", error);
+        toast({
+          type: "error",
+          message: "Failed to load requirements. Please try again.",
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchRequirements();
-  }, []);
+  }, [toast]);
 
   const checkForChanges = useCallback(() => {
     if (editingRequirement && editingRequirement.status !== "DRAFT") {
@@ -232,7 +208,7 @@ export default function Requirements() {
     const initialState = JSON.stringify(initialFormData);
     const currentState = JSON.stringify(formData);
     return currentState !== initialState;
-  }, [formData, editingRequirement, initialFormData]); // Added initialFormData to dependencies
+  }, [formData, editingRequirement, initialFormData]);
 
   useEffect(() => {
     setHasChanges(checkForChanges());
@@ -240,7 +216,6 @@ export default function Requirements() {
 
   const handleOpenModal = (requirement?: Requirement) => {
     if (requirement) {
-      // Load existing requirement data
       setEditingRequirement(requirement);
       setIsViewMode(requirement.status !== "DRAFT");
 
@@ -249,27 +224,28 @@ export default function Requirements() {
           title: role.title,
           quantity: role.quantity,
           nationality: role.nationality,
-          salary: role.salary || "",
+          salary: role.salary?.toString() || "",
+          salaryCurrency: role.salaryCurrency || "QAR",
+          startDate: role.startDate
+            ? format(new Date(role.startDate), "yyyy-MM-dd")
+            : "",
+          contractDuration: role.contractDuration || "",
         })),
-        projectLocation: requirement.projectLocation,
-        startDate: requirement.startDate || "",
         contractDuration: requirement.contractDuration || "",
         languageRequirements: requirement.languageRequirements || [],
-        previousExperience: requirement.previousExperience || "",
-        ticketDetails: requirement.ticketDetails || "",
-        totalExperienceYears: requirement.totalExperienceYears || undefined,
-        preferredAge: requirement.preferredAge || undefined,
-        specialRequirements: requirement.specialRequirements,
+        minExperience: requirement.minExperience || "",
+        maxAge: requirement.maxAge || undefined,
+        specialRequirements: requirement.specialNotes || "",
+        ticketType: requirement.ticketType || "",
+        ticketProvided: requirement.ticketProvided || false,
       });
 
-      // If not draft, go directly to review step
       if (requirement.status !== "DRAFT") {
         setCurrentStep(3);
       } else {
         setCurrentStep(1);
       }
     } else {
-      // New requirement
       setEditingRequirement(null);
       setIsViewMode(false);
       setFormData(initialFormData);
@@ -297,23 +273,8 @@ export default function Requirements() {
     setIsSubmitting(true);
     try {
       const payload = {
-        projectLocation: formData.projectLocation || null,
-        startDate: formData.startDate || null,
-        contractDuration: formData.contractDuration || null,
-        previousExperience: formData.previousExperience || null,
-        totalExperienceYears: formData.totalExperienceYears || null,
-        preferredAge: formData.preferredAge || null,
-        specialNotes: formData.specialRequirements || null,
+        ...preparePayload(),
         status: "DRAFT",
-        languages: formData.languageRequirements || [],
-        jobRoles: formData.jobRoles.map((role) => ({
-          title: role.title || "",
-          quantity: role.quantity || 1,
-          nationality: role.nationality || "",
-          salary: role.salary || "",
-        })),
-        ticketDetails: formData.ticketDetails || null,
-        id: editingRequirement?.id,
       };
 
       const response = await fetch("/api/requirements", {
@@ -341,6 +302,10 @@ export default function Requirements() {
           setRequirements((prev) => [requirementWithRoles, ...prev]);
         }
         resetAndCloseModal();
+        toast({
+          type: "success",
+          message: "Requirement saved as draft successfully",
+        });
       } else {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to save draft");
@@ -357,37 +322,80 @@ export default function Requirements() {
     }
   };
 
+  const preparePayload = () => {
+    return {
+      contractDuration: formData.contractDuration,
+      languageRequirements: formData.languageRequirements,
+      minExperience: formData.minExperience || null,
+      maxAge: formData.maxAge || null,
+      ticketType: formData.ticketType || null,
+      ticketProvided: formData.ticketProvided || false,
+      specialNotes: formData.specialRequirements,
+      jobRoles: formData.jobRoles.map((role) => ({
+        title: role.title,
+        quantity: role.quantity,
+        nationality: role.nationality,
+        salary: role.salary ? parseFloat(role.salary) : null,
+        salaryCurrency: role.salaryCurrency || "QAR",
+        startDate: role.startDate || null,
+        contractDuration: role.contractDuration || null,
+      })),
+      id: editingRequirement?.id,
+    };
+  };
+
   const resetAndCloseModal = () => {
     setFormData(initialFormData);
     setIsModalOpen(false);
     setEditingRequirement(null);
     setCurrentStep(1);
+    setErrors({});
   };
 
   const validateStep1 = (isDraft: boolean): boolean => {
     const newErrors: Errors = {};
 
     if (!isDraft) {
-      if (formData.jobRoles.some((role) => !role.title || !role.salary))
-        newErrors.jobRoles = t.required || "Required";
-      if (!formData.projectLocation)
-        newErrors.projectLocation = t.required || "Required";
-      if (!formData.startDate) newErrors.startDate = t.required || "Required";
+      // Validate job roles
+      formData.jobRoles.forEach((role, index) => {
+        if (!role.title) {
+          newErrors[`jobRoles[${index}].title`] = "Job title is required";
+        }
+        if (!role.salary) {
+          newErrors[`jobRoles[${index}].salary`] = "Salary is required";
+        } else if (isNaN(parseFloat(role.salary))) {
+          newErrors[`jobRoles[${index}].salary`] = "Salary must be a number";
+        }
+        if (!role.nationality) {
+          newErrors[`jobRoles[${index}].nationality`] =
+            "Nationality is required";
+        }
+        if (!role.startDate) {
+          newErrors[`jobRoles[${index}].startDate`] = "Start date is required";
+        }
+        if (!role.contractDuration) {
+          newErrors[`jobRoles[${index}].contractDuration`] =
+            "Duration is required";
+        }
+      });
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const validateStep2 = (isDraft: boolean): boolean => {
     const newErrors: Errors = {};
+
     if (!isDraft) {
-      if (formData.languageRequirements.length === 0)
-        newErrors.languageRequirements = t.required || "Required";
-      if (!formData.previousExperience)
-        newErrors.previousExperience = t.required || "Required";
-      if (!formData.ticketDetails)
-        newErrors.ticketDetails = t.required || "Required";
+      if (formData.languageRequirements.length === 0) {
+        newErrors.languageRequirements = "At least one language is required";
+      }
+      if (formData.maxAge && (formData.maxAge < 18 || formData.maxAge > 70)) {
+        newErrors.maxAge = "Age must be between 18 and 70";
+      }
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -399,7 +407,13 @@ export default function Requirements() {
     if (currentStep === 1) isValid = validateStep1(isDraft);
     if (currentStep === 2) isValid = validateStep2(isDraft);
 
-    if (!isValid) return;
+    if (!isValid) {
+      toast({
+        type: "error",
+        message: "Please fix all errors before proceeding",
+      });
+      return;
+    }
 
     setIsSubmitting(true);
     setTimeout(() => {
@@ -441,6 +455,19 @@ export default function Requirements() {
       };
       return { ...prev, jobRoles: updatedJobRoles };
     });
+
+    // Clear any errors for this field
+    if (
+      errors[`jobRoles[${index}].${name.replace(`jobRoles[${index}].`, "")}`]
+    ) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[
+          `jobRoles[${index}].${name.replace(`jobRoles[${index}].`, "")}`
+        ];
+        return newErrors;
+      });
+    }
   };
 
   const addJobRole = () => {
@@ -453,6 +480,9 @@ export default function Requirements() {
           quantity: 1,
           nationality: "",
           salary: "",
+          salaryCurrency: "QAR",
+          startDate: "",
+          contractDuration: "",
         },
       ],
     }));
@@ -460,6 +490,10 @@ export default function Requirements() {
 
   const removeJobRole = (index: number) => {
     if (formData.jobRoles.length <= 1) {
+      toast({
+        type: "error",
+        message: "You must have at least one job role",
+      });
       return;
     }
     setFormData((prev) => ({
@@ -476,11 +510,21 @@ export default function Requirements() {
         : [...prev.languageRequirements, language];
       return { ...prev, languageRequirements: updated };
     });
+
+    if (errors.languageRequirements) {
+      setErrors((prev) => ({ ...prev, languageRequirements: "" }));
+    }
   };
 
   const handleAddLanguage = () => {
     const trimmedLang = newLanguage.trim();
-    if (!trimmedLang) return;
+    if (!trimmedLang) {
+      toast({
+        type: "error",
+        message: "Please enter a language",
+      });
+      return;
+    }
 
     if (!languageOptions.includes(trimmedLang)) {
       setLanguageOptions((prev) => [...prev, trimmedLang]);
@@ -497,7 +541,7 @@ export default function Requirements() {
   };
 
   const handleSubmit = async () => {
-    const isDraft = false; // This is a final submission, not a draft
+    const isDraft = false;
     const step1Valid = validateStep1(isDraft);
     const step2Valid = validateStep2(isDraft);
 
@@ -508,26 +552,12 @@ export default function Requirements() {
       });
       return;
     }
+
     setIsSubmitting(true);
     try {
       const payload = {
-        projectLocation: formData.projectLocation,
-        startDate: formData.startDate,
-        contractDuration: formData.contractDuration,
-        previousExperience: formData.previousExperience,
-        totalExperienceYears: formData.totalExperienceYears,
-        preferredAge: formData.preferredAge,
-        specialNotes: formData.specialRequirements,
+        ...preparePayload(),
         status: "SUBMITTED",
-        languages: formData.languageRequirements,
-        jobRoles: formData.jobRoles.map((role) => ({
-          title: role.title,
-          quantity: role.quantity,
-          nationality: role.nationality,
-          salary: role.salary,
-        })),
-        ticketDetails: formData.ticketDetails,
-        id: editingRequirement?.id,
       };
 
       const response = await fetch("/api/requirements", {
@@ -544,6 +574,7 @@ export default function Requirements() {
           ...savedRequirement,
           jobRoles: savedRequirement.jobRoles || formData.jobRoles,
         };
+
         if (editingRequirement) {
           setRequirements((prev) =>
             prev.map((req) =>
@@ -551,9 +582,16 @@ export default function Requirements() {
             )
           );
         } else {
-          setRequirements((prev) => [savedRequirement, ...prev]);
+          setRequirements((prev) => [requirementWithRoles, ...prev]);
         }
+
         resetAndCloseModal();
+        toast({
+          type: "success",
+          message: editingRequirement
+            ? "Requirement updated successfully"
+            : "Requirement submitted successfully",
+        });
       } else {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to submit requirement");
@@ -584,170 +622,199 @@ export default function Requirements() {
               </p>
             </div>
 
-            <div className="grid grid-cols-12 gap-8 mt-6">
-              <div className="col-span-6">
-                <h2 className="text-3xl font-semibold mb-4 text-center">
-                  {t.jobRoles}
-                </h2>
-                <div className="rounded-lg shadow-sm overflow-hidden">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-[#4C187A]/85">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-2/5">
-                          {t.jobRole}
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/6">
-                          {t.quantity}
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                          {t.nationality}
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                          Salary/Month
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                          {t.actions}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-[#2C0053]/10 divide-y divide-gray-200">
-                      {formData.jobRoles.map((role, index) => (
-                        <tr key={index}>
-                          <td className="px-6 py-4 w-2/5 whitespace-nowrap">
-                            <select
-                              name={`jobRoles[${index}].title`}
-                              value={role.title}
-                              onChange={(e) => handleJobRoleChange(index, e)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                              disabled={isViewMode}
-                            >
-                              <option value="">{t.selectOption}</option>
-                              {t.jobPositions
-                                ?.filter(
-                                  (job) =>
-                                    !formData.jobRoles.some(
-                                      (r, i) => r.title === job && i !== index
-                                    )
-                                )
-                                .map((job) => (
-                                  <option key={job} value={job}>
-                                    {job}
-                                  </option>
-                                ))}
-                            </select>
-                          </td>
-                          <td className="px-6 py-4 w-1/6 whitespace-nowrap">
-                            <input
-                              type="number"
-                              min="1"
-                              name={`jobRoles[${index}].quantity`}
-                              value={role.quantity}
-                              onChange={(e) => handleJobRoleChange(index, e)}
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                              disabled={isViewMode}
-                            />
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <AutocompleteInput
-                              name={`jobRoles[${index}].nationality`}
-                              value={role.nationality || ""}
-                              onChangeValue={(val: string) =>
-                                handleJobRoleChange(index, {
-                                  target: {
-                                    name: `jobRoles[${index}].nationality`,
-                                    value: val,
-                                  },
-                                } as React.ChangeEvent<HTMLInputElement>)
-                              }
-                              options={t.nationalityOptions || []}
-                              placeholder="Type nationality..."
-                              className="w-full"
-                              disabled={isViewMode}
-                            />
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+            <div className="mt-6">
+              <h2 className="text-3xl font-semibold mb-4 text-center">
+                {t.jobRoles}
+              </h2>
+              <div className="rounded-lg shadow-sm overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-[#4C187A]/85">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/4">
+                        {t.jobRole}
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/8">
+                        {t.quantity}
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/8">
+                        {t.nationality}
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/8">
+                        Salary
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/8">
+                        Start Date
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/8">
+                        Duration
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        {t.actions}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-[#2C0053]/10 divide-y divide-gray-200">
+                    {formData.jobRoles.map((role, index) => (
+                      <tr key={index}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <select
+                            name={`jobRoles[${index}].title`}
+                            value={role.title}
+                            onChange={(e) => handleJobRoleChange(index, e)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                            disabled={isViewMode}
+                          >
+                            <option value="">{t.selectOption}</option>
+                            {t.jobPositions
+                              ?.filter(
+                                (job) =>
+                                  !formData.jobRoles.some(
+                                    (r, i) => r.title === job && i !== index
+                                  )
+                              )
+                              .map((job) => (
+                                <option key={job} value={job}>
+                                  {job}
+                                </option>
+                              ))}
+                          </select>
+                          {errors[`jobRoles[${index}].title`] && (
+                            <p className="text-xs text-red-500 mt-1">
+                              {errors[`jobRoles[${index}].title`]}
+                            </p>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <input
+                            type="number"
+                            min="1"
+                            name={`jobRoles[${index}].quantity`}
+                            value={role.quantity}
+                            onChange={(e) => handleJobRoleChange(index, e)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                            disabled={isViewMode}
+                          />
+                          {errors[`jobRoles[${index}].quantity`] && (
+                            <p className="text-xs text-red-500 mt-1">
+                              {errors[`jobRoles[${index}].quantity`]}
+                            </p>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <AutocompleteInput
+                            name={`jobRoles[${index}].nationality`}
+                            value={role.nationality || ""}
+                            onChangeValue={(val: string) =>
+                              handleJobRoleChange(index, {
+                                target: {
+                                  name: `jobRoles[${index}].nationality`,
+                                  value: val,
+                                },
+                              } as React.ChangeEvent<HTMLInputElement>)
+                            }
+                            options={t.nationalityOptions || []}
+                            placeholder="Type nationality..."
+                            className="w-full"
+                            disabled={isViewMode}
+                          />
+                          {errors[`jobRoles[${index}].nationality`] && (
+                            <p className="text-xs text-red-500 mt-1">
+                              {errors[`jobRoles[${index}].nationality`]}
+                            </p>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex">
                             <input
                               type="text"
                               name={`jobRoles[${index}].salary`}
-                              value={role.salary || ""}
+                              value={role.salary}
                               onChange={(e) => handleJobRoleChange(index, e)}
-                              placeholder="Salary amount"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                              className="w-full px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                              placeholder="Amount"
                               disabled={isViewMode}
                             />
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            {!isViewMode && (
-                              <button onClick={() => removeJobRole(index)}>
-                                <Trash2 />
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                            <select
+                              name={`jobRoles[${index}].salaryCurrency`}
+                              value={role.salaryCurrency}
+                              onChange={(e) => handleJobRoleChange(index, e)}
+                              className="px-2 py-2 border border-gray-300 rounded-r-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                              disabled={isViewMode}
+                            >
+                              <option value="QAR">QAR</option>
+                              <option value="USD">USD</option>
+                              <option value="EUR">EUR</option>
+                            </select>
+                          </div>
+                          {errors[`jobRoles[${index}].salary`] && (
+                            <p className="text-xs text-red-500 mt-1">
+                              {errors[`jobRoles[${index}].salary`]}
+                            </p>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <input
+                            type="date"
+                            name={`jobRoles[${index}].startDate`}
+                            value={role.startDate}
+                            onChange={(e) => handleJobRoleChange(index, e)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                            disabled={isViewMode}
+                          />
+                          {errors[`jobRoles[${index}].startDate`] && (
+                            <p className="text-xs text-red-500 mt-1">
+                              {errors[`jobRoles[${index}].startDate`]}
+                            </p>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <select
+                            name={`jobRoles[${index}].contractDuration`}
+                            value={role.contractDuration}
+                            onChange={(e) => handleJobRoleChange(index, e)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                            disabled={isViewMode}
+                          >
+                            <option value="">Select duration</option>
+                            {contractDurationOptions.map((option) => (
+                              <option key={option.value} value={option.value}>
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+                          {errors[`jobRoles[${index}].contractDuration`] && (
+                            <p className="text-xs text-red-500 mt-1">
+                              {errors[`jobRoles[${index}].contractDuration`]}
+                            </p>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          {!isViewMode && (
+                            <button
+                              onClick={() => removeJobRole(index)}
+                              className="text-red-500 hover:text-red-700"
+                              disabled={formData.jobRoles.length <= 1}
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="px-6 py-3 text-left">
                 {!isViewMode && (
-                  <div className="px-6 py-3 text-left">
-                    <Button
-                      type="button"
-                      variant="default"
-                      onClick={addJobRole}
-                      className="mr-4"
-                    >
-                      {t.addAnotherRole}
-                    </Button>
-                  </div>
+                  <Button
+                    type="button"
+                    variant="default"
+                    onClick={addJobRole}
+                    className="mr-4"
+                  >
+                    {t.addAnotherRole}
+                  </Button>
                 )}
-              </div>
-
-              <div className="col-span-2 flex justify-center items-center">
-                <div className="w-[2px] h-2/3 bg-[#2C0053]/30 rounded-full"></div>
-              </div>
-
-              <div className="col-span-4 space-y-6">
-                <div>
-                  <Select
-                    name="contractDuration"
-                    value={formData.contractDuration}
-                    onChange={handleChange}
-                    required
-                    className="w-full"
-                    label="Contract Duration"
-                    error={errors.contractDuration}
-                    options={contractDurationOptions}
-                    disabled={isViewMode}
-                  />
-                </div>
-                <div>
-                  <Input
-                    name="projectLocation"
-                    value={formData.projectLocation}
-                    onChange={handleChange}
-                    placeholder={t.projectLocationPlaceholder}
-                    required
-                    className="w-full"
-                    label={t.projectLocation}
-                    error={errors.projectLocation}
-                    id="location"
-                    disabled={isViewMode}
-                  />
-                </div>
-                <div>
-                  <Input
-                    name="startDate"
-                    value={formData.startDate}
-                    onChange={handleChange}
-                    type="date"
-                    required
-                    className="w-full"
-                    label={t.startDate}
-                    error={errors.startDate}
-                    id="date"
-                    disabled={isViewMode}
-                  />
-                </div>
               </div>
             </div>
           </Card>
@@ -818,29 +885,98 @@ export default function Requirements() {
                         placeholder="Add another language"
                         className="w-full"
                       />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleAddLanguage}
+                      >
+                        Add
+                      </Button>
                     </div>
                   )}
                 </div>
-                <Select
-                  label="Previous Experience"
-                  name="previousExperience"
-                  value={formData.previousExperience}
-                  onChange={handleChange}
-                  error={errors.previousExperience}
-                  required
-                  options={previousExperienceOptions}
-                  disabled={isViewMode}
-                />
-                <Input
-                  label="Total Experience Years (optional)"
-                  name="totalExperienceYears"
-                  value={formData.totalExperienceYears || ""}
-                  onChange={handleChange}
-                  type="number"
-                  min="0"
-                  placeholder="e.g., 5 Years"
-                  disabled={isViewMode}
-                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Minimum Experience
+                    </label>
+                    <select
+                      name="minExperience"
+                      value={formData.minExperience}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                      disabled={isViewMode}
+                    >
+                      <option value="">Select</option>
+                      {experienceLevelOptions.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <Input
+                      label="Maximum Age"
+                      name="maxAge"
+                      value={formData.maxAge || ""}
+                      onChange={handleChange}
+                      type="number"
+                      min="18"
+                      max="70"
+                      placeholder="e.g., 45"
+                      error={errors.maxAge}
+                      disabled={isViewMode}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Ticket Details
+                  </label>
+                  <div className="space-y-2">
+                    <div>
+                      <select
+                        name="ticketType"
+                        value={formData.ticketType}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                        disabled={isViewMode}
+                      >
+                        <option value="">Select ticket type</option>
+                        {ticketTypeOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="ticketProvided"
+                        name="ticketProvided"
+                        checked={formData.ticketProvided || false}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            ticketProvided: e.target.checked,
+                          })
+                        }
+                        className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
+                        disabled={isViewMode}
+                      />
+                      <label
+                        htmlFor="ticketProvided"
+                        className="ml-2 text-sm text-gray-700"
+                      >
+                        Ticket provided by employer
+                      </label>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="col-span-2 flex justify-center items-center">
@@ -851,29 +987,6 @@ export default function Requirements() {
                 <h2 className="text-lg font-semibold mb-2">
                   {t.additionalRequirements}
                 </h2>
-
-                <Input
-                  label="Preferred Age (optional)"
-                  name="preferredAge"
-                  value={formData.preferredAge || ""}
-                  onChange={handleChange}
-                  type="number"
-                  min="18"
-                  placeholder="e.g., 30 Years old"
-                  disabled={isViewMode}
-                />
-
-                <Select
-                  label="Ticket Details"
-                  name="ticketDetails"
-                  value={formData.ticketDetails}
-                  onChange={handleChange}
-                  error={errors.ticketDetails}
-                  required
-                  options={ticketDetailsOptions}
-                  disabled={isViewMode}
-                />
-
                 <div>
                   <label
                     htmlFor="specialRequirements"
@@ -918,24 +1031,25 @@ export default function Requirements() {
                     <ul className="list-disc list-inside text-sm text-gray-600 mt-1">
                       {formData.jobRoles.map((role, index) => (
                         <li key={index}>
-                          {role.title} ({t.quantity}: {role.quantity}, Salary:{" "}
-                          {role.salary})
+                          {role.title} ({t.quantity}: {role.quantity},{" "}
+                          {t.nationality}: {role.nationality}, Salary:{" "}
+                          {role.salary} {role.salaryCurrency}
+                          {role.startDate &&
+                            `, Start Date: ${format(new Date(role.startDate), "MMM d, yyyy")}`}
+                          {role.contractDuration &&
+                            `, Duration: ${contractDurationOptions.find((o) => o.value === role.contractDuration)?.label || role.contractDuration}`}
                         </li>
                       ))}
                     </ul>
                   </div>
-
-                  <ReviewField
-                    label={t.projectLocation}
-                    value={formData.projectLocation}
-                  />
-                  <ReviewField label={t.startDate} value={formData.startDate} />
                   <ReviewField
                     label="Contract Duration"
                     value={
-                      displayContractDurationMapping[
-                        formData.contractDuration as ContractDuration
-                      ] || formData.contractDuration
+                      formData.contractDuration
+                        ? contractDurationOptions.find(
+                            (o) => o.value === formData.contractDuration
+                          )?.label || formData.contractDuration
+                        : "Not specified"
                     }
                   />
                 </div>
@@ -960,35 +1074,36 @@ export default function Requirements() {
                     }
                   />
                   <ReviewField
-                    label="Previous Experience"
+                    label="Minimum Experience"
                     value={
-                      displayPreviousExperienceMapping[
-                        formData.previousExperience as PreviousExperience
-                      ] || formData.previousExperience
+                      formData.minExperience
+                        ? experienceLevelOptions.find(
+                            (o) => o.value === formData.minExperience
+                          )?.label || formData.minExperience
+                        : "Not specified"
                     }
                   />
                   <ReviewField
-                    label="Ticket Details"
+                    label="Maximum Age"
+                    value={formData.maxAge?.toString() || "Not specified"}
+                  />
+                  <ReviewField
+                    label="Ticket Type"
                     value={
-                      displayTicketDetailsMapping[
-                        formData.ticketDetails as TicketDetails
-                      ] || formData.ticketDetails
+                      formData.ticketType
+                        ? ticketTypeOptions.find(
+                            (o) => o.value === formData.ticketType
+                          )?.label || formData.ticketType
+                        : "Not specified"
                     }
                   />
                   <ReviewField
-                    label="Total Experience Years"
-                    value={
-                      formData.totalExperienceYears?.toString() ||
-                      t.noneSpecified
-                    }
-                  />
-                  <ReviewField
-                    label="Preferred Age"
-                    value={formData.preferredAge?.toString() || t.noneSpecified}
+                    label="Ticket Provided"
+                    value={formData.ticketProvided ? "Yes" : "No"}
                   />
                   <ReviewField
                     label={t.specialRequirements}
-                    value={formData.specialRequirements || t.noneSpecified}
+                    value={formData.specialRequirements || "None specified"}
                   />
                 </div>
               </div>

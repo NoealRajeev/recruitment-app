@@ -29,7 +29,7 @@ export default function DashboardHeader({
 
   // Map paths to their display names
   const getPageTitle = () => {
-    const pathSegments = pathname.split("/").filter((segment) => segment); // Remove empty segments
+    const pathSegments = pathname.split("/").filter((segment) => segment);
 
     // If we're at the base dashboard path (e.g., /dashboard/admin)
     if (pathSegments.length === 2) {

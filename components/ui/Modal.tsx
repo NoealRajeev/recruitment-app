@@ -28,6 +28,7 @@ interface ModalProps {
   confirmText?: string;
   confirmVariant?: "default" | "destructive";
   isLoading?: boolean;
+  confirmDisabled?: boolean;
 }
 
 const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
@@ -45,6 +46,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
       confirmText = "Confirm",
       confirmVariant = "default",
       isLoading = false,
+      confirmDisabled,
     },
     ref
   ) => {
@@ -102,7 +104,7 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
                   <Button
                     variant={confirmVariant}
                     onClick={onConfirm}
-                    disabled={isLoading}
+                    disabled={isLoading || confirmDisabled} // Add confirmDisabled here
                     className="w-1/3 bg-[#3D1673] hover:bg-[#2b0e54] text-white py-2 px-4 rounded-md"
                   >
                     {isLoading ? (

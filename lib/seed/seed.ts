@@ -7,7 +7,6 @@ import {
   CompanySize,
   RequirementStatus,
   ExperienceLevel,
-  ContractDuration,
   TicketType,
 } from "@prisma/client";
 import prisma from "@/lib/prisma";
@@ -59,9 +58,6 @@ interface SeedUser {
 }
 
 interface SeedRequirement {
-  projectLocation: string;
-  startDate: Date;
-  contractDuration: ContractDuration;
   minExperience: ExperienceLevel;
   maxAge?: number;
   ticketType?: TicketType;
@@ -264,9 +260,6 @@ async function seedRequirements() {
 
   const requirementsToSeed: SeedRequirement[] = [
     {
-      projectLocation: "Downtown Doha",
-      startDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-      contractDuration: ContractDuration.TWO_YEARS,
       minExperience: ExperienceLevel.TWO_YEARS,
       maxAge: 45,
       ticketType: TicketType.TWO_WAY,
@@ -289,9 +282,6 @@ async function seedRequirements() {
       ],
     },
     {
-      projectLocation: "Lusail City",
-      startDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000), // 45 days from now
-      contractDuration: ContractDuration.ONE_YEAR,
       minExperience: ExperienceLevel.ONE_YEAR,
       languages: ["English", "Arabic"],
       ticketProvided: false,
@@ -315,9 +305,6 @@ async function seedRequirements() {
   for (const reqData of requirementsToSeed) {
     await prisma.requirement.create({
       data: {
-        projectLocation: reqData.projectLocation,
-        startDate: reqData.startDate,
-        contractDuration: reqData.contractDuration,
         minExperience: reqData.minExperience,
         maxAge: reqData.maxAge,
         ticketType: reqData.ticketType,

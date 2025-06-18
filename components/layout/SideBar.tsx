@@ -11,7 +11,6 @@ import {
   Settings,
   FileText,
   BarChart2,
-  File,
   HelpCircle,
   UserPlus,
   ClipboardList,
@@ -75,12 +74,6 @@ const navItems = {
       exact: false,
     },
     {
-      href: "/dashboard/client/documents",
-      label: "Documents",
-      icon: File,
-      exact: false,
-    },
-    {
       href: "/dashboard/client/settings",
       label: "Settings",
       icon: Settings,
@@ -102,9 +95,9 @@ const navItems = {
       exact: false,
     },
     {
-      href: "/dashboard/agency/documents",
-      label: "My Documents",
-      icon: File,
+      href: "/dashboard/agency/recruitment",
+      label: "Recruitment Tracker",
+      icon: MapPin,
       exact: false,
     },
     {

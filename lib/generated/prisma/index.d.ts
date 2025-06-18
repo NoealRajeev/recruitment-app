@@ -44,10 +44,20 @@ export type Requirement = $Result.DefaultSelection<Prisma.$RequirementPayload>
  */
 export type JobRole = $Result.DefaultSelection<Prisma.$JobRolePayload>
 /**
+ * Model RequirementAssignment
+ * 
+ */
+export type RequirementAssignment = $Result.DefaultSelection<Prisma.$RequirementAssignmentPayload>
+/**
  * Model LabourProfile
  * 
  */
 export type LabourProfile = $Result.DefaultSelection<Prisma.$LabourProfilePayload>
+/**
+ * Model DocumentVerification
+ * 
+ */
+export type DocumentVerification = $Result.DefaultSelection<Prisma.$DocumentVerificationPayload>
 /**
  * Model Procedure
  * 
@@ -68,11 +78,6 @@ export type ClientDocument = $Result.DefaultSelection<Prisma.$ClientDocumentPayl
  * 
  */
 export type AgencyDocument = $Result.DefaultSelection<Prisma.$AgencyDocumentPayload>
-/**
- * Model RequirementDocument
- * 
- */
-export type RequirementDocument = $Result.DefaultSelection<Prisma.$RequirementDocumentPayload>
 /**
  * Model AuditLog
  * 
@@ -289,6 +294,26 @@ export const DeletionType: {
 
 export type DeletionType = (typeof DeletionType)[keyof typeof DeletionType]
 
+
+export const DocumentVerificationStatus: {
+  PENDING: 'PENDING',
+  PARTIALLY_VERIFIED: 'PARTIALLY_VERIFIED',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED'
+};
+
+export type DocumentVerificationStatus = (typeof DocumentVerificationStatus)[keyof typeof DocumentVerificationStatus]
+
+
+export const VerificationStatus: {
+  PENDING: 'PENDING',
+  VERIFIED: 'VERIFIED',
+  REJECTED: 'REJECTED',
+  EXPIRED: 'EXPIRED'
+};
+
+export type VerificationStatus = (typeof VerificationStatus)[keyof typeof VerificationStatus]
+
 }
 
 export type UserRole = $Enums.UserRole
@@ -350,6 +375,14 @@ export const NotificationType: typeof $Enums.NotificationType
 export type DeletionType = $Enums.DeletionType
 
 export const DeletionType: typeof $Enums.DeletionType
+
+export type DocumentVerificationStatus = $Enums.DocumentVerificationStatus
+
+export const DocumentVerificationStatus: typeof $Enums.DocumentVerificationStatus
+
+export type VerificationStatus = $Enums.VerificationStatus
+
+export const VerificationStatus: typeof $Enums.VerificationStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -537,6 +570,16 @@ export class PrismaClient<
   get jobRole(): Prisma.JobRoleDelegate<ExtArgs, ClientOptions>;
 
   /**
+   * `prisma.requirementAssignment`: Exposes CRUD operations for the **RequirementAssignment** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RequirementAssignments
+    * const requirementAssignments = await prisma.requirementAssignment.findMany()
+    * ```
+    */
+  get requirementAssignment(): Prisma.RequirementAssignmentDelegate<ExtArgs, ClientOptions>;
+
+  /**
    * `prisma.labourProfile`: Exposes CRUD operations for the **LabourProfile** model.
     * Example usage:
     * ```ts
@@ -545,6 +588,16 @@ export class PrismaClient<
     * ```
     */
   get labourProfile(): Prisma.LabourProfileDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.documentVerification`: Exposes CRUD operations for the **DocumentVerification** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more DocumentVerifications
+    * const documentVerifications = await prisma.documentVerification.findMany()
+    * ```
+    */
+  get documentVerification(): Prisma.DocumentVerificationDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.procedure`: Exposes CRUD operations for the **Procedure** model.
@@ -585,16 +638,6 @@ export class PrismaClient<
     * ```
     */
   get agencyDocument(): Prisma.AgencyDocumentDelegate<ExtArgs, ClientOptions>;
-
-  /**
-   * `prisma.requirementDocument`: Exposes CRUD operations for the **RequirementDocument** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more RequirementDocuments
-    * const requirementDocuments = await prisma.requirementDocument.findMany()
-    * ```
-    */
-  get requirementDocument(): Prisma.RequirementDocumentDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.auditLog`: Exposes CRUD operations for the **AuditLog** model.
@@ -1061,12 +1104,13 @@ export namespace Prisma {
     Admin: 'Admin',
     Requirement: 'Requirement',
     JobRole: 'JobRole',
+    RequirementAssignment: 'RequirementAssignment',
     LabourProfile: 'LabourProfile',
+    DocumentVerification: 'DocumentVerification',
     Procedure: 'Procedure',
     LabourStatusLog: 'LabourStatusLog',
     ClientDocument: 'ClientDocument',
     AgencyDocument: 'AgencyDocument',
-    RequirementDocument: 'RequirementDocument',
     AuditLog: 'AuditLog',
     Notification: 'Notification'
   };
@@ -1087,7 +1131,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "client" | "agency" | "admin" | "requirement" | "jobRole" | "labourProfile" | "procedure" | "labourStatusLog" | "clientDocument" | "agencyDocument" | "requirementDocument" | "auditLog" | "notification"
+      modelProps: "user" | "client" | "agency" | "admin" | "requirement" | "jobRole" | "requirementAssignment" | "labourProfile" | "documentVerification" | "procedure" | "labourStatusLog" | "clientDocument" | "agencyDocument" | "auditLog" | "notification"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1535,6 +1579,80 @@ export namespace Prisma {
           }
         }
       }
+      RequirementAssignment: {
+        payload: Prisma.$RequirementAssignmentPayload<ExtArgs>
+        fields: Prisma.RequirementAssignmentFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RequirementAssignmentFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementAssignmentPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RequirementAssignmentFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementAssignmentPayload>
+          }
+          findFirst: {
+            args: Prisma.RequirementAssignmentFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementAssignmentPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RequirementAssignmentFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementAssignmentPayload>
+          }
+          findMany: {
+            args: Prisma.RequirementAssignmentFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementAssignmentPayload>[]
+          }
+          create: {
+            args: Prisma.RequirementAssignmentCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementAssignmentPayload>
+          }
+          createMany: {
+            args: Prisma.RequirementAssignmentCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RequirementAssignmentCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementAssignmentPayload>[]
+          }
+          delete: {
+            args: Prisma.RequirementAssignmentDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementAssignmentPayload>
+          }
+          update: {
+            args: Prisma.RequirementAssignmentUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementAssignmentPayload>
+          }
+          deleteMany: {
+            args: Prisma.RequirementAssignmentDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RequirementAssignmentUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.RequirementAssignmentUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementAssignmentPayload>[]
+          }
+          upsert: {
+            args: Prisma.RequirementAssignmentUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementAssignmentPayload>
+          }
+          aggregate: {
+            args: Prisma.RequirementAssignmentAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRequirementAssignment>
+          }
+          groupBy: {
+            args: Prisma.RequirementAssignmentGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RequirementAssignmentGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RequirementAssignmentCountArgs<ExtArgs>
+            result: $Utils.Optional<RequirementAssignmentCountAggregateOutputType> | number
+          }
+        }
+      }
       LabourProfile: {
         payload: Prisma.$LabourProfilePayload<ExtArgs>
         fields: Prisma.LabourProfileFieldRefs
@@ -1606,6 +1724,80 @@ export namespace Prisma {
           count: {
             args: Prisma.LabourProfileCountArgs<ExtArgs>
             result: $Utils.Optional<LabourProfileCountAggregateOutputType> | number
+          }
+        }
+      }
+      DocumentVerification: {
+        payload: Prisma.$DocumentVerificationPayload<ExtArgs>
+        fields: Prisma.DocumentVerificationFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.DocumentVerificationFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentVerificationPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.DocumentVerificationFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentVerificationPayload>
+          }
+          findFirst: {
+            args: Prisma.DocumentVerificationFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentVerificationPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.DocumentVerificationFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentVerificationPayload>
+          }
+          findMany: {
+            args: Prisma.DocumentVerificationFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentVerificationPayload>[]
+          }
+          create: {
+            args: Prisma.DocumentVerificationCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentVerificationPayload>
+          }
+          createMany: {
+            args: Prisma.DocumentVerificationCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.DocumentVerificationCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentVerificationPayload>[]
+          }
+          delete: {
+            args: Prisma.DocumentVerificationDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentVerificationPayload>
+          }
+          update: {
+            args: Prisma.DocumentVerificationUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentVerificationPayload>
+          }
+          deleteMany: {
+            args: Prisma.DocumentVerificationDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.DocumentVerificationUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.DocumentVerificationUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentVerificationPayload>[]
+          }
+          upsert: {
+            args: Prisma.DocumentVerificationUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$DocumentVerificationPayload>
+          }
+          aggregate: {
+            args: Prisma.DocumentVerificationAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateDocumentVerification>
+          }
+          groupBy: {
+            args: Prisma.DocumentVerificationGroupByArgs<ExtArgs>
+            result: $Utils.Optional<DocumentVerificationGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.DocumentVerificationCountArgs<ExtArgs>
+            result: $Utils.Optional<DocumentVerificationCountAggregateOutputType> | number
           }
         }
       }
@@ -1905,80 +2097,6 @@ export namespace Prisma {
           }
         }
       }
-      RequirementDocument: {
-        payload: Prisma.$RequirementDocumentPayload<ExtArgs>
-        fields: Prisma.RequirementDocumentFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.RequirementDocumentFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RequirementDocumentPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.RequirementDocumentFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RequirementDocumentPayload>
-          }
-          findFirst: {
-            args: Prisma.RequirementDocumentFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RequirementDocumentPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.RequirementDocumentFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RequirementDocumentPayload>
-          }
-          findMany: {
-            args: Prisma.RequirementDocumentFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RequirementDocumentPayload>[]
-          }
-          create: {
-            args: Prisma.RequirementDocumentCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RequirementDocumentPayload>
-          }
-          createMany: {
-            args: Prisma.RequirementDocumentCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.RequirementDocumentCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RequirementDocumentPayload>[]
-          }
-          delete: {
-            args: Prisma.RequirementDocumentDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RequirementDocumentPayload>
-          }
-          update: {
-            args: Prisma.RequirementDocumentUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RequirementDocumentPayload>
-          }
-          deleteMany: {
-            args: Prisma.RequirementDocumentDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.RequirementDocumentUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.RequirementDocumentUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RequirementDocumentPayload>[]
-          }
-          upsert: {
-            args: Prisma.RequirementDocumentUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$RequirementDocumentPayload>
-          }
-          aggregate: {
-            args: Prisma.RequirementDocumentAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateRequirementDocument>
-          }
-          groupBy: {
-            args: Prisma.RequirementDocumentGroupByArgs<ExtArgs>
-            result: $Utils.Optional<RequirementDocumentGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.RequirementDocumentCountArgs<ExtArgs>
-            result: $Utils.Optional<RequirementDocumentCountAggregateOutputType> | number
-          }
-        }
-      }
       AuditLog: {
         payload: Prisma.$AuditLogPayload<ExtArgs>
         fields: Prisma.AuditLogFieldRefs
@@ -2217,12 +2335,13 @@ export namespace Prisma {
     admin?: AdminOmit
     requirement?: RequirementOmit
     jobRole?: JobRoleOmit
+    requirementAssignment?: RequirementAssignmentOmit
     labourProfile?: LabourProfileOmit
+    documentVerification?: DocumentVerificationOmit
     procedure?: ProcedureOmit
     labourStatusLog?: LabourStatusLogOmit
     clientDocument?: ClientDocumentOmit
     agencyDocument?: AgencyDocumentOmit
-    requirementDocument?: RequirementDocumentOmit
     auditLog?: AuditLogOmit
     notification?: NotificationOmit
   }
@@ -2325,7 +2444,7 @@ export namespace Prisma {
     statusLogs: number
     clientDocuments: number
     agencyDocuments: number
-    requirementDocuments: number
+    DocumentVerification: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2335,7 +2454,7 @@ export namespace Prisma {
     statusLogs?: boolean | UserCountOutputTypeCountStatusLogsArgs
     clientDocuments?: boolean | UserCountOutputTypeCountClientDocumentsArgs
     agencyDocuments?: boolean | UserCountOutputTypeCountAgencyDocumentsArgs
-    requirementDocuments?: boolean | UserCountOutputTypeCountRequirementDocumentsArgs
+    DocumentVerification?: boolean | UserCountOutputTypeCountDocumentVerificationArgs
   }
 
   // Custom InputTypes
@@ -2394,8 +2513,8 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountRequirementDocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: RequirementDocumentWhereInput
+  export type UserCountOutputTypeCountDocumentVerificationArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DocumentVerificationWhereInput
   }
 
 
@@ -2447,12 +2566,14 @@ export namespace Prisma {
     labourProfiles: number
     requirements: number
     documents: number
+    RequirementAssignment: number
   }
 
   export type AgencyCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     labourProfiles?: boolean | AgencyCountOutputTypeCountLabourProfilesArgs
     requirements?: boolean | AgencyCountOutputTypeCountRequirementsArgs
     documents?: boolean | AgencyCountOutputTypeCountDocumentsArgs
+    RequirementAssignment?: boolean | AgencyCountOutputTypeCountRequirementAssignmentArgs
   }
 
   // Custom InputTypes
@@ -2487,6 +2608,13 @@ export namespace Prisma {
     where?: AgencyDocumentWhereInput
   }
 
+  /**
+   * AgencyCountOutputType without action
+   */
+  export type AgencyCountOutputTypeCountRequirementAssignmentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RequirementAssignmentWhereInput
+  }
+
 
   /**
    * Count Type RequirementCountOutputType
@@ -2494,16 +2622,14 @@ export namespace Prisma {
 
   export type RequirementCountOutputType = {
     jobRoles: number
-    labourProfiles: number
     procedures: number
-    documents: number
+    RequirementAssignment: number
   }
 
   export type RequirementCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     jobRoles?: boolean | RequirementCountOutputTypeCountJobRolesArgs
-    labourProfiles?: boolean | RequirementCountOutputTypeCountLabourProfilesArgs
     procedures?: boolean | RequirementCountOutputTypeCountProceduresArgs
-    documents?: boolean | RequirementCountOutputTypeCountDocumentsArgs
+    RequirementAssignment?: boolean | RequirementCountOutputTypeCountRequirementAssignmentArgs
   }
 
   // Custom InputTypes
@@ -2527,13 +2653,6 @@ export namespace Prisma {
   /**
    * RequirementCountOutputType without action
    */
-  export type RequirementCountOutputTypeCountLabourProfilesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: LabourProfileWhereInput
-  }
-
-  /**
-   * RequirementCountOutputType without action
-   */
   export type RequirementCountOutputTypeCountProceduresArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ProcedureWhereInput
   }
@@ -2541,8 +2660,70 @@ export namespace Prisma {
   /**
    * RequirementCountOutputType without action
    */
-  export type RequirementCountOutputTypeCountDocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: RequirementDocumentWhereInput
+  export type RequirementCountOutputTypeCountRequirementAssignmentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RequirementAssignmentWhereInput
+  }
+
+
+  /**
+   * Count Type JobRoleCountOutputType
+   */
+
+  export type JobRoleCountOutputType = {
+    RequirementAssignment: number
+  }
+
+  export type JobRoleCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    RequirementAssignment?: boolean | JobRoleCountOutputTypeCountRequirementAssignmentArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * JobRoleCountOutputType without action
+   */
+  export type JobRoleCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobRoleCountOutputType
+     */
+    select?: JobRoleCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * JobRoleCountOutputType without action
+   */
+  export type JobRoleCountOutputTypeCountRequirementAssignmentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RequirementAssignmentWhereInput
+  }
+
+
+  /**
+   * Count Type RequirementAssignmentCountOutputType
+   */
+
+  export type RequirementAssignmentCountOutputType = {
+    LabourProfile: number
+  }
+
+  export type RequirementAssignmentCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    LabourProfile?: boolean | RequirementAssignmentCountOutputTypeCountLabourProfileArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * RequirementAssignmentCountOutputType without action
+   */
+  export type RequirementAssignmentCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementAssignmentCountOutputType
+     */
+    select?: RequirementAssignmentCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * RequirementAssignmentCountOutputType without action
+   */
+  export type RequirementAssignmentCountOutputTypeCountLabourProfileArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: LabourProfileWhereInput
   }
 
 
@@ -2553,11 +2734,13 @@ export namespace Prisma {
   export type LabourProfileCountOutputType = {
     statusLogs: number
     procedures: number
+    documentVerifications: number
   }
 
   export type LabourProfileCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     statusLogs?: boolean | LabourProfileCountOutputTypeCountStatusLogsArgs
     procedures?: boolean | LabourProfileCountOutputTypeCountProceduresArgs
+    documentVerifications?: boolean | LabourProfileCountOutputTypeCountDocumentVerificationsArgs
   }
 
   // Custom InputTypes
@@ -2583,6 +2766,13 @@ export namespace Prisma {
    */
   export type LabourProfileCountOutputTypeCountProceduresArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: ProcedureWhereInput
+  }
+
+  /**
+   * LabourProfileCountOutputType without action
+   */
+  export type LabourProfileCountOutputTypeCountDocumentVerificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DocumentVerificationWhereInput
   }
 
 
@@ -2868,7 +3058,7 @@ export namespace Prisma {
     statusLogs?: boolean | User$statusLogsArgs<ExtArgs>
     clientDocuments?: boolean | User$clientDocumentsArgs<ExtArgs>
     agencyDocuments?: boolean | User$agencyDocumentsArgs<ExtArgs>
-    requirementDocuments?: boolean | User$requirementDocumentsArgs<ExtArgs>
+    DocumentVerification?: boolean | User$DocumentVerificationArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -2949,7 +3139,7 @@ export namespace Prisma {
     statusLogs?: boolean | User$statusLogsArgs<ExtArgs>
     clientDocuments?: boolean | User$clientDocumentsArgs<ExtArgs>
     agencyDocuments?: boolean | User$agencyDocumentsArgs<ExtArgs>
-    requirementDocuments?: boolean | User$requirementDocumentsArgs<ExtArgs>
+    DocumentVerification?: boolean | User$DocumentVerificationArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2972,7 +3162,7 @@ export namespace Prisma {
       statusLogs: Prisma.$LabourStatusLogPayload<ExtArgs>[]
       clientDocuments: Prisma.$ClientDocumentPayload<ExtArgs>[]
       agencyDocuments: Prisma.$AgencyDocumentPayload<ExtArgs>[]
-      requirementDocuments: Prisma.$RequirementDocumentPayload<ExtArgs>[]
+      DocumentVerification: Prisma.$DocumentVerificationPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -3397,7 +3587,7 @@ export namespace Prisma {
     statusLogs<T extends User$statusLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$statusLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LabourStatusLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     clientDocuments<T extends User$clientDocumentsArgs<ExtArgs> = {}>(args?: Subset<T, User$clientDocumentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClientDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     agencyDocuments<T extends User$agencyDocumentsArgs<ExtArgs> = {}>(args?: Subset<T, User$agencyDocumentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AgencyDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    requirementDocuments<T extends User$requirementDocumentsArgs<ExtArgs> = {}>(args?: Subset<T, User$requirementDocumentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    DocumentVerification<T extends User$DocumentVerificationArgs<ExtArgs> = {}>(args?: Subset<T, User$DocumentVerificationArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentVerificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4061,27 +4251,27 @@ export namespace Prisma {
   }
 
   /**
-   * User.requirementDocuments
+   * User.DocumentVerification
    */
-  export type User$requirementDocumentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$DocumentVerificationArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the RequirementDocument
+     * Select specific fields to fetch from the DocumentVerification
      */
-    select?: RequirementDocumentSelect<ExtArgs> | null
+    select?: DocumentVerificationSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the RequirementDocument
+     * Omit specific fields from the DocumentVerification
      */
-    omit?: RequirementDocumentOmit<ExtArgs> | null
+    omit?: DocumentVerificationOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: RequirementDocumentInclude<ExtArgs> | null
-    where?: RequirementDocumentWhereInput
-    orderBy?: RequirementDocumentOrderByWithRelationInput | RequirementDocumentOrderByWithRelationInput[]
-    cursor?: RequirementDocumentWhereUniqueInput
+    include?: DocumentVerificationInclude<ExtArgs> | null
+    where?: DocumentVerificationWhereInput
+    orderBy?: DocumentVerificationOrderByWithRelationInput | DocumentVerificationOrderByWithRelationInput[]
+    cursor?: DocumentVerificationWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: RequirementDocumentScalarFieldEnum | RequirementDocumentScalarFieldEnum[]
+    distinct?: DocumentVerificationScalarFieldEnum | DocumentVerificationScalarFieldEnum[]
   }
 
   /**
@@ -5568,6 +5758,7 @@ export namespace Prisma {
     labourProfiles?: boolean | Agency$labourProfilesArgs<ExtArgs>
     requirements?: boolean | Agency$requirementsArgs<ExtArgs>
     documents?: boolean | Agency$documentsArgs<ExtArgs>
+    RequirementAssignment?: boolean | Agency$RequirementAssignmentArgs<ExtArgs>
     _count?: boolean | AgencyCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["agency"]>
 
@@ -5627,6 +5818,7 @@ export namespace Prisma {
     labourProfiles?: boolean | Agency$labourProfilesArgs<ExtArgs>
     requirements?: boolean | Agency$requirementsArgs<ExtArgs>
     documents?: boolean | Agency$documentsArgs<ExtArgs>
+    RequirementAssignment?: boolean | Agency$RequirementAssignmentArgs<ExtArgs>
     _count?: boolean | AgencyCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type AgencyIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5643,6 +5835,7 @@ export namespace Prisma {
       labourProfiles: Prisma.$LabourProfilePayload<ExtArgs>[]
       requirements: Prisma.$RequirementPayload<ExtArgs>[]
       documents: Prisma.$AgencyDocumentPayload<ExtArgs>[]
+      RequirementAssignment: Prisma.$RequirementAssignmentPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -6056,6 +6249,7 @@ export namespace Prisma {
     labourProfiles<T extends Agency$labourProfilesArgs<ExtArgs> = {}>(args?: Subset<T, Agency$labourProfilesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LabourProfilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     requirements<T extends Agency$requirementsArgs<ExtArgs> = {}>(args?: Subset<T, Agency$requirementsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     documents<T extends Agency$documentsArgs<ExtArgs> = {}>(args?: Subset<T, Agency$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AgencyDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    RequirementAssignment<T extends Agency$RequirementAssignmentArgs<ExtArgs> = {}>(args?: Subset<T, Agency$RequirementAssignmentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6563,6 +6757,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: AgencyDocumentScalarFieldEnum | AgencyDocumentScalarFieldEnum[]
+  }
+
+  /**
+   * Agency.RequirementAssignment
+   */
+  export type Agency$RequirementAssignmentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementAssignment
+     */
+    select?: RequirementAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementAssignment
+     */
+    omit?: RequirementAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementAssignmentInclude<ExtArgs> | null
+    where?: RequirementAssignmentWhereInput
+    orderBy?: RequirementAssignmentOrderByWithRelationInput | RequirementAssignmentOrderByWithRelationInput[]
+    cursor?: RequirementAssignmentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RequirementAssignmentScalarFieldEnum | RequirementAssignmentScalarFieldEnum[]
   }
 
   /**
@@ -7933,9 +8151,8 @@ export namespace Prisma {
     client?: boolean | ClientDefaultArgs<ExtArgs>
     assignedAgency?: boolean | Requirement$assignedAgencyArgs<ExtArgs>
     jobRoles?: boolean | Requirement$jobRolesArgs<ExtArgs>
-    labourProfiles?: boolean | Requirement$labourProfilesArgs<ExtArgs>
     procedures?: boolean | Requirement$proceduresArgs<ExtArgs>
-    documents?: boolean | Requirement$documentsArgs<ExtArgs>
+    RequirementAssignment?: boolean | Requirement$RequirementAssignmentArgs<ExtArgs>
     _count?: boolean | RequirementCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["requirement"]>
 
@@ -7999,9 +8216,8 @@ export namespace Prisma {
     client?: boolean | ClientDefaultArgs<ExtArgs>
     assignedAgency?: boolean | Requirement$assignedAgencyArgs<ExtArgs>
     jobRoles?: boolean | Requirement$jobRolesArgs<ExtArgs>
-    labourProfiles?: boolean | Requirement$labourProfilesArgs<ExtArgs>
     procedures?: boolean | Requirement$proceduresArgs<ExtArgs>
-    documents?: boolean | Requirement$documentsArgs<ExtArgs>
+    RequirementAssignment?: boolean | Requirement$RequirementAssignmentArgs<ExtArgs>
     _count?: boolean | RequirementCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type RequirementIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -8019,9 +8235,8 @@ export namespace Prisma {
       client: Prisma.$ClientPayload<ExtArgs>
       assignedAgency: Prisma.$AgencyPayload<ExtArgs> | null
       jobRoles: Prisma.$JobRolePayload<ExtArgs>[]
-      labourProfiles: Prisma.$LabourProfilePayload<ExtArgs>[]
       procedures: Prisma.$ProcedurePayload<ExtArgs>[]
-      documents: Prisma.$RequirementDocumentPayload<ExtArgs>[]
+      RequirementAssignment: Prisma.$RequirementAssignmentPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -8435,9 +8650,8 @@ export namespace Prisma {
     client<T extends ClientDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ClientDefaultArgs<ExtArgs>>): Prisma__ClientClient<$Result.GetResult<Prisma.$ClientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     assignedAgency<T extends Requirement$assignedAgencyArgs<ExtArgs> = {}>(args?: Subset<T, Requirement$assignedAgencyArgs<ExtArgs>>): Prisma__AgencyClient<$Result.GetResult<Prisma.$AgencyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     jobRoles<T extends Requirement$jobRolesArgs<ExtArgs> = {}>(args?: Subset<T, Requirement$jobRolesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobRolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    labourProfiles<T extends Requirement$labourProfilesArgs<ExtArgs> = {}>(args?: Subset<T, Requirement$labourProfilesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LabourProfilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     procedures<T extends Requirement$proceduresArgs<ExtArgs> = {}>(args?: Subset<T, Requirement$proceduresArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProcedurePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    documents<T extends Requirement$documentsArgs<ExtArgs> = {}>(args?: Subset<T, Requirement$documentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    RequirementAssignment<T extends Requirement$RequirementAssignmentArgs<ExtArgs> = {}>(args?: Subset<T, Requirement$RequirementAssignmentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8920,30 +9134,6 @@ export namespace Prisma {
   }
 
   /**
-   * Requirement.labourProfiles
-   */
-  export type Requirement$labourProfilesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the LabourProfile
-     */
-    select?: LabourProfileSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the LabourProfile
-     */
-    omit?: LabourProfileOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: LabourProfileInclude<ExtArgs> | null
-    where?: LabourProfileWhereInput
-    orderBy?: LabourProfileOrderByWithRelationInput | LabourProfileOrderByWithRelationInput[]
-    cursor?: LabourProfileWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: LabourProfileScalarFieldEnum | LabourProfileScalarFieldEnum[]
-  }
-
-  /**
    * Requirement.procedures
    */
   export type Requirement$proceduresArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -8968,27 +9158,27 @@ export namespace Prisma {
   }
 
   /**
-   * Requirement.documents
+   * Requirement.RequirementAssignment
    */
-  export type Requirement$documentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Requirement$RequirementAssignmentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the RequirementDocument
+     * Select specific fields to fetch from the RequirementAssignment
      */
-    select?: RequirementDocumentSelect<ExtArgs> | null
+    select?: RequirementAssignmentSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the RequirementDocument
+     * Omit specific fields from the RequirementAssignment
      */
-    omit?: RequirementDocumentOmit<ExtArgs> | null
+    omit?: RequirementAssignmentOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: RequirementDocumentInclude<ExtArgs> | null
-    where?: RequirementDocumentWhereInput
-    orderBy?: RequirementDocumentOrderByWithRelationInput | RequirementDocumentOrderByWithRelationInput[]
-    cursor?: RequirementDocumentWhereUniqueInput
+    include?: RequirementAssignmentInclude<ExtArgs> | null
+    where?: RequirementAssignmentWhereInput
+    orderBy?: RequirementAssignmentOrderByWithRelationInput | RequirementAssignmentOrderByWithRelationInput[]
+    cursor?: RequirementAssignmentWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: RequirementDocumentScalarFieldEnum | RequirementDocumentScalarFieldEnum[]
+    distinct?: RequirementAssignmentScalarFieldEnum | RequirementAssignmentScalarFieldEnum[]
   }
 
   /**
@@ -9261,6 +9451,8 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     requirement?: boolean | RequirementDefaultArgs<ExtArgs>
+    RequirementAssignment?: boolean | JobRole$RequirementAssignmentArgs<ExtArgs>
+    _count?: boolean | JobRoleCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["jobRole"]>
 
   export type JobRoleSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -9310,6 +9502,8 @@ export namespace Prisma {
   export type JobRoleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "title" | "quantity" | "nationality" | "salary" | "salaryCurrency" | "startDate" | "contractDuration" | "requirementId" | "createdAt" | "updatedAt", ExtArgs["result"]["jobRole"]>
   export type JobRoleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     requirement?: boolean | RequirementDefaultArgs<ExtArgs>
+    RequirementAssignment?: boolean | JobRole$RequirementAssignmentArgs<ExtArgs>
+    _count?: boolean | JobRoleCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type JobRoleIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     requirement?: boolean | RequirementDefaultArgs<ExtArgs>
@@ -9322,6 +9516,7 @@ export namespace Prisma {
     name: "JobRole"
     objects: {
       requirement: Prisma.$RequirementPayload<ExtArgs>
+      RequirementAssignment: Prisma.$RequirementAssignmentPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -9730,6 +9925,7 @@ export namespace Prisma {
   export interface Prisma__JobRoleClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     requirement<T extends RequirementDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RequirementDefaultArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    RequirementAssignment<T extends JobRole$RequirementAssignmentArgs<ExtArgs> = {}>(args?: Subset<T, JobRole$RequirementAssignmentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -10166,6 +10362,30 @@ export namespace Prisma {
   }
 
   /**
+   * JobRole.RequirementAssignment
+   */
+  export type JobRole$RequirementAssignmentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementAssignment
+     */
+    select?: RequirementAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementAssignment
+     */
+    omit?: RequirementAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementAssignmentInclude<ExtArgs> | null
+    where?: RequirementAssignmentWhereInput
+    orderBy?: RequirementAssignmentOrderByWithRelationInput | RequirementAssignmentOrderByWithRelationInput[]
+    cursor?: RequirementAssignmentWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RequirementAssignmentScalarFieldEnum | RequirementAssignmentScalarFieldEnum[]
+  }
+
+  /**
    * JobRole without action
    */
   export type JobRoleDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -10185,6 +10405,1192 @@ export namespace Prisma {
 
 
   /**
+   * Model RequirementAssignment
+   */
+
+  export type AggregateRequirementAssignment = {
+    _count: RequirementAssignmentCountAggregateOutputType | null
+    _avg: RequirementAssignmentAvgAggregateOutputType | null
+    _sum: RequirementAssignmentSumAggregateOutputType | null
+    _min: RequirementAssignmentMinAggregateOutputType | null
+    _max: RequirementAssignmentMaxAggregateOutputType | null
+  }
+
+  export type RequirementAssignmentAvgAggregateOutputType = {
+    quantity: number | null
+  }
+
+  export type RequirementAssignmentSumAggregateOutputType = {
+    quantity: number | null
+  }
+
+  export type RequirementAssignmentMinAggregateOutputType = {
+    id: string | null
+    requirementId: string | null
+    jobRoleId: string | null
+    agencyId: string | null
+    quantity: number | null
+    status: $Enums.RequirementStatus | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RequirementAssignmentMaxAggregateOutputType = {
+    id: string | null
+    requirementId: string | null
+    jobRoleId: string | null
+    agencyId: string | null
+    quantity: number | null
+    status: $Enums.RequirementStatus | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RequirementAssignmentCountAggregateOutputType = {
+    id: number
+    requirementId: number
+    jobRoleId: number
+    agencyId: number
+    quantity: number
+    status: number
+    metadata: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type RequirementAssignmentAvgAggregateInputType = {
+    quantity?: true
+  }
+
+  export type RequirementAssignmentSumAggregateInputType = {
+    quantity?: true
+  }
+
+  export type RequirementAssignmentMinAggregateInputType = {
+    id?: true
+    requirementId?: true
+    jobRoleId?: true
+    agencyId?: true
+    quantity?: true
+    status?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RequirementAssignmentMaxAggregateInputType = {
+    id?: true
+    requirementId?: true
+    jobRoleId?: true
+    agencyId?: true
+    quantity?: true
+    status?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RequirementAssignmentCountAggregateInputType = {
+    id?: true
+    requirementId?: true
+    jobRoleId?: true
+    agencyId?: true
+    quantity?: true
+    status?: true
+    metadata?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type RequirementAssignmentAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RequirementAssignment to aggregate.
+     */
+    where?: RequirementAssignmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RequirementAssignments to fetch.
+     */
+    orderBy?: RequirementAssignmentOrderByWithRelationInput | RequirementAssignmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RequirementAssignmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RequirementAssignments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RequirementAssignments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned RequirementAssignments
+    **/
+    _count?: true | RequirementAssignmentCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: RequirementAssignmentAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: RequirementAssignmentSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RequirementAssignmentMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RequirementAssignmentMaxAggregateInputType
+  }
+
+  export type GetRequirementAssignmentAggregateType<T extends RequirementAssignmentAggregateArgs> = {
+        [P in keyof T & keyof AggregateRequirementAssignment]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRequirementAssignment[P]>
+      : GetScalarType<T[P], AggregateRequirementAssignment[P]>
+  }
+
+
+
+
+  export type RequirementAssignmentGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RequirementAssignmentWhereInput
+    orderBy?: RequirementAssignmentOrderByWithAggregationInput | RequirementAssignmentOrderByWithAggregationInput[]
+    by: RequirementAssignmentScalarFieldEnum[] | RequirementAssignmentScalarFieldEnum
+    having?: RequirementAssignmentScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RequirementAssignmentCountAggregateInputType | true
+    _avg?: RequirementAssignmentAvgAggregateInputType
+    _sum?: RequirementAssignmentSumAggregateInputType
+    _min?: RequirementAssignmentMinAggregateInputType
+    _max?: RequirementAssignmentMaxAggregateInputType
+  }
+
+  export type RequirementAssignmentGroupByOutputType = {
+    id: string
+    requirementId: string
+    jobRoleId: string
+    agencyId: string
+    quantity: number
+    status: $Enums.RequirementStatus
+    metadata: JsonValue | null
+    createdAt: Date
+    updatedAt: Date
+    _count: RequirementAssignmentCountAggregateOutputType | null
+    _avg: RequirementAssignmentAvgAggregateOutputType | null
+    _sum: RequirementAssignmentSumAggregateOutputType | null
+    _min: RequirementAssignmentMinAggregateOutputType | null
+    _max: RequirementAssignmentMaxAggregateOutputType | null
+  }
+
+  type GetRequirementAssignmentGroupByPayload<T extends RequirementAssignmentGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RequirementAssignmentGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RequirementAssignmentGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RequirementAssignmentGroupByOutputType[P]>
+            : GetScalarType<T[P], RequirementAssignmentGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RequirementAssignmentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    requirementId?: boolean
+    jobRoleId?: boolean
+    agencyId?: boolean
+    quantity?: boolean
+    status?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
+    jobRole?: boolean | JobRoleDefaultArgs<ExtArgs>
+    agency?: boolean | AgencyDefaultArgs<ExtArgs>
+    LabourProfile?: boolean | RequirementAssignment$LabourProfileArgs<ExtArgs>
+    _count?: boolean | RequirementAssignmentCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["requirementAssignment"]>
+
+  export type RequirementAssignmentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    requirementId?: boolean
+    jobRoleId?: boolean
+    agencyId?: boolean
+    quantity?: boolean
+    status?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
+    jobRole?: boolean | JobRoleDefaultArgs<ExtArgs>
+    agency?: boolean | AgencyDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["requirementAssignment"]>
+
+  export type RequirementAssignmentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    requirementId?: boolean
+    jobRoleId?: boolean
+    agencyId?: boolean
+    quantity?: boolean
+    status?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
+    jobRole?: boolean | JobRoleDefaultArgs<ExtArgs>
+    agency?: boolean | AgencyDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["requirementAssignment"]>
+
+  export type RequirementAssignmentSelectScalar = {
+    id?: boolean
+    requirementId?: boolean
+    jobRoleId?: boolean
+    agencyId?: boolean
+    quantity?: boolean
+    status?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type RequirementAssignmentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "requirementId" | "jobRoleId" | "agencyId" | "quantity" | "status" | "metadata" | "createdAt" | "updatedAt", ExtArgs["result"]["requirementAssignment"]>
+  export type RequirementAssignmentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
+    jobRole?: boolean | JobRoleDefaultArgs<ExtArgs>
+    agency?: boolean | AgencyDefaultArgs<ExtArgs>
+    LabourProfile?: boolean | RequirementAssignment$LabourProfileArgs<ExtArgs>
+    _count?: boolean | RequirementAssignmentCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type RequirementAssignmentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
+    jobRole?: boolean | JobRoleDefaultArgs<ExtArgs>
+    agency?: boolean | AgencyDefaultArgs<ExtArgs>
+  }
+  export type RequirementAssignmentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
+    jobRole?: boolean | JobRoleDefaultArgs<ExtArgs>
+    agency?: boolean | AgencyDefaultArgs<ExtArgs>
+  }
+
+  export type $RequirementAssignmentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RequirementAssignment"
+    objects: {
+      requirement: Prisma.$RequirementPayload<ExtArgs>
+      jobRole: Prisma.$JobRolePayload<ExtArgs>
+      agency: Prisma.$AgencyPayload<ExtArgs>
+      LabourProfile: Prisma.$LabourProfilePayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      requirementId: string
+      jobRoleId: string
+      agencyId: string
+      quantity: number
+      status: $Enums.RequirementStatus
+      metadata: Prisma.JsonValue | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["requirementAssignment"]>
+    composites: {}
+  }
+
+  type RequirementAssignmentGetPayload<S extends boolean | null | undefined | RequirementAssignmentDefaultArgs> = $Result.GetResult<Prisma.$RequirementAssignmentPayload, S>
+
+  type RequirementAssignmentCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<RequirementAssignmentFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: RequirementAssignmentCountAggregateInputType | true
+    }
+
+  export interface RequirementAssignmentDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RequirementAssignment'], meta: { name: 'RequirementAssignment' } }
+    /**
+     * Find zero or one RequirementAssignment that matches the filter.
+     * @param {RequirementAssignmentFindUniqueArgs} args - Arguments to find a RequirementAssignment
+     * @example
+     * // Get one RequirementAssignment
+     * const requirementAssignment = await prisma.requirementAssignment.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RequirementAssignmentFindUniqueArgs>(args: SelectSubset<T, RequirementAssignmentFindUniqueArgs<ExtArgs>>): Prisma__RequirementAssignmentClient<$Result.GetResult<Prisma.$RequirementAssignmentPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one RequirementAssignment that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {RequirementAssignmentFindUniqueOrThrowArgs} args - Arguments to find a RequirementAssignment
+     * @example
+     * // Get one RequirementAssignment
+     * const requirementAssignment = await prisma.requirementAssignment.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RequirementAssignmentFindUniqueOrThrowArgs>(args: SelectSubset<T, RequirementAssignmentFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RequirementAssignmentClient<$Result.GetResult<Prisma.$RequirementAssignmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RequirementAssignment that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementAssignmentFindFirstArgs} args - Arguments to find a RequirementAssignment
+     * @example
+     * // Get one RequirementAssignment
+     * const requirementAssignment = await prisma.requirementAssignment.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RequirementAssignmentFindFirstArgs>(args?: SelectSubset<T, RequirementAssignmentFindFirstArgs<ExtArgs>>): Prisma__RequirementAssignmentClient<$Result.GetResult<Prisma.$RequirementAssignmentPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RequirementAssignment that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementAssignmentFindFirstOrThrowArgs} args - Arguments to find a RequirementAssignment
+     * @example
+     * // Get one RequirementAssignment
+     * const requirementAssignment = await prisma.requirementAssignment.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RequirementAssignmentFindFirstOrThrowArgs>(args?: SelectSubset<T, RequirementAssignmentFindFirstOrThrowArgs<ExtArgs>>): Prisma__RequirementAssignmentClient<$Result.GetResult<Prisma.$RequirementAssignmentPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more RequirementAssignments that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementAssignmentFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RequirementAssignments
+     * const requirementAssignments = await prisma.requirementAssignment.findMany()
+     * 
+     * // Get first 10 RequirementAssignments
+     * const requirementAssignments = await prisma.requirementAssignment.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const requirementAssignmentWithIdOnly = await prisma.requirementAssignment.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends RequirementAssignmentFindManyArgs>(args?: SelectSubset<T, RequirementAssignmentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a RequirementAssignment.
+     * @param {RequirementAssignmentCreateArgs} args - Arguments to create a RequirementAssignment.
+     * @example
+     * // Create one RequirementAssignment
+     * const RequirementAssignment = await prisma.requirementAssignment.create({
+     *   data: {
+     *     // ... data to create a RequirementAssignment
+     *   }
+     * })
+     * 
+     */
+    create<T extends RequirementAssignmentCreateArgs>(args: SelectSubset<T, RequirementAssignmentCreateArgs<ExtArgs>>): Prisma__RequirementAssignmentClient<$Result.GetResult<Prisma.$RequirementAssignmentPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many RequirementAssignments.
+     * @param {RequirementAssignmentCreateManyArgs} args - Arguments to create many RequirementAssignments.
+     * @example
+     * // Create many RequirementAssignments
+     * const requirementAssignment = await prisma.requirementAssignment.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RequirementAssignmentCreateManyArgs>(args?: SelectSubset<T, RequirementAssignmentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RequirementAssignments and returns the data saved in the database.
+     * @param {RequirementAssignmentCreateManyAndReturnArgs} args - Arguments to create many RequirementAssignments.
+     * @example
+     * // Create many RequirementAssignments
+     * const requirementAssignment = await prisma.requirementAssignment.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many RequirementAssignments and only return the `id`
+     * const requirementAssignmentWithIdOnly = await prisma.requirementAssignment.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RequirementAssignmentCreateManyAndReturnArgs>(args?: SelectSubset<T, RequirementAssignmentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementAssignmentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a RequirementAssignment.
+     * @param {RequirementAssignmentDeleteArgs} args - Arguments to delete one RequirementAssignment.
+     * @example
+     * // Delete one RequirementAssignment
+     * const RequirementAssignment = await prisma.requirementAssignment.delete({
+     *   where: {
+     *     // ... filter to delete one RequirementAssignment
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RequirementAssignmentDeleteArgs>(args: SelectSubset<T, RequirementAssignmentDeleteArgs<ExtArgs>>): Prisma__RequirementAssignmentClient<$Result.GetResult<Prisma.$RequirementAssignmentPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one RequirementAssignment.
+     * @param {RequirementAssignmentUpdateArgs} args - Arguments to update one RequirementAssignment.
+     * @example
+     * // Update one RequirementAssignment
+     * const requirementAssignment = await prisma.requirementAssignment.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RequirementAssignmentUpdateArgs>(args: SelectSubset<T, RequirementAssignmentUpdateArgs<ExtArgs>>): Prisma__RequirementAssignmentClient<$Result.GetResult<Prisma.$RequirementAssignmentPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more RequirementAssignments.
+     * @param {RequirementAssignmentDeleteManyArgs} args - Arguments to filter RequirementAssignments to delete.
+     * @example
+     * // Delete a few RequirementAssignments
+     * const { count } = await prisma.requirementAssignment.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RequirementAssignmentDeleteManyArgs>(args?: SelectSubset<T, RequirementAssignmentDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RequirementAssignments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementAssignmentUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RequirementAssignments
+     * const requirementAssignment = await prisma.requirementAssignment.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RequirementAssignmentUpdateManyArgs>(args: SelectSubset<T, RequirementAssignmentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RequirementAssignments and returns the data updated in the database.
+     * @param {RequirementAssignmentUpdateManyAndReturnArgs} args - Arguments to update many RequirementAssignments.
+     * @example
+     * // Update many RequirementAssignments
+     * const requirementAssignment = await prisma.requirementAssignment.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more RequirementAssignments and only return the `id`
+     * const requirementAssignmentWithIdOnly = await prisma.requirementAssignment.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends RequirementAssignmentUpdateManyAndReturnArgs>(args: SelectSubset<T, RequirementAssignmentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementAssignmentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one RequirementAssignment.
+     * @param {RequirementAssignmentUpsertArgs} args - Arguments to update or create a RequirementAssignment.
+     * @example
+     * // Update or create a RequirementAssignment
+     * const requirementAssignment = await prisma.requirementAssignment.upsert({
+     *   create: {
+     *     // ... data to create a RequirementAssignment
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RequirementAssignment we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RequirementAssignmentUpsertArgs>(args: SelectSubset<T, RequirementAssignmentUpsertArgs<ExtArgs>>): Prisma__RequirementAssignmentClient<$Result.GetResult<Prisma.$RequirementAssignmentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of RequirementAssignments.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementAssignmentCountArgs} args - Arguments to filter RequirementAssignments to count.
+     * @example
+     * // Count the number of RequirementAssignments
+     * const count = await prisma.requirementAssignment.count({
+     *   where: {
+     *     // ... the filter for the RequirementAssignments we want to count
+     *   }
+     * })
+    **/
+    count<T extends RequirementAssignmentCountArgs>(
+      args?: Subset<T, RequirementAssignmentCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RequirementAssignmentCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RequirementAssignment.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementAssignmentAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RequirementAssignmentAggregateArgs>(args: Subset<T, RequirementAssignmentAggregateArgs>): Prisma.PrismaPromise<GetRequirementAssignmentAggregateType<T>>
+
+    /**
+     * Group by RequirementAssignment.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementAssignmentGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RequirementAssignmentGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RequirementAssignmentGroupByArgs['orderBy'] }
+        : { orderBy?: RequirementAssignmentGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RequirementAssignmentGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRequirementAssignmentGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RequirementAssignment model
+   */
+  readonly fields: RequirementAssignmentFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RequirementAssignment.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RequirementAssignmentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    requirement<T extends RequirementDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RequirementDefaultArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    jobRole<T extends JobRoleDefaultArgs<ExtArgs> = {}>(args?: Subset<T, JobRoleDefaultArgs<ExtArgs>>): Prisma__JobRoleClient<$Result.GetResult<Prisma.$JobRolePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    agency<T extends AgencyDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AgencyDefaultArgs<ExtArgs>>): Prisma__AgencyClient<$Result.GetResult<Prisma.$AgencyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    LabourProfile<T extends RequirementAssignment$LabourProfileArgs<ExtArgs> = {}>(args?: Subset<T, RequirementAssignment$LabourProfileArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LabourProfilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RequirementAssignment model
+   */
+  interface RequirementAssignmentFieldRefs {
+    readonly id: FieldRef<"RequirementAssignment", 'String'>
+    readonly requirementId: FieldRef<"RequirementAssignment", 'String'>
+    readonly jobRoleId: FieldRef<"RequirementAssignment", 'String'>
+    readonly agencyId: FieldRef<"RequirementAssignment", 'String'>
+    readonly quantity: FieldRef<"RequirementAssignment", 'Int'>
+    readonly status: FieldRef<"RequirementAssignment", 'RequirementStatus'>
+    readonly metadata: FieldRef<"RequirementAssignment", 'Json'>
+    readonly createdAt: FieldRef<"RequirementAssignment", 'DateTime'>
+    readonly updatedAt: FieldRef<"RequirementAssignment", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * RequirementAssignment findUnique
+   */
+  export type RequirementAssignmentFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementAssignment
+     */
+    select?: RequirementAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementAssignment
+     */
+    omit?: RequirementAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementAssignmentInclude<ExtArgs> | null
+    /**
+     * Filter, which RequirementAssignment to fetch.
+     */
+    where: RequirementAssignmentWhereUniqueInput
+  }
+
+  /**
+   * RequirementAssignment findUniqueOrThrow
+   */
+  export type RequirementAssignmentFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementAssignment
+     */
+    select?: RequirementAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementAssignment
+     */
+    omit?: RequirementAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementAssignmentInclude<ExtArgs> | null
+    /**
+     * Filter, which RequirementAssignment to fetch.
+     */
+    where: RequirementAssignmentWhereUniqueInput
+  }
+
+  /**
+   * RequirementAssignment findFirst
+   */
+  export type RequirementAssignmentFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementAssignment
+     */
+    select?: RequirementAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementAssignment
+     */
+    omit?: RequirementAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementAssignmentInclude<ExtArgs> | null
+    /**
+     * Filter, which RequirementAssignment to fetch.
+     */
+    where?: RequirementAssignmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RequirementAssignments to fetch.
+     */
+    orderBy?: RequirementAssignmentOrderByWithRelationInput | RequirementAssignmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RequirementAssignments.
+     */
+    cursor?: RequirementAssignmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RequirementAssignments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RequirementAssignments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RequirementAssignments.
+     */
+    distinct?: RequirementAssignmentScalarFieldEnum | RequirementAssignmentScalarFieldEnum[]
+  }
+
+  /**
+   * RequirementAssignment findFirstOrThrow
+   */
+  export type RequirementAssignmentFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementAssignment
+     */
+    select?: RequirementAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementAssignment
+     */
+    omit?: RequirementAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementAssignmentInclude<ExtArgs> | null
+    /**
+     * Filter, which RequirementAssignment to fetch.
+     */
+    where?: RequirementAssignmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RequirementAssignments to fetch.
+     */
+    orderBy?: RequirementAssignmentOrderByWithRelationInput | RequirementAssignmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RequirementAssignments.
+     */
+    cursor?: RequirementAssignmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RequirementAssignments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RequirementAssignments.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RequirementAssignments.
+     */
+    distinct?: RequirementAssignmentScalarFieldEnum | RequirementAssignmentScalarFieldEnum[]
+  }
+
+  /**
+   * RequirementAssignment findMany
+   */
+  export type RequirementAssignmentFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementAssignment
+     */
+    select?: RequirementAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementAssignment
+     */
+    omit?: RequirementAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementAssignmentInclude<ExtArgs> | null
+    /**
+     * Filter, which RequirementAssignments to fetch.
+     */
+    where?: RequirementAssignmentWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RequirementAssignments to fetch.
+     */
+    orderBy?: RequirementAssignmentOrderByWithRelationInput | RequirementAssignmentOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing RequirementAssignments.
+     */
+    cursor?: RequirementAssignmentWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RequirementAssignments from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RequirementAssignments.
+     */
+    skip?: number
+    distinct?: RequirementAssignmentScalarFieldEnum | RequirementAssignmentScalarFieldEnum[]
+  }
+
+  /**
+   * RequirementAssignment create
+   */
+  export type RequirementAssignmentCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementAssignment
+     */
+    select?: RequirementAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementAssignment
+     */
+    omit?: RequirementAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementAssignmentInclude<ExtArgs> | null
+    /**
+     * The data needed to create a RequirementAssignment.
+     */
+    data: XOR<RequirementAssignmentCreateInput, RequirementAssignmentUncheckedCreateInput>
+  }
+
+  /**
+   * RequirementAssignment createMany
+   */
+  export type RequirementAssignmentCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RequirementAssignments.
+     */
+    data: RequirementAssignmentCreateManyInput | RequirementAssignmentCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RequirementAssignment createManyAndReturn
+   */
+  export type RequirementAssignmentCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementAssignment
+     */
+    select?: RequirementAssignmentSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementAssignment
+     */
+    omit?: RequirementAssignmentOmit<ExtArgs> | null
+    /**
+     * The data used to create many RequirementAssignments.
+     */
+    data: RequirementAssignmentCreateManyInput | RequirementAssignmentCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementAssignmentIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RequirementAssignment update
+   */
+  export type RequirementAssignmentUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementAssignment
+     */
+    select?: RequirementAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementAssignment
+     */
+    omit?: RequirementAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementAssignmentInclude<ExtArgs> | null
+    /**
+     * The data needed to update a RequirementAssignment.
+     */
+    data: XOR<RequirementAssignmentUpdateInput, RequirementAssignmentUncheckedUpdateInput>
+    /**
+     * Choose, which RequirementAssignment to update.
+     */
+    where: RequirementAssignmentWhereUniqueInput
+  }
+
+  /**
+   * RequirementAssignment updateMany
+   */
+  export type RequirementAssignmentUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RequirementAssignments.
+     */
+    data: XOR<RequirementAssignmentUpdateManyMutationInput, RequirementAssignmentUncheckedUpdateManyInput>
+    /**
+     * Filter which RequirementAssignments to update
+     */
+    where?: RequirementAssignmentWhereInput
+    /**
+     * Limit how many RequirementAssignments to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RequirementAssignment updateManyAndReturn
+   */
+  export type RequirementAssignmentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementAssignment
+     */
+    select?: RequirementAssignmentSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementAssignment
+     */
+    omit?: RequirementAssignmentOmit<ExtArgs> | null
+    /**
+     * The data used to update RequirementAssignments.
+     */
+    data: XOR<RequirementAssignmentUpdateManyMutationInput, RequirementAssignmentUncheckedUpdateManyInput>
+    /**
+     * Filter which RequirementAssignments to update
+     */
+    where?: RequirementAssignmentWhereInput
+    /**
+     * Limit how many RequirementAssignments to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementAssignmentIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * RequirementAssignment upsert
+   */
+  export type RequirementAssignmentUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementAssignment
+     */
+    select?: RequirementAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementAssignment
+     */
+    omit?: RequirementAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementAssignmentInclude<ExtArgs> | null
+    /**
+     * The filter to search for the RequirementAssignment to update in case it exists.
+     */
+    where: RequirementAssignmentWhereUniqueInput
+    /**
+     * In case the RequirementAssignment found by the `where` argument doesn't exist, create a new RequirementAssignment with this data.
+     */
+    create: XOR<RequirementAssignmentCreateInput, RequirementAssignmentUncheckedCreateInput>
+    /**
+     * In case the RequirementAssignment was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RequirementAssignmentUpdateInput, RequirementAssignmentUncheckedUpdateInput>
+  }
+
+  /**
+   * RequirementAssignment delete
+   */
+  export type RequirementAssignmentDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementAssignment
+     */
+    select?: RequirementAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementAssignment
+     */
+    omit?: RequirementAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementAssignmentInclude<ExtArgs> | null
+    /**
+     * Filter which RequirementAssignment to delete.
+     */
+    where: RequirementAssignmentWhereUniqueInput
+  }
+
+  /**
+   * RequirementAssignment deleteMany
+   */
+  export type RequirementAssignmentDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RequirementAssignments to delete
+     */
+    where?: RequirementAssignmentWhereInput
+    /**
+     * Limit how many RequirementAssignments to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * RequirementAssignment.LabourProfile
+   */
+  export type RequirementAssignment$LabourProfileArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the LabourProfile
+     */
+    select?: LabourProfileSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the LabourProfile
+     */
+    omit?: LabourProfileOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: LabourProfileInclude<ExtArgs> | null
+    where?: LabourProfileWhereInput
+    orderBy?: LabourProfileOrderByWithRelationInput | LabourProfileOrderByWithRelationInput[]
+    cursor?: LabourProfileWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: LabourProfileScalarFieldEnum | LabourProfileScalarFieldEnum[]
+  }
+
+  /**
+   * RequirementAssignment without action
+   */
+  export type RequirementAssignmentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementAssignment
+     */
+    select?: RequirementAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementAssignment
+     */
+    omit?: RequirementAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementAssignmentInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Model LabourProfile
    */
 
@@ -10198,12 +11604,10 @@ export namespace Prisma {
 
   export type LabourProfileAvgAggregateOutputType = {
     age: number | null
-    experienceYears: number | null
   }
 
   export type LabourProfileSumAggregateOutputType = {
     age: number | null
-    experienceYears: number | null
   }
 
   export type LabourProfileMinAggregateOutputType = {
@@ -10212,34 +11616,33 @@ export namespace Prisma {
     age: number | null
     gender: $Enums.Gender | null
     nationality: string | null
-    maritalStatus: string | null
-    experienceYears: number | null
-    education: string | null
-    currentPosition: string | null
-    currentCompany: string | null
-    englishProficiency: string | null
+    jobRoleName: string | null
+    status: $Enums.LabourProfileStatus | null
     email: string | null
     phone: string | null
-    address: string | null
-    city: string | null
-    country: string | null
-    cvUrl: string | null
     passportNumber: string | null
     passportExpiry: Date | null
+    passportCopy: string | null
+    passportVerified: boolean | null
     visaType: string | null
     visaExpiry: Date | null
-    medicalStatus: string | null
+    visaCopy: string | null
+    visaVerified: boolean | null
+    medicalReport: string | null
     medicalExpiry: Date | null
-    photo: string | null
-    status: $Enums.LabourProfileStatus | null
+    medicalVerified: boolean | null
+    policeClearance: string | null
+    policeVerified: boolean | null
+    contractCopy: string | null
+    contractVerified: boolean | null
+    verificationStatus: $Enums.DocumentVerificationStatus | null
     statusReason: string | null
-    requirementId: string | null
     agencyId: string | null
-    deploymentDate: Date | null
-    contractStartDate: Date | null
-    contractEndDate: Date | null
+    requirementAssignmentId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    documentsSubmittedAt: Date | null
+    documentsVerifiedAt: Date | null
   }
 
   export type LabourProfileMaxAggregateOutputType = {
@@ -10248,34 +11651,33 @@ export namespace Prisma {
     age: number | null
     gender: $Enums.Gender | null
     nationality: string | null
-    maritalStatus: string | null
-    experienceYears: number | null
-    education: string | null
-    currentPosition: string | null
-    currentCompany: string | null
-    englishProficiency: string | null
+    jobRoleName: string | null
+    status: $Enums.LabourProfileStatus | null
     email: string | null
     phone: string | null
-    address: string | null
-    city: string | null
-    country: string | null
-    cvUrl: string | null
     passportNumber: string | null
     passportExpiry: Date | null
+    passportCopy: string | null
+    passportVerified: boolean | null
     visaType: string | null
     visaExpiry: Date | null
-    medicalStatus: string | null
+    visaCopy: string | null
+    visaVerified: boolean | null
+    medicalReport: string | null
     medicalExpiry: Date | null
-    photo: string | null
-    status: $Enums.LabourProfileStatus | null
+    medicalVerified: boolean | null
+    policeClearance: string | null
+    policeVerified: boolean | null
+    contractCopy: string | null
+    contractVerified: boolean | null
+    verificationStatus: $Enums.DocumentVerificationStatus | null
     statusReason: string | null
-    requirementId: string | null
     agencyId: string | null
-    deploymentDate: Date | null
-    contractStartDate: Date | null
-    contractEndDate: Date | null
+    requirementAssignmentId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    documentsSubmittedAt: Date | null
+    documentsVerifiedAt: Date | null
   }
 
   export type LabourProfileCountAggregateOutputType = {
@@ -10284,49 +11686,44 @@ export namespace Prisma {
     age: number
     gender: number
     nationality: number
-    maritalStatus: number
-    skills: number
-    experienceYears: number
-    education: number
-    currentPosition: number
-    currentCompany: number
-    languages: number
-    englishProficiency: number
+    jobRoleName: number
+    status: number
     email: number
     phone: number
-    address: number
-    city: number
-    country: number
-    cvUrl: number
     passportNumber: number
     passportExpiry: number
+    passportCopy: number
+    passportVerified: number
     visaType: number
     visaExpiry: number
-    medicalStatus: number
+    visaCopy: number
+    visaVerified: number
+    medicalReport: number
     medicalExpiry: number
-    photo: number
+    medicalVerified: number
+    policeClearance: number
+    policeVerified: number
+    contractCopy: number
+    contractVerified: number
     otherDocs: number
-    status: number
+    verificationStatus: number
     statusReason: number
-    requirementId: number
     agencyId: number
-    deploymentDate: number
-    contractStartDate: number
-    contractEndDate: number
+    requirementAssignmentId: number
     createdAt: number
     updatedAt: number
+    documentsSubmittedAt: number
+    documentsVerifiedAt: number
     _all: number
   }
 
 
   export type LabourProfileAvgAggregateInputType = {
     age?: true
-    experienceYears?: true
   }
 
   export type LabourProfileSumAggregateInputType = {
     age?: true
-    experienceYears?: true
   }
 
   export type LabourProfileMinAggregateInputType = {
@@ -10335,34 +11732,33 @@ export namespace Prisma {
     age?: true
     gender?: true
     nationality?: true
-    maritalStatus?: true
-    experienceYears?: true
-    education?: true
-    currentPosition?: true
-    currentCompany?: true
-    englishProficiency?: true
+    jobRoleName?: true
+    status?: true
     email?: true
     phone?: true
-    address?: true
-    city?: true
-    country?: true
-    cvUrl?: true
     passportNumber?: true
     passportExpiry?: true
+    passportCopy?: true
+    passportVerified?: true
     visaType?: true
     visaExpiry?: true
-    medicalStatus?: true
+    visaCopy?: true
+    visaVerified?: true
+    medicalReport?: true
     medicalExpiry?: true
-    photo?: true
-    status?: true
+    medicalVerified?: true
+    policeClearance?: true
+    policeVerified?: true
+    contractCopy?: true
+    contractVerified?: true
+    verificationStatus?: true
     statusReason?: true
-    requirementId?: true
     agencyId?: true
-    deploymentDate?: true
-    contractStartDate?: true
-    contractEndDate?: true
+    requirementAssignmentId?: true
     createdAt?: true
     updatedAt?: true
+    documentsSubmittedAt?: true
+    documentsVerifiedAt?: true
   }
 
   export type LabourProfileMaxAggregateInputType = {
@@ -10371,34 +11767,33 @@ export namespace Prisma {
     age?: true
     gender?: true
     nationality?: true
-    maritalStatus?: true
-    experienceYears?: true
-    education?: true
-    currentPosition?: true
-    currentCompany?: true
-    englishProficiency?: true
+    jobRoleName?: true
+    status?: true
     email?: true
     phone?: true
-    address?: true
-    city?: true
-    country?: true
-    cvUrl?: true
     passportNumber?: true
     passportExpiry?: true
+    passportCopy?: true
+    passportVerified?: true
     visaType?: true
     visaExpiry?: true
-    medicalStatus?: true
+    visaCopy?: true
+    visaVerified?: true
+    medicalReport?: true
     medicalExpiry?: true
-    photo?: true
-    status?: true
+    medicalVerified?: true
+    policeClearance?: true
+    policeVerified?: true
+    contractCopy?: true
+    contractVerified?: true
+    verificationStatus?: true
     statusReason?: true
-    requirementId?: true
     agencyId?: true
-    deploymentDate?: true
-    contractStartDate?: true
-    contractEndDate?: true
+    requirementAssignmentId?: true
     createdAt?: true
     updatedAt?: true
+    documentsSubmittedAt?: true
+    documentsVerifiedAt?: true
   }
 
   export type LabourProfileCountAggregateInputType = {
@@ -10407,37 +11802,34 @@ export namespace Prisma {
     age?: true
     gender?: true
     nationality?: true
-    maritalStatus?: true
-    skills?: true
-    experienceYears?: true
-    education?: true
-    currentPosition?: true
-    currentCompany?: true
-    languages?: true
-    englishProficiency?: true
+    jobRoleName?: true
+    status?: true
     email?: true
     phone?: true
-    address?: true
-    city?: true
-    country?: true
-    cvUrl?: true
     passportNumber?: true
     passportExpiry?: true
+    passportCopy?: true
+    passportVerified?: true
     visaType?: true
     visaExpiry?: true
-    medicalStatus?: true
+    visaCopy?: true
+    visaVerified?: true
+    medicalReport?: true
     medicalExpiry?: true
-    photo?: true
+    medicalVerified?: true
+    policeClearance?: true
+    policeVerified?: true
+    contractCopy?: true
+    contractVerified?: true
     otherDocs?: true
-    status?: true
+    verificationStatus?: true
     statusReason?: true
-    requirementId?: true
     agencyId?: true
-    deploymentDate?: true
-    contractStartDate?: true
-    contractEndDate?: true
+    requirementAssignmentId?: true
     createdAt?: true
     updatedAt?: true
+    documentsSubmittedAt?: true
+    documentsVerifiedAt?: true
     _all?: true
   }
 
@@ -10533,37 +11925,34 @@ export namespace Prisma {
     age: number
     gender: $Enums.Gender
     nationality: string
-    maritalStatus: string | null
-    skills: string[]
-    experienceYears: number
-    education: string | null
-    currentPosition: string | null
-    currentCompany: string | null
-    languages: string[]
-    englishProficiency: string | null
+    jobRoleName: string
+    status: $Enums.LabourProfileStatus
     email: string | null
-    phone: string
-    address: string | null
-    city: string | null
-    country: string | null
-    cvUrl: string
+    phone: string | null
     passportNumber: string | null
     passportExpiry: Date | null
+    passportCopy: string | null
+    passportVerified: boolean
     visaType: string | null
     visaExpiry: Date | null
-    medicalStatus: string | null
+    visaCopy: string | null
+    visaVerified: boolean
+    medicalReport: string | null
     medicalExpiry: Date | null
-    photo: string | null
-    otherDocs: string[]
-    status: $Enums.LabourProfileStatus
+    medicalVerified: boolean
+    policeClearance: string | null
+    policeVerified: boolean
+    contractCopy: string | null
+    contractVerified: boolean
+    otherDocs: JsonValue | null
+    verificationStatus: $Enums.DocumentVerificationStatus
     statusReason: string | null
-    requirementId: string
     agencyId: string
-    deploymentDate: Date | null
-    contractStartDate: Date | null
-    contractEndDate: Date | null
+    requirementAssignmentId: string | null
     createdAt: Date
     updatedAt: Date
+    documentsSubmittedAt: Date | null
+    documentsVerifiedAt: Date | null
     _count: LabourProfileCountAggregateOutputType | null
     _avg: LabourProfileAvgAggregateOutputType | null
     _sum: LabourProfileSumAggregateOutputType | null
@@ -10591,41 +11980,39 @@ export namespace Prisma {
     age?: boolean
     gender?: boolean
     nationality?: boolean
-    maritalStatus?: boolean
-    skills?: boolean
-    experienceYears?: boolean
-    education?: boolean
-    currentPosition?: boolean
-    currentCompany?: boolean
-    languages?: boolean
-    englishProficiency?: boolean
+    jobRoleName?: boolean
+    status?: boolean
     email?: boolean
     phone?: boolean
-    address?: boolean
-    city?: boolean
-    country?: boolean
-    cvUrl?: boolean
     passportNumber?: boolean
     passportExpiry?: boolean
+    passportCopy?: boolean
+    passportVerified?: boolean
     visaType?: boolean
     visaExpiry?: boolean
-    medicalStatus?: boolean
+    visaCopy?: boolean
+    visaVerified?: boolean
+    medicalReport?: boolean
     medicalExpiry?: boolean
-    photo?: boolean
+    medicalVerified?: boolean
+    policeClearance?: boolean
+    policeVerified?: boolean
+    contractCopy?: boolean
+    contractVerified?: boolean
     otherDocs?: boolean
-    status?: boolean
+    verificationStatus?: boolean
     statusReason?: boolean
-    requirementId?: boolean
     agencyId?: boolean
-    deploymentDate?: boolean
-    contractStartDate?: boolean
-    contractEndDate?: boolean
+    requirementAssignmentId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
+    documentsSubmittedAt?: boolean
+    documentsVerifiedAt?: boolean
     agency?: boolean | AgencyDefaultArgs<ExtArgs>
+    requirementAssignment?: boolean | LabourProfile$requirementAssignmentArgs<ExtArgs>
     statusLogs?: boolean | LabourProfile$statusLogsArgs<ExtArgs>
     procedures?: boolean | LabourProfile$proceduresArgs<ExtArgs>
+    documentVerifications?: boolean | LabourProfile$documentVerificationsArgs<ExtArgs>
     _count?: boolean | LabourProfileCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["labourProfile"]>
 
@@ -10635,39 +12022,36 @@ export namespace Prisma {
     age?: boolean
     gender?: boolean
     nationality?: boolean
-    maritalStatus?: boolean
-    skills?: boolean
-    experienceYears?: boolean
-    education?: boolean
-    currentPosition?: boolean
-    currentCompany?: boolean
-    languages?: boolean
-    englishProficiency?: boolean
+    jobRoleName?: boolean
+    status?: boolean
     email?: boolean
     phone?: boolean
-    address?: boolean
-    city?: boolean
-    country?: boolean
-    cvUrl?: boolean
     passportNumber?: boolean
     passportExpiry?: boolean
+    passportCopy?: boolean
+    passportVerified?: boolean
     visaType?: boolean
     visaExpiry?: boolean
-    medicalStatus?: boolean
+    visaCopy?: boolean
+    visaVerified?: boolean
+    medicalReport?: boolean
     medicalExpiry?: boolean
-    photo?: boolean
+    medicalVerified?: boolean
+    policeClearance?: boolean
+    policeVerified?: boolean
+    contractCopy?: boolean
+    contractVerified?: boolean
     otherDocs?: boolean
-    status?: boolean
+    verificationStatus?: boolean
     statusReason?: boolean
-    requirementId?: boolean
     agencyId?: boolean
-    deploymentDate?: boolean
-    contractStartDate?: boolean
-    contractEndDate?: boolean
+    requirementAssignmentId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
+    documentsSubmittedAt?: boolean
+    documentsVerifiedAt?: boolean
     agency?: boolean | AgencyDefaultArgs<ExtArgs>
+    requirementAssignment?: boolean | LabourProfile$requirementAssignmentArgs<ExtArgs>
   }, ExtArgs["result"]["labourProfile"]>
 
   export type LabourProfileSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -10676,39 +12060,36 @@ export namespace Prisma {
     age?: boolean
     gender?: boolean
     nationality?: boolean
-    maritalStatus?: boolean
-    skills?: boolean
-    experienceYears?: boolean
-    education?: boolean
-    currentPosition?: boolean
-    currentCompany?: boolean
-    languages?: boolean
-    englishProficiency?: boolean
+    jobRoleName?: boolean
+    status?: boolean
     email?: boolean
     phone?: boolean
-    address?: boolean
-    city?: boolean
-    country?: boolean
-    cvUrl?: boolean
     passportNumber?: boolean
     passportExpiry?: boolean
+    passportCopy?: boolean
+    passportVerified?: boolean
     visaType?: boolean
     visaExpiry?: boolean
-    medicalStatus?: boolean
+    visaCopy?: boolean
+    visaVerified?: boolean
+    medicalReport?: boolean
     medicalExpiry?: boolean
-    photo?: boolean
+    medicalVerified?: boolean
+    policeClearance?: boolean
+    policeVerified?: boolean
+    contractCopy?: boolean
+    contractVerified?: boolean
     otherDocs?: boolean
-    status?: boolean
+    verificationStatus?: boolean
     statusReason?: boolean
-    requirementId?: boolean
     agencyId?: boolean
-    deploymentDate?: boolean
-    contractStartDate?: boolean
-    contractEndDate?: boolean
+    requirementAssignmentId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
+    documentsSubmittedAt?: boolean
+    documentsVerifiedAt?: boolean
     agency?: boolean | AgencyDefaultArgs<ExtArgs>
+    requirementAssignment?: boolean | LabourProfile$requirementAssignmentArgs<ExtArgs>
   }, ExtArgs["result"]["labourProfile"]>
 
   export type LabourProfileSelectScalar = {
@@ -10717,63 +12098,62 @@ export namespace Prisma {
     age?: boolean
     gender?: boolean
     nationality?: boolean
-    maritalStatus?: boolean
-    skills?: boolean
-    experienceYears?: boolean
-    education?: boolean
-    currentPosition?: boolean
-    currentCompany?: boolean
-    languages?: boolean
-    englishProficiency?: boolean
+    jobRoleName?: boolean
+    status?: boolean
     email?: boolean
     phone?: boolean
-    address?: boolean
-    city?: boolean
-    country?: boolean
-    cvUrl?: boolean
     passportNumber?: boolean
     passportExpiry?: boolean
+    passportCopy?: boolean
+    passportVerified?: boolean
     visaType?: boolean
     visaExpiry?: boolean
-    medicalStatus?: boolean
+    visaCopy?: boolean
+    visaVerified?: boolean
+    medicalReport?: boolean
     medicalExpiry?: boolean
-    photo?: boolean
+    medicalVerified?: boolean
+    policeClearance?: boolean
+    policeVerified?: boolean
+    contractCopy?: boolean
+    contractVerified?: boolean
     otherDocs?: boolean
-    status?: boolean
+    verificationStatus?: boolean
     statusReason?: boolean
-    requirementId?: boolean
     agencyId?: boolean
-    deploymentDate?: boolean
-    contractStartDate?: boolean
-    contractEndDate?: boolean
+    requirementAssignmentId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    documentsSubmittedAt?: boolean
+    documentsVerifiedAt?: boolean
   }
 
-  export type LabourProfileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "age" | "gender" | "nationality" | "maritalStatus" | "skills" | "experienceYears" | "education" | "currentPosition" | "currentCompany" | "languages" | "englishProficiency" | "email" | "phone" | "address" | "city" | "country" | "cvUrl" | "passportNumber" | "passportExpiry" | "visaType" | "visaExpiry" | "medicalStatus" | "medicalExpiry" | "photo" | "otherDocs" | "status" | "statusReason" | "requirementId" | "agencyId" | "deploymentDate" | "contractStartDate" | "contractEndDate" | "createdAt" | "updatedAt", ExtArgs["result"]["labourProfile"]>
+  export type LabourProfileOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "age" | "gender" | "nationality" | "jobRoleName" | "status" | "email" | "phone" | "passportNumber" | "passportExpiry" | "passportCopy" | "passportVerified" | "visaType" | "visaExpiry" | "visaCopy" | "visaVerified" | "medicalReport" | "medicalExpiry" | "medicalVerified" | "policeClearance" | "policeVerified" | "contractCopy" | "contractVerified" | "otherDocs" | "verificationStatus" | "statusReason" | "agencyId" | "requirementAssignmentId" | "createdAt" | "updatedAt" | "documentsSubmittedAt" | "documentsVerifiedAt", ExtArgs["result"]["labourProfile"]>
   export type LabourProfileInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
     agency?: boolean | AgencyDefaultArgs<ExtArgs>
+    requirementAssignment?: boolean | LabourProfile$requirementAssignmentArgs<ExtArgs>
     statusLogs?: boolean | LabourProfile$statusLogsArgs<ExtArgs>
     procedures?: boolean | LabourProfile$proceduresArgs<ExtArgs>
+    documentVerifications?: boolean | LabourProfile$documentVerificationsArgs<ExtArgs>
     _count?: boolean | LabourProfileCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type LabourProfileIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
     agency?: boolean | AgencyDefaultArgs<ExtArgs>
+    requirementAssignment?: boolean | LabourProfile$requirementAssignmentArgs<ExtArgs>
   }
   export type LabourProfileIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
     agency?: boolean | AgencyDefaultArgs<ExtArgs>
+    requirementAssignment?: boolean | LabourProfile$requirementAssignmentArgs<ExtArgs>
   }
 
   export type $LabourProfilePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "LabourProfile"
     objects: {
-      requirement: Prisma.$RequirementPayload<ExtArgs>
       agency: Prisma.$AgencyPayload<ExtArgs>
+      requirementAssignment: Prisma.$RequirementAssignmentPayload<ExtArgs> | null
       statusLogs: Prisma.$LabourStatusLogPayload<ExtArgs>[]
       procedures: Prisma.$ProcedurePayload<ExtArgs>[]
+      documentVerifications: Prisma.$DocumentVerificationPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -10781,37 +12161,34 @@ export namespace Prisma {
       age: number
       gender: $Enums.Gender
       nationality: string
-      maritalStatus: string | null
-      skills: string[]
-      experienceYears: number
-      education: string | null
-      currentPosition: string | null
-      currentCompany: string | null
-      languages: string[]
-      englishProficiency: string | null
+      jobRoleName: string
+      status: $Enums.LabourProfileStatus
       email: string | null
-      phone: string
-      address: string | null
-      city: string | null
-      country: string | null
-      cvUrl: string
+      phone: string | null
       passportNumber: string | null
       passportExpiry: Date | null
+      passportCopy: string | null
+      passportVerified: boolean
       visaType: string | null
       visaExpiry: Date | null
-      medicalStatus: string | null
+      visaCopy: string | null
+      visaVerified: boolean
+      medicalReport: string | null
       medicalExpiry: Date | null
-      photo: string | null
-      otherDocs: string[]
-      status: $Enums.LabourProfileStatus
+      medicalVerified: boolean
+      policeClearance: string | null
+      policeVerified: boolean
+      contractCopy: string | null
+      contractVerified: boolean
+      otherDocs: Prisma.JsonValue | null
+      verificationStatus: $Enums.DocumentVerificationStatus
       statusReason: string | null
-      requirementId: string
       agencyId: string
-      deploymentDate: Date | null
-      contractStartDate: Date | null
-      contractEndDate: Date | null
+      requirementAssignmentId: string | null
       createdAt: Date
       updatedAt: Date
+      documentsSubmittedAt: Date | null
+      documentsVerifiedAt: Date | null
     }, ExtArgs["result"]["labourProfile"]>
     composites: {}
   }
@@ -11206,10 +12583,11 @@ export namespace Prisma {
    */
   export interface Prisma__LabourProfileClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    requirement<T extends RequirementDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RequirementDefaultArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     agency<T extends AgencyDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AgencyDefaultArgs<ExtArgs>>): Prisma__AgencyClient<$Result.GetResult<Prisma.$AgencyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    requirementAssignment<T extends LabourProfile$requirementAssignmentArgs<ExtArgs> = {}>(args?: Subset<T, LabourProfile$requirementAssignmentArgs<ExtArgs>>): Prisma__RequirementAssignmentClient<$Result.GetResult<Prisma.$RequirementAssignmentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     statusLogs<T extends LabourProfile$statusLogsArgs<ExtArgs> = {}>(args?: Subset<T, LabourProfile$statusLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LabourStatusLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     procedures<T extends LabourProfile$proceduresArgs<ExtArgs> = {}>(args?: Subset<T, LabourProfile$proceduresArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProcedurePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    documentVerifications<T extends LabourProfile$documentVerificationsArgs<ExtArgs> = {}>(args?: Subset<T, LabourProfile$documentVerificationsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentVerificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -11244,37 +12622,34 @@ export namespace Prisma {
     readonly age: FieldRef<"LabourProfile", 'Int'>
     readonly gender: FieldRef<"LabourProfile", 'Gender'>
     readonly nationality: FieldRef<"LabourProfile", 'String'>
-    readonly maritalStatus: FieldRef<"LabourProfile", 'String'>
-    readonly skills: FieldRef<"LabourProfile", 'String[]'>
-    readonly experienceYears: FieldRef<"LabourProfile", 'Int'>
-    readonly education: FieldRef<"LabourProfile", 'String'>
-    readonly currentPosition: FieldRef<"LabourProfile", 'String'>
-    readonly currentCompany: FieldRef<"LabourProfile", 'String'>
-    readonly languages: FieldRef<"LabourProfile", 'String[]'>
-    readonly englishProficiency: FieldRef<"LabourProfile", 'String'>
+    readonly jobRoleName: FieldRef<"LabourProfile", 'String'>
+    readonly status: FieldRef<"LabourProfile", 'LabourProfileStatus'>
     readonly email: FieldRef<"LabourProfile", 'String'>
     readonly phone: FieldRef<"LabourProfile", 'String'>
-    readonly address: FieldRef<"LabourProfile", 'String'>
-    readonly city: FieldRef<"LabourProfile", 'String'>
-    readonly country: FieldRef<"LabourProfile", 'String'>
-    readonly cvUrl: FieldRef<"LabourProfile", 'String'>
     readonly passportNumber: FieldRef<"LabourProfile", 'String'>
     readonly passportExpiry: FieldRef<"LabourProfile", 'DateTime'>
+    readonly passportCopy: FieldRef<"LabourProfile", 'String'>
+    readonly passportVerified: FieldRef<"LabourProfile", 'Boolean'>
     readonly visaType: FieldRef<"LabourProfile", 'String'>
     readonly visaExpiry: FieldRef<"LabourProfile", 'DateTime'>
-    readonly medicalStatus: FieldRef<"LabourProfile", 'String'>
+    readonly visaCopy: FieldRef<"LabourProfile", 'String'>
+    readonly visaVerified: FieldRef<"LabourProfile", 'Boolean'>
+    readonly medicalReport: FieldRef<"LabourProfile", 'String'>
     readonly medicalExpiry: FieldRef<"LabourProfile", 'DateTime'>
-    readonly photo: FieldRef<"LabourProfile", 'String'>
-    readonly otherDocs: FieldRef<"LabourProfile", 'String[]'>
-    readonly status: FieldRef<"LabourProfile", 'LabourProfileStatus'>
+    readonly medicalVerified: FieldRef<"LabourProfile", 'Boolean'>
+    readonly policeClearance: FieldRef<"LabourProfile", 'String'>
+    readonly policeVerified: FieldRef<"LabourProfile", 'Boolean'>
+    readonly contractCopy: FieldRef<"LabourProfile", 'String'>
+    readonly contractVerified: FieldRef<"LabourProfile", 'Boolean'>
+    readonly otherDocs: FieldRef<"LabourProfile", 'Json'>
+    readonly verificationStatus: FieldRef<"LabourProfile", 'DocumentVerificationStatus'>
     readonly statusReason: FieldRef<"LabourProfile", 'String'>
-    readonly requirementId: FieldRef<"LabourProfile", 'String'>
     readonly agencyId: FieldRef<"LabourProfile", 'String'>
-    readonly deploymentDate: FieldRef<"LabourProfile", 'DateTime'>
-    readonly contractStartDate: FieldRef<"LabourProfile", 'DateTime'>
-    readonly contractEndDate: FieldRef<"LabourProfile", 'DateTime'>
+    readonly requirementAssignmentId: FieldRef<"LabourProfile", 'String'>
     readonly createdAt: FieldRef<"LabourProfile", 'DateTime'>
     readonly updatedAt: FieldRef<"LabourProfile", 'DateTime'>
+    readonly documentsSubmittedAt: FieldRef<"LabourProfile", 'DateTime'>
+    readonly documentsVerifiedAt: FieldRef<"LabourProfile", 'DateTime'>
   }
     
 
@@ -11671,6 +13046,25 @@ export namespace Prisma {
   }
 
   /**
+   * LabourProfile.requirementAssignment
+   */
+  export type LabourProfile$requirementAssignmentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementAssignment
+     */
+    select?: RequirementAssignmentSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementAssignment
+     */
+    omit?: RequirementAssignmentOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RequirementAssignmentInclude<ExtArgs> | null
+    where?: RequirementAssignmentWhereInput
+  }
+
+  /**
    * LabourProfile.statusLogs
    */
   export type LabourProfile$statusLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -11719,6 +13113,30 @@ export namespace Prisma {
   }
 
   /**
+   * LabourProfile.documentVerifications
+   */
+  export type LabourProfile$documentVerificationsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentVerification
+     */
+    select?: DocumentVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentVerification
+     */
+    omit?: DocumentVerificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentVerificationInclude<ExtArgs> | null
+    where?: DocumentVerificationWhereInput
+    orderBy?: DocumentVerificationOrderByWithRelationInput | DocumentVerificationOrderByWithRelationInput[]
+    cursor?: DocumentVerificationWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: DocumentVerificationScalarFieldEnum | DocumentVerificationScalarFieldEnum[]
+  }
+
+  /**
    * LabourProfile without action
    */
   export type LabourProfileDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -11734,6 +13152,1156 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: LabourProfileInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model DocumentVerification
+   */
+
+  export type AggregateDocumentVerification = {
+    _count: DocumentVerificationCountAggregateOutputType | null
+    _min: DocumentVerificationMinAggregateOutputType | null
+    _max: DocumentVerificationMaxAggregateOutputType | null
+  }
+
+  export type DocumentVerificationMinAggregateOutputType = {
+    id: string | null
+    documentType: string | null
+    documentUrl: string | null
+    status: $Enums.VerificationStatus | null
+    comments: string | null
+    labourProfileId: string | null
+    verifiedById: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    verifiedAt: Date | null
+  }
+
+  export type DocumentVerificationMaxAggregateOutputType = {
+    id: string | null
+    documentType: string | null
+    documentUrl: string | null
+    status: $Enums.VerificationStatus | null
+    comments: string | null
+    labourProfileId: string | null
+    verifiedById: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    verifiedAt: Date | null
+  }
+
+  export type DocumentVerificationCountAggregateOutputType = {
+    id: number
+    documentType: number
+    documentUrl: number
+    status: number
+    comments: number
+    labourProfileId: number
+    verifiedById: number
+    createdAt: number
+    updatedAt: number
+    verifiedAt: number
+    _all: number
+  }
+
+
+  export type DocumentVerificationMinAggregateInputType = {
+    id?: true
+    documentType?: true
+    documentUrl?: true
+    status?: true
+    comments?: true
+    labourProfileId?: true
+    verifiedById?: true
+    createdAt?: true
+    updatedAt?: true
+    verifiedAt?: true
+  }
+
+  export type DocumentVerificationMaxAggregateInputType = {
+    id?: true
+    documentType?: true
+    documentUrl?: true
+    status?: true
+    comments?: true
+    labourProfileId?: true
+    verifiedById?: true
+    createdAt?: true
+    updatedAt?: true
+    verifiedAt?: true
+  }
+
+  export type DocumentVerificationCountAggregateInputType = {
+    id?: true
+    documentType?: true
+    documentUrl?: true
+    status?: true
+    comments?: true
+    labourProfileId?: true
+    verifiedById?: true
+    createdAt?: true
+    updatedAt?: true
+    verifiedAt?: true
+    _all?: true
+  }
+
+  export type DocumentVerificationAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DocumentVerification to aggregate.
+     */
+    where?: DocumentVerificationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DocumentVerifications to fetch.
+     */
+    orderBy?: DocumentVerificationOrderByWithRelationInput | DocumentVerificationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: DocumentVerificationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DocumentVerifications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DocumentVerifications.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned DocumentVerifications
+    **/
+    _count?: true | DocumentVerificationCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: DocumentVerificationMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: DocumentVerificationMaxAggregateInputType
+  }
+
+  export type GetDocumentVerificationAggregateType<T extends DocumentVerificationAggregateArgs> = {
+        [P in keyof T & keyof AggregateDocumentVerification]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateDocumentVerification[P]>
+      : GetScalarType<T[P], AggregateDocumentVerification[P]>
+  }
+
+
+
+
+  export type DocumentVerificationGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: DocumentVerificationWhereInput
+    orderBy?: DocumentVerificationOrderByWithAggregationInput | DocumentVerificationOrderByWithAggregationInput[]
+    by: DocumentVerificationScalarFieldEnum[] | DocumentVerificationScalarFieldEnum
+    having?: DocumentVerificationScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: DocumentVerificationCountAggregateInputType | true
+    _min?: DocumentVerificationMinAggregateInputType
+    _max?: DocumentVerificationMaxAggregateInputType
+  }
+
+  export type DocumentVerificationGroupByOutputType = {
+    id: string
+    documentType: string
+    documentUrl: string
+    status: $Enums.VerificationStatus
+    comments: string | null
+    labourProfileId: string
+    verifiedById: string | null
+    createdAt: Date
+    updatedAt: Date
+    verifiedAt: Date | null
+    _count: DocumentVerificationCountAggregateOutputType | null
+    _min: DocumentVerificationMinAggregateOutputType | null
+    _max: DocumentVerificationMaxAggregateOutputType | null
+  }
+
+  type GetDocumentVerificationGroupByPayload<T extends DocumentVerificationGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<DocumentVerificationGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof DocumentVerificationGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], DocumentVerificationGroupByOutputType[P]>
+            : GetScalarType<T[P], DocumentVerificationGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type DocumentVerificationSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    documentType?: boolean
+    documentUrl?: boolean
+    status?: boolean
+    comments?: boolean
+    labourProfileId?: boolean
+    verifiedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    verifiedAt?: boolean
+    labourProfile?: boolean | LabourProfileDefaultArgs<ExtArgs>
+    verifiedBy?: boolean | DocumentVerification$verifiedByArgs<ExtArgs>
+  }, ExtArgs["result"]["documentVerification"]>
+
+  export type DocumentVerificationSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    documentType?: boolean
+    documentUrl?: boolean
+    status?: boolean
+    comments?: boolean
+    labourProfileId?: boolean
+    verifiedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    verifiedAt?: boolean
+    labourProfile?: boolean | LabourProfileDefaultArgs<ExtArgs>
+    verifiedBy?: boolean | DocumentVerification$verifiedByArgs<ExtArgs>
+  }, ExtArgs["result"]["documentVerification"]>
+
+  export type DocumentVerificationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    documentType?: boolean
+    documentUrl?: boolean
+    status?: boolean
+    comments?: boolean
+    labourProfileId?: boolean
+    verifiedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    verifiedAt?: boolean
+    labourProfile?: boolean | LabourProfileDefaultArgs<ExtArgs>
+    verifiedBy?: boolean | DocumentVerification$verifiedByArgs<ExtArgs>
+  }, ExtArgs["result"]["documentVerification"]>
+
+  export type DocumentVerificationSelectScalar = {
+    id?: boolean
+    documentType?: boolean
+    documentUrl?: boolean
+    status?: boolean
+    comments?: boolean
+    labourProfileId?: boolean
+    verifiedById?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    verifiedAt?: boolean
+  }
+
+  export type DocumentVerificationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "documentType" | "documentUrl" | "status" | "comments" | "labourProfileId" | "verifiedById" | "createdAt" | "updatedAt" | "verifiedAt", ExtArgs["result"]["documentVerification"]>
+  export type DocumentVerificationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    labourProfile?: boolean | LabourProfileDefaultArgs<ExtArgs>
+    verifiedBy?: boolean | DocumentVerification$verifiedByArgs<ExtArgs>
+  }
+  export type DocumentVerificationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    labourProfile?: boolean | LabourProfileDefaultArgs<ExtArgs>
+    verifiedBy?: boolean | DocumentVerification$verifiedByArgs<ExtArgs>
+  }
+  export type DocumentVerificationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    labourProfile?: boolean | LabourProfileDefaultArgs<ExtArgs>
+    verifiedBy?: boolean | DocumentVerification$verifiedByArgs<ExtArgs>
+  }
+
+  export type $DocumentVerificationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "DocumentVerification"
+    objects: {
+      labourProfile: Prisma.$LabourProfilePayload<ExtArgs>
+      verifiedBy: Prisma.$UserPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      documentType: string
+      documentUrl: string
+      status: $Enums.VerificationStatus
+      comments: string | null
+      labourProfileId: string
+      verifiedById: string | null
+      createdAt: Date
+      updatedAt: Date
+      verifiedAt: Date | null
+    }, ExtArgs["result"]["documentVerification"]>
+    composites: {}
+  }
+
+  type DocumentVerificationGetPayload<S extends boolean | null | undefined | DocumentVerificationDefaultArgs> = $Result.GetResult<Prisma.$DocumentVerificationPayload, S>
+
+  type DocumentVerificationCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<DocumentVerificationFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: DocumentVerificationCountAggregateInputType | true
+    }
+
+  export interface DocumentVerificationDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['DocumentVerification'], meta: { name: 'DocumentVerification' } }
+    /**
+     * Find zero or one DocumentVerification that matches the filter.
+     * @param {DocumentVerificationFindUniqueArgs} args - Arguments to find a DocumentVerification
+     * @example
+     * // Get one DocumentVerification
+     * const documentVerification = await prisma.documentVerification.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends DocumentVerificationFindUniqueArgs>(args: SelectSubset<T, DocumentVerificationFindUniqueArgs<ExtArgs>>): Prisma__DocumentVerificationClient<$Result.GetResult<Prisma.$DocumentVerificationPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one DocumentVerification that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {DocumentVerificationFindUniqueOrThrowArgs} args - Arguments to find a DocumentVerification
+     * @example
+     * // Get one DocumentVerification
+     * const documentVerification = await prisma.documentVerification.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends DocumentVerificationFindUniqueOrThrowArgs>(args: SelectSubset<T, DocumentVerificationFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DocumentVerificationClient<$Result.GetResult<Prisma.$DocumentVerificationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DocumentVerification that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentVerificationFindFirstArgs} args - Arguments to find a DocumentVerification
+     * @example
+     * // Get one DocumentVerification
+     * const documentVerification = await prisma.documentVerification.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends DocumentVerificationFindFirstArgs>(args?: SelectSubset<T, DocumentVerificationFindFirstArgs<ExtArgs>>): Prisma__DocumentVerificationClient<$Result.GetResult<Prisma.$DocumentVerificationPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first DocumentVerification that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentVerificationFindFirstOrThrowArgs} args - Arguments to find a DocumentVerification
+     * @example
+     * // Get one DocumentVerification
+     * const documentVerification = await prisma.documentVerification.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends DocumentVerificationFindFirstOrThrowArgs>(args?: SelectSubset<T, DocumentVerificationFindFirstOrThrowArgs<ExtArgs>>): Prisma__DocumentVerificationClient<$Result.GetResult<Prisma.$DocumentVerificationPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more DocumentVerifications that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentVerificationFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all DocumentVerifications
+     * const documentVerifications = await prisma.documentVerification.findMany()
+     * 
+     * // Get first 10 DocumentVerifications
+     * const documentVerifications = await prisma.documentVerification.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const documentVerificationWithIdOnly = await prisma.documentVerification.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends DocumentVerificationFindManyArgs>(args?: SelectSubset<T, DocumentVerificationFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentVerificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a DocumentVerification.
+     * @param {DocumentVerificationCreateArgs} args - Arguments to create a DocumentVerification.
+     * @example
+     * // Create one DocumentVerification
+     * const DocumentVerification = await prisma.documentVerification.create({
+     *   data: {
+     *     // ... data to create a DocumentVerification
+     *   }
+     * })
+     * 
+     */
+    create<T extends DocumentVerificationCreateArgs>(args: SelectSubset<T, DocumentVerificationCreateArgs<ExtArgs>>): Prisma__DocumentVerificationClient<$Result.GetResult<Prisma.$DocumentVerificationPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many DocumentVerifications.
+     * @param {DocumentVerificationCreateManyArgs} args - Arguments to create many DocumentVerifications.
+     * @example
+     * // Create many DocumentVerifications
+     * const documentVerification = await prisma.documentVerification.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends DocumentVerificationCreateManyArgs>(args?: SelectSubset<T, DocumentVerificationCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many DocumentVerifications and returns the data saved in the database.
+     * @param {DocumentVerificationCreateManyAndReturnArgs} args - Arguments to create many DocumentVerifications.
+     * @example
+     * // Create many DocumentVerifications
+     * const documentVerification = await prisma.documentVerification.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many DocumentVerifications and only return the `id`
+     * const documentVerificationWithIdOnly = await prisma.documentVerification.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends DocumentVerificationCreateManyAndReturnArgs>(args?: SelectSubset<T, DocumentVerificationCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentVerificationPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a DocumentVerification.
+     * @param {DocumentVerificationDeleteArgs} args - Arguments to delete one DocumentVerification.
+     * @example
+     * // Delete one DocumentVerification
+     * const DocumentVerification = await prisma.documentVerification.delete({
+     *   where: {
+     *     // ... filter to delete one DocumentVerification
+     *   }
+     * })
+     * 
+     */
+    delete<T extends DocumentVerificationDeleteArgs>(args: SelectSubset<T, DocumentVerificationDeleteArgs<ExtArgs>>): Prisma__DocumentVerificationClient<$Result.GetResult<Prisma.$DocumentVerificationPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one DocumentVerification.
+     * @param {DocumentVerificationUpdateArgs} args - Arguments to update one DocumentVerification.
+     * @example
+     * // Update one DocumentVerification
+     * const documentVerification = await prisma.documentVerification.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends DocumentVerificationUpdateArgs>(args: SelectSubset<T, DocumentVerificationUpdateArgs<ExtArgs>>): Prisma__DocumentVerificationClient<$Result.GetResult<Prisma.$DocumentVerificationPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more DocumentVerifications.
+     * @param {DocumentVerificationDeleteManyArgs} args - Arguments to filter DocumentVerifications to delete.
+     * @example
+     * // Delete a few DocumentVerifications
+     * const { count } = await prisma.documentVerification.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends DocumentVerificationDeleteManyArgs>(args?: SelectSubset<T, DocumentVerificationDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DocumentVerifications.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentVerificationUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many DocumentVerifications
+     * const documentVerification = await prisma.documentVerification.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends DocumentVerificationUpdateManyArgs>(args: SelectSubset<T, DocumentVerificationUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more DocumentVerifications and returns the data updated in the database.
+     * @param {DocumentVerificationUpdateManyAndReturnArgs} args - Arguments to update many DocumentVerifications.
+     * @example
+     * // Update many DocumentVerifications
+     * const documentVerification = await prisma.documentVerification.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more DocumentVerifications and only return the `id`
+     * const documentVerificationWithIdOnly = await prisma.documentVerification.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends DocumentVerificationUpdateManyAndReturnArgs>(args: SelectSubset<T, DocumentVerificationUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DocumentVerificationPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one DocumentVerification.
+     * @param {DocumentVerificationUpsertArgs} args - Arguments to update or create a DocumentVerification.
+     * @example
+     * // Update or create a DocumentVerification
+     * const documentVerification = await prisma.documentVerification.upsert({
+     *   create: {
+     *     // ... data to create a DocumentVerification
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the DocumentVerification we want to update
+     *   }
+     * })
+     */
+    upsert<T extends DocumentVerificationUpsertArgs>(args: SelectSubset<T, DocumentVerificationUpsertArgs<ExtArgs>>): Prisma__DocumentVerificationClient<$Result.GetResult<Prisma.$DocumentVerificationPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of DocumentVerifications.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentVerificationCountArgs} args - Arguments to filter DocumentVerifications to count.
+     * @example
+     * // Count the number of DocumentVerifications
+     * const count = await prisma.documentVerification.count({
+     *   where: {
+     *     // ... the filter for the DocumentVerifications we want to count
+     *   }
+     * })
+    **/
+    count<T extends DocumentVerificationCountArgs>(
+      args?: Subset<T, DocumentVerificationCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], DocumentVerificationCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a DocumentVerification.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentVerificationAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends DocumentVerificationAggregateArgs>(args: Subset<T, DocumentVerificationAggregateArgs>): Prisma.PrismaPromise<GetDocumentVerificationAggregateType<T>>
+
+    /**
+     * Group by DocumentVerification.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {DocumentVerificationGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends DocumentVerificationGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: DocumentVerificationGroupByArgs['orderBy'] }
+        : { orderBy?: DocumentVerificationGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, DocumentVerificationGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDocumentVerificationGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the DocumentVerification model
+   */
+  readonly fields: DocumentVerificationFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for DocumentVerification.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__DocumentVerificationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    labourProfile<T extends LabourProfileDefaultArgs<ExtArgs> = {}>(args?: Subset<T, LabourProfileDefaultArgs<ExtArgs>>): Prisma__LabourProfileClient<$Result.GetResult<Prisma.$LabourProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    verifiedBy<T extends DocumentVerification$verifiedByArgs<ExtArgs> = {}>(args?: Subset<T, DocumentVerification$verifiedByArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the DocumentVerification model
+   */
+  interface DocumentVerificationFieldRefs {
+    readonly id: FieldRef<"DocumentVerification", 'String'>
+    readonly documentType: FieldRef<"DocumentVerification", 'String'>
+    readonly documentUrl: FieldRef<"DocumentVerification", 'String'>
+    readonly status: FieldRef<"DocumentVerification", 'VerificationStatus'>
+    readonly comments: FieldRef<"DocumentVerification", 'String'>
+    readonly labourProfileId: FieldRef<"DocumentVerification", 'String'>
+    readonly verifiedById: FieldRef<"DocumentVerification", 'String'>
+    readonly createdAt: FieldRef<"DocumentVerification", 'DateTime'>
+    readonly updatedAt: FieldRef<"DocumentVerification", 'DateTime'>
+    readonly verifiedAt: FieldRef<"DocumentVerification", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * DocumentVerification findUnique
+   */
+  export type DocumentVerificationFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentVerification
+     */
+    select?: DocumentVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentVerification
+     */
+    omit?: DocumentVerificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentVerificationInclude<ExtArgs> | null
+    /**
+     * Filter, which DocumentVerification to fetch.
+     */
+    where: DocumentVerificationWhereUniqueInput
+  }
+
+  /**
+   * DocumentVerification findUniqueOrThrow
+   */
+  export type DocumentVerificationFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentVerification
+     */
+    select?: DocumentVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentVerification
+     */
+    omit?: DocumentVerificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentVerificationInclude<ExtArgs> | null
+    /**
+     * Filter, which DocumentVerification to fetch.
+     */
+    where: DocumentVerificationWhereUniqueInput
+  }
+
+  /**
+   * DocumentVerification findFirst
+   */
+  export type DocumentVerificationFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentVerification
+     */
+    select?: DocumentVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentVerification
+     */
+    omit?: DocumentVerificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentVerificationInclude<ExtArgs> | null
+    /**
+     * Filter, which DocumentVerification to fetch.
+     */
+    where?: DocumentVerificationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DocumentVerifications to fetch.
+     */
+    orderBy?: DocumentVerificationOrderByWithRelationInput | DocumentVerificationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DocumentVerifications.
+     */
+    cursor?: DocumentVerificationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DocumentVerifications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DocumentVerifications.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DocumentVerifications.
+     */
+    distinct?: DocumentVerificationScalarFieldEnum | DocumentVerificationScalarFieldEnum[]
+  }
+
+  /**
+   * DocumentVerification findFirstOrThrow
+   */
+  export type DocumentVerificationFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentVerification
+     */
+    select?: DocumentVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentVerification
+     */
+    omit?: DocumentVerificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentVerificationInclude<ExtArgs> | null
+    /**
+     * Filter, which DocumentVerification to fetch.
+     */
+    where?: DocumentVerificationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DocumentVerifications to fetch.
+     */
+    orderBy?: DocumentVerificationOrderByWithRelationInput | DocumentVerificationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for DocumentVerifications.
+     */
+    cursor?: DocumentVerificationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DocumentVerifications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DocumentVerifications.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of DocumentVerifications.
+     */
+    distinct?: DocumentVerificationScalarFieldEnum | DocumentVerificationScalarFieldEnum[]
+  }
+
+  /**
+   * DocumentVerification findMany
+   */
+  export type DocumentVerificationFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentVerification
+     */
+    select?: DocumentVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentVerification
+     */
+    omit?: DocumentVerificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentVerificationInclude<ExtArgs> | null
+    /**
+     * Filter, which DocumentVerifications to fetch.
+     */
+    where?: DocumentVerificationWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of DocumentVerifications to fetch.
+     */
+    orderBy?: DocumentVerificationOrderByWithRelationInput | DocumentVerificationOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing DocumentVerifications.
+     */
+    cursor?: DocumentVerificationWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` DocumentVerifications from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` DocumentVerifications.
+     */
+    skip?: number
+    distinct?: DocumentVerificationScalarFieldEnum | DocumentVerificationScalarFieldEnum[]
+  }
+
+  /**
+   * DocumentVerification create
+   */
+  export type DocumentVerificationCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentVerification
+     */
+    select?: DocumentVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentVerification
+     */
+    omit?: DocumentVerificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentVerificationInclude<ExtArgs> | null
+    /**
+     * The data needed to create a DocumentVerification.
+     */
+    data: XOR<DocumentVerificationCreateInput, DocumentVerificationUncheckedCreateInput>
+  }
+
+  /**
+   * DocumentVerification createMany
+   */
+  export type DocumentVerificationCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many DocumentVerifications.
+     */
+    data: DocumentVerificationCreateManyInput | DocumentVerificationCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * DocumentVerification createManyAndReturn
+   */
+  export type DocumentVerificationCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentVerification
+     */
+    select?: DocumentVerificationSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentVerification
+     */
+    omit?: DocumentVerificationOmit<ExtArgs> | null
+    /**
+     * The data used to create many DocumentVerifications.
+     */
+    data: DocumentVerificationCreateManyInput | DocumentVerificationCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentVerificationIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DocumentVerification update
+   */
+  export type DocumentVerificationUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentVerification
+     */
+    select?: DocumentVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentVerification
+     */
+    omit?: DocumentVerificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentVerificationInclude<ExtArgs> | null
+    /**
+     * The data needed to update a DocumentVerification.
+     */
+    data: XOR<DocumentVerificationUpdateInput, DocumentVerificationUncheckedUpdateInput>
+    /**
+     * Choose, which DocumentVerification to update.
+     */
+    where: DocumentVerificationWhereUniqueInput
+  }
+
+  /**
+   * DocumentVerification updateMany
+   */
+  export type DocumentVerificationUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update DocumentVerifications.
+     */
+    data: XOR<DocumentVerificationUpdateManyMutationInput, DocumentVerificationUncheckedUpdateManyInput>
+    /**
+     * Filter which DocumentVerifications to update
+     */
+    where?: DocumentVerificationWhereInput
+    /**
+     * Limit how many DocumentVerifications to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * DocumentVerification updateManyAndReturn
+   */
+  export type DocumentVerificationUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentVerification
+     */
+    select?: DocumentVerificationSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentVerification
+     */
+    omit?: DocumentVerificationOmit<ExtArgs> | null
+    /**
+     * The data used to update DocumentVerifications.
+     */
+    data: XOR<DocumentVerificationUpdateManyMutationInput, DocumentVerificationUncheckedUpdateManyInput>
+    /**
+     * Filter which DocumentVerifications to update
+     */
+    where?: DocumentVerificationWhereInput
+    /**
+     * Limit how many DocumentVerifications to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentVerificationIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * DocumentVerification upsert
+   */
+  export type DocumentVerificationUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentVerification
+     */
+    select?: DocumentVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentVerification
+     */
+    omit?: DocumentVerificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentVerificationInclude<ExtArgs> | null
+    /**
+     * The filter to search for the DocumentVerification to update in case it exists.
+     */
+    where: DocumentVerificationWhereUniqueInput
+    /**
+     * In case the DocumentVerification found by the `where` argument doesn't exist, create a new DocumentVerification with this data.
+     */
+    create: XOR<DocumentVerificationCreateInput, DocumentVerificationUncheckedCreateInput>
+    /**
+     * In case the DocumentVerification was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<DocumentVerificationUpdateInput, DocumentVerificationUncheckedUpdateInput>
+  }
+
+  /**
+   * DocumentVerification delete
+   */
+  export type DocumentVerificationDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentVerification
+     */
+    select?: DocumentVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentVerification
+     */
+    omit?: DocumentVerificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentVerificationInclude<ExtArgs> | null
+    /**
+     * Filter which DocumentVerification to delete.
+     */
+    where: DocumentVerificationWhereUniqueInput
+  }
+
+  /**
+   * DocumentVerification deleteMany
+   */
+  export type DocumentVerificationDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which DocumentVerifications to delete
+     */
+    where?: DocumentVerificationWhereInput
+    /**
+     * Limit how many DocumentVerifications to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * DocumentVerification.verifiedBy
+   */
+  export type DocumentVerification$verifiedByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * DocumentVerification without action
+   */
+  export type DocumentVerificationDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the DocumentVerification
+     */
+    select?: DocumentVerificationSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the DocumentVerification
+     */
+    omit?: DocumentVerificationOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: DocumentVerificationInclude<ExtArgs> | null
   }
 
 
@@ -16369,1124 +18937,6 @@ export namespace Prisma {
 
 
   /**
-   * Model RequirementDocument
-   */
-
-  export type AggregateRequirementDocument = {
-    _count: RequirementDocumentCountAggregateOutputType | null
-    _min: RequirementDocumentMinAggregateOutputType | null
-    _max: RequirementDocumentMaxAggregateOutputType | null
-  }
-
-  export type RequirementDocumentMinAggregateOutputType = {
-    id: string | null
-    type: $Enums.DocumentType | null
-    url: string | null
-    name: string | null
-    description: string | null
-    requirementId: string | null
-    uploadedById: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type RequirementDocumentMaxAggregateOutputType = {
-    id: string | null
-    type: $Enums.DocumentType | null
-    url: string | null
-    name: string | null
-    description: string | null
-    requirementId: string | null
-    uploadedById: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type RequirementDocumentCountAggregateOutputType = {
-    id: number
-    type: number
-    url: number
-    name: number
-    description: number
-    requirementId: number
-    uploadedById: number
-    createdAt: number
-    updatedAt: number
-    _all: number
-  }
-
-
-  export type RequirementDocumentMinAggregateInputType = {
-    id?: true
-    type?: true
-    url?: true
-    name?: true
-    description?: true
-    requirementId?: true
-    uploadedById?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type RequirementDocumentMaxAggregateInputType = {
-    id?: true
-    type?: true
-    url?: true
-    name?: true
-    description?: true
-    requirementId?: true
-    uploadedById?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type RequirementDocumentCountAggregateInputType = {
-    id?: true
-    type?: true
-    url?: true
-    name?: true
-    description?: true
-    requirementId?: true
-    uploadedById?: true
-    createdAt?: true
-    updatedAt?: true
-    _all?: true
-  }
-
-  export type RequirementDocumentAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which RequirementDocument to aggregate.
-     */
-    where?: RequirementDocumentWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of RequirementDocuments to fetch.
-     */
-    orderBy?: RequirementDocumentOrderByWithRelationInput | RequirementDocumentOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: RequirementDocumentWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` RequirementDocuments from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` RequirementDocuments.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned RequirementDocuments
-    **/
-    _count?: true | RequirementDocumentCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: RequirementDocumentMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: RequirementDocumentMaxAggregateInputType
-  }
-
-  export type GetRequirementDocumentAggregateType<T extends RequirementDocumentAggregateArgs> = {
-        [P in keyof T & keyof AggregateRequirementDocument]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateRequirementDocument[P]>
-      : GetScalarType<T[P], AggregateRequirementDocument[P]>
-  }
-
-
-
-
-  export type RequirementDocumentGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: RequirementDocumentWhereInput
-    orderBy?: RequirementDocumentOrderByWithAggregationInput | RequirementDocumentOrderByWithAggregationInput[]
-    by: RequirementDocumentScalarFieldEnum[] | RequirementDocumentScalarFieldEnum
-    having?: RequirementDocumentScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: RequirementDocumentCountAggregateInputType | true
-    _min?: RequirementDocumentMinAggregateInputType
-    _max?: RequirementDocumentMaxAggregateInputType
-  }
-
-  export type RequirementDocumentGroupByOutputType = {
-    id: string
-    type: $Enums.DocumentType
-    url: string
-    name: string | null
-    description: string | null
-    requirementId: string
-    uploadedById: string
-    createdAt: Date
-    updatedAt: Date
-    _count: RequirementDocumentCountAggregateOutputType | null
-    _min: RequirementDocumentMinAggregateOutputType | null
-    _max: RequirementDocumentMaxAggregateOutputType | null
-  }
-
-  type GetRequirementDocumentGroupByPayload<T extends RequirementDocumentGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<RequirementDocumentGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof RequirementDocumentGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], RequirementDocumentGroupByOutputType[P]>
-            : GetScalarType<T[P], RequirementDocumentGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type RequirementDocumentSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    type?: boolean
-    url?: boolean
-    name?: boolean
-    description?: boolean
-    requirementId?: boolean
-    uploadedById?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
-    uploadedBy?: boolean | UserDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["requirementDocument"]>
-
-  export type RequirementDocumentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    type?: boolean
-    url?: boolean
-    name?: boolean
-    description?: boolean
-    requirementId?: boolean
-    uploadedById?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
-    uploadedBy?: boolean | UserDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["requirementDocument"]>
-
-  export type RequirementDocumentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    type?: boolean
-    url?: boolean
-    name?: boolean
-    description?: boolean
-    requirementId?: boolean
-    uploadedById?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
-    uploadedBy?: boolean | UserDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["requirementDocument"]>
-
-  export type RequirementDocumentSelectScalar = {
-    id?: boolean
-    type?: boolean
-    url?: boolean
-    name?: boolean
-    description?: boolean
-    requirementId?: boolean
-    uploadedById?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }
-
-  export type RequirementDocumentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "url" | "name" | "description" | "requirementId" | "uploadedById" | "createdAt" | "updatedAt", ExtArgs["result"]["requirementDocument"]>
-  export type RequirementDocumentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
-    uploadedBy?: boolean | UserDefaultArgs<ExtArgs>
-  }
-  export type RequirementDocumentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
-    uploadedBy?: boolean | UserDefaultArgs<ExtArgs>
-  }
-  export type RequirementDocumentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    requirement?: boolean | RequirementDefaultArgs<ExtArgs>
-    uploadedBy?: boolean | UserDefaultArgs<ExtArgs>
-  }
-
-  export type $RequirementDocumentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "RequirementDocument"
-    objects: {
-      requirement: Prisma.$RequirementPayload<ExtArgs>
-      uploadedBy: Prisma.$UserPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: string
-      type: $Enums.DocumentType
-      url: string
-      name: string | null
-      description: string | null
-      requirementId: string
-      uploadedById: string
-      createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["requirementDocument"]>
-    composites: {}
-  }
-
-  type RequirementDocumentGetPayload<S extends boolean | null | undefined | RequirementDocumentDefaultArgs> = $Result.GetResult<Prisma.$RequirementDocumentPayload, S>
-
-  type RequirementDocumentCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
-    Omit<RequirementDocumentFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
-      select?: RequirementDocumentCountAggregateInputType | true
-    }
-
-  export interface RequirementDocumentDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RequirementDocument'], meta: { name: 'RequirementDocument' } }
-    /**
-     * Find zero or one RequirementDocument that matches the filter.
-     * @param {RequirementDocumentFindUniqueArgs} args - Arguments to find a RequirementDocument
-     * @example
-     * // Get one RequirementDocument
-     * const requirementDocument = await prisma.requirementDocument.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends RequirementDocumentFindUniqueArgs>(args: SelectSubset<T, RequirementDocumentFindUniqueArgs<ExtArgs>>): Prisma__RequirementDocumentClient<$Result.GetResult<Prisma.$RequirementDocumentPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find one RequirementDocument that matches the filter or throw an error with `error.code='P2025'`
-     * if no matches were found.
-     * @param {RequirementDocumentFindUniqueOrThrowArgs} args - Arguments to find a RequirementDocument
-     * @example
-     * // Get one RequirementDocument
-     * const requirementDocument = await prisma.requirementDocument.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends RequirementDocumentFindUniqueOrThrowArgs>(args: SelectSubset<T, RequirementDocumentFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RequirementDocumentClient<$Result.GetResult<Prisma.$RequirementDocumentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first RequirementDocument that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RequirementDocumentFindFirstArgs} args - Arguments to find a RequirementDocument
-     * @example
-     * // Get one RequirementDocument
-     * const requirementDocument = await prisma.requirementDocument.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends RequirementDocumentFindFirstArgs>(args?: SelectSubset<T, RequirementDocumentFindFirstArgs<ExtArgs>>): Prisma__RequirementDocumentClient<$Result.GetResult<Prisma.$RequirementDocumentPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find the first RequirementDocument that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RequirementDocumentFindFirstOrThrowArgs} args - Arguments to find a RequirementDocument
-     * @example
-     * // Get one RequirementDocument
-     * const requirementDocument = await prisma.requirementDocument.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends RequirementDocumentFindFirstOrThrowArgs>(args?: SelectSubset<T, RequirementDocumentFindFirstOrThrowArgs<ExtArgs>>): Prisma__RequirementDocumentClient<$Result.GetResult<Prisma.$RequirementDocumentPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Find zero or more RequirementDocuments that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RequirementDocumentFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all RequirementDocuments
-     * const requirementDocuments = await prisma.requirementDocument.findMany()
-     * 
-     * // Get first 10 RequirementDocuments
-     * const requirementDocuments = await prisma.requirementDocument.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const requirementDocumentWithIdOnly = await prisma.requirementDocument.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends RequirementDocumentFindManyArgs>(args?: SelectSubset<T, RequirementDocumentFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementDocumentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
-
-    /**
-     * Create a RequirementDocument.
-     * @param {RequirementDocumentCreateArgs} args - Arguments to create a RequirementDocument.
-     * @example
-     * // Create one RequirementDocument
-     * const RequirementDocument = await prisma.requirementDocument.create({
-     *   data: {
-     *     // ... data to create a RequirementDocument
-     *   }
-     * })
-     * 
-     */
-    create<T extends RequirementDocumentCreateArgs>(args: SelectSubset<T, RequirementDocumentCreateArgs<ExtArgs>>): Prisma__RequirementDocumentClient<$Result.GetResult<Prisma.$RequirementDocumentPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Create many RequirementDocuments.
-     * @param {RequirementDocumentCreateManyArgs} args - Arguments to create many RequirementDocuments.
-     * @example
-     * // Create many RequirementDocuments
-     * const requirementDocument = await prisma.requirementDocument.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends RequirementDocumentCreateManyArgs>(args?: SelectSubset<T, RequirementDocumentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many RequirementDocuments and returns the data saved in the database.
-     * @param {RequirementDocumentCreateManyAndReturnArgs} args - Arguments to create many RequirementDocuments.
-     * @example
-     * // Create many RequirementDocuments
-     * const requirementDocument = await prisma.requirementDocument.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many RequirementDocuments and only return the `id`
-     * const requirementDocumentWithIdOnly = await prisma.requirementDocument.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends RequirementDocumentCreateManyAndReturnArgs>(args?: SelectSubset<T, RequirementDocumentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementDocumentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Delete a RequirementDocument.
-     * @param {RequirementDocumentDeleteArgs} args - Arguments to delete one RequirementDocument.
-     * @example
-     * // Delete one RequirementDocument
-     * const RequirementDocument = await prisma.requirementDocument.delete({
-     *   where: {
-     *     // ... filter to delete one RequirementDocument
-     *   }
-     * })
-     * 
-     */
-    delete<T extends RequirementDocumentDeleteArgs>(args: SelectSubset<T, RequirementDocumentDeleteArgs<ExtArgs>>): Prisma__RequirementDocumentClient<$Result.GetResult<Prisma.$RequirementDocumentPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Update one RequirementDocument.
-     * @param {RequirementDocumentUpdateArgs} args - Arguments to update one RequirementDocument.
-     * @example
-     * // Update one RequirementDocument
-     * const requirementDocument = await prisma.requirementDocument.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends RequirementDocumentUpdateArgs>(args: SelectSubset<T, RequirementDocumentUpdateArgs<ExtArgs>>): Prisma__RequirementDocumentClient<$Result.GetResult<Prisma.$RequirementDocumentPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-    /**
-     * Delete zero or more RequirementDocuments.
-     * @param {RequirementDocumentDeleteManyArgs} args - Arguments to filter RequirementDocuments to delete.
-     * @example
-     * // Delete a few RequirementDocuments
-     * const { count } = await prisma.requirementDocument.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends RequirementDocumentDeleteManyArgs>(args?: SelectSubset<T, RequirementDocumentDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more RequirementDocuments.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RequirementDocumentUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many RequirementDocuments
-     * const requirementDocument = await prisma.requirementDocument.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends RequirementDocumentUpdateManyArgs>(args: SelectSubset<T, RequirementDocumentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more RequirementDocuments and returns the data updated in the database.
-     * @param {RequirementDocumentUpdateManyAndReturnArgs} args - Arguments to update many RequirementDocuments.
-     * @example
-     * // Update many RequirementDocuments
-     * const requirementDocument = await prisma.requirementDocument.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more RequirementDocuments and only return the `id`
-     * const requirementDocumentWithIdOnly = await prisma.requirementDocument.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends RequirementDocumentUpdateManyAndReturnArgs>(args: SelectSubset<T, RequirementDocumentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementDocumentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
-     * Create or update one RequirementDocument.
-     * @param {RequirementDocumentUpsertArgs} args - Arguments to update or create a RequirementDocument.
-     * @example
-     * // Update or create a RequirementDocument
-     * const requirementDocument = await prisma.requirementDocument.upsert({
-     *   create: {
-     *     // ... data to create a RequirementDocument
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the RequirementDocument we want to update
-     *   }
-     * })
-     */
-    upsert<T extends RequirementDocumentUpsertArgs>(args: SelectSubset<T, RequirementDocumentUpsertArgs<ExtArgs>>): Prisma__RequirementDocumentClient<$Result.GetResult<Prisma.$RequirementDocumentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
-
-
-    /**
-     * Count the number of RequirementDocuments.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RequirementDocumentCountArgs} args - Arguments to filter RequirementDocuments to count.
-     * @example
-     * // Count the number of RequirementDocuments
-     * const count = await prisma.requirementDocument.count({
-     *   where: {
-     *     // ... the filter for the RequirementDocuments we want to count
-     *   }
-     * })
-    **/
-    count<T extends RequirementDocumentCountArgs>(
-      args?: Subset<T, RequirementDocumentCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], RequirementDocumentCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a RequirementDocument.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RequirementDocumentAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends RequirementDocumentAggregateArgs>(args: Subset<T, RequirementDocumentAggregateArgs>): Prisma.PrismaPromise<GetRequirementDocumentAggregateType<T>>
-
-    /**
-     * Group by RequirementDocument.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {RequirementDocumentGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends RequirementDocumentGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: RequirementDocumentGroupByArgs['orderBy'] }
-        : { orderBy?: RequirementDocumentGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, RequirementDocumentGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRequirementDocumentGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the RequirementDocument model
-   */
-  readonly fields: RequirementDocumentFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for RequirementDocument.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__RequirementDocumentClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    requirement<T extends RequirementDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RequirementDefaultArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    uploadedBy<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the RequirementDocument model
-   */
-  interface RequirementDocumentFieldRefs {
-    readonly id: FieldRef<"RequirementDocument", 'String'>
-    readonly type: FieldRef<"RequirementDocument", 'DocumentType'>
-    readonly url: FieldRef<"RequirementDocument", 'String'>
-    readonly name: FieldRef<"RequirementDocument", 'String'>
-    readonly description: FieldRef<"RequirementDocument", 'String'>
-    readonly requirementId: FieldRef<"RequirementDocument", 'String'>
-    readonly uploadedById: FieldRef<"RequirementDocument", 'String'>
-    readonly createdAt: FieldRef<"RequirementDocument", 'DateTime'>
-    readonly updatedAt: FieldRef<"RequirementDocument", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * RequirementDocument findUnique
-   */
-  export type RequirementDocumentFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RequirementDocument
-     */
-    select?: RequirementDocumentSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RequirementDocument
-     */
-    omit?: RequirementDocumentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementDocumentInclude<ExtArgs> | null
-    /**
-     * Filter, which RequirementDocument to fetch.
-     */
-    where: RequirementDocumentWhereUniqueInput
-  }
-
-  /**
-   * RequirementDocument findUniqueOrThrow
-   */
-  export type RequirementDocumentFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RequirementDocument
-     */
-    select?: RequirementDocumentSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RequirementDocument
-     */
-    omit?: RequirementDocumentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementDocumentInclude<ExtArgs> | null
-    /**
-     * Filter, which RequirementDocument to fetch.
-     */
-    where: RequirementDocumentWhereUniqueInput
-  }
-
-  /**
-   * RequirementDocument findFirst
-   */
-  export type RequirementDocumentFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RequirementDocument
-     */
-    select?: RequirementDocumentSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RequirementDocument
-     */
-    omit?: RequirementDocumentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementDocumentInclude<ExtArgs> | null
-    /**
-     * Filter, which RequirementDocument to fetch.
-     */
-    where?: RequirementDocumentWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of RequirementDocuments to fetch.
-     */
-    orderBy?: RequirementDocumentOrderByWithRelationInput | RequirementDocumentOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for RequirementDocuments.
-     */
-    cursor?: RequirementDocumentWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` RequirementDocuments from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` RequirementDocuments.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of RequirementDocuments.
-     */
-    distinct?: RequirementDocumentScalarFieldEnum | RequirementDocumentScalarFieldEnum[]
-  }
-
-  /**
-   * RequirementDocument findFirstOrThrow
-   */
-  export type RequirementDocumentFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RequirementDocument
-     */
-    select?: RequirementDocumentSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RequirementDocument
-     */
-    omit?: RequirementDocumentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementDocumentInclude<ExtArgs> | null
-    /**
-     * Filter, which RequirementDocument to fetch.
-     */
-    where?: RequirementDocumentWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of RequirementDocuments to fetch.
-     */
-    orderBy?: RequirementDocumentOrderByWithRelationInput | RequirementDocumentOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for RequirementDocuments.
-     */
-    cursor?: RequirementDocumentWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` RequirementDocuments from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` RequirementDocuments.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of RequirementDocuments.
-     */
-    distinct?: RequirementDocumentScalarFieldEnum | RequirementDocumentScalarFieldEnum[]
-  }
-
-  /**
-   * RequirementDocument findMany
-   */
-  export type RequirementDocumentFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RequirementDocument
-     */
-    select?: RequirementDocumentSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RequirementDocument
-     */
-    omit?: RequirementDocumentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementDocumentInclude<ExtArgs> | null
-    /**
-     * Filter, which RequirementDocuments to fetch.
-     */
-    where?: RequirementDocumentWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of RequirementDocuments to fetch.
-     */
-    orderBy?: RequirementDocumentOrderByWithRelationInput | RequirementDocumentOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing RequirementDocuments.
-     */
-    cursor?: RequirementDocumentWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` RequirementDocuments from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` RequirementDocuments.
-     */
-    skip?: number
-    distinct?: RequirementDocumentScalarFieldEnum | RequirementDocumentScalarFieldEnum[]
-  }
-
-  /**
-   * RequirementDocument create
-   */
-  export type RequirementDocumentCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RequirementDocument
-     */
-    select?: RequirementDocumentSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RequirementDocument
-     */
-    omit?: RequirementDocumentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementDocumentInclude<ExtArgs> | null
-    /**
-     * The data needed to create a RequirementDocument.
-     */
-    data: XOR<RequirementDocumentCreateInput, RequirementDocumentUncheckedCreateInput>
-  }
-
-  /**
-   * RequirementDocument createMany
-   */
-  export type RequirementDocumentCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many RequirementDocuments.
-     */
-    data: RequirementDocumentCreateManyInput | RequirementDocumentCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * RequirementDocument createManyAndReturn
-   */
-  export type RequirementDocumentCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RequirementDocument
-     */
-    select?: RequirementDocumentSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the RequirementDocument
-     */
-    omit?: RequirementDocumentOmit<ExtArgs> | null
-    /**
-     * The data used to create many RequirementDocuments.
-     */
-    data: RequirementDocumentCreateManyInput | RequirementDocumentCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementDocumentIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * RequirementDocument update
-   */
-  export type RequirementDocumentUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RequirementDocument
-     */
-    select?: RequirementDocumentSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RequirementDocument
-     */
-    omit?: RequirementDocumentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementDocumentInclude<ExtArgs> | null
-    /**
-     * The data needed to update a RequirementDocument.
-     */
-    data: XOR<RequirementDocumentUpdateInput, RequirementDocumentUncheckedUpdateInput>
-    /**
-     * Choose, which RequirementDocument to update.
-     */
-    where: RequirementDocumentWhereUniqueInput
-  }
-
-  /**
-   * RequirementDocument updateMany
-   */
-  export type RequirementDocumentUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update RequirementDocuments.
-     */
-    data: XOR<RequirementDocumentUpdateManyMutationInput, RequirementDocumentUncheckedUpdateManyInput>
-    /**
-     * Filter which RequirementDocuments to update
-     */
-    where?: RequirementDocumentWhereInput
-    /**
-     * Limit how many RequirementDocuments to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * RequirementDocument updateManyAndReturn
-   */
-  export type RequirementDocumentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RequirementDocument
-     */
-    select?: RequirementDocumentSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the RequirementDocument
-     */
-    omit?: RequirementDocumentOmit<ExtArgs> | null
-    /**
-     * The data used to update RequirementDocuments.
-     */
-    data: XOR<RequirementDocumentUpdateManyMutationInput, RequirementDocumentUncheckedUpdateManyInput>
-    /**
-     * Filter which RequirementDocuments to update
-     */
-    where?: RequirementDocumentWhereInput
-    /**
-     * Limit how many RequirementDocuments to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementDocumentIncludeUpdateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * RequirementDocument upsert
-   */
-  export type RequirementDocumentUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RequirementDocument
-     */
-    select?: RequirementDocumentSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RequirementDocument
-     */
-    omit?: RequirementDocumentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementDocumentInclude<ExtArgs> | null
-    /**
-     * The filter to search for the RequirementDocument to update in case it exists.
-     */
-    where: RequirementDocumentWhereUniqueInput
-    /**
-     * In case the RequirementDocument found by the `where` argument doesn't exist, create a new RequirementDocument with this data.
-     */
-    create: XOR<RequirementDocumentCreateInput, RequirementDocumentUncheckedCreateInput>
-    /**
-     * In case the RequirementDocument was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<RequirementDocumentUpdateInput, RequirementDocumentUncheckedUpdateInput>
-  }
-
-  /**
-   * RequirementDocument delete
-   */
-  export type RequirementDocumentDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RequirementDocument
-     */
-    select?: RequirementDocumentSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RequirementDocument
-     */
-    omit?: RequirementDocumentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementDocumentInclude<ExtArgs> | null
-    /**
-     * Filter which RequirementDocument to delete.
-     */
-    where: RequirementDocumentWhereUniqueInput
-  }
-
-  /**
-   * RequirementDocument deleteMany
-   */
-  export type RequirementDocumentDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which RequirementDocuments to delete
-     */
-    where?: RequirementDocumentWhereInput
-    /**
-     * Limit how many RequirementDocuments to delete.
-     */
-    limit?: number
-  }
-
-  /**
-   * RequirementDocument without action
-   */
-  export type RequirementDocumentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the RequirementDocument
-     */
-    select?: RequirementDocumentSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the RequirementDocument
-     */
-    omit?: RequirementDocumentOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: RequirementDocumentInclude<ExtArgs> | null
-  }
-
-
-  /**
    * Model AuditLog
    */
 
@@ -19882,46 +21332,74 @@ export namespace Prisma {
   export type JobRoleScalarFieldEnum = (typeof JobRoleScalarFieldEnum)[keyof typeof JobRoleScalarFieldEnum]
 
 
+  export const RequirementAssignmentScalarFieldEnum: {
+    id: 'id',
+    requirementId: 'requirementId',
+    jobRoleId: 'jobRoleId',
+    agencyId: 'agencyId',
+    quantity: 'quantity',
+    status: 'status',
+    metadata: 'metadata',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type RequirementAssignmentScalarFieldEnum = (typeof RequirementAssignmentScalarFieldEnum)[keyof typeof RequirementAssignmentScalarFieldEnum]
+
+
   export const LabourProfileScalarFieldEnum: {
     id: 'id',
     name: 'name',
     age: 'age',
     gender: 'gender',
     nationality: 'nationality',
-    maritalStatus: 'maritalStatus',
-    skills: 'skills',
-    experienceYears: 'experienceYears',
-    education: 'education',
-    currentPosition: 'currentPosition',
-    currentCompany: 'currentCompany',
-    languages: 'languages',
-    englishProficiency: 'englishProficiency',
+    jobRoleName: 'jobRoleName',
+    status: 'status',
     email: 'email',
     phone: 'phone',
-    address: 'address',
-    city: 'city',
-    country: 'country',
-    cvUrl: 'cvUrl',
     passportNumber: 'passportNumber',
     passportExpiry: 'passportExpiry',
+    passportCopy: 'passportCopy',
+    passportVerified: 'passportVerified',
     visaType: 'visaType',
     visaExpiry: 'visaExpiry',
-    medicalStatus: 'medicalStatus',
+    visaCopy: 'visaCopy',
+    visaVerified: 'visaVerified',
+    medicalReport: 'medicalReport',
     medicalExpiry: 'medicalExpiry',
-    photo: 'photo',
+    medicalVerified: 'medicalVerified',
+    policeClearance: 'policeClearance',
+    policeVerified: 'policeVerified',
+    contractCopy: 'contractCopy',
+    contractVerified: 'contractVerified',
     otherDocs: 'otherDocs',
-    status: 'status',
+    verificationStatus: 'verificationStatus',
     statusReason: 'statusReason',
-    requirementId: 'requirementId',
     agencyId: 'agencyId',
-    deploymentDate: 'deploymentDate',
-    contractStartDate: 'contractStartDate',
-    contractEndDate: 'contractEndDate',
+    requirementAssignmentId: 'requirementAssignmentId',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    documentsSubmittedAt: 'documentsSubmittedAt',
+    documentsVerifiedAt: 'documentsVerifiedAt'
   };
 
   export type LabourProfileScalarFieldEnum = (typeof LabourProfileScalarFieldEnum)[keyof typeof LabourProfileScalarFieldEnum]
+
+
+  export const DocumentVerificationScalarFieldEnum: {
+    id: 'id',
+    documentType: 'documentType',
+    documentUrl: 'documentUrl',
+    status: 'status',
+    comments: 'comments',
+    labourProfileId: 'labourProfileId',
+    verifiedById: 'verifiedById',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    verifiedAt: 'verifiedAt'
+  };
+
+  export type DocumentVerificationScalarFieldEnum = (typeof DocumentVerificationScalarFieldEnum)[keyof typeof DocumentVerificationScalarFieldEnum]
 
 
   export const ProcedureScalarFieldEnum: {
@@ -19989,21 +21467,6 @@ export namespace Prisma {
   };
 
   export type AgencyDocumentScalarFieldEnum = (typeof AgencyDocumentScalarFieldEnum)[keyof typeof AgencyDocumentScalarFieldEnum]
-
-
-  export const RequirementDocumentScalarFieldEnum: {
-    id: 'id',
-    type: 'type',
-    url: 'url',
-    name: 'name',
-    description: 'description',
-    requirementId: 'requirementId',
-    uploadedById: 'uploadedById',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
-  };
-
-  export type RequirementDocumentScalarFieldEnum = (typeof RequirementDocumentScalarFieldEnum)[keyof typeof RequirementDocumentScalarFieldEnum]
 
 
   export const AuditLogScalarFieldEnum: {
@@ -20319,6 +21782,34 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'DocumentVerificationStatus'
+   */
+  export type EnumDocumentVerificationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentVerificationStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'DocumentVerificationStatus[]'
+   */
+  export type ListEnumDocumentVerificationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DocumentVerificationStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'VerificationStatus'
+   */
+  export type EnumVerificationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VerificationStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'VerificationStatus[]'
+   */
+  export type ListEnumVerificationStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VerificationStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'ProcedureStatus'
    */
   export type EnumProcedureStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ProcedureStatus'>
@@ -20409,7 +21900,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogListRelationFilter
     clientDocuments?: ClientDocumentListRelationFilter
     agencyDocuments?: AgencyDocumentListRelationFilter
-    requirementDocuments?: RequirementDocumentListRelationFilter
+    DocumentVerification?: DocumentVerificationListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -20441,7 +21932,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogOrderByRelationAggregateInput
     clientDocuments?: ClientDocumentOrderByRelationAggregateInput
     agencyDocuments?: AgencyDocumentOrderByRelationAggregateInput
-    requirementDocuments?: RequirementDocumentOrderByRelationAggregateInput
+    DocumentVerification?: DocumentVerificationOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -20476,7 +21967,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogListRelationFilter
     clientDocuments?: ClientDocumentListRelationFilter
     agencyDocuments?: AgencyDocumentListRelationFilter
-    requirementDocuments?: RequirementDocumentListRelationFilter
+    DocumentVerification?: DocumentVerificationListRelationFilter
   }, "id" | "email" | "phone">
 
   export type UserOrderByWithAggregationInput = {
@@ -20654,6 +22145,7 @@ export namespace Prisma {
     labourProfiles?: LabourProfileListRelationFilter
     requirements?: RequirementListRelationFilter
     documents?: AgencyDocumentListRelationFilter
+    RequirementAssignment?: RequirementAssignmentListRelationFilter
   }
 
   export type AgencyOrderByWithRelationInput = {
@@ -20674,6 +22166,7 @@ export namespace Prisma {
     labourProfiles?: LabourProfileOrderByRelationAggregateInput
     requirements?: RequirementOrderByRelationAggregateInput
     documents?: AgencyDocumentOrderByRelationAggregateInput
+    RequirementAssignment?: RequirementAssignmentOrderByRelationAggregateInput
   }
 
   export type AgencyWhereUniqueInput = Prisma.AtLeast<{
@@ -20697,6 +22190,7 @@ export namespace Prisma {
     labourProfiles?: LabourProfileListRelationFilter
     requirements?: RequirementListRelationFilter
     documents?: AgencyDocumentListRelationFilter
+    RequirementAssignment?: RequirementAssignmentListRelationFilter
   }, "id" | "userId" | "registrationNo">
 
   export type AgencyOrderByWithAggregationInput = {
@@ -20823,9 +22317,8 @@ export namespace Prisma {
     client?: XOR<ClientScalarRelationFilter, ClientWhereInput>
     assignedAgency?: XOR<AgencyNullableScalarRelationFilter, AgencyWhereInput> | null
     jobRoles?: JobRoleListRelationFilter
-    labourProfiles?: LabourProfileListRelationFilter
     procedures?: ProcedureListRelationFilter
-    documents?: RequirementDocumentListRelationFilter
+    RequirementAssignment?: RequirementAssignmentListRelationFilter
   }
 
   export type RequirementOrderByWithRelationInput = {
@@ -20846,9 +22339,8 @@ export namespace Prisma {
     client?: ClientOrderByWithRelationInput
     assignedAgency?: AgencyOrderByWithRelationInput
     jobRoles?: JobRoleOrderByRelationAggregateInput
-    labourProfiles?: LabourProfileOrderByRelationAggregateInput
     procedures?: ProcedureOrderByRelationAggregateInput
-    documents?: RequirementDocumentOrderByRelationAggregateInput
+    RequirementAssignment?: RequirementAssignmentOrderByRelationAggregateInput
   }
 
   export type RequirementWhereUniqueInput = Prisma.AtLeast<{
@@ -20872,9 +22364,8 @@ export namespace Prisma {
     client?: XOR<ClientScalarRelationFilter, ClientWhereInput>
     assignedAgency?: XOR<AgencyNullableScalarRelationFilter, AgencyWhereInput> | null
     jobRoles?: JobRoleListRelationFilter
-    labourProfiles?: LabourProfileListRelationFilter
     procedures?: ProcedureListRelationFilter
-    documents?: RequirementDocumentListRelationFilter
+    RequirementAssignment?: RequirementAssignmentListRelationFilter
   }, "id">
 
   export type RequirementOrderByWithAggregationInput = {
@@ -20935,6 +22426,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"JobRole"> | Date | string
     updatedAt?: DateTimeFilter<"JobRole"> | Date | string
     requirement?: XOR<RequirementScalarRelationFilter, RequirementWhereInput>
+    RequirementAssignment?: RequirementAssignmentListRelationFilter
   }
 
   export type JobRoleOrderByWithRelationInput = {
@@ -20950,6 +22442,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     requirement?: RequirementOrderByWithRelationInput
+    RequirementAssignment?: RequirementAssignmentOrderByRelationAggregateInput
   }
 
   export type JobRoleWhereUniqueInput = Prisma.AtLeast<{
@@ -20968,6 +22461,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"JobRole"> | Date | string
     updatedAt?: DateTimeFilter<"JobRole"> | Date | string
     requirement?: XOR<RequirementScalarRelationFilter, RequirementWhereInput>
+    RequirementAssignment?: RequirementAssignmentListRelationFilter
   }, "id">
 
   export type JobRoleOrderByWithAggregationInput = {
@@ -21006,6 +22500,93 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"JobRole"> | Date | string
   }
 
+  export type RequirementAssignmentWhereInput = {
+    AND?: RequirementAssignmentWhereInput | RequirementAssignmentWhereInput[]
+    OR?: RequirementAssignmentWhereInput[]
+    NOT?: RequirementAssignmentWhereInput | RequirementAssignmentWhereInput[]
+    id?: StringFilter<"RequirementAssignment"> | string
+    requirementId?: StringFilter<"RequirementAssignment"> | string
+    jobRoleId?: StringFilter<"RequirementAssignment"> | string
+    agencyId?: StringFilter<"RequirementAssignment"> | string
+    quantity?: IntFilter<"RequirementAssignment"> | number
+    status?: EnumRequirementStatusFilter<"RequirementAssignment"> | $Enums.RequirementStatus
+    metadata?: JsonNullableFilter<"RequirementAssignment">
+    createdAt?: DateTimeFilter<"RequirementAssignment"> | Date | string
+    updatedAt?: DateTimeFilter<"RequirementAssignment"> | Date | string
+    requirement?: XOR<RequirementScalarRelationFilter, RequirementWhereInput>
+    jobRole?: XOR<JobRoleScalarRelationFilter, JobRoleWhereInput>
+    agency?: XOR<AgencyScalarRelationFilter, AgencyWhereInput>
+    LabourProfile?: LabourProfileListRelationFilter
+  }
+
+  export type RequirementAssignmentOrderByWithRelationInput = {
+    id?: SortOrder
+    requirementId?: SortOrder
+    jobRoleId?: SortOrder
+    agencyId?: SortOrder
+    quantity?: SortOrder
+    status?: SortOrder
+    metadata?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    requirement?: RequirementOrderByWithRelationInput
+    jobRole?: JobRoleOrderByWithRelationInput
+    agency?: AgencyOrderByWithRelationInput
+    LabourProfile?: LabourProfileOrderByRelationAggregateInput
+  }
+
+  export type RequirementAssignmentWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    requirementId_jobRoleId_agencyId?: RequirementAssignmentRequirementIdJobRoleIdAgencyIdCompoundUniqueInput
+    AND?: RequirementAssignmentWhereInput | RequirementAssignmentWhereInput[]
+    OR?: RequirementAssignmentWhereInput[]
+    NOT?: RequirementAssignmentWhereInput | RequirementAssignmentWhereInput[]
+    requirementId?: StringFilter<"RequirementAssignment"> | string
+    jobRoleId?: StringFilter<"RequirementAssignment"> | string
+    agencyId?: StringFilter<"RequirementAssignment"> | string
+    quantity?: IntFilter<"RequirementAssignment"> | number
+    status?: EnumRequirementStatusFilter<"RequirementAssignment"> | $Enums.RequirementStatus
+    metadata?: JsonNullableFilter<"RequirementAssignment">
+    createdAt?: DateTimeFilter<"RequirementAssignment"> | Date | string
+    updatedAt?: DateTimeFilter<"RequirementAssignment"> | Date | string
+    requirement?: XOR<RequirementScalarRelationFilter, RequirementWhereInput>
+    jobRole?: XOR<JobRoleScalarRelationFilter, JobRoleWhereInput>
+    agency?: XOR<AgencyScalarRelationFilter, AgencyWhereInput>
+    LabourProfile?: LabourProfileListRelationFilter
+  }, "id" | "requirementId_jobRoleId_agencyId">
+
+  export type RequirementAssignmentOrderByWithAggregationInput = {
+    id?: SortOrder
+    requirementId?: SortOrder
+    jobRoleId?: SortOrder
+    agencyId?: SortOrder
+    quantity?: SortOrder
+    status?: SortOrder
+    metadata?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: RequirementAssignmentCountOrderByAggregateInput
+    _avg?: RequirementAssignmentAvgOrderByAggregateInput
+    _max?: RequirementAssignmentMaxOrderByAggregateInput
+    _min?: RequirementAssignmentMinOrderByAggregateInput
+    _sum?: RequirementAssignmentSumOrderByAggregateInput
+  }
+
+  export type RequirementAssignmentScalarWhereWithAggregatesInput = {
+    AND?: RequirementAssignmentScalarWhereWithAggregatesInput | RequirementAssignmentScalarWhereWithAggregatesInput[]
+    OR?: RequirementAssignmentScalarWhereWithAggregatesInput[]
+    NOT?: RequirementAssignmentScalarWhereWithAggregatesInput | RequirementAssignmentScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"RequirementAssignment"> | string
+    requirementId?: StringWithAggregatesFilter<"RequirementAssignment"> | string
+    jobRoleId?: StringWithAggregatesFilter<"RequirementAssignment"> | string
+    agencyId?: StringWithAggregatesFilter<"RequirementAssignment"> | string
+    quantity?: IntWithAggregatesFilter<"RequirementAssignment"> | number
+    status?: EnumRequirementStatusWithAggregatesFilter<"RequirementAssignment"> | $Enums.RequirementStatus
+    metadata?: JsonNullableWithAggregatesFilter<"RequirementAssignment">
+    createdAt?: DateTimeWithAggregatesFilter<"RequirementAssignment"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"RequirementAssignment"> | Date | string
+  }
+
   export type LabourProfileWhereInput = {
     AND?: LabourProfileWhereInput | LabourProfileWhereInput[]
     OR?: LabourProfileWhereInput[]
@@ -21015,41 +22596,39 @@ export namespace Prisma {
     age?: IntFilter<"LabourProfile"> | number
     gender?: EnumGenderFilter<"LabourProfile"> | $Enums.Gender
     nationality?: StringFilter<"LabourProfile"> | string
-    maritalStatus?: StringNullableFilter<"LabourProfile"> | string | null
-    skills?: StringNullableListFilter<"LabourProfile">
-    experienceYears?: IntFilter<"LabourProfile"> | number
-    education?: StringNullableFilter<"LabourProfile"> | string | null
-    currentPosition?: StringNullableFilter<"LabourProfile"> | string | null
-    currentCompany?: StringNullableFilter<"LabourProfile"> | string | null
-    languages?: StringNullableListFilter<"LabourProfile">
-    englishProficiency?: StringNullableFilter<"LabourProfile"> | string | null
+    jobRoleName?: StringFilter<"LabourProfile"> | string
+    status?: EnumLabourProfileStatusFilter<"LabourProfile"> | $Enums.LabourProfileStatus
     email?: StringNullableFilter<"LabourProfile"> | string | null
-    phone?: StringFilter<"LabourProfile"> | string
-    address?: StringNullableFilter<"LabourProfile"> | string | null
-    city?: StringNullableFilter<"LabourProfile"> | string | null
-    country?: StringNullableFilter<"LabourProfile"> | string | null
-    cvUrl?: StringFilter<"LabourProfile"> | string
+    phone?: StringNullableFilter<"LabourProfile"> | string | null
     passportNumber?: StringNullableFilter<"LabourProfile"> | string | null
     passportExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    passportCopy?: StringNullableFilter<"LabourProfile"> | string | null
+    passportVerified?: BoolFilter<"LabourProfile"> | boolean
     visaType?: StringNullableFilter<"LabourProfile"> | string | null
     visaExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
-    medicalStatus?: StringNullableFilter<"LabourProfile"> | string | null
+    visaCopy?: StringNullableFilter<"LabourProfile"> | string | null
+    visaVerified?: BoolFilter<"LabourProfile"> | boolean
+    medicalReport?: StringNullableFilter<"LabourProfile"> | string | null
     medicalExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
-    photo?: StringNullableFilter<"LabourProfile"> | string | null
-    otherDocs?: StringNullableListFilter<"LabourProfile">
-    status?: EnumLabourProfileStatusFilter<"LabourProfile"> | $Enums.LabourProfileStatus
+    medicalVerified?: BoolFilter<"LabourProfile"> | boolean
+    policeClearance?: StringNullableFilter<"LabourProfile"> | string | null
+    policeVerified?: BoolFilter<"LabourProfile"> | boolean
+    contractCopy?: StringNullableFilter<"LabourProfile"> | string | null
+    contractVerified?: BoolFilter<"LabourProfile"> | boolean
+    otherDocs?: JsonNullableFilter<"LabourProfile">
+    verificationStatus?: EnumDocumentVerificationStatusFilter<"LabourProfile"> | $Enums.DocumentVerificationStatus
     statusReason?: StringNullableFilter<"LabourProfile"> | string | null
-    requirementId?: StringFilter<"LabourProfile"> | string
     agencyId?: StringFilter<"LabourProfile"> | string
-    deploymentDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
-    contractStartDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
-    contractEndDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    requirementAssignmentId?: StringNullableFilter<"LabourProfile"> | string | null
     createdAt?: DateTimeFilter<"LabourProfile"> | Date | string
     updatedAt?: DateTimeFilter<"LabourProfile"> | Date | string
-    requirement?: XOR<RequirementScalarRelationFilter, RequirementWhereInput>
+    documentsSubmittedAt?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    documentsVerifiedAt?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
     agency?: XOR<AgencyScalarRelationFilter, AgencyWhereInput>
+    requirementAssignment?: XOR<RequirementAssignmentNullableScalarRelationFilter, RequirementAssignmentWhereInput> | null
     statusLogs?: LabourStatusLogListRelationFilter
     procedures?: ProcedureListRelationFilter
+    documentVerifications?: DocumentVerificationListRelationFilter
   }
 
   export type LabourProfileOrderByWithRelationInput = {
@@ -21058,45 +22637,45 @@ export namespace Prisma {
     age?: SortOrder
     gender?: SortOrder
     nationality?: SortOrder
-    maritalStatus?: SortOrderInput | SortOrder
-    skills?: SortOrder
-    experienceYears?: SortOrder
-    education?: SortOrderInput | SortOrder
-    currentPosition?: SortOrderInput | SortOrder
-    currentCompany?: SortOrderInput | SortOrder
-    languages?: SortOrder
-    englishProficiency?: SortOrderInput | SortOrder
+    jobRoleName?: SortOrder
+    status?: SortOrder
     email?: SortOrderInput | SortOrder
-    phone?: SortOrder
-    address?: SortOrderInput | SortOrder
-    city?: SortOrderInput | SortOrder
-    country?: SortOrderInput | SortOrder
-    cvUrl?: SortOrder
+    phone?: SortOrderInput | SortOrder
     passportNumber?: SortOrderInput | SortOrder
     passportExpiry?: SortOrderInput | SortOrder
+    passportCopy?: SortOrderInput | SortOrder
+    passportVerified?: SortOrder
     visaType?: SortOrderInput | SortOrder
     visaExpiry?: SortOrderInput | SortOrder
-    medicalStatus?: SortOrderInput | SortOrder
+    visaCopy?: SortOrderInput | SortOrder
+    visaVerified?: SortOrder
+    medicalReport?: SortOrderInput | SortOrder
     medicalExpiry?: SortOrderInput | SortOrder
-    photo?: SortOrderInput | SortOrder
-    otherDocs?: SortOrder
-    status?: SortOrder
+    medicalVerified?: SortOrder
+    policeClearance?: SortOrderInput | SortOrder
+    policeVerified?: SortOrder
+    contractCopy?: SortOrderInput | SortOrder
+    contractVerified?: SortOrder
+    otherDocs?: SortOrderInput | SortOrder
+    verificationStatus?: SortOrder
     statusReason?: SortOrderInput | SortOrder
-    requirementId?: SortOrder
     agencyId?: SortOrder
-    deploymentDate?: SortOrderInput | SortOrder
-    contractStartDate?: SortOrderInput | SortOrder
-    contractEndDate?: SortOrderInput | SortOrder
+    requirementAssignmentId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    requirement?: RequirementOrderByWithRelationInput
+    documentsSubmittedAt?: SortOrderInput | SortOrder
+    documentsVerifiedAt?: SortOrderInput | SortOrder
     agency?: AgencyOrderByWithRelationInput
+    requirementAssignment?: RequirementAssignmentOrderByWithRelationInput
     statusLogs?: LabourStatusLogOrderByRelationAggregateInput
     procedures?: ProcedureOrderByRelationAggregateInput
+    documentVerifications?: DocumentVerificationOrderByRelationAggregateInput
   }
 
   export type LabourProfileWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    email?: string
+    phone?: string
     AND?: LabourProfileWhereInput | LabourProfileWhereInput[]
     OR?: LabourProfileWhereInput[]
     NOT?: LabourProfileWhereInput | LabourProfileWhereInput[]
@@ -21104,42 +22683,38 @@ export namespace Prisma {
     age?: IntFilter<"LabourProfile"> | number
     gender?: EnumGenderFilter<"LabourProfile"> | $Enums.Gender
     nationality?: StringFilter<"LabourProfile"> | string
-    maritalStatus?: StringNullableFilter<"LabourProfile"> | string | null
-    skills?: StringNullableListFilter<"LabourProfile">
-    experienceYears?: IntFilter<"LabourProfile"> | number
-    education?: StringNullableFilter<"LabourProfile"> | string | null
-    currentPosition?: StringNullableFilter<"LabourProfile"> | string | null
-    currentCompany?: StringNullableFilter<"LabourProfile"> | string | null
-    languages?: StringNullableListFilter<"LabourProfile">
-    englishProficiency?: StringNullableFilter<"LabourProfile"> | string | null
-    email?: StringNullableFilter<"LabourProfile"> | string | null
-    phone?: StringFilter<"LabourProfile"> | string
-    address?: StringNullableFilter<"LabourProfile"> | string | null
-    city?: StringNullableFilter<"LabourProfile"> | string | null
-    country?: StringNullableFilter<"LabourProfile"> | string | null
-    cvUrl?: StringFilter<"LabourProfile"> | string
+    jobRoleName?: StringFilter<"LabourProfile"> | string
+    status?: EnumLabourProfileStatusFilter<"LabourProfile"> | $Enums.LabourProfileStatus
     passportNumber?: StringNullableFilter<"LabourProfile"> | string | null
     passportExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    passportCopy?: StringNullableFilter<"LabourProfile"> | string | null
+    passportVerified?: BoolFilter<"LabourProfile"> | boolean
     visaType?: StringNullableFilter<"LabourProfile"> | string | null
     visaExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
-    medicalStatus?: StringNullableFilter<"LabourProfile"> | string | null
+    visaCopy?: StringNullableFilter<"LabourProfile"> | string | null
+    visaVerified?: BoolFilter<"LabourProfile"> | boolean
+    medicalReport?: StringNullableFilter<"LabourProfile"> | string | null
     medicalExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
-    photo?: StringNullableFilter<"LabourProfile"> | string | null
-    otherDocs?: StringNullableListFilter<"LabourProfile">
-    status?: EnumLabourProfileStatusFilter<"LabourProfile"> | $Enums.LabourProfileStatus
+    medicalVerified?: BoolFilter<"LabourProfile"> | boolean
+    policeClearance?: StringNullableFilter<"LabourProfile"> | string | null
+    policeVerified?: BoolFilter<"LabourProfile"> | boolean
+    contractCopy?: StringNullableFilter<"LabourProfile"> | string | null
+    contractVerified?: BoolFilter<"LabourProfile"> | boolean
+    otherDocs?: JsonNullableFilter<"LabourProfile">
+    verificationStatus?: EnumDocumentVerificationStatusFilter<"LabourProfile"> | $Enums.DocumentVerificationStatus
     statusReason?: StringNullableFilter<"LabourProfile"> | string | null
-    requirementId?: StringFilter<"LabourProfile"> | string
     agencyId?: StringFilter<"LabourProfile"> | string
-    deploymentDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
-    contractStartDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
-    contractEndDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    requirementAssignmentId?: StringNullableFilter<"LabourProfile"> | string | null
     createdAt?: DateTimeFilter<"LabourProfile"> | Date | string
     updatedAt?: DateTimeFilter<"LabourProfile"> | Date | string
-    requirement?: XOR<RequirementScalarRelationFilter, RequirementWhereInput>
+    documentsSubmittedAt?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    documentsVerifiedAt?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
     agency?: XOR<AgencyScalarRelationFilter, AgencyWhereInput>
+    requirementAssignment?: XOR<RequirementAssignmentNullableScalarRelationFilter, RequirementAssignmentWhereInput> | null
     statusLogs?: LabourStatusLogListRelationFilter
     procedures?: ProcedureListRelationFilter
-  }, "id">
+    documentVerifications?: DocumentVerificationListRelationFilter
+  }, "id" | "email" | "phone">
 
   export type LabourProfileOrderByWithAggregationInput = {
     id?: SortOrder
@@ -21147,37 +22722,34 @@ export namespace Prisma {
     age?: SortOrder
     gender?: SortOrder
     nationality?: SortOrder
-    maritalStatus?: SortOrderInput | SortOrder
-    skills?: SortOrder
-    experienceYears?: SortOrder
-    education?: SortOrderInput | SortOrder
-    currentPosition?: SortOrderInput | SortOrder
-    currentCompany?: SortOrderInput | SortOrder
-    languages?: SortOrder
-    englishProficiency?: SortOrderInput | SortOrder
+    jobRoleName?: SortOrder
+    status?: SortOrder
     email?: SortOrderInput | SortOrder
-    phone?: SortOrder
-    address?: SortOrderInput | SortOrder
-    city?: SortOrderInput | SortOrder
-    country?: SortOrderInput | SortOrder
-    cvUrl?: SortOrder
+    phone?: SortOrderInput | SortOrder
     passportNumber?: SortOrderInput | SortOrder
     passportExpiry?: SortOrderInput | SortOrder
+    passportCopy?: SortOrderInput | SortOrder
+    passportVerified?: SortOrder
     visaType?: SortOrderInput | SortOrder
     visaExpiry?: SortOrderInput | SortOrder
-    medicalStatus?: SortOrderInput | SortOrder
+    visaCopy?: SortOrderInput | SortOrder
+    visaVerified?: SortOrder
+    medicalReport?: SortOrderInput | SortOrder
     medicalExpiry?: SortOrderInput | SortOrder
-    photo?: SortOrderInput | SortOrder
-    otherDocs?: SortOrder
-    status?: SortOrder
+    medicalVerified?: SortOrder
+    policeClearance?: SortOrderInput | SortOrder
+    policeVerified?: SortOrder
+    contractCopy?: SortOrderInput | SortOrder
+    contractVerified?: SortOrder
+    otherDocs?: SortOrderInput | SortOrder
+    verificationStatus?: SortOrder
     statusReason?: SortOrderInput | SortOrder
-    requirementId?: SortOrder
     agencyId?: SortOrder
-    deploymentDate?: SortOrderInput | SortOrder
-    contractStartDate?: SortOrderInput | SortOrder
-    contractEndDate?: SortOrderInput | SortOrder
+    requirementAssignmentId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    documentsSubmittedAt?: SortOrderInput | SortOrder
+    documentsVerifiedAt?: SortOrderInput | SortOrder
     _count?: LabourProfileCountOrderByAggregateInput
     _avg?: LabourProfileAvgOrderByAggregateInput
     _max?: LabourProfileMaxOrderByAggregateInput
@@ -21194,37 +22766,117 @@ export namespace Prisma {
     age?: IntWithAggregatesFilter<"LabourProfile"> | number
     gender?: EnumGenderWithAggregatesFilter<"LabourProfile"> | $Enums.Gender
     nationality?: StringWithAggregatesFilter<"LabourProfile"> | string
-    maritalStatus?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
-    skills?: StringNullableListFilter<"LabourProfile">
-    experienceYears?: IntWithAggregatesFilter<"LabourProfile"> | number
-    education?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
-    currentPosition?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
-    currentCompany?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
-    languages?: StringNullableListFilter<"LabourProfile">
-    englishProficiency?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
+    jobRoleName?: StringWithAggregatesFilter<"LabourProfile"> | string
+    status?: EnumLabourProfileStatusWithAggregatesFilter<"LabourProfile"> | $Enums.LabourProfileStatus
     email?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
-    phone?: StringWithAggregatesFilter<"LabourProfile"> | string
-    address?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
-    city?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
-    country?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
-    cvUrl?: StringWithAggregatesFilter<"LabourProfile"> | string
+    phone?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
     passportNumber?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
     passportExpiry?: DateTimeNullableWithAggregatesFilter<"LabourProfile"> | Date | string | null
+    passportCopy?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
+    passportVerified?: BoolWithAggregatesFilter<"LabourProfile"> | boolean
     visaType?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
     visaExpiry?: DateTimeNullableWithAggregatesFilter<"LabourProfile"> | Date | string | null
-    medicalStatus?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
+    visaCopy?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
+    visaVerified?: BoolWithAggregatesFilter<"LabourProfile"> | boolean
+    medicalReport?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
     medicalExpiry?: DateTimeNullableWithAggregatesFilter<"LabourProfile"> | Date | string | null
-    photo?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
-    otherDocs?: StringNullableListFilter<"LabourProfile">
-    status?: EnumLabourProfileStatusWithAggregatesFilter<"LabourProfile"> | $Enums.LabourProfileStatus
+    medicalVerified?: BoolWithAggregatesFilter<"LabourProfile"> | boolean
+    policeClearance?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
+    policeVerified?: BoolWithAggregatesFilter<"LabourProfile"> | boolean
+    contractCopy?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
+    contractVerified?: BoolWithAggregatesFilter<"LabourProfile"> | boolean
+    otherDocs?: JsonNullableWithAggregatesFilter<"LabourProfile">
+    verificationStatus?: EnumDocumentVerificationStatusWithAggregatesFilter<"LabourProfile"> | $Enums.DocumentVerificationStatus
     statusReason?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
-    requirementId?: StringWithAggregatesFilter<"LabourProfile"> | string
     agencyId?: StringWithAggregatesFilter<"LabourProfile"> | string
-    deploymentDate?: DateTimeNullableWithAggregatesFilter<"LabourProfile"> | Date | string | null
-    contractStartDate?: DateTimeNullableWithAggregatesFilter<"LabourProfile"> | Date | string | null
-    contractEndDate?: DateTimeNullableWithAggregatesFilter<"LabourProfile"> | Date | string | null
+    requirementAssignmentId?: StringNullableWithAggregatesFilter<"LabourProfile"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"LabourProfile"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"LabourProfile"> | Date | string
+    documentsSubmittedAt?: DateTimeNullableWithAggregatesFilter<"LabourProfile"> | Date | string | null
+    documentsVerifiedAt?: DateTimeNullableWithAggregatesFilter<"LabourProfile"> | Date | string | null
+  }
+
+  export type DocumentVerificationWhereInput = {
+    AND?: DocumentVerificationWhereInput | DocumentVerificationWhereInput[]
+    OR?: DocumentVerificationWhereInput[]
+    NOT?: DocumentVerificationWhereInput | DocumentVerificationWhereInput[]
+    id?: StringFilter<"DocumentVerification"> | string
+    documentType?: StringFilter<"DocumentVerification"> | string
+    documentUrl?: StringFilter<"DocumentVerification"> | string
+    status?: EnumVerificationStatusFilter<"DocumentVerification"> | $Enums.VerificationStatus
+    comments?: StringNullableFilter<"DocumentVerification"> | string | null
+    labourProfileId?: StringFilter<"DocumentVerification"> | string
+    verifiedById?: StringNullableFilter<"DocumentVerification"> | string | null
+    createdAt?: DateTimeFilter<"DocumentVerification"> | Date | string
+    updatedAt?: DateTimeFilter<"DocumentVerification"> | Date | string
+    verifiedAt?: DateTimeNullableFilter<"DocumentVerification"> | Date | string | null
+    labourProfile?: XOR<LabourProfileScalarRelationFilter, LabourProfileWhereInput>
+    verifiedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }
+
+  export type DocumentVerificationOrderByWithRelationInput = {
+    id?: SortOrder
+    documentType?: SortOrder
+    documentUrl?: SortOrder
+    status?: SortOrder
+    comments?: SortOrderInput | SortOrder
+    labourProfileId?: SortOrder
+    verifiedById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    verifiedAt?: SortOrderInput | SortOrder
+    labourProfile?: LabourProfileOrderByWithRelationInput
+    verifiedBy?: UserOrderByWithRelationInput
+  }
+
+  export type DocumentVerificationWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: DocumentVerificationWhereInput | DocumentVerificationWhereInput[]
+    OR?: DocumentVerificationWhereInput[]
+    NOT?: DocumentVerificationWhereInput | DocumentVerificationWhereInput[]
+    documentType?: StringFilter<"DocumentVerification"> | string
+    documentUrl?: StringFilter<"DocumentVerification"> | string
+    status?: EnumVerificationStatusFilter<"DocumentVerification"> | $Enums.VerificationStatus
+    comments?: StringNullableFilter<"DocumentVerification"> | string | null
+    labourProfileId?: StringFilter<"DocumentVerification"> | string
+    verifiedById?: StringNullableFilter<"DocumentVerification"> | string | null
+    createdAt?: DateTimeFilter<"DocumentVerification"> | Date | string
+    updatedAt?: DateTimeFilter<"DocumentVerification"> | Date | string
+    verifiedAt?: DateTimeNullableFilter<"DocumentVerification"> | Date | string | null
+    labourProfile?: XOR<LabourProfileScalarRelationFilter, LabourProfileWhereInput>
+    verifiedBy?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }, "id">
+
+  export type DocumentVerificationOrderByWithAggregationInput = {
+    id?: SortOrder
+    documentType?: SortOrder
+    documentUrl?: SortOrder
+    status?: SortOrder
+    comments?: SortOrderInput | SortOrder
+    labourProfileId?: SortOrder
+    verifiedById?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    verifiedAt?: SortOrderInput | SortOrder
+    _count?: DocumentVerificationCountOrderByAggregateInput
+    _max?: DocumentVerificationMaxOrderByAggregateInput
+    _min?: DocumentVerificationMinOrderByAggregateInput
+  }
+
+  export type DocumentVerificationScalarWhereWithAggregatesInput = {
+    AND?: DocumentVerificationScalarWhereWithAggregatesInput | DocumentVerificationScalarWhereWithAggregatesInput[]
+    OR?: DocumentVerificationScalarWhereWithAggregatesInput[]
+    NOT?: DocumentVerificationScalarWhereWithAggregatesInput | DocumentVerificationScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"DocumentVerification"> | string
+    documentType?: StringWithAggregatesFilter<"DocumentVerification"> | string
+    documentUrl?: StringWithAggregatesFilter<"DocumentVerification"> | string
+    status?: EnumVerificationStatusWithAggregatesFilter<"DocumentVerification"> | $Enums.VerificationStatus
+    comments?: StringNullableWithAggregatesFilter<"DocumentVerification"> | string | null
+    labourProfileId?: StringWithAggregatesFilter<"DocumentVerification"> | string
+    verifiedById?: StringNullableWithAggregatesFilter<"DocumentVerification"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"DocumentVerification"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"DocumentVerification"> | Date | string
+    verifiedAt?: DateTimeNullableWithAggregatesFilter<"DocumentVerification"> | Date | string | null
   }
 
   export type ProcedureWhereInput = {
@@ -21574,84 +23226,6 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"AgencyDocument"> | Date | string
   }
 
-  export type RequirementDocumentWhereInput = {
-    AND?: RequirementDocumentWhereInput | RequirementDocumentWhereInput[]
-    OR?: RequirementDocumentWhereInput[]
-    NOT?: RequirementDocumentWhereInput | RequirementDocumentWhereInput[]
-    id?: StringFilter<"RequirementDocument"> | string
-    type?: EnumDocumentTypeFilter<"RequirementDocument"> | $Enums.DocumentType
-    url?: StringFilter<"RequirementDocument"> | string
-    name?: StringNullableFilter<"RequirementDocument"> | string | null
-    description?: StringNullableFilter<"RequirementDocument"> | string | null
-    requirementId?: StringFilter<"RequirementDocument"> | string
-    uploadedById?: StringFilter<"RequirementDocument"> | string
-    createdAt?: DateTimeFilter<"RequirementDocument"> | Date | string
-    updatedAt?: DateTimeFilter<"RequirementDocument"> | Date | string
-    requirement?: XOR<RequirementScalarRelationFilter, RequirementWhereInput>
-    uploadedBy?: XOR<UserScalarRelationFilter, UserWhereInput>
-  }
-
-  export type RequirementDocumentOrderByWithRelationInput = {
-    id?: SortOrder
-    type?: SortOrder
-    url?: SortOrder
-    name?: SortOrderInput | SortOrder
-    description?: SortOrderInput | SortOrder
-    requirementId?: SortOrder
-    uploadedById?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    requirement?: RequirementOrderByWithRelationInput
-    uploadedBy?: UserOrderByWithRelationInput
-  }
-
-  export type RequirementDocumentWhereUniqueInput = Prisma.AtLeast<{
-    id?: string
-    AND?: RequirementDocumentWhereInput | RequirementDocumentWhereInput[]
-    OR?: RequirementDocumentWhereInput[]
-    NOT?: RequirementDocumentWhereInput | RequirementDocumentWhereInput[]
-    type?: EnumDocumentTypeFilter<"RequirementDocument"> | $Enums.DocumentType
-    url?: StringFilter<"RequirementDocument"> | string
-    name?: StringNullableFilter<"RequirementDocument"> | string | null
-    description?: StringNullableFilter<"RequirementDocument"> | string | null
-    requirementId?: StringFilter<"RequirementDocument"> | string
-    uploadedById?: StringFilter<"RequirementDocument"> | string
-    createdAt?: DateTimeFilter<"RequirementDocument"> | Date | string
-    updatedAt?: DateTimeFilter<"RequirementDocument"> | Date | string
-    requirement?: XOR<RequirementScalarRelationFilter, RequirementWhereInput>
-    uploadedBy?: XOR<UserScalarRelationFilter, UserWhereInput>
-  }, "id">
-
-  export type RequirementDocumentOrderByWithAggregationInput = {
-    id?: SortOrder
-    type?: SortOrder
-    url?: SortOrder
-    name?: SortOrderInput | SortOrder
-    description?: SortOrderInput | SortOrder
-    requirementId?: SortOrder
-    uploadedById?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: RequirementDocumentCountOrderByAggregateInput
-    _max?: RequirementDocumentMaxOrderByAggregateInput
-    _min?: RequirementDocumentMinOrderByAggregateInput
-  }
-
-  export type RequirementDocumentScalarWhereWithAggregatesInput = {
-    AND?: RequirementDocumentScalarWhereWithAggregatesInput | RequirementDocumentScalarWhereWithAggregatesInput[]
-    OR?: RequirementDocumentScalarWhereWithAggregatesInput[]
-    NOT?: RequirementDocumentScalarWhereWithAggregatesInput | RequirementDocumentScalarWhereWithAggregatesInput[]
-    id?: StringWithAggregatesFilter<"RequirementDocument"> | string
-    type?: EnumDocumentTypeWithAggregatesFilter<"RequirementDocument"> | $Enums.DocumentType
-    url?: StringWithAggregatesFilter<"RequirementDocument"> | string
-    name?: StringNullableWithAggregatesFilter<"RequirementDocument"> | string | null
-    description?: StringNullableWithAggregatesFilter<"RequirementDocument"> | string | null
-    requirementId?: StringWithAggregatesFilter<"RequirementDocument"> | string
-    uploadedById?: StringWithAggregatesFilter<"RequirementDocument"> | string
-    createdAt?: DateTimeWithAggregatesFilter<"RequirementDocument"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"RequirementDocument"> | Date | string
-  }
-
   export type AuditLogWhereInput = {
     AND?: AuditLogWhereInput | AuditLogWhereInput[]
     OR?: AuditLogWhereInput[]
@@ -21855,7 +23429,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -21886,7 +23460,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationUncheckedCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserUpdateInput = {
@@ -21917,7 +23491,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -21948,7 +23522,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUncheckedUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -22156,6 +23730,7 @@ export namespace Prisma {
     labourProfiles?: LabourProfileCreateNestedManyWithoutAgencyInput
     requirements?: RequirementCreateNestedManyWithoutAssignedAgencyInput
     documents?: AgencyDocumentCreateNestedManyWithoutAgencyInput
+    RequirementAssignment?: RequirementAssignmentCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyUncheckedCreateInput = {
@@ -22175,6 +23750,7 @@ export namespace Prisma {
     labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutAgencyInput
     requirements?: RequirementUncheckedCreateNestedManyWithoutAssignedAgencyInput
     documents?: AgencyDocumentUncheckedCreateNestedManyWithoutAgencyInput
+    RequirementAssignment?: RequirementAssignmentUncheckedCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyUpdateInput = {
@@ -22194,6 +23770,7 @@ export namespace Prisma {
     labourProfiles?: LabourProfileUpdateManyWithoutAgencyNestedInput
     requirements?: RequirementUpdateManyWithoutAssignedAgencyNestedInput
     documents?: AgencyDocumentUpdateManyWithoutAgencyNestedInput
+    RequirementAssignment?: RequirementAssignmentUpdateManyWithoutAgencyNestedInput
   }
 
   export type AgencyUncheckedUpdateInput = {
@@ -22213,6 +23790,7 @@ export namespace Prisma {
     labourProfiles?: LabourProfileUncheckedUpdateManyWithoutAgencyNestedInput
     requirements?: RequirementUncheckedUpdateManyWithoutAssignedAgencyNestedInput
     documents?: AgencyDocumentUncheckedUpdateManyWithoutAgencyNestedInput
+    RequirementAssignment?: RequirementAssignmentUncheckedUpdateManyWithoutAgencyNestedInput
   }
 
   export type AgencyCreateManyInput = {
@@ -22347,9 +23925,8 @@ export namespace Prisma {
     client: ClientCreateNestedOneWithoutRequirementsInput
     assignedAgency?: AgencyCreateNestedOneWithoutRequirementsInput
     jobRoles?: JobRoleCreateNestedManyWithoutRequirementInput
-    labourProfiles?: LabourProfileCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureCreateNestedManyWithoutRequirementInput
-    documents?: RequirementDocumentCreateNestedManyWithoutRequirementInput
+    RequirementAssignment?: RequirementAssignmentCreateNestedManyWithoutRequirementInput
   }
 
   export type RequirementUncheckedCreateInput = {
@@ -22368,9 +23945,8 @@ export namespace Prisma {
     submittedAt?: Date | string | null
     reviewedAt?: Date | string | null
     jobRoles?: JobRoleUncheckedCreateNestedManyWithoutRequirementInput
-    labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureUncheckedCreateNestedManyWithoutRequirementInput
-    documents?: RequirementDocumentUncheckedCreateNestedManyWithoutRequirementInput
+    RequirementAssignment?: RequirementAssignmentUncheckedCreateNestedManyWithoutRequirementInput
   }
 
   export type RequirementUpdateInput = {
@@ -22389,9 +23965,8 @@ export namespace Prisma {
     client?: ClientUpdateOneRequiredWithoutRequirementsNestedInput
     assignedAgency?: AgencyUpdateOneWithoutRequirementsNestedInput
     jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
-    labourProfiles?: LabourProfileUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUpdateManyWithoutRequirementNestedInput
-    documents?: RequirementDocumentUpdateManyWithoutRequirementNestedInput
+    RequirementAssignment?: RequirementAssignmentUpdateManyWithoutRequirementNestedInput
   }
 
   export type RequirementUncheckedUpdateInput = {
@@ -22410,9 +23985,8 @@ export namespace Prisma {
     submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     jobRoles?: JobRoleUncheckedUpdateManyWithoutRequirementNestedInput
-    labourProfiles?: LabourProfileUncheckedUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUncheckedUpdateManyWithoutRequirementNestedInput
-    documents?: RequirementDocumentUncheckedUpdateManyWithoutRequirementNestedInput
+    RequirementAssignment?: RequirementAssignmentUncheckedUpdateManyWithoutRequirementNestedInput
   }
 
   export type RequirementCreateManyInput = {
@@ -22476,6 +24050,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     requirement: RequirementCreateNestedOneWithoutJobRolesInput
+    RequirementAssignment?: RequirementAssignmentCreateNestedManyWithoutJobRoleInput
   }
 
   export type JobRoleUncheckedCreateInput = {
@@ -22490,6 +24065,7 @@ export namespace Prisma {
     requirementId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    RequirementAssignment?: RequirementAssignmentUncheckedCreateNestedManyWithoutJobRoleInput
   }
 
   export type JobRoleUpdateInput = {
@@ -22504,6 +24080,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requirement?: RequirementUpdateOneRequiredWithoutJobRolesNestedInput
+    RequirementAssignment?: RequirementAssignmentUpdateManyWithoutJobRoleNestedInput
   }
 
   export type JobRoleUncheckedUpdateInput = {
@@ -22518,6 +24095,7 @@ export namespace Prisma {
     requirementId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    RequirementAssignment?: RequirementAssignmentUncheckedUpdateManyWithoutJobRoleNestedInput
   }
 
   export type JobRoleCreateManyInput = {
@@ -22561,45 +24139,128 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type RequirementAssignmentCreateInput = {
+    id?: string
+    quantity: number
+    status?: $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    requirement: RequirementCreateNestedOneWithoutRequirementAssignmentInput
+    jobRole: JobRoleCreateNestedOneWithoutRequirementAssignmentInput
+    agency: AgencyCreateNestedOneWithoutRequirementAssignmentInput
+    LabourProfile?: LabourProfileCreateNestedManyWithoutRequirementAssignmentInput
+  }
+
+  export type RequirementAssignmentUncheckedCreateInput = {
+    id?: string
+    requirementId: string
+    jobRoleId: string
+    agencyId: string
+    quantity: number
+    status?: $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    LabourProfile?: LabourProfileUncheckedCreateNestedManyWithoutRequirementAssignmentInput
+  }
+
+  export type RequirementAssignmentUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    requirement?: RequirementUpdateOneRequiredWithoutRequirementAssignmentNestedInput
+    jobRole?: JobRoleUpdateOneRequiredWithoutRequirementAssignmentNestedInput
+    agency?: AgencyUpdateOneRequiredWithoutRequirementAssignmentNestedInput
+    LabourProfile?: LabourProfileUpdateManyWithoutRequirementAssignmentNestedInput
+  }
+
+  export type RequirementAssignmentUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requirementId?: StringFieldUpdateOperationsInput | string
+    jobRoleId?: StringFieldUpdateOperationsInput | string
+    agencyId?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    LabourProfile?: LabourProfileUncheckedUpdateManyWithoutRequirementAssignmentNestedInput
+  }
+
+  export type RequirementAssignmentCreateManyInput = {
+    id?: string
+    requirementId: string
+    jobRoleId: string
+    agencyId: string
+    quantity: number
+    status?: $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RequirementAssignmentUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RequirementAssignmentUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requirementId?: StringFieldUpdateOperationsInput | string
+    jobRoleId?: StringFieldUpdateOperationsInput | string
+    agencyId?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type LabourProfileCreateInput = {
     id?: string
     name: string
     age: number
     gender: $Enums.Gender
     nationality: string
-    maritalStatus?: string | null
-    skills?: LabourProfileCreateskillsInput | string[]
-    experienceYears: number
-    education?: string | null
-    currentPosition?: string | null
-    currentCompany?: string | null
-    languages?: LabourProfileCreatelanguagesInput | string[]
-    englishProficiency?: string | null
+    jobRoleName: string
+    status?: $Enums.LabourProfileStatus
     email?: string | null
-    phone: string
-    address?: string | null
-    city?: string | null
-    country?: string | null
-    cvUrl: string
+    phone?: string | null
     passportNumber?: string | null
     passportExpiry?: Date | string | null
+    passportCopy?: string | null
+    passportVerified?: boolean
     visaType?: string | null
     visaExpiry?: Date | string | null
-    medicalStatus?: string | null
+    visaCopy?: string | null
+    visaVerified?: boolean
+    medicalReport?: string | null
     medicalExpiry?: Date | string | null
-    photo?: string | null
-    otherDocs?: LabourProfileCreateotherDocsInput | string[]
-    status?: $Enums.LabourProfileStatus
+    medicalVerified?: boolean
+    policeClearance?: string | null
+    policeVerified?: boolean
+    contractCopy?: string | null
+    contractVerified?: boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: $Enums.DocumentVerificationStatus
     statusReason?: string | null
-    deploymentDate?: Date | string | null
-    contractStartDate?: Date | string | null
-    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    requirement: RequirementCreateNestedOneWithoutLabourProfilesInput
+    documentsSubmittedAt?: Date | string | null
+    documentsVerifiedAt?: Date | string | null
     agency: AgencyCreateNestedOneWithoutLabourProfilesInput
+    requirementAssignment?: RequirementAssignmentCreateNestedOneWithoutLabourProfileInput
     statusLogs?: LabourStatusLogCreateNestedManyWithoutLabourProfileInput
     procedures?: ProcedureCreateNestedManyWithoutLabourProfileInput
+    documentVerifications?: DocumentVerificationCreateNestedManyWithoutLabourProfileInput
   }
 
   export type LabourProfileUncheckedCreateInput = {
@@ -22608,39 +24269,37 @@ export namespace Prisma {
     age: number
     gender: $Enums.Gender
     nationality: string
-    maritalStatus?: string | null
-    skills?: LabourProfileCreateskillsInput | string[]
-    experienceYears: number
-    education?: string | null
-    currentPosition?: string | null
-    currentCompany?: string | null
-    languages?: LabourProfileCreatelanguagesInput | string[]
-    englishProficiency?: string | null
+    jobRoleName: string
+    status?: $Enums.LabourProfileStatus
     email?: string | null
-    phone: string
-    address?: string | null
-    city?: string | null
-    country?: string | null
-    cvUrl: string
+    phone?: string | null
     passportNumber?: string | null
     passportExpiry?: Date | string | null
+    passportCopy?: string | null
+    passportVerified?: boolean
     visaType?: string | null
     visaExpiry?: Date | string | null
-    medicalStatus?: string | null
+    visaCopy?: string | null
+    visaVerified?: boolean
+    medicalReport?: string | null
     medicalExpiry?: Date | string | null
-    photo?: string | null
-    otherDocs?: LabourProfileCreateotherDocsInput | string[]
-    status?: $Enums.LabourProfileStatus
+    medicalVerified?: boolean
+    policeClearance?: string | null
+    policeVerified?: boolean
+    contractCopy?: string | null
+    contractVerified?: boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: $Enums.DocumentVerificationStatus
     statusReason?: string | null
-    requirementId: string
     agencyId: string
-    deploymentDate?: Date | string | null
-    contractStartDate?: Date | string | null
-    contractEndDate?: Date | string | null
+    requirementAssignmentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    documentsSubmittedAt?: Date | string | null
+    documentsVerifiedAt?: Date | string | null
     statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutLabourProfileInput
     procedures?: ProcedureUncheckedCreateNestedManyWithoutLabourProfileInput
+    documentVerifications?: DocumentVerificationUncheckedCreateNestedManyWithoutLabourProfileInput
   }
 
   export type LabourProfileUpdateInput = {
@@ -22649,39 +24308,37 @@ export namespace Prisma {
     age?: IntFieldUpdateOperationsInput | number
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
-    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: LabourProfileUpdateskillsInput | string[]
-    experienceYears?: IntFieldUpdateOperationsInput | number
-    education?: NullableStringFieldUpdateOperationsInput | string | null
-    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
-    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
-    languages?: LabourProfileUpdatelanguagesInput | string[]
-    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    jobRoleName?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: StringFieldUpdateOperationsInput | string
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    cvUrl?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
     passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportVerified?: BoolFieldUpdateOperationsInput | boolean
     visaType?: NullableStringFieldUpdateOperationsInput | string | null
     visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    visaCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    visaVerified?: BoolFieldUpdateOperationsInput | boolean
+    medicalReport?: NullableStringFieldUpdateOperationsInput | string | null
     medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    photo?: NullableStringFieldUpdateOperationsInput | string | null
-    otherDocs?: LabourProfileUpdateotherDocsInput | string[]
-    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    medicalVerified?: BoolFieldUpdateOperationsInput | boolean
+    policeClearance?: NullableStringFieldUpdateOperationsInput | string | null
+    policeVerified?: BoolFieldUpdateOperationsInput | boolean
+    contractCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    contractVerified?: BoolFieldUpdateOperationsInput | boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
     statusReason?: NullableStringFieldUpdateOperationsInput | string | null
-    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    requirement?: RequirementUpdateOneRequiredWithoutLabourProfilesNestedInput
+    documentsSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    documentsVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     agency?: AgencyUpdateOneRequiredWithoutLabourProfilesNestedInput
+    requirementAssignment?: RequirementAssignmentUpdateOneWithoutLabourProfileNestedInput
     statusLogs?: LabourStatusLogUpdateManyWithoutLabourProfileNestedInput
     procedures?: ProcedureUpdateManyWithoutLabourProfileNestedInput
+    documentVerifications?: DocumentVerificationUpdateManyWithoutLabourProfileNestedInput
   }
 
   export type LabourProfileUncheckedUpdateInput = {
@@ -22690,39 +24347,37 @@ export namespace Prisma {
     age?: IntFieldUpdateOperationsInput | number
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
-    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: LabourProfileUpdateskillsInput | string[]
-    experienceYears?: IntFieldUpdateOperationsInput | number
-    education?: NullableStringFieldUpdateOperationsInput | string | null
-    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
-    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
-    languages?: LabourProfileUpdatelanguagesInput | string[]
-    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    jobRoleName?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: StringFieldUpdateOperationsInput | string
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    cvUrl?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
     passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportVerified?: BoolFieldUpdateOperationsInput | boolean
     visaType?: NullableStringFieldUpdateOperationsInput | string | null
     visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    visaCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    visaVerified?: BoolFieldUpdateOperationsInput | boolean
+    medicalReport?: NullableStringFieldUpdateOperationsInput | string | null
     medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    photo?: NullableStringFieldUpdateOperationsInput | string | null
-    otherDocs?: LabourProfileUpdateotherDocsInput | string[]
-    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    medicalVerified?: BoolFieldUpdateOperationsInput | boolean
+    policeClearance?: NullableStringFieldUpdateOperationsInput | string | null
+    policeVerified?: BoolFieldUpdateOperationsInput | boolean
+    contractCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    contractVerified?: BoolFieldUpdateOperationsInput | boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
     statusReason?: NullableStringFieldUpdateOperationsInput | string | null
-    requirementId?: StringFieldUpdateOperationsInput | string
     agencyId?: StringFieldUpdateOperationsInput | string
-    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    requirementAssignmentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documentsSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    documentsVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutLabourProfileNestedInput
     procedures?: ProcedureUncheckedUpdateManyWithoutLabourProfileNestedInput
+    documentVerifications?: DocumentVerificationUncheckedUpdateManyWithoutLabourProfileNestedInput
   }
 
   export type LabourProfileCreateManyInput = {
@@ -22731,37 +24386,34 @@ export namespace Prisma {
     age: number
     gender: $Enums.Gender
     nationality: string
-    maritalStatus?: string | null
-    skills?: LabourProfileCreateskillsInput | string[]
-    experienceYears: number
-    education?: string | null
-    currentPosition?: string | null
-    currentCompany?: string | null
-    languages?: LabourProfileCreatelanguagesInput | string[]
-    englishProficiency?: string | null
+    jobRoleName: string
+    status?: $Enums.LabourProfileStatus
     email?: string | null
-    phone: string
-    address?: string | null
-    city?: string | null
-    country?: string | null
-    cvUrl: string
+    phone?: string | null
     passportNumber?: string | null
     passportExpiry?: Date | string | null
+    passportCopy?: string | null
+    passportVerified?: boolean
     visaType?: string | null
     visaExpiry?: Date | string | null
-    medicalStatus?: string | null
+    visaCopy?: string | null
+    visaVerified?: boolean
+    medicalReport?: string | null
     medicalExpiry?: Date | string | null
-    photo?: string | null
-    otherDocs?: LabourProfileCreateotherDocsInput | string[]
-    status?: $Enums.LabourProfileStatus
+    medicalVerified?: boolean
+    policeClearance?: string | null
+    policeVerified?: boolean
+    contractCopy?: string | null
+    contractVerified?: boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: $Enums.DocumentVerificationStatus
     statusReason?: string | null
-    requirementId: string
     agencyId: string
-    deploymentDate?: Date | string | null
-    contractStartDate?: Date | string | null
-    contractEndDate?: Date | string | null
+    requirementAssignmentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    documentsSubmittedAt?: Date | string | null
+    documentsVerifiedAt?: Date | string | null
   }
 
   export type LabourProfileUpdateManyMutationInput = {
@@ -22770,35 +24422,32 @@ export namespace Prisma {
     age?: IntFieldUpdateOperationsInput | number
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
-    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: LabourProfileUpdateskillsInput | string[]
-    experienceYears?: IntFieldUpdateOperationsInput | number
-    education?: NullableStringFieldUpdateOperationsInput | string | null
-    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
-    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
-    languages?: LabourProfileUpdatelanguagesInput | string[]
-    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    jobRoleName?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: StringFieldUpdateOperationsInput | string
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    cvUrl?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
     passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportVerified?: BoolFieldUpdateOperationsInput | boolean
     visaType?: NullableStringFieldUpdateOperationsInput | string | null
     visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    visaCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    visaVerified?: BoolFieldUpdateOperationsInput | boolean
+    medicalReport?: NullableStringFieldUpdateOperationsInput | string | null
     medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    photo?: NullableStringFieldUpdateOperationsInput | string | null
-    otherDocs?: LabourProfileUpdateotherDocsInput | string[]
-    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    medicalVerified?: BoolFieldUpdateOperationsInput | boolean
+    policeClearance?: NullableStringFieldUpdateOperationsInput | string | null
+    policeVerified?: BoolFieldUpdateOperationsInput | boolean
+    contractCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    contractVerified?: BoolFieldUpdateOperationsInput | boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
     statusReason?: NullableStringFieldUpdateOperationsInput | string | null
-    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documentsSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    documentsVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type LabourProfileUncheckedUpdateManyInput = {
@@ -22807,37 +24456,123 @@ export namespace Prisma {
     age?: IntFieldUpdateOperationsInput | number
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
-    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: LabourProfileUpdateskillsInput | string[]
-    experienceYears?: IntFieldUpdateOperationsInput | number
-    education?: NullableStringFieldUpdateOperationsInput | string | null
-    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
-    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
-    languages?: LabourProfileUpdatelanguagesInput | string[]
-    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    jobRoleName?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: StringFieldUpdateOperationsInput | string
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    cvUrl?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
     passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportVerified?: BoolFieldUpdateOperationsInput | boolean
     visaType?: NullableStringFieldUpdateOperationsInput | string | null
     visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    visaCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    visaVerified?: BoolFieldUpdateOperationsInput | boolean
+    medicalReport?: NullableStringFieldUpdateOperationsInput | string | null
     medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    photo?: NullableStringFieldUpdateOperationsInput | string | null
-    otherDocs?: LabourProfileUpdateotherDocsInput | string[]
-    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    medicalVerified?: BoolFieldUpdateOperationsInput | boolean
+    policeClearance?: NullableStringFieldUpdateOperationsInput | string | null
+    policeVerified?: BoolFieldUpdateOperationsInput | boolean
+    contractCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    contractVerified?: BoolFieldUpdateOperationsInput | boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
     statusReason?: NullableStringFieldUpdateOperationsInput | string | null
-    requirementId?: StringFieldUpdateOperationsInput | string
     agencyId?: StringFieldUpdateOperationsInput | string
-    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    requirementAssignmentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documentsSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    documentsVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type DocumentVerificationCreateInput = {
+    id?: string
+    documentType: string
+    documentUrl: string
+    status?: $Enums.VerificationStatus
+    comments?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    verifiedAt?: Date | string | null
+    labourProfile: LabourProfileCreateNestedOneWithoutDocumentVerificationsInput
+    verifiedBy?: UserCreateNestedOneWithoutDocumentVerificationInput
+  }
+
+  export type DocumentVerificationUncheckedCreateInput = {
+    id?: string
+    documentType: string
+    documentUrl: string
+    status?: $Enums.VerificationStatus
+    comments?: string | null
+    labourProfileId: string
+    verifiedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    verifiedAt?: Date | string | null
+  }
+
+  export type DocumentVerificationUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    documentType?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    labourProfile?: LabourProfileUpdateOneRequiredWithoutDocumentVerificationsNestedInput
+    verifiedBy?: UserUpdateOneWithoutDocumentVerificationNestedInput
+  }
+
+  export type DocumentVerificationUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    documentType?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    labourProfileId?: StringFieldUpdateOperationsInput | string
+    verifiedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type DocumentVerificationCreateManyInput = {
+    id?: string
+    documentType: string
+    documentUrl: string
+    status?: $Enums.VerificationStatus
+    comments?: string | null
+    labourProfileId: string
+    verifiedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    verifiedAt?: Date | string | null
+  }
+
+  export type DocumentVerificationUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    documentType?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type DocumentVerificationUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    documentType?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    labourProfileId?: StringFieldUpdateOperationsInput | string
+    verifiedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type ProcedureCreateInput = {
@@ -23217,88 +24952,6 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type RequirementDocumentCreateInput = {
-    id?: string
-    type: $Enums.DocumentType
-    url: string
-    name?: string | null
-    description?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    requirement: RequirementCreateNestedOneWithoutDocumentsInput
-    uploadedBy: UserCreateNestedOneWithoutRequirementDocumentsInput
-  }
-
-  export type RequirementDocumentUncheckedCreateInput = {
-    id?: string
-    type: $Enums.DocumentType
-    url: string
-    name?: string | null
-    description?: string | null
-    requirementId: string
-    uploadedById: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type RequirementDocumentUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    requirement?: RequirementUpdateOneRequiredWithoutDocumentsNestedInput
-    uploadedBy?: UserUpdateOneRequiredWithoutRequirementDocumentsNestedInput
-  }
-
-  export type RequirementDocumentUncheckedUpdateInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    requirementId?: StringFieldUpdateOperationsInput | string
-    uploadedById?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type RequirementDocumentCreateManyInput = {
-    id?: string
-    type: $Enums.DocumentType
-    url: string
-    name?: string | null
-    description?: string | null
-    requirementId: string
-    uploadedById: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type RequirementDocumentUpdateManyMutationInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type RequirementDocumentUncheckedUpdateManyInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    requirementId?: StringFieldUpdateOperationsInput | string
-    uploadedById?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
   export type AuditLogCreateInput = {
     id?: string
     action: $Enums.AuditAction
@@ -23634,10 +25287,10 @@ export namespace Prisma {
     none?: AgencyDocumentWhereInput
   }
 
-  export type RequirementDocumentListRelationFilter = {
-    every?: RequirementDocumentWhereInput
-    some?: RequirementDocumentWhereInput
-    none?: RequirementDocumentWhereInput
+  export type DocumentVerificationListRelationFilter = {
+    every?: DocumentVerificationWhereInput
+    some?: DocumentVerificationWhereInput
+    none?: DocumentVerificationWhereInput
   }
 
   export type SortOrderInput = {
@@ -23669,7 +25322,7 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type RequirementDocumentOrderByRelationAggregateInput = {
+  export type DocumentVerificationOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -23944,7 +25597,17 @@ export namespace Prisma {
     none?: LabourProfileWhereInput
   }
 
+  export type RequirementAssignmentListRelationFilter = {
+    every?: RequirementAssignmentWhereInput
+    some?: RequirementAssignmentWhereInput
+    none?: RequirementAssignmentWhereInput
+  }
+
   export type LabourProfileOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type RequirementAssignmentOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -24369,6 +26032,64 @@ export namespace Prisma {
     _max?: NestedEnumContractDurationNullableFilter<$PrismaModel>
   }
 
+  export type JobRoleScalarRelationFilter = {
+    is?: JobRoleWhereInput
+    isNot?: JobRoleWhereInput
+  }
+
+  export type AgencyScalarRelationFilter = {
+    is?: AgencyWhereInput
+    isNot?: AgencyWhereInput
+  }
+
+  export type RequirementAssignmentRequirementIdJobRoleIdAgencyIdCompoundUniqueInput = {
+    requirementId: string
+    jobRoleId: string
+    agencyId: string
+  }
+
+  export type RequirementAssignmentCountOrderByAggregateInput = {
+    id?: SortOrder
+    requirementId?: SortOrder
+    jobRoleId?: SortOrder
+    agencyId?: SortOrder
+    quantity?: SortOrder
+    status?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RequirementAssignmentAvgOrderByAggregateInput = {
+    quantity?: SortOrder
+  }
+
+  export type RequirementAssignmentMaxOrderByAggregateInput = {
+    id?: SortOrder
+    requirementId?: SortOrder
+    jobRoleId?: SortOrder
+    agencyId?: SortOrder
+    quantity?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RequirementAssignmentMinOrderByAggregateInput = {
+    id?: SortOrder
+    requirementId?: SortOrder
+    jobRoleId?: SortOrder
+    agencyId?: SortOrder
+    quantity?: SortOrder
+    status?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RequirementAssignmentSumOrderByAggregateInput = {
+    quantity?: SortOrder
+  }
+
   export type EnumGenderFilter<$PrismaModel = never> = {
     equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel>
     in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
@@ -24383,9 +26104,16 @@ export namespace Prisma {
     not?: NestedEnumLabourProfileStatusFilter<$PrismaModel> | $Enums.LabourProfileStatus
   }
 
-  export type AgencyScalarRelationFilter = {
-    is?: AgencyWhereInput
-    isNot?: AgencyWhereInput
+  export type EnumDocumentVerificationStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.DocumentVerificationStatus | EnumDocumentVerificationStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DocumentVerificationStatus[] | ListEnumDocumentVerificationStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DocumentVerificationStatus[] | ListEnumDocumentVerificationStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDocumentVerificationStatusFilter<$PrismaModel> | $Enums.DocumentVerificationStatus
+  }
+
+  export type RequirementAssignmentNullableScalarRelationFilter = {
+    is?: RequirementAssignmentWhereInput | null
+    isNot?: RequirementAssignmentWhereInput | null
   }
 
   export type LabourProfileCountOrderByAggregateInput = {
@@ -24394,42 +26122,38 @@ export namespace Prisma {
     age?: SortOrder
     gender?: SortOrder
     nationality?: SortOrder
-    maritalStatus?: SortOrder
-    skills?: SortOrder
-    experienceYears?: SortOrder
-    education?: SortOrder
-    currentPosition?: SortOrder
-    currentCompany?: SortOrder
-    languages?: SortOrder
-    englishProficiency?: SortOrder
+    jobRoleName?: SortOrder
+    status?: SortOrder
     email?: SortOrder
     phone?: SortOrder
-    address?: SortOrder
-    city?: SortOrder
-    country?: SortOrder
-    cvUrl?: SortOrder
     passportNumber?: SortOrder
     passportExpiry?: SortOrder
+    passportCopy?: SortOrder
+    passportVerified?: SortOrder
     visaType?: SortOrder
     visaExpiry?: SortOrder
-    medicalStatus?: SortOrder
+    visaCopy?: SortOrder
+    visaVerified?: SortOrder
+    medicalReport?: SortOrder
     medicalExpiry?: SortOrder
-    photo?: SortOrder
+    medicalVerified?: SortOrder
+    policeClearance?: SortOrder
+    policeVerified?: SortOrder
+    contractCopy?: SortOrder
+    contractVerified?: SortOrder
     otherDocs?: SortOrder
-    status?: SortOrder
+    verificationStatus?: SortOrder
     statusReason?: SortOrder
-    requirementId?: SortOrder
     agencyId?: SortOrder
-    deploymentDate?: SortOrder
-    contractStartDate?: SortOrder
-    contractEndDate?: SortOrder
+    requirementAssignmentId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    documentsSubmittedAt?: SortOrder
+    documentsVerifiedAt?: SortOrder
   }
 
   export type LabourProfileAvgOrderByAggregateInput = {
     age?: SortOrder
-    experienceYears?: SortOrder
   }
 
   export type LabourProfileMaxOrderByAggregateInput = {
@@ -24438,34 +26162,33 @@ export namespace Prisma {
     age?: SortOrder
     gender?: SortOrder
     nationality?: SortOrder
-    maritalStatus?: SortOrder
-    experienceYears?: SortOrder
-    education?: SortOrder
-    currentPosition?: SortOrder
-    currentCompany?: SortOrder
-    englishProficiency?: SortOrder
+    jobRoleName?: SortOrder
+    status?: SortOrder
     email?: SortOrder
     phone?: SortOrder
-    address?: SortOrder
-    city?: SortOrder
-    country?: SortOrder
-    cvUrl?: SortOrder
     passportNumber?: SortOrder
     passportExpiry?: SortOrder
+    passportCopy?: SortOrder
+    passportVerified?: SortOrder
     visaType?: SortOrder
     visaExpiry?: SortOrder
-    medicalStatus?: SortOrder
+    visaCopy?: SortOrder
+    visaVerified?: SortOrder
+    medicalReport?: SortOrder
     medicalExpiry?: SortOrder
-    photo?: SortOrder
-    status?: SortOrder
+    medicalVerified?: SortOrder
+    policeClearance?: SortOrder
+    policeVerified?: SortOrder
+    contractCopy?: SortOrder
+    contractVerified?: SortOrder
+    verificationStatus?: SortOrder
     statusReason?: SortOrder
-    requirementId?: SortOrder
     agencyId?: SortOrder
-    deploymentDate?: SortOrder
-    contractStartDate?: SortOrder
-    contractEndDate?: SortOrder
+    requirementAssignmentId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    documentsSubmittedAt?: SortOrder
+    documentsVerifiedAt?: SortOrder
   }
 
   export type LabourProfileMinOrderByAggregateInput = {
@@ -24474,39 +26197,37 @@ export namespace Prisma {
     age?: SortOrder
     gender?: SortOrder
     nationality?: SortOrder
-    maritalStatus?: SortOrder
-    experienceYears?: SortOrder
-    education?: SortOrder
-    currentPosition?: SortOrder
-    currentCompany?: SortOrder
-    englishProficiency?: SortOrder
+    jobRoleName?: SortOrder
+    status?: SortOrder
     email?: SortOrder
     phone?: SortOrder
-    address?: SortOrder
-    city?: SortOrder
-    country?: SortOrder
-    cvUrl?: SortOrder
     passportNumber?: SortOrder
     passportExpiry?: SortOrder
+    passportCopy?: SortOrder
+    passportVerified?: SortOrder
     visaType?: SortOrder
     visaExpiry?: SortOrder
-    medicalStatus?: SortOrder
+    visaCopy?: SortOrder
+    visaVerified?: SortOrder
+    medicalReport?: SortOrder
     medicalExpiry?: SortOrder
-    photo?: SortOrder
-    status?: SortOrder
+    medicalVerified?: SortOrder
+    policeClearance?: SortOrder
+    policeVerified?: SortOrder
+    contractCopy?: SortOrder
+    contractVerified?: SortOrder
+    verificationStatus?: SortOrder
     statusReason?: SortOrder
-    requirementId?: SortOrder
     agencyId?: SortOrder
-    deploymentDate?: SortOrder
-    contractStartDate?: SortOrder
-    contractEndDate?: SortOrder
+    requirementAssignmentId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    documentsSubmittedAt?: SortOrder
+    documentsVerifiedAt?: SortOrder
   }
 
   export type LabourProfileSumOrderByAggregateInput = {
     age?: SortOrder
-    experienceYears?: SortOrder
   }
 
   export type EnumGenderWithAggregatesFilter<$PrismaModel = never> = {
@@ -24527,6 +26248,77 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumLabourProfileStatusFilter<$PrismaModel>
     _max?: NestedEnumLabourProfileStatusFilter<$PrismaModel>
+  }
+
+  export type EnumDocumentVerificationStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DocumentVerificationStatus | EnumDocumentVerificationStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DocumentVerificationStatus[] | ListEnumDocumentVerificationStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DocumentVerificationStatus[] | ListEnumDocumentVerificationStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDocumentVerificationStatusWithAggregatesFilter<$PrismaModel> | $Enums.DocumentVerificationStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumDocumentVerificationStatusFilter<$PrismaModel>
+    _max?: NestedEnumDocumentVerificationStatusFilter<$PrismaModel>
+  }
+
+  export type EnumVerificationStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.VerificationStatus | EnumVerificationStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.VerificationStatus[] | ListEnumVerificationStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.VerificationStatus[] | ListEnumVerificationStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumVerificationStatusFilter<$PrismaModel> | $Enums.VerificationStatus
+  }
+
+  export type LabourProfileScalarRelationFilter = {
+    is?: LabourProfileWhereInput
+    isNot?: LabourProfileWhereInput
+  }
+
+  export type DocumentVerificationCountOrderByAggregateInput = {
+    id?: SortOrder
+    documentType?: SortOrder
+    documentUrl?: SortOrder
+    status?: SortOrder
+    comments?: SortOrder
+    labourProfileId?: SortOrder
+    verifiedById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    verifiedAt?: SortOrder
+  }
+
+  export type DocumentVerificationMaxOrderByAggregateInput = {
+    id?: SortOrder
+    documentType?: SortOrder
+    documentUrl?: SortOrder
+    status?: SortOrder
+    comments?: SortOrder
+    labourProfileId?: SortOrder
+    verifiedById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    verifiedAt?: SortOrder
+  }
+
+  export type DocumentVerificationMinOrderByAggregateInput = {
+    id?: SortOrder
+    documentType?: SortOrder
+    documentUrl?: SortOrder
+    status?: SortOrder
+    comments?: SortOrder
+    labourProfileId?: SortOrder
+    verifiedById?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    verifiedAt?: SortOrder
+  }
+
+  export type EnumVerificationStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.VerificationStatus | EnumVerificationStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.VerificationStatus[] | ListEnumVerificationStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.VerificationStatus[] | ListEnumVerificationStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumVerificationStatusWithAggregatesFilter<$PrismaModel> | $Enums.VerificationStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumVerificationStatusFilter<$PrismaModel>
+    _max?: NestedEnumVerificationStatusFilter<$PrismaModel>
   }
 
   export type EnumProcedureStatusFilter<$PrismaModel = never> = {
@@ -24597,11 +26389,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumProcedureStatusFilter<$PrismaModel>
     _max?: NestedEnumProcedureStatusFilter<$PrismaModel>
-  }
-
-  export type LabourProfileScalarRelationFilter = {
-    is?: LabourProfileWhereInput
-    isNot?: LabourProfileWhereInput
   }
 
   export type LabourStatusLogCountOrderByAggregateInput = {
@@ -24735,42 +26522,6 @@ export namespace Prisma {
     expiryDate?: SortOrder
     agencyId?: SortOrder
     verifiedById?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type RequirementDocumentCountOrderByAggregateInput = {
-    id?: SortOrder
-    type?: SortOrder
-    url?: SortOrder
-    name?: SortOrder
-    description?: SortOrder
-    requirementId?: SortOrder
-    uploadedById?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type RequirementDocumentMaxOrderByAggregateInput = {
-    id?: SortOrder
-    type?: SortOrder
-    url?: SortOrder
-    name?: SortOrder
-    description?: SortOrder
-    requirementId?: SortOrder
-    uploadedById?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type RequirementDocumentMinOrderByAggregateInput = {
-    id?: SortOrder
-    type?: SortOrder
-    url?: SortOrder
-    name?: SortOrder
-    description?: SortOrder
-    requirementId?: SortOrder
-    uploadedById?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -24954,11 +26705,11 @@ export namespace Prisma {
     connect?: AgencyDocumentWhereUniqueInput | AgencyDocumentWhereUniqueInput[]
   }
 
-  export type RequirementDocumentCreateNestedManyWithoutUploadedByInput = {
-    create?: XOR<RequirementDocumentCreateWithoutUploadedByInput, RequirementDocumentUncheckedCreateWithoutUploadedByInput> | RequirementDocumentCreateWithoutUploadedByInput[] | RequirementDocumentUncheckedCreateWithoutUploadedByInput[]
-    connectOrCreate?: RequirementDocumentCreateOrConnectWithoutUploadedByInput | RequirementDocumentCreateOrConnectWithoutUploadedByInput[]
-    createMany?: RequirementDocumentCreateManyUploadedByInputEnvelope
-    connect?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
+  export type DocumentVerificationCreateNestedManyWithoutVerifiedByInput = {
+    create?: XOR<DocumentVerificationCreateWithoutVerifiedByInput, DocumentVerificationUncheckedCreateWithoutVerifiedByInput> | DocumentVerificationCreateWithoutVerifiedByInput[] | DocumentVerificationUncheckedCreateWithoutVerifiedByInput[]
+    connectOrCreate?: DocumentVerificationCreateOrConnectWithoutVerifiedByInput | DocumentVerificationCreateOrConnectWithoutVerifiedByInput[]
+    createMany?: DocumentVerificationCreateManyVerifiedByInputEnvelope
+    connect?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
   }
 
   export type ClientUncheckedCreateNestedOneWithoutUserInput = {
@@ -25021,11 +26772,11 @@ export namespace Prisma {
     connect?: AgencyDocumentWhereUniqueInput | AgencyDocumentWhereUniqueInput[]
   }
 
-  export type RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput = {
-    create?: XOR<RequirementDocumentCreateWithoutUploadedByInput, RequirementDocumentUncheckedCreateWithoutUploadedByInput> | RequirementDocumentCreateWithoutUploadedByInput[] | RequirementDocumentUncheckedCreateWithoutUploadedByInput[]
-    connectOrCreate?: RequirementDocumentCreateOrConnectWithoutUploadedByInput | RequirementDocumentCreateOrConnectWithoutUploadedByInput[]
-    createMany?: RequirementDocumentCreateManyUploadedByInputEnvelope
-    connect?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
+  export type DocumentVerificationUncheckedCreateNestedManyWithoutVerifiedByInput = {
+    create?: XOR<DocumentVerificationCreateWithoutVerifiedByInput, DocumentVerificationUncheckedCreateWithoutVerifiedByInput> | DocumentVerificationCreateWithoutVerifiedByInput[] | DocumentVerificationUncheckedCreateWithoutVerifiedByInput[]
+    connectOrCreate?: DocumentVerificationCreateOrConnectWithoutVerifiedByInput | DocumentVerificationCreateOrConnectWithoutVerifiedByInput[]
+    createMany?: DocumentVerificationCreateManyVerifiedByInputEnvelope
+    connect?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -25184,18 +26935,18 @@ export namespace Prisma {
     deleteMany?: AgencyDocumentScalarWhereInput | AgencyDocumentScalarWhereInput[]
   }
 
-  export type RequirementDocumentUpdateManyWithoutUploadedByNestedInput = {
-    create?: XOR<RequirementDocumentCreateWithoutUploadedByInput, RequirementDocumentUncheckedCreateWithoutUploadedByInput> | RequirementDocumentCreateWithoutUploadedByInput[] | RequirementDocumentUncheckedCreateWithoutUploadedByInput[]
-    connectOrCreate?: RequirementDocumentCreateOrConnectWithoutUploadedByInput | RequirementDocumentCreateOrConnectWithoutUploadedByInput[]
-    upsert?: RequirementDocumentUpsertWithWhereUniqueWithoutUploadedByInput | RequirementDocumentUpsertWithWhereUniqueWithoutUploadedByInput[]
-    createMany?: RequirementDocumentCreateManyUploadedByInputEnvelope
-    set?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
-    disconnect?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
-    delete?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
-    connect?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
-    update?: RequirementDocumentUpdateWithWhereUniqueWithoutUploadedByInput | RequirementDocumentUpdateWithWhereUniqueWithoutUploadedByInput[]
-    updateMany?: RequirementDocumentUpdateManyWithWhereWithoutUploadedByInput | RequirementDocumentUpdateManyWithWhereWithoutUploadedByInput[]
-    deleteMany?: RequirementDocumentScalarWhereInput | RequirementDocumentScalarWhereInput[]
+  export type DocumentVerificationUpdateManyWithoutVerifiedByNestedInput = {
+    create?: XOR<DocumentVerificationCreateWithoutVerifiedByInput, DocumentVerificationUncheckedCreateWithoutVerifiedByInput> | DocumentVerificationCreateWithoutVerifiedByInput[] | DocumentVerificationUncheckedCreateWithoutVerifiedByInput[]
+    connectOrCreate?: DocumentVerificationCreateOrConnectWithoutVerifiedByInput | DocumentVerificationCreateOrConnectWithoutVerifiedByInput[]
+    upsert?: DocumentVerificationUpsertWithWhereUniqueWithoutVerifiedByInput | DocumentVerificationUpsertWithWhereUniqueWithoutVerifiedByInput[]
+    createMany?: DocumentVerificationCreateManyVerifiedByInputEnvelope
+    set?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+    disconnect?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+    delete?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+    connect?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+    update?: DocumentVerificationUpdateWithWhereUniqueWithoutVerifiedByInput | DocumentVerificationUpdateWithWhereUniqueWithoutVerifiedByInput[]
+    updateMany?: DocumentVerificationUpdateManyWithWhereWithoutVerifiedByInput | DocumentVerificationUpdateManyWithWhereWithoutVerifiedByInput[]
+    deleteMany?: DocumentVerificationScalarWhereInput | DocumentVerificationScalarWhereInput[]
   }
 
   export type ClientUncheckedUpdateOneWithoutUserNestedInput = {
@@ -25312,18 +27063,18 @@ export namespace Prisma {
     deleteMany?: AgencyDocumentScalarWhereInput | AgencyDocumentScalarWhereInput[]
   }
 
-  export type RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput = {
-    create?: XOR<RequirementDocumentCreateWithoutUploadedByInput, RequirementDocumentUncheckedCreateWithoutUploadedByInput> | RequirementDocumentCreateWithoutUploadedByInput[] | RequirementDocumentUncheckedCreateWithoutUploadedByInput[]
-    connectOrCreate?: RequirementDocumentCreateOrConnectWithoutUploadedByInput | RequirementDocumentCreateOrConnectWithoutUploadedByInput[]
-    upsert?: RequirementDocumentUpsertWithWhereUniqueWithoutUploadedByInput | RequirementDocumentUpsertWithWhereUniqueWithoutUploadedByInput[]
-    createMany?: RequirementDocumentCreateManyUploadedByInputEnvelope
-    set?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
-    disconnect?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
-    delete?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
-    connect?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
-    update?: RequirementDocumentUpdateWithWhereUniqueWithoutUploadedByInput | RequirementDocumentUpdateWithWhereUniqueWithoutUploadedByInput[]
-    updateMany?: RequirementDocumentUpdateManyWithWhereWithoutUploadedByInput | RequirementDocumentUpdateManyWithWhereWithoutUploadedByInput[]
-    deleteMany?: RequirementDocumentScalarWhereInput | RequirementDocumentScalarWhereInput[]
+  export type DocumentVerificationUncheckedUpdateManyWithoutVerifiedByNestedInput = {
+    create?: XOR<DocumentVerificationCreateWithoutVerifiedByInput, DocumentVerificationUncheckedCreateWithoutVerifiedByInput> | DocumentVerificationCreateWithoutVerifiedByInput[] | DocumentVerificationUncheckedCreateWithoutVerifiedByInput[]
+    connectOrCreate?: DocumentVerificationCreateOrConnectWithoutVerifiedByInput | DocumentVerificationCreateOrConnectWithoutVerifiedByInput[]
+    upsert?: DocumentVerificationUpsertWithWhereUniqueWithoutVerifiedByInput | DocumentVerificationUpsertWithWhereUniqueWithoutVerifiedByInput[]
+    createMany?: DocumentVerificationCreateManyVerifiedByInputEnvelope
+    set?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+    disconnect?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+    delete?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+    connect?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+    update?: DocumentVerificationUpdateWithWhereUniqueWithoutVerifiedByInput | DocumentVerificationUpdateWithWhereUniqueWithoutVerifiedByInput[]
+    updateMany?: DocumentVerificationUpdateManyWithWhereWithoutVerifiedByInput | DocumentVerificationUpdateManyWithWhereWithoutVerifiedByInput[]
+    deleteMany?: DocumentVerificationScalarWhereInput | DocumentVerificationScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutClientProfileInput = {
@@ -25459,6 +27210,13 @@ export namespace Prisma {
     connect?: AgencyDocumentWhereUniqueInput | AgencyDocumentWhereUniqueInput[]
   }
 
+  export type RequirementAssignmentCreateNestedManyWithoutAgencyInput = {
+    create?: XOR<RequirementAssignmentCreateWithoutAgencyInput, RequirementAssignmentUncheckedCreateWithoutAgencyInput> | RequirementAssignmentCreateWithoutAgencyInput[] | RequirementAssignmentUncheckedCreateWithoutAgencyInput[]
+    connectOrCreate?: RequirementAssignmentCreateOrConnectWithoutAgencyInput | RequirementAssignmentCreateOrConnectWithoutAgencyInput[]
+    createMany?: RequirementAssignmentCreateManyAgencyInputEnvelope
+    connect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+  }
+
   export type LabourProfileUncheckedCreateNestedManyWithoutAgencyInput = {
     create?: XOR<LabourProfileCreateWithoutAgencyInput, LabourProfileUncheckedCreateWithoutAgencyInput> | LabourProfileCreateWithoutAgencyInput[] | LabourProfileUncheckedCreateWithoutAgencyInput[]
     connectOrCreate?: LabourProfileCreateOrConnectWithoutAgencyInput | LabourProfileCreateOrConnectWithoutAgencyInput[]
@@ -25478,6 +27236,13 @@ export namespace Prisma {
     connectOrCreate?: AgencyDocumentCreateOrConnectWithoutAgencyInput | AgencyDocumentCreateOrConnectWithoutAgencyInput[]
     createMany?: AgencyDocumentCreateManyAgencyInputEnvelope
     connect?: AgencyDocumentWhereUniqueInput | AgencyDocumentWhereUniqueInput[]
+  }
+
+  export type RequirementAssignmentUncheckedCreateNestedManyWithoutAgencyInput = {
+    create?: XOR<RequirementAssignmentCreateWithoutAgencyInput, RequirementAssignmentUncheckedCreateWithoutAgencyInput> | RequirementAssignmentCreateWithoutAgencyInput[] | RequirementAssignmentUncheckedCreateWithoutAgencyInput[]
+    connectOrCreate?: RequirementAssignmentCreateOrConnectWithoutAgencyInput | RequirementAssignmentCreateOrConnectWithoutAgencyInput[]
+    createMany?: RequirementAssignmentCreateManyAgencyInputEnvelope
+    connect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
   }
 
   export type UserUpdateOneRequiredWithoutAgencyProfileNestedInput = {
@@ -25530,6 +27295,20 @@ export namespace Prisma {
     deleteMany?: AgencyDocumentScalarWhereInput | AgencyDocumentScalarWhereInput[]
   }
 
+  export type RequirementAssignmentUpdateManyWithoutAgencyNestedInput = {
+    create?: XOR<RequirementAssignmentCreateWithoutAgencyInput, RequirementAssignmentUncheckedCreateWithoutAgencyInput> | RequirementAssignmentCreateWithoutAgencyInput[] | RequirementAssignmentUncheckedCreateWithoutAgencyInput[]
+    connectOrCreate?: RequirementAssignmentCreateOrConnectWithoutAgencyInput | RequirementAssignmentCreateOrConnectWithoutAgencyInput[]
+    upsert?: RequirementAssignmentUpsertWithWhereUniqueWithoutAgencyInput | RequirementAssignmentUpsertWithWhereUniqueWithoutAgencyInput[]
+    createMany?: RequirementAssignmentCreateManyAgencyInputEnvelope
+    set?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    disconnect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    delete?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    connect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    update?: RequirementAssignmentUpdateWithWhereUniqueWithoutAgencyInput | RequirementAssignmentUpdateWithWhereUniqueWithoutAgencyInput[]
+    updateMany?: RequirementAssignmentUpdateManyWithWhereWithoutAgencyInput | RequirementAssignmentUpdateManyWithWhereWithoutAgencyInput[]
+    deleteMany?: RequirementAssignmentScalarWhereInput | RequirementAssignmentScalarWhereInput[]
+  }
+
   export type LabourProfileUncheckedUpdateManyWithoutAgencyNestedInput = {
     create?: XOR<LabourProfileCreateWithoutAgencyInput, LabourProfileUncheckedCreateWithoutAgencyInput> | LabourProfileCreateWithoutAgencyInput[] | LabourProfileUncheckedCreateWithoutAgencyInput[]
     connectOrCreate?: LabourProfileCreateOrConnectWithoutAgencyInput | LabourProfileCreateOrConnectWithoutAgencyInput[]
@@ -25572,6 +27351,20 @@ export namespace Prisma {
     deleteMany?: AgencyDocumentScalarWhereInput | AgencyDocumentScalarWhereInput[]
   }
 
+  export type RequirementAssignmentUncheckedUpdateManyWithoutAgencyNestedInput = {
+    create?: XOR<RequirementAssignmentCreateWithoutAgencyInput, RequirementAssignmentUncheckedCreateWithoutAgencyInput> | RequirementAssignmentCreateWithoutAgencyInput[] | RequirementAssignmentUncheckedCreateWithoutAgencyInput[]
+    connectOrCreate?: RequirementAssignmentCreateOrConnectWithoutAgencyInput | RequirementAssignmentCreateOrConnectWithoutAgencyInput[]
+    upsert?: RequirementAssignmentUpsertWithWhereUniqueWithoutAgencyInput | RequirementAssignmentUpsertWithWhereUniqueWithoutAgencyInput[]
+    createMany?: RequirementAssignmentCreateManyAgencyInputEnvelope
+    set?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    disconnect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    delete?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    connect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    update?: RequirementAssignmentUpdateWithWhereUniqueWithoutAgencyInput | RequirementAssignmentUpdateWithWhereUniqueWithoutAgencyInput[]
+    updateMany?: RequirementAssignmentUpdateManyWithWhereWithoutAgencyInput | RequirementAssignmentUpdateManyWithWhereWithoutAgencyInput[]
+    deleteMany?: RequirementAssignmentScalarWhereInput | RequirementAssignmentScalarWhereInput[]
+  }
+
   export type UserCreateNestedOneWithoutAdminProfileInput = {
     create?: XOR<UserCreateWithoutAdminProfileInput, UserUncheckedCreateWithoutAdminProfileInput>
     connectOrCreate?: UserCreateOrConnectWithoutAdminProfileInput
@@ -25609,13 +27402,6 @@ export namespace Prisma {
     connect?: JobRoleWhereUniqueInput | JobRoleWhereUniqueInput[]
   }
 
-  export type LabourProfileCreateNestedManyWithoutRequirementInput = {
-    create?: XOR<LabourProfileCreateWithoutRequirementInput, LabourProfileUncheckedCreateWithoutRequirementInput> | LabourProfileCreateWithoutRequirementInput[] | LabourProfileUncheckedCreateWithoutRequirementInput[]
-    connectOrCreate?: LabourProfileCreateOrConnectWithoutRequirementInput | LabourProfileCreateOrConnectWithoutRequirementInput[]
-    createMany?: LabourProfileCreateManyRequirementInputEnvelope
-    connect?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
-  }
-
   export type ProcedureCreateNestedManyWithoutRequirementInput = {
     create?: XOR<ProcedureCreateWithoutRequirementInput, ProcedureUncheckedCreateWithoutRequirementInput> | ProcedureCreateWithoutRequirementInput[] | ProcedureUncheckedCreateWithoutRequirementInput[]
     connectOrCreate?: ProcedureCreateOrConnectWithoutRequirementInput | ProcedureCreateOrConnectWithoutRequirementInput[]
@@ -25623,11 +27409,11 @@ export namespace Prisma {
     connect?: ProcedureWhereUniqueInput | ProcedureWhereUniqueInput[]
   }
 
-  export type RequirementDocumentCreateNestedManyWithoutRequirementInput = {
-    create?: XOR<RequirementDocumentCreateWithoutRequirementInput, RequirementDocumentUncheckedCreateWithoutRequirementInput> | RequirementDocumentCreateWithoutRequirementInput[] | RequirementDocumentUncheckedCreateWithoutRequirementInput[]
-    connectOrCreate?: RequirementDocumentCreateOrConnectWithoutRequirementInput | RequirementDocumentCreateOrConnectWithoutRequirementInput[]
-    createMany?: RequirementDocumentCreateManyRequirementInputEnvelope
-    connect?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
+  export type RequirementAssignmentCreateNestedManyWithoutRequirementInput = {
+    create?: XOR<RequirementAssignmentCreateWithoutRequirementInput, RequirementAssignmentUncheckedCreateWithoutRequirementInput> | RequirementAssignmentCreateWithoutRequirementInput[] | RequirementAssignmentUncheckedCreateWithoutRequirementInput[]
+    connectOrCreate?: RequirementAssignmentCreateOrConnectWithoutRequirementInput | RequirementAssignmentCreateOrConnectWithoutRequirementInput[]
+    createMany?: RequirementAssignmentCreateManyRequirementInputEnvelope
+    connect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
   }
 
   export type JobRoleUncheckedCreateNestedManyWithoutRequirementInput = {
@@ -25637,13 +27423,6 @@ export namespace Prisma {
     connect?: JobRoleWhereUniqueInput | JobRoleWhereUniqueInput[]
   }
 
-  export type LabourProfileUncheckedCreateNestedManyWithoutRequirementInput = {
-    create?: XOR<LabourProfileCreateWithoutRequirementInput, LabourProfileUncheckedCreateWithoutRequirementInput> | LabourProfileCreateWithoutRequirementInput[] | LabourProfileUncheckedCreateWithoutRequirementInput[]
-    connectOrCreate?: LabourProfileCreateOrConnectWithoutRequirementInput | LabourProfileCreateOrConnectWithoutRequirementInput[]
-    createMany?: LabourProfileCreateManyRequirementInputEnvelope
-    connect?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
-  }
-
   export type ProcedureUncheckedCreateNestedManyWithoutRequirementInput = {
     create?: XOR<ProcedureCreateWithoutRequirementInput, ProcedureUncheckedCreateWithoutRequirementInput> | ProcedureCreateWithoutRequirementInput[] | ProcedureUncheckedCreateWithoutRequirementInput[]
     connectOrCreate?: ProcedureCreateOrConnectWithoutRequirementInput | ProcedureCreateOrConnectWithoutRequirementInput[]
@@ -25651,11 +27430,11 @@ export namespace Prisma {
     connect?: ProcedureWhereUniqueInput | ProcedureWhereUniqueInput[]
   }
 
-  export type RequirementDocumentUncheckedCreateNestedManyWithoutRequirementInput = {
-    create?: XOR<RequirementDocumentCreateWithoutRequirementInput, RequirementDocumentUncheckedCreateWithoutRequirementInput> | RequirementDocumentCreateWithoutRequirementInput[] | RequirementDocumentUncheckedCreateWithoutRequirementInput[]
-    connectOrCreate?: RequirementDocumentCreateOrConnectWithoutRequirementInput | RequirementDocumentCreateOrConnectWithoutRequirementInput[]
-    createMany?: RequirementDocumentCreateManyRequirementInputEnvelope
-    connect?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
+  export type RequirementAssignmentUncheckedCreateNestedManyWithoutRequirementInput = {
+    create?: XOR<RequirementAssignmentCreateWithoutRequirementInput, RequirementAssignmentUncheckedCreateWithoutRequirementInput> | RequirementAssignmentCreateWithoutRequirementInput[] | RequirementAssignmentUncheckedCreateWithoutRequirementInput[]
+    connectOrCreate?: RequirementAssignmentCreateOrConnectWithoutRequirementInput | RequirementAssignmentCreateOrConnectWithoutRequirementInput[]
+    createMany?: RequirementAssignmentCreateManyRequirementInputEnvelope
+    connect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
   }
 
   export type EnumRequirementStatusFieldUpdateOperationsInput = {
@@ -25715,20 +27494,6 @@ export namespace Prisma {
     deleteMany?: JobRoleScalarWhereInput | JobRoleScalarWhereInput[]
   }
 
-  export type LabourProfileUpdateManyWithoutRequirementNestedInput = {
-    create?: XOR<LabourProfileCreateWithoutRequirementInput, LabourProfileUncheckedCreateWithoutRequirementInput> | LabourProfileCreateWithoutRequirementInput[] | LabourProfileUncheckedCreateWithoutRequirementInput[]
-    connectOrCreate?: LabourProfileCreateOrConnectWithoutRequirementInput | LabourProfileCreateOrConnectWithoutRequirementInput[]
-    upsert?: LabourProfileUpsertWithWhereUniqueWithoutRequirementInput | LabourProfileUpsertWithWhereUniqueWithoutRequirementInput[]
-    createMany?: LabourProfileCreateManyRequirementInputEnvelope
-    set?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
-    disconnect?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
-    delete?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
-    connect?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
-    update?: LabourProfileUpdateWithWhereUniqueWithoutRequirementInput | LabourProfileUpdateWithWhereUniqueWithoutRequirementInput[]
-    updateMany?: LabourProfileUpdateManyWithWhereWithoutRequirementInput | LabourProfileUpdateManyWithWhereWithoutRequirementInput[]
-    deleteMany?: LabourProfileScalarWhereInput | LabourProfileScalarWhereInput[]
-  }
-
   export type ProcedureUpdateManyWithoutRequirementNestedInput = {
     create?: XOR<ProcedureCreateWithoutRequirementInput, ProcedureUncheckedCreateWithoutRequirementInput> | ProcedureCreateWithoutRequirementInput[] | ProcedureUncheckedCreateWithoutRequirementInput[]
     connectOrCreate?: ProcedureCreateOrConnectWithoutRequirementInput | ProcedureCreateOrConnectWithoutRequirementInput[]
@@ -25743,18 +27508,18 @@ export namespace Prisma {
     deleteMany?: ProcedureScalarWhereInput | ProcedureScalarWhereInput[]
   }
 
-  export type RequirementDocumentUpdateManyWithoutRequirementNestedInput = {
-    create?: XOR<RequirementDocumentCreateWithoutRequirementInput, RequirementDocumentUncheckedCreateWithoutRequirementInput> | RequirementDocumentCreateWithoutRequirementInput[] | RequirementDocumentUncheckedCreateWithoutRequirementInput[]
-    connectOrCreate?: RequirementDocumentCreateOrConnectWithoutRequirementInput | RequirementDocumentCreateOrConnectWithoutRequirementInput[]
-    upsert?: RequirementDocumentUpsertWithWhereUniqueWithoutRequirementInput | RequirementDocumentUpsertWithWhereUniqueWithoutRequirementInput[]
-    createMany?: RequirementDocumentCreateManyRequirementInputEnvelope
-    set?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
-    disconnect?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
-    delete?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
-    connect?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
-    update?: RequirementDocumentUpdateWithWhereUniqueWithoutRequirementInput | RequirementDocumentUpdateWithWhereUniqueWithoutRequirementInput[]
-    updateMany?: RequirementDocumentUpdateManyWithWhereWithoutRequirementInput | RequirementDocumentUpdateManyWithWhereWithoutRequirementInput[]
-    deleteMany?: RequirementDocumentScalarWhereInput | RequirementDocumentScalarWhereInput[]
+  export type RequirementAssignmentUpdateManyWithoutRequirementNestedInput = {
+    create?: XOR<RequirementAssignmentCreateWithoutRequirementInput, RequirementAssignmentUncheckedCreateWithoutRequirementInput> | RequirementAssignmentCreateWithoutRequirementInput[] | RequirementAssignmentUncheckedCreateWithoutRequirementInput[]
+    connectOrCreate?: RequirementAssignmentCreateOrConnectWithoutRequirementInput | RequirementAssignmentCreateOrConnectWithoutRequirementInput[]
+    upsert?: RequirementAssignmentUpsertWithWhereUniqueWithoutRequirementInput | RequirementAssignmentUpsertWithWhereUniqueWithoutRequirementInput[]
+    createMany?: RequirementAssignmentCreateManyRequirementInputEnvelope
+    set?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    disconnect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    delete?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    connect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    update?: RequirementAssignmentUpdateWithWhereUniqueWithoutRequirementInput | RequirementAssignmentUpdateWithWhereUniqueWithoutRequirementInput[]
+    updateMany?: RequirementAssignmentUpdateManyWithWhereWithoutRequirementInput | RequirementAssignmentUpdateManyWithWhereWithoutRequirementInput[]
+    deleteMany?: RequirementAssignmentScalarWhereInput | RequirementAssignmentScalarWhereInput[]
   }
 
   export type JobRoleUncheckedUpdateManyWithoutRequirementNestedInput = {
@@ -25771,20 +27536,6 @@ export namespace Prisma {
     deleteMany?: JobRoleScalarWhereInput | JobRoleScalarWhereInput[]
   }
 
-  export type LabourProfileUncheckedUpdateManyWithoutRequirementNestedInput = {
-    create?: XOR<LabourProfileCreateWithoutRequirementInput, LabourProfileUncheckedCreateWithoutRequirementInput> | LabourProfileCreateWithoutRequirementInput[] | LabourProfileUncheckedCreateWithoutRequirementInput[]
-    connectOrCreate?: LabourProfileCreateOrConnectWithoutRequirementInput | LabourProfileCreateOrConnectWithoutRequirementInput[]
-    upsert?: LabourProfileUpsertWithWhereUniqueWithoutRequirementInput | LabourProfileUpsertWithWhereUniqueWithoutRequirementInput[]
-    createMany?: LabourProfileCreateManyRequirementInputEnvelope
-    set?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
-    disconnect?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
-    delete?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
-    connect?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
-    update?: LabourProfileUpdateWithWhereUniqueWithoutRequirementInput | LabourProfileUpdateWithWhereUniqueWithoutRequirementInput[]
-    updateMany?: LabourProfileUpdateManyWithWhereWithoutRequirementInput | LabourProfileUpdateManyWithWhereWithoutRequirementInput[]
-    deleteMany?: LabourProfileScalarWhereInput | LabourProfileScalarWhereInput[]
-  }
-
   export type ProcedureUncheckedUpdateManyWithoutRequirementNestedInput = {
     create?: XOR<ProcedureCreateWithoutRequirementInput, ProcedureUncheckedCreateWithoutRequirementInput> | ProcedureCreateWithoutRequirementInput[] | ProcedureUncheckedCreateWithoutRequirementInput[]
     connectOrCreate?: ProcedureCreateOrConnectWithoutRequirementInput | ProcedureCreateOrConnectWithoutRequirementInput[]
@@ -25799,24 +27550,38 @@ export namespace Prisma {
     deleteMany?: ProcedureScalarWhereInput | ProcedureScalarWhereInput[]
   }
 
-  export type RequirementDocumentUncheckedUpdateManyWithoutRequirementNestedInput = {
-    create?: XOR<RequirementDocumentCreateWithoutRequirementInput, RequirementDocumentUncheckedCreateWithoutRequirementInput> | RequirementDocumentCreateWithoutRequirementInput[] | RequirementDocumentUncheckedCreateWithoutRequirementInput[]
-    connectOrCreate?: RequirementDocumentCreateOrConnectWithoutRequirementInput | RequirementDocumentCreateOrConnectWithoutRequirementInput[]
-    upsert?: RequirementDocumentUpsertWithWhereUniqueWithoutRequirementInput | RequirementDocumentUpsertWithWhereUniqueWithoutRequirementInput[]
-    createMany?: RequirementDocumentCreateManyRequirementInputEnvelope
-    set?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
-    disconnect?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
-    delete?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
-    connect?: RequirementDocumentWhereUniqueInput | RequirementDocumentWhereUniqueInput[]
-    update?: RequirementDocumentUpdateWithWhereUniqueWithoutRequirementInput | RequirementDocumentUpdateWithWhereUniqueWithoutRequirementInput[]
-    updateMany?: RequirementDocumentUpdateManyWithWhereWithoutRequirementInput | RequirementDocumentUpdateManyWithWhereWithoutRequirementInput[]
-    deleteMany?: RequirementDocumentScalarWhereInput | RequirementDocumentScalarWhereInput[]
+  export type RequirementAssignmentUncheckedUpdateManyWithoutRequirementNestedInput = {
+    create?: XOR<RequirementAssignmentCreateWithoutRequirementInput, RequirementAssignmentUncheckedCreateWithoutRequirementInput> | RequirementAssignmentCreateWithoutRequirementInput[] | RequirementAssignmentUncheckedCreateWithoutRequirementInput[]
+    connectOrCreate?: RequirementAssignmentCreateOrConnectWithoutRequirementInput | RequirementAssignmentCreateOrConnectWithoutRequirementInput[]
+    upsert?: RequirementAssignmentUpsertWithWhereUniqueWithoutRequirementInput | RequirementAssignmentUpsertWithWhereUniqueWithoutRequirementInput[]
+    createMany?: RequirementAssignmentCreateManyRequirementInputEnvelope
+    set?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    disconnect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    delete?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    connect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    update?: RequirementAssignmentUpdateWithWhereUniqueWithoutRequirementInput | RequirementAssignmentUpdateWithWhereUniqueWithoutRequirementInput[]
+    updateMany?: RequirementAssignmentUpdateManyWithWhereWithoutRequirementInput | RequirementAssignmentUpdateManyWithWhereWithoutRequirementInput[]
+    deleteMany?: RequirementAssignmentScalarWhereInput | RequirementAssignmentScalarWhereInput[]
   }
 
   export type RequirementCreateNestedOneWithoutJobRolesInput = {
     create?: XOR<RequirementCreateWithoutJobRolesInput, RequirementUncheckedCreateWithoutJobRolesInput>
     connectOrCreate?: RequirementCreateOrConnectWithoutJobRolesInput
     connect?: RequirementWhereUniqueInput
+  }
+
+  export type RequirementAssignmentCreateNestedManyWithoutJobRoleInput = {
+    create?: XOR<RequirementAssignmentCreateWithoutJobRoleInput, RequirementAssignmentUncheckedCreateWithoutJobRoleInput> | RequirementAssignmentCreateWithoutJobRoleInput[] | RequirementAssignmentUncheckedCreateWithoutJobRoleInput[]
+    connectOrCreate?: RequirementAssignmentCreateOrConnectWithoutJobRoleInput | RequirementAssignmentCreateOrConnectWithoutJobRoleInput[]
+    createMany?: RequirementAssignmentCreateManyJobRoleInputEnvelope
+    connect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+  }
+
+  export type RequirementAssignmentUncheckedCreateNestedManyWithoutJobRoleInput = {
+    create?: XOR<RequirementAssignmentCreateWithoutJobRoleInput, RequirementAssignmentUncheckedCreateWithoutJobRoleInput> | RequirementAssignmentCreateWithoutJobRoleInput[] | RequirementAssignmentUncheckedCreateWithoutJobRoleInput[]
+    connectOrCreate?: RequirementAssignmentCreateOrConnectWithoutJobRoleInput | RequirementAssignmentCreateOrConnectWithoutJobRoleInput[]
+    createMany?: RequirementAssignmentCreateManyJobRoleInputEnvelope
+    connect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
   }
 
   export type IntFieldUpdateOperationsInput = {
@@ -25847,28 +27612,128 @@ export namespace Prisma {
     update?: XOR<XOR<RequirementUpdateToOneWithWhereWithoutJobRolesInput, RequirementUpdateWithoutJobRolesInput>, RequirementUncheckedUpdateWithoutJobRolesInput>
   }
 
-  export type LabourProfileCreateskillsInput = {
-    set: string[]
+  export type RequirementAssignmentUpdateManyWithoutJobRoleNestedInput = {
+    create?: XOR<RequirementAssignmentCreateWithoutJobRoleInput, RequirementAssignmentUncheckedCreateWithoutJobRoleInput> | RequirementAssignmentCreateWithoutJobRoleInput[] | RequirementAssignmentUncheckedCreateWithoutJobRoleInput[]
+    connectOrCreate?: RequirementAssignmentCreateOrConnectWithoutJobRoleInput | RequirementAssignmentCreateOrConnectWithoutJobRoleInput[]
+    upsert?: RequirementAssignmentUpsertWithWhereUniqueWithoutJobRoleInput | RequirementAssignmentUpsertWithWhereUniqueWithoutJobRoleInput[]
+    createMany?: RequirementAssignmentCreateManyJobRoleInputEnvelope
+    set?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    disconnect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    delete?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    connect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    update?: RequirementAssignmentUpdateWithWhereUniqueWithoutJobRoleInput | RequirementAssignmentUpdateWithWhereUniqueWithoutJobRoleInput[]
+    updateMany?: RequirementAssignmentUpdateManyWithWhereWithoutJobRoleInput | RequirementAssignmentUpdateManyWithWhereWithoutJobRoleInput[]
+    deleteMany?: RequirementAssignmentScalarWhereInput | RequirementAssignmentScalarWhereInput[]
   }
 
-  export type LabourProfileCreatelanguagesInput = {
-    set: string[]
+  export type RequirementAssignmentUncheckedUpdateManyWithoutJobRoleNestedInput = {
+    create?: XOR<RequirementAssignmentCreateWithoutJobRoleInput, RequirementAssignmentUncheckedCreateWithoutJobRoleInput> | RequirementAssignmentCreateWithoutJobRoleInput[] | RequirementAssignmentUncheckedCreateWithoutJobRoleInput[]
+    connectOrCreate?: RequirementAssignmentCreateOrConnectWithoutJobRoleInput | RequirementAssignmentCreateOrConnectWithoutJobRoleInput[]
+    upsert?: RequirementAssignmentUpsertWithWhereUniqueWithoutJobRoleInput | RequirementAssignmentUpsertWithWhereUniqueWithoutJobRoleInput[]
+    createMany?: RequirementAssignmentCreateManyJobRoleInputEnvelope
+    set?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    disconnect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    delete?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    connect?: RequirementAssignmentWhereUniqueInput | RequirementAssignmentWhereUniqueInput[]
+    update?: RequirementAssignmentUpdateWithWhereUniqueWithoutJobRoleInput | RequirementAssignmentUpdateWithWhereUniqueWithoutJobRoleInput[]
+    updateMany?: RequirementAssignmentUpdateManyWithWhereWithoutJobRoleInput | RequirementAssignmentUpdateManyWithWhereWithoutJobRoleInput[]
+    deleteMany?: RequirementAssignmentScalarWhereInput | RequirementAssignmentScalarWhereInput[]
   }
 
-  export type LabourProfileCreateotherDocsInput = {
-    set: string[]
-  }
-
-  export type RequirementCreateNestedOneWithoutLabourProfilesInput = {
-    create?: XOR<RequirementCreateWithoutLabourProfilesInput, RequirementUncheckedCreateWithoutLabourProfilesInput>
-    connectOrCreate?: RequirementCreateOrConnectWithoutLabourProfilesInput
+  export type RequirementCreateNestedOneWithoutRequirementAssignmentInput = {
+    create?: XOR<RequirementCreateWithoutRequirementAssignmentInput, RequirementUncheckedCreateWithoutRequirementAssignmentInput>
+    connectOrCreate?: RequirementCreateOrConnectWithoutRequirementAssignmentInput
     connect?: RequirementWhereUniqueInput
+  }
+
+  export type JobRoleCreateNestedOneWithoutRequirementAssignmentInput = {
+    create?: XOR<JobRoleCreateWithoutRequirementAssignmentInput, JobRoleUncheckedCreateWithoutRequirementAssignmentInput>
+    connectOrCreate?: JobRoleCreateOrConnectWithoutRequirementAssignmentInput
+    connect?: JobRoleWhereUniqueInput
+  }
+
+  export type AgencyCreateNestedOneWithoutRequirementAssignmentInput = {
+    create?: XOR<AgencyCreateWithoutRequirementAssignmentInput, AgencyUncheckedCreateWithoutRequirementAssignmentInput>
+    connectOrCreate?: AgencyCreateOrConnectWithoutRequirementAssignmentInput
+    connect?: AgencyWhereUniqueInput
+  }
+
+  export type LabourProfileCreateNestedManyWithoutRequirementAssignmentInput = {
+    create?: XOR<LabourProfileCreateWithoutRequirementAssignmentInput, LabourProfileUncheckedCreateWithoutRequirementAssignmentInput> | LabourProfileCreateWithoutRequirementAssignmentInput[] | LabourProfileUncheckedCreateWithoutRequirementAssignmentInput[]
+    connectOrCreate?: LabourProfileCreateOrConnectWithoutRequirementAssignmentInput | LabourProfileCreateOrConnectWithoutRequirementAssignmentInput[]
+    createMany?: LabourProfileCreateManyRequirementAssignmentInputEnvelope
+    connect?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
+  }
+
+  export type LabourProfileUncheckedCreateNestedManyWithoutRequirementAssignmentInput = {
+    create?: XOR<LabourProfileCreateWithoutRequirementAssignmentInput, LabourProfileUncheckedCreateWithoutRequirementAssignmentInput> | LabourProfileCreateWithoutRequirementAssignmentInput[] | LabourProfileUncheckedCreateWithoutRequirementAssignmentInput[]
+    connectOrCreate?: LabourProfileCreateOrConnectWithoutRequirementAssignmentInput | LabourProfileCreateOrConnectWithoutRequirementAssignmentInput[]
+    createMany?: LabourProfileCreateManyRequirementAssignmentInputEnvelope
+    connect?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
+  }
+
+  export type RequirementUpdateOneRequiredWithoutRequirementAssignmentNestedInput = {
+    create?: XOR<RequirementCreateWithoutRequirementAssignmentInput, RequirementUncheckedCreateWithoutRequirementAssignmentInput>
+    connectOrCreate?: RequirementCreateOrConnectWithoutRequirementAssignmentInput
+    upsert?: RequirementUpsertWithoutRequirementAssignmentInput
+    connect?: RequirementWhereUniqueInput
+    update?: XOR<XOR<RequirementUpdateToOneWithWhereWithoutRequirementAssignmentInput, RequirementUpdateWithoutRequirementAssignmentInput>, RequirementUncheckedUpdateWithoutRequirementAssignmentInput>
+  }
+
+  export type JobRoleUpdateOneRequiredWithoutRequirementAssignmentNestedInput = {
+    create?: XOR<JobRoleCreateWithoutRequirementAssignmentInput, JobRoleUncheckedCreateWithoutRequirementAssignmentInput>
+    connectOrCreate?: JobRoleCreateOrConnectWithoutRequirementAssignmentInput
+    upsert?: JobRoleUpsertWithoutRequirementAssignmentInput
+    connect?: JobRoleWhereUniqueInput
+    update?: XOR<XOR<JobRoleUpdateToOneWithWhereWithoutRequirementAssignmentInput, JobRoleUpdateWithoutRequirementAssignmentInput>, JobRoleUncheckedUpdateWithoutRequirementAssignmentInput>
+  }
+
+  export type AgencyUpdateOneRequiredWithoutRequirementAssignmentNestedInput = {
+    create?: XOR<AgencyCreateWithoutRequirementAssignmentInput, AgencyUncheckedCreateWithoutRequirementAssignmentInput>
+    connectOrCreate?: AgencyCreateOrConnectWithoutRequirementAssignmentInput
+    upsert?: AgencyUpsertWithoutRequirementAssignmentInput
+    connect?: AgencyWhereUniqueInput
+    update?: XOR<XOR<AgencyUpdateToOneWithWhereWithoutRequirementAssignmentInput, AgencyUpdateWithoutRequirementAssignmentInput>, AgencyUncheckedUpdateWithoutRequirementAssignmentInput>
+  }
+
+  export type LabourProfileUpdateManyWithoutRequirementAssignmentNestedInput = {
+    create?: XOR<LabourProfileCreateWithoutRequirementAssignmentInput, LabourProfileUncheckedCreateWithoutRequirementAssignmentInput> | LabourProfileCreateWithoutRequirementAssignmentInput[] | LabourProfileUncheckedCreateWithoutRequirementAssignmentInput[]
+    connectOrCreate?: LabourProfileCreateOrConnectWithoutRequirementAssignmentInput | LabourProfileCreateOrConnectWithoutRequirementAssignmentInput[]
+    upsert?: LabourProfileUpsertWithWhereUniqueWithoutRequirementAssignmentInput | LabourProfileUpsertWithWhereUniqueWithoutRequirementAssignmentInput[]
+    createMany?: LabourProfileCreateManyRequirementAssignmentInputEnvelope
+    set?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
+    disconnect?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
+    delete?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
+    connect?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
+    update?: LabourProfileUpdateWithWhereUniqueWithoutRequirementAssignmentInput | LabourProfileUpdateWithWhereUniqueWithoutRequirementAssignmentInput[]
+    updateMany?: LabourProfileUpdateManyWithWhereWithoutRequirementAssignmentInput | LabourProfileUpdateManyWithWhereWithoutRequirementAssignmentInput[]
+    deleteMany?: LabourProfileScalarWhereInput | LabourProfileScalarWhereInput[]
+  }
+
+  export type LabourProfileUncheckedUpdateManyWithoutRequirementAssignmentNestedInput = {
+    create?: XOR<LabourProfileCreateWithoutRequirementAssignmentInput, LabourProfileUncheckedCreateWithoutRequirementAssignmentInput> | LabourProfileCreateWithoutRequirementAssignmentInput[] | LabourProfileUncheckedCreateWithoutRequirementAssignmentInput[]
+    connectOrCreate?: LabourProfileCreateOrConnectWithoutRequirementAssignmentInput | LabourProfileCreateOrConnectWithoutRequirementAssignmentInput[]
+    upsert?: LabourProfileUpsertWithWhereUniqueWithoutRequirementAssignmentInput | LabourProfileUpsertWithWhereUniqueWithoutRequirementAssignmentInput[]
+    createMany?: LabourProfileCreateManyRequirementAssignmentInputEnvelope
+    set?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
+    disconnect?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
+    delete?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
+    connect?: LabourProfileWhereUniqueInput | LabourProfileWhereUniqueInput[]
+    update?: LabourProfileUpdateWithWhereUniqueWithoutRequirementAssignmentInput | LabourProfileUpdateWithWhereUniqueWithoutRequirementAssignmentInput[]
+    updateMany?: LabourProfileUpdateManyWithWhereWithoutRequirementAssignmentInput | LabourProfileUpdateManyWithWhereWithoutRequirementAssignmentInput[]
+    deleteMany?: LabourProfileScalarWhereInput | LabourProfileScalarWhereInput[]
   }
 
   export type AgencyCreateNestedOneWithoutLabourProfilesInput = {
     create?: XOR<AgencyCreateWithoutLabourProfilesInput, AgencyUncheckedCreateWithoutLabourProfilesInput>
     connectOrCreate?: AgencyCreateOrConnectWithoutLabourProfilesInput
     connect?: AgencyWhereUniqueInput
+  }
+
+  export type RequirementAssignmentCreateNestedOneWithoutLabourProfileInput = {
+    create?: XOR<RequirementAssignmentCreateWithoutLabourProfileInput, RequirementAssignmentUncheckedCreateWithoutLabourProfileInput>
+    connectOrCreate?: RequirementAssignmentCreateOrConnectWithoutLabourProfileInput
+    connect?: RequirementAssignmentWhereUniqueInput
   }
 
   export type LabourStatusLogCreateNestedManyWithoutLabourProfileInput = {
@@ -25885,6 +27750,13 @@ export namespace Prisma {
     connect?: ProcedureWhereUniqueInput | ProcedureWhereUniqueInput[]
   }
 
+  export type DocumentVerificationCreateNestedManyWithoutLabourProfileInput = {
+    create?: XOR<DocumentVerificationCreateWithoutLabourProfileInput, DocumentVerificationUncheckedCreateWithoutLabourProfileInput> | DocumentVerificationCreateWithoutLabourProfileInput[] | DocumentVerificationUncheckedCreateWithoutLabourProfileInput[]
+    connectOrCreate?: DocumentVerificationCreateOrConnectWithoutLabourProfileInput | DocumentVerificationCreateOrConnectWithoutLabourProfileInput[]
+    createMany?: DocumentVerificationCreateManyLabourProfileInputEnvelope
+    connect?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+  }
+
   export type LabourStatusLogUncheckedCreateNestedManyWithoutLabourProfileInput = {
     create?: XOR<LabourStatusLogCreateWithoutLabourProfileInput, LabourStatusLogUncheckedCreateWithoutLabourProfileInput> | LabourStatusLogCreateWithoutLabourProfileInput[] | LabourStatusLogUncheckedCreateWithoutLabourProfileInput[]
     connectOrCreate?: LabourStatusLogCreateOrConnectWithoutLabourProfileInput | LabourStatusLogCreateOrConnectWithoutLabourProfileInput[]
@@ -25899,35 +27771,23 @@ export namespace Prisma {
     connect?: ProcedureWhereUniqueInput | ProcedureWhereUniqueInput[]
   }
 
+  export type DocumentVerificationUncheckedCreateNestedManyWithoutLabourProfileInput = {
+    create?: XOR<DocumentVerificationCreateWithoutLabourProfileInput, DocumentVerificationUncheckedCreateWithoutLabourProfileInput> | DocumentVerificationCreateWithoutLabourProfileInput[] | DocumentVerificationUncheckedCreateWithoutLabourProfileInput[]
+    connectOrCreate?: DocumentVerificationCreateOrConnectWithoutLabourProfileInput | DocumentVerificationCreateOrConnectWithoutLabourProfileInput[]
+    createMany?: DocumentVerificationCreateManyLabourProfileInputEnvelope
+    connect?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+  }
+
   export type EnumGenderFieldUpdateOperationsInput = {
     set?: $Enums.Gender
-  }
-
-  export type LabourProfileUpdateskillsInput = {
-    set?: string[]
-    push?: string | string[]
-  }
-
-  export type LabourProfileUpdatelanguagesInput = {
-    set?: string[]
-    push?: string | string[]
-  }
-
-  export type LabourProfileUpdateotherDocsInput = {
-    set?: string[]
-    push?: string | string[]
   }
 
   export type EnumLabourProfileStatusFieldUpdateOperationsInput = {
     set?: $Enums.LabourProfileStatus
   }
 
-  export type RequirementUpdateOneRequiredWithoutLabourProfilesNestedInput = {
-    create?: XOR<RequirementCreateWithoutLabourProfilesInput, RequirementUncheckedCreateWithoutLabourProfilesInput>
-    connectOrCreate?: RequirementCreateOrConnectWithoutLabourProfilesInput
-    upsert?: RequirementUpsertWithoutLabourProfilesInput
-    connect?: RequirementWhereUniqueInput
-    update?: XOR<XOR<RequirementUpdateToOneWithWhereWithoutLabourProfilesInput, RequirementUpdateWithoutLabourProfilesInput>, RequirementUncheckedUpdateWithoutLabourProfilesInput>
+  export type EnumDocumentVerificationStatusFieldUpdateOperationsInput = {
+    set?: $Enums.DocumentVerificationStatus
   }
 
   export type AgencyUpdateOneRequiredWithoutLabourProfilesNestedInput = {
@@ -25936,6 +27796,16 @@ export namespace Prisma {
     upsert?: AgencyUpsertWithoutLabourProfilesInput
     connect?: AgencyWhereUniqueInput
     update?: XOR<XOR<AgencyUpdateToOneWithWhereWithoutLabourProfilesInput, AgencyUpdateWithoutLabourProfilesInput>, AgencyUncheckedUpdateWithoutLabourProfilesInput>
+  }
+
+  export type RequirementAssignmentUpdateOneWithoutLabourProfileNestedInput = {
+    create?: XOR<RequirementAssignmentCreateWithoutLabourProfileInput, RequirementAssignmentUncheckedCreateWithoutLabourProfileInput>
+    connectOrCreate?: RequirementAssignmentCreateOrConnectWithoutLabourProfileInput
+    upsert?: RequirementAssignmentUpsertWithoutLabourProfileInput
+    disconnect?: RequirementAssignmentWhereInput | boolean
+    delete?: RequirementAssignmentWhereInput | boolean
+    connect?: RequirementAssignmentWhereUniqueInput
+    update?: XOR<XOR<RequirementAssignmentUpdateToOneWithWhereWithoutLabourProfileInput, RequirementAssignmentUpdateWithoutLabourProfileInput>, RequirementAssignmentUncheckedUpdateWithoutLabourProfileInput>
   }
 
   export type LabourStatusLogUpdateManyWithoutLabourProfileNestedInput = {
@@ -25966,6 +27836,20 @@ export namespace Prisma {
     deleteMany?: ProcedureScalarWhereInput | ProcedureScalarWhereInput[]
   }
 
+  export type DocumentVerificationUpdateManyWithoutLabourProfileNestedInput = {
+    create?: XOR<DocumentVerificationCreateWithoutLabourProfileInput, DocumentVerificationUncheckedCreateWithoutLabourProfileInput> | DocumentVerificationCreateWithoutLabourProfileInput[] | DocumentVerificationUncheckedCreateWithoutLabourProfileInput[]
+    connectOrCreate?: DocumentVerificationCreateOrConnectWithoutLabourProfileInput | DocumentVerificationCreateOrConnectWithoutLabourProfileInput[]
+    upsert?: DocumentVerificationUpsertWithWhereUniqueWithoutLabourProfileInput | DocumentVerificationUpsertWithWhereUniqueWithoutLabourProfileInput[]
+    createMany?: DocumentVerificationCreateManyLabourProfileInputEnvelope
+    set?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+    disconnect?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+    delete?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+    connect?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+    update?: DocumentVerificationUpdateWithWhereUniqueWithoutLabourProfileInput | DocumentVerificationUpdateWithWhereUniqueWithoutLabourProfileInput[]
+    updateMany?: DocumentVerificationUpdateManyWithWhereWithoutLabourProfileInput | DocumentVerificationUpdateManyWithWhereWithoutLabourProfileInput[]
+    deleteMany?: DocumentVerificationScalarWhereInput | DocumentVerificationScalarWhereInput[]
+  }
+
   export type LabourStatusLogUncheckedUpdateManyWithoutLabourProfileNestedInput = {
     create?: XOR<LabourStatusLogCreateWithoutLabourProfileInput, LabourStatusLogUncheckedCreateWithoutLabourProfileInput> | LabourStatusLogCreateWithoutLabourProfileInput[] | LabourStatusLogUncheckedCreateWithoutLabourProfileInput[]
     connectOrCreate?: LabourStatusLogCreateOrConnectWithoutLabourProfileInput | LabourStatusLogCreateOrConnectWithoutLabourProfileInput[]
@@ -25992,6 +27876,54 @@ export namespace Prisma {
     update?: ProcedureUpdateWithWhereUniqueWithoutLabourProfileInput | ProcedureUpdateWithWhereUniqueWithoutLabourProfileInput[]
     updateMany?: ProcedureUpdateManyWithWhereWithoutLabourProfileInput | ProcedureUpdateManyWithWhereWithoutLabourProfileInput[]
     deleteMany?: ProcedureScalarWhereInput | ProcedureScalarWhereInput[]
+  }
+
+  export type DocumentVerificationUncheckedUpdateManyWithoutLabourProfileNestedInput = {
+    create?: XOR<DocumentVerificationCreateWithoutLabourProfileInput, DocumentVerificationUncheckedCreateWithoutLabourProfileInput> | DocumentVerificationCreateWithoutLabourProfileInput[] | DocumentVerificationUncheckedCreateWithoutLabourProfileInput[]
+    connectOrCreate?: DocumentVerificationCreateOrConnectWithoutLabourProfileInput | DocumentVerificationCreateOrConnectWithoutLabourProfileInput[]
+    upsert?: DocumentVerificationUpsertWithWhereUniqueWithoutLabourProfileInput | DocumentVerificationUpsertWithWhereUniqueWithoutLabourProfileInput[]
+    createMany?: DocumentVerificationCreateManyLabourProfileInputEnvelope
+    set?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+    disconnect?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+    delete?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+    connect?: DocumentVerificationWhereUniqueInput | DocumentVerificationWhereUniqueInput[]
+    update?: DocumentVerificationUpdateWithWhereUniqueWithoutLabourProfileInput | DocumentVerificationUpdateWithWhereUniqueWithoutLabourProfileInput[]
+    updateMany?: DocumentVerificationUpdateManyWithWhereWithoutLabourProfileInput | DocumentVerificationUpdateManyWithWhereWithoutLabourProfileInput[]
+    deleteMany?: DocumentVerificationScalarWhereInput | DocumentVerificationScalarWhereInput[]
+  }
+
+  export type LabourProfileCreateNestedOneWithoutDocumentVerificationsInput = {
+    create?: XOR<LabourProfileCreateWithoutDocumentVerificationsInput, LabourProfileUncheckedCreateWithoutDocumentVerificationsInput>
+    connectOrCreate?: LabourProfileCreateOrConnectWithoutDocumentVerificationsInput
+    connect?: LabourProfileWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutDocumentVerificationInput = {
+    create?: XOR<UserCreateWithoutDocumentVerificationInput, UserUncheckedCreateWithoutDocumentVerificationInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDocumentVerificationInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type EnumVerificationStatusFieldUpdateOperationsInput = {
+    set?: $Enums.VerificationStatus
+  }
+
+  export type LabourProfileUpdateOneRequiredWithoutDocumentVerificationsNestedInput = {
+    create?: XOR<LabourProfileCreateWithoutDocumentVerificationsInput, LabourProfileUncheckedCreateWithoutDocumentVerificationsInput>
+    connectOrCreate?: LabourProfileCreateOrConnectWithoutDocumentVerificationsInput
+    upsert?: LabourProfileUpsertWithoutDocumentVerificationsInput
+    connect?: LabourProfileWhereUniqueInput
+    update?: XOR<XOR<LabourProfileUpdateToOneWithWhereWithoutDocumentVerificationsInput, LabourProfileUpdateWithoutDocumentVerificationsInput>, LabourProfileUncheckedUpdateWithoutDocumentVerificationsInput>
+  }
+
+  export type UserUpdateOneWithoutDocumentVerificationNestedInput = {
+    create?: XOR<UserCreateWithoutDocumentVerificationInput, UserUncheckedCreateWithoutDocumentVerificationInput>
+    connectOrCreate?: UserCreateOrConnectWithoutDocumentVerificationInput
+    upsert?: UserUpsertWithoutDocumentVerificationInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDocumentVerificationInput, UserUpdateWithoutDocumentVerificationInput>, UserUncheckedUpdateWithoutDocumentVerificationInput>
   }
 
   export type RequirementCreateNestedOneWithoutProceduresInput = {
@@ -26120,34 +28052,6 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAgencyDocumentsInput, UserUpdateWithoutAgencyDocumentsInput>, UserUncheckedUpdateWithoutAgencyDocumentsInput>
-  }
-
-  export type RequirementCreateNestedOneWithoutDocumentsInput = {
-    create?: XOR<RequirementCreateWithoutDocumentsInput, RequirementUncheckedCreateWithoutDocumentsInput>
-    connectOrCreate?: RequirementCreateOrConnectWithoutDocumentsInput
-    connect?: RequirementWhereUniqueInput
-  }
-
-  export type UserCreateNestedOneWithoutRequirementDocumentsInput = {
-    create?: XOR<UserCreateWithoutRequirementDocumentsInput, UserUncheckedCreateWithoutRequirementDocumentsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutRequirementDocumentsInput
-    connect?: UserWhereUniqueInput
-  }
-
-  export type RequirementUpdateOneRequiredWithoutDocumentsNestedInput = {
-    create?: XOR<RequirementCreateWithoutDocumentsInput, RequirementUncheckedCreateWithoutDocumentsInput>
-    connectOrCreate?: RequirementCreateOrConnectWithoutDocumentsInput
-    upsert?: RequirementUpsertWithoutDocumentsInput
-    connect?: RequirementWhereUniqueInput
-    update?: XOR<XOR<RequirementUpdateToOneWithWhereWithoutDocumentsInput, RequirementUpdateWithoutDocumentsInput>, RequirementUncheckedUpdateWithoutDocumentsInput>
-  }
-
-  export type UserUpdateOneRequiredWithoutRequirementDocumentsNestedInput = {
-    create?: XOR<UserCreateWithoutRequirementDocumentsInput, UserUncheckedCreateWithoutRequirementDocumentsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutRequirementDocumentsInput
-    upsert?: UserUpsertWithoutRequirementDocumentsInput
-    connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutRequirementDocumentsInput, UserUpdateWithoutRequirementDocumentsInput>, UserUncheckedUpdateWithoutRequirementDocumentsInput>
   }
 
   export type AuditLogCreateaffectedFieldsInput = {
@@ -26602,6 +28506,13 @@ export namespace Prisma {
     not?: NestedEnumLabourProfileStatusFilter<$PrismaModel> | $Enums.LabourProfileStatus
   }
 
+  export type NestedEnumDocumentVerificationStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.DocumentVerificationStatus | EnumDocumentVerificationStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DocumentVerificationStatus[] | ListEnumDocumentVerificationStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DocumentVerificationStatus[] | ListEnumDocumentVerificationStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDocumentVerificationStatusFilter<$PrismaModel> | $Enums.DocumentVerificationStatus
+  }
+
   export type NestedEnumGenderWithAggregatesFilter<$PrismaModel = never> = {
     equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel>
     in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
@@ -26620,6 +28531,33 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumLabourProfileStatusFilter<$PrismaModel>
     _max?: NestedEnumLabourProfileStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumDocumentVerificationStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.DocumentVerificationStatus | EnumDocumentVerificationStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.DocumentVerificationStatus[] | ListEnumDocumentVerificationStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.DocumentVerificationStatus[] | ListEnumDocumentVerificationStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumDocumentVerificationStatusWithAggregatesFilter<$PrismaModel> | $Enums.DocumentVerificationStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumDocumentVerificationStatusFilter<$PrismaModel>
+    _max?: NestedEnumDocumentVerificationStatusFilter<$PrismaModel>
+  }
+
+  export type NestedEnumVerificationStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.VerificationStatus | EnumVerificationStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.VerificationStatus[] | ListEnumVerificationStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.VerificationStatus[] | ListEnumVerificationStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumVerificationStatusFilter<$PrismaModel> | $Enums.VerificationStatus
+  }
+
+  export type NestedEnumVerificationStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.VerificationStatus | EnumVerificationStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.VerificationStatus[] | ListEnumVerificationStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.VerificationStatus[] | ListEnumVerificationStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumVerificationStatusWithAggregatesFilter<$PrismaModel> | $Enums.VerificationStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumVerificationStatusFilter<$PrismaModel>
+    _max?: NestedEnumVerificationStatusFilter<$PrismaModel>
   }
 
   export type NestedEnumProcedureStatusFilter<$PrismaModel = never> = {
@@ -26747,6 +28685,7 @@ export namespace Prisma {
     labourProfiles?: LabourProfileCreateNestedManyWithoutAgencyInput
     requirements?: RequirementCreateNestedManyWithoutAssignedAgencyInput
     documents?: AgencyDocumentCreateNestedManyWithoutAgencyInput
+    RequirementAssignment?: RequirementAssignmentCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyUncheckedCreateWithoutUserInput = {
@@ -26765,6 +28704,7 @@ export namespace Prisma {
     labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutAgencyInput
     requirements?: RequirementUncheckedCreateNestedManyWithoutAssignedAgencyInput
     documents?: AgencyDocumentUncheckedCreateNestedManyWithoutAgencyInput
+    RequirementAssignment?: RequirementAssignmentUncheckedCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyCreateOrConnectWithoutUserInput = {
@@ -26822,7 +28762,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutCreatedUsersInput = {
@@ -26852,7 +28792,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationUncheckedCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutCreatedUsersInput = {
@@ -26887,7 +28827,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutCreatedByInput = {
@@ -26917,7 +28857,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationUncheckedCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutCreatedByInput = {
@@ -27108,35 +29048,37 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type RequirementDocumentCreateWithoutUploadedByInput = {
+  export type DocumentVerificationCreateWithoutVerifiedByInput = {
     id?: string
-    type: $Enums.DocumentType
-    url: string
-    name?: string | null
-    description?: string | null
+    documentType: string
+    documentUrl: string
+    status?: $Enums.VerificationStatus
+    comments?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    requirement: RequirementCreateNestedOneWithoutDocumentsInput
+    verifiedAt?: Date | string | null
+    labourProfile: LabourProfileCreateNestedOneWithoutDocumentVerificationsInput
   }
 
-  export type RequirementDocumentUncheckedCreateWithoutUploadedByInput = {
+  export type DocumentVerificationUncheckedCreateWithoutVerifiedByInput = {
     id?: string
-    type: $Enums.DocumentType
-    url: string
-    name?: string | null
-    description?: string | null
-    requirementId: string
+    documentType: string
+    documentUrl: string
+    status?: $Enums.VerificationStatus
+    comments?: string | null
+    labourProfileId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    verifiedAt?: Date | string | null
   }
 
-  export type RequirementDocumentCreateOrConnectWithoutUploadedByInput = {
-    where: RequirementDocumentWhereUniqueInput
-    create: XOR<RequirementDocumentCreateWithoutUploadedByInput, RequirementDocumentUncheckedCreateWithoutUploadedByInput>
+  export type DocumentVerificationCreateOrConnectWithoutVerifiedByInput = {
+    where: DocumentVerificationWhereUniqueInput
+    create: XOR<DocumentVerificationCreateWithoutVerifiedByInput, DocumentVerificationUncheckedCreateWithoutVerifiedByInput>
   }
 
-  export type RequirementDocumentCreateManyUploadedByInputEnvelope = {
-    data: RequirementDocumentCreateManyUploadedByInput | RequirementDocumentCreateManyUploadedByInput[]
+  export type DocumentVerificationCreateManyVerifiedByInputEnvelope = {
+    data: DocumentVerificationCreateManyVerifiedByInput | DocumentVerificationCreateManyVerifiedByInput[]
     skipDuplicates?: boolean
   }
 
@@ -27214,6 +29156,7 @@ export namespace Prisma {
     labourProfiles?: LabourProfileUpdateManyWithoutAgencyNestedInput
     requirements?: RequirementUpdateManyWithoutAssignedAgencyNestedInput
     documents?: AgencyDocumentUpdateManyWithoutAgencyNestedInput
+    RequirementAssignment?: RequirementAssignmentUpdateManyWithoutAgencyNestedInput
   }
 
   export type AgencyUncheckedUpdateWithoutUserInput = {
@@ -27232,6 +29175,7 @@ export namespace Prisma {
     labourProfiles?: LabourProfileUncheckedUpdateManyWithoutAgencyNestedInput
     requirements?: RequirementUncheckedUpdateManyWithoutAssignedAgencyNestedInput
     documents?: AgencyDocumentUncheckedUpdateManyWithoutAgencyNestedInput
+    RequirementAssignment?: RequirementAssignmentUncheckedUpdateManyWithoutAgencyNestedInput
   }
 
   export type AdminUpsertWithoutUserInput = {
@@ -27301,7 +29245,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCreatedUsersInput = {
@@ -27331,7 +29275,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUncheckedUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserUpsertWithWhereUniqueWithoutCreatedByInput = {
@@ -27538,35 +29482,36 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"AgencyDocument"> | Date | string
   }
 
-  export type RequirementDocumentUpsertWithWhereUniqueWithoutUploadedByInput = {
-    where: RequirementDocumentWhereUniqueInput
-    update: XOR<RequirementDocumentUpdateWithoutUploadedByInput, RequirementDocumentUncheckedUpdateWithoutUploadedByInput>
-    create: XOR<RequirementDocumentCreateWithoutUploadedByInput, RequirementDocumentUncheckedCreateWithoutUploadedByInput>
+  export type DocumentVerificationUpsertWithWhereUniqueWithoutVerifiedByInput = {
+    where: DocumentVerificationWhereUniqueInput
+    update: XOR<DocumentVerificationUpdateWithoutVerifiedByInput, DocumentVerificationUncheckedUpdateWithoutVerifiedByInput>
+    create: XOR<DocumentVerificationCreateWithoutVerifiedByInput, DocumentVerificationUncheckedCreateWithoutVerifiedByInput>
   }
 
-  export type RequirementDocumentUpdateWithWhereUniqueWithoutUploadedByInput = {
-    where: RequirementDocumentWhereUniqueInput
-    data: XOR<RequirementDocumentUpdateWithoutUploadedByInput, RequirementDocumentUncheckedUpdateWithoutUploadedByInput>
+  export type DocumentVerificationUpdateWithWhereUniqueWithoutVerifiedByInput = {
+    where: DocumentVerificationWhereUniqueInput
+    data: XOR<DocumentVerificationUpdateWithoutVerifiedByInput, DocumentVerificationUncheckedUpdateWithoutVerifiedByInput>
   }
 
-  export type RequirementDocumentUpdateManyWithWhereWithoutUploadedByInput = {
-    where: RequirementDocumentScalarWhereInput
-    data: XOR<RequirementDocumentUpdateManyMutationInput, RequirementDocumentUncheckedUpdateManyWithoutUploadedByInput>
+  export type DocumentVerificationUpdateManyWithWhereWithoutVerifiedByInput = {
+    where: DocumentVerificationScalarWhereInput
+    data: XOR<DocumentVerificationUpdateManyMutationInput, DocumentVerificationUncheckedUpdateManyWithoutVerifiedByInput>
   }
 
-  export type RequirementDocumentScalarWhereInput = {
-    AND?: RequirementDocumentScalarWhereInput | RequirementDocumentScalarWhereInput[]
-    OR?: RequirementDocumentScalarWhereInput[]
-    NOT?: RequirementDocumentScalarWhereInput | RequirementDocumentScalarWhereInput[]
-    id?: StringFilter<"RequirementDocument"> | string
-    type?: EnumDocumentTypeFilter<"RequirementDocument"> | $Enums.DocumentType
-    url?: StringFilter<"RequirementDocument"> | string
-    name?: StringNullableFilter<"RequirementDocument"> | string | null
-    description?: StringNullableFilter<"RequirementDocument"> | string | null
-    requirementId?: StringFilter<"RequirementDocument"> | string
-    uploadedById?: StringFilter<"RequirementDocument"> | string
-    createdAt?: DateTimeFilter<"RequirementDocument"> | Date | string
-    updatedAt?: DateTimeFilter<"RequirementDocument"> | Date | string
+  export type DocumentVerificationScalarWhereInput = {
+    AND?: DocumentVerificationScalarWhereInput | DocumentVerificationScalarWhereInput[]
+    OR?: DocumentVerificationScalarWhereInput[]
+    NOT?: DocumentVerificationScalarWhereInput | DocumentVerificationScalarWhereInput[]
+    id?: StringFilter<"DocumentVerification"> | string
+    documentType?: StringFilter<"DocumentVerification"> | string
+    documentUrl?: StringFilter<"DocumentVerification"> | string
+    status?: EnumVerificationStatusFilter<"DocumentVerification"> | $Enums.VerificationStatus
+    comments?: StringNullableFilter<"DocumentVerification"> | string | null
+    labourProfileId?: StringFilter<"DocumentVerification"> | string
+    verifiedById?: StringNullableFilter<"DocumentVerification"> | string | null
+    createdAt?: DateTimeFilter<"DocumentVerification"> | Date | string
+    updatedAt?: DateTimeFilter<"DocumentVerification"> | Date | string
+    verifiedAt?: DateTimeNullableFilter<"DocumentVerification"> | Date | string | null
   }
 
   export type UserCreateWithoutClientProfileInput = {
@@ -27596,7 +29541,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutClientProfileInput = {
@@ -27626,7 +29571,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationUncheckedCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutClientProfileInput = {
@@ -27649,9 +29594,8 @@ export namespace Prisma {
     reviewedAt?: Date | string | null
     assignedAgency?: AgencyCreateNestedOneWithoutRequirementsInput
     jobRoles?: JobRoleCreateNestedManyWithoutRequirementInput
-    labourProfiles?: LabourProfileCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureCreateNestedManyWithoutRequirementInput
-    documents?: RequirementDocumentCreateNestedManyWithoutRequirementInput
+    RequirementAssignment?: RequirementAssignmentCreateNestedManyWithoutRequirementInput
   }
 
   export type RequirementUncheckedCreateWithoutClientInput = {
@@ -27669,9 +29613,8 @@ export namespace Prisma {
     submittedAt?: Date | string | null
     reviewedAt?: Date | string | null
     jobRoles?: JobRoleUncheckedCreateNestedManyWithoutRequirementInput
-    labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureUncheckedCreateNestedManyWithoutRequirementInput
-    documents?: RequirementDocumentUncheckedCreateNestedManyWithoutRequirementInput
+    RequirementAssignment?: RequirementAssignmentUncheckedCreateNestedManyWithoutRequirementInput
   }
 
   export type RequirementCreateOrConnectWithoutClientInput = {
@@ -27760,7 +29703,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutClientProfileInput = {
@@ -27790,7 +29733,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUncheckedUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type RequirementUpsertWithWhereUniqueWithoutClientInput = {
@@ -27872,7 +29815,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutAgencyProfileInput = {
@@ -27902,7 +29845,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationUncheckedCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutAgencyProfileInput = {
@@ -27916,38 +29859,36 @@ export namespace Prisma {
     age: number
     gender: $Enums.Gender
     nationality: string
-    maritalStatus?: string | null
-    skills?: LabourProfileCreateskillsInput | string[]
-    experienceYears: number
-    education?: string | null
-    currentPosition?: string | null
-    currentCompany?: string | null
-    languages?: LabourProfileCreatelanguagesInput | string[]
-    englishProficiency?: string | null
+    jobRoleName: string
+    status?: $Enums.LabourProfileStatus
     email?: string | null
-    phone: string
-    address?: string | null
-    city?: string | null
-    country?: string | null
-    cvUrl: string
+    phone?: string | null
     passportNumber?: string | null
     passportExpiry?: Date | string | null
+    passportCopy?: string | null
+    passportVerified?: boolean
     visaType?: string | null
     visaExpiry?: Date | string | null
-    medicalStatus?: string | null
+    visaCopy?: string | null
+    visaVerified?: boolean
+    medicalReport?: string | null
     medicalExpiry?: Date | string | null
-    photo?: string | null
-    otherDocs?: LabourProfileCreateotherDocsInput | string[]
-    status?: $Enums.LabourProfileStatus
+    medicalVerified?: boolean
+    policeClearance?: string | null
+    policeVerified?: boolean
+    contractCopy?: string | null
+    contractVerified?: boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: $Enums.DocumentVerificationStatus
     statusReason?: string | null
-    deploymentDate?: Date | string | null
-    contractStartDate?: Date | string | null
-    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    requirement: RequirementCreateNestedOneWithoutLabourProfilesInput
+    documentsSubmittedAt?: Date | string | null
+    documentsVerifiedAt?: Date | string | null
+    requirementAssignment?: RequirementAssignmentCreateNestedOneWithoutLabourProfileInput
     statusLogs?: LabourStatusLogCreateNestedManyWithoutLabourProfileInput
     procedures?: ProcedureCreateNestedManyWithoutLabourProfileInput
+    documentVerifications?: DocumentVerificationCreateNestedManyWithoutLabourProfileInput
   }
 
   export type LabourProfileUncheckedCreateWithoutAgencyInput = {
@@ -27956,38 +29897,36 @@ export namespace Prisma {
     age: number
     gender: $Enums.Gender
     nationality: string
-    maritalStatus?: string | null
-    skills?: LabourProfileCreateskillsInput | string[]
-    experienceYears: number
-    education?: string | null
-    currentPosition?: string | null
-    currentCompany?: string | null
-    languages?: LabourProfileCreatelanguagesInput | string[]
-    englishProficiency?: string | null
+    jobRoleName: string
+    status?: $Enums.LabourProfileStatus
     email?: string | null
-    phone: string
-    address?: string | null
-    city?: string | null
-    country?: string | null
-    cvUrl: string
+    phone?: string | null
     passportNumber?: string | null
     passportExpiry?: Date | string | null
+    passportCopy?: string | null
+    passportVerified?: boolean
     visaType?: string | null
     visaExpiry?: Date | string | null
-    medicalStatus?: string | null
+    visaCopy?: string | null
+    visaVerified?: boolean
+    medicalReport?: string | null
     medicalExpiry?: Date | string | null
-    photo?: string | null
-    otherDocs?: LabourProfileCreateotherDocsInput | string[]
-    status?: $Enums.LabourProfileStatus
+    medicalVerified?: boolean
+    policeClearance?: string | null
+    policeVerified?: boolean
+    contractCopy?: string | null
+    contractVerified?: boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: $Enums.DocumentVerificationStatus
     statusReason?: string | null
-    requirementId: string
-    deploymentDate?: Date | string | null
-    contractStartDate?: Date | string | null
-    contractEndDate?: Date | string | null
+    requirementAssignmentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    documentsSubmittedAt?: Date | string | null
+    documentsVerifiedAt?: Date | string | null
     statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutLabourProfileInput
     procedures?: ProcedureUncheckedCreateNestedManyWithoutLabourProfileInput
+    documentVerifications?: DocumentVerificationUncheckedCreateNestedManyWithoutLabourProfileInput
   }
 
   export type LabourProfileCreateOrConnectWithoutAgencyInput = {
@@ -28015,9 +29954,8 @@ export namespace Prisma {
     reviewedAt?: Date | string | null
     client: ClientCreateNestedOneWithoutRequirementsInput
     jobRoles?: JobRoleCreateNestedManyWithoutRequirementInput
-    labourProfiles?: LabourProfileCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureCreateNestedManyWithoutRequirementInput
-    documents?: RequirementDocumentCreateNestedManyWithoutRequirementInput
+    RequirementAssignment?: RequirementAssignmentCreateNestedManyWithoutRequirementInput
   }
 
   export type RequirementUncheckedCreateWithoutAssignedAgencyInput = {
@@ -28035,9 +29973,8 @@ export namespace Prisma {
     submittedAt?: Date | string | null
     reviewedAt?: Date | string | null
     jobRoles?: JobRoleUncheckedCreateNestedManyWithoutRequirementInput
-    labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureUncheckedCreateNestedManyWithoutRequirementInput
-    documents?: RequirementDocumentUncheckedCreateNestedManyWithoutRequirementInput
+    RequirementAssignment?: RequirementAssignmentUncheckedCreateNestedManyWithoutRequirementInput
   }
 
   export type RequirementCreateOrConnectWithoutAssignedAgencyInput = {
@@ -28088,6 +30025,40 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type RequirementAssignmentCreateWithoutAgencyInput = {
+    id?: string
+    quantity: number
+    status?: $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    requirement: RequirementCreateNestedOneWithoutRequirementAssignmentInput
+    jobRole: JobRoleCreateNestedOneWithoutRequirementAssignmentInput
+    LabourProfile?: LabourProfileCreateNestedManyWithoutRequirementAssignmentInput
+  }
+
+  export type RequirementAssignmentUncheckedCreateWithoutAgencyInput = {
+    id?: string
+    requirementId: string
+    jobRoleId: string
+    quantity: number
+    status?: $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    LabourProfile?: LabourProfileUncheckedCreateNestedManyWithoutRequirementAssignmentInput
+  }
+
+  export type RequirementAssignmentCreateOrConnectWithoutAgencyInput = {
+    where: RequirementAssignmentWhereUniqueInput
+    create: XOR<RequirementAssignmentCreateWithoutAgencyInput, RequirementAssignmentUncheckedCreateWithoutAgencyInput>
+  }
+
+  export type RequirementAssignmentCreateManyAgencyInputEnvelope = {
+    data: RequirementAssignmentCreateManyAgencyInput | RequirementAssignmentCreateManyAgencyInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutAgencyProfileInput = {
     update: XOR<UserUpdateWithoutAgencyProfileInput, UserUncheckedUpdateWithoutAgencyProfileInput>
     create: XOR<UserCreateWithoutAgencyProfileInput, UserUncheckedCreateWithoutAgencyProfileInput>
@@ -28126,7 +30097,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAgencyProfileInput = {
@@ -28156,7 +30127,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUncheckedUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type LabourProfileUpsertWithWhereUniqueWithoutAgencyInput = {
@@ -28184,37 +30155,34 @@ export namespace Prisma {
     age?: IntFilter<"LabourProfile"> | number
     gender?: EnumGenderFilter<"LabourProfile"> | $Enums.Gender
     nationality?: StringFilter<"LabourProfile"> | string
-    maritalStatus?: StringNullableFilter<"LabourProfile"> | string | null
-    skills?: StringNullableListFilter<"LabourProfile">
-    experienceYears?: IntFilter<"LabourProfile"> | number
-    education?: StringNullableFilter<"LabourProfile"> | string | null
-    currentPosition?: StringNullableFilter<"LabourProfile"> | string | null
-    currentCompany?: StringNullableFilter<"LabourProfile"> | string | null
-    languages?: StringNullableListFilter<"LabourProfile">
-    englishProficiency?: StringNullableFilter<"LabourProfile"> | string | null
+    jobRoleName?: StringFilter<"LabourProfile"> | string
+    status?: EnumLabourProfileStatusFilter<"LabourProfile"> | $Enums.LabourProfileStatus
     email?: StringNullableFilter<"LabourProfile"> | string | null
-    phone?: StringFilter<"LabourProfile"> | string
-    address?: StringNullableFilter<"LabourProfile"> | string | null
-    city?: StringNullableFilter<"LabourProfile"> | string | null
-    country?: StringNullableFilter<"LabourProfile"> | string | null
-    cvUrl?: StringFilter<"LabourProfile"> | string
+    phone?: StringNullableFilter<"LabourProfile"> | string | null
     passportNumber?: StringNullableFilter<"LabourProfile"> | string | null
     passportExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    passportCopy?: StringNullableFilter<"LabourProfile"> | string | null
+    passportVerified?: BoolFilter<"LabourProfile"> | boolean
     visaType?: StringNullableFilter<"LabourProfile"> | string | null
     visaExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
-    medicalStatus?: StringNullableFilter<"LabourProfile"> | string | null
+    visaCopy?: StringNullableFilter<"LabourProfile"> | string | null
+    visaVerified?: BoolFilter<"LabourProfile"> | boolean
+    medicalReport?: StringNullableFilter<"LabourProfile"> | string | null
     medicalExpiry?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
-    photo?: StringNullableFilter<"LabourProfile"> | string | null
-    otherDocs?: StringNullableListFilter<"LabourProfile">
-    status?: EnumLabourProfileStatusFilter<"LabourProfile"> | $Enums.LabourProfileStatus
+    medicalVerified?: BoolFilter<"LabourProfile"> | boolean
+    policeClearance?: StringNullableFilter<"LabourProfile"> | string | null
+    policeVerified?: BoolFilter<"LabourProfile"> | boolean
+    contractCopy?: StringNullableFilter<"LabourProfile"> | string | null
+    contractVerified?: BoolFilter<"LabourProfile"> | boolean
+    otherDocs?: JsonNullableFilter<"LabourProfile">
+    verificationStatus?: EnumDocumentVerificationStatusFilter<"LabourProfile"> | $Enums.DocumentVerificationStatus
     statusReason?: StringNullableFilter<"LabourProfile"> | string | null
-    requirementId?: StringFilter<"LabourProfile"> | string
     agencyId?: StringFilter<"LabourProfile"> | string
-    deploymentDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
-    contractStartDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
-    contractEndDate?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    requirementAssignmentId?: StringNullableFilter<"LabourProfile"> | string | null
     createdAt?: DateTimeFilter<"LabourProfile"> | Date | string
     updatedAt?: DateTimeFilter<"LabourProfile"> | Date | string
+    documentsSubmittedAt?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
+    documentsVerifiedAt?: DateTimeNullableFilter<"LabourProfile"> | Date | string | null
   }
 
   export type RequirementUpsertWithWhereUniqueWithoutAssignedAgencyInput = {
@@ -28249,6 +30217,37 @@ export namespace Prisma {
     data: XOR<AgencyDocumentUpdateManyMutationInput, AgencyDocumentUncheckedUpdateManyWithoutAgencyInput>
   }
 
+  export type RequirementAssignmentUpsertWithWhereUniqueWithoutAgencyInput = {
+    where: RequirementAssignmentWhereUniqueInput
+    update: XOR<RequirementAssignmentUpdateWithoutAgencyInput, RequirementAssignmentUncheckedUpdateWithoutAgencyInput>
+    create: XOR<RequirementAssignmentCreateWithoutAgencyInput, RequirementAssignmentUncheckedCreateWithoutAgencyInput>
+  }
+
+  export type RequirementAssignmentUpdateWithWhereUniqueWithoutAgencyInput = {
+    where: RequirementAssignmentWhereUniqueInput
+    data: XOR<RequirementAssignmentUpdateWithoutAgencyInput, RequirementAssignmentUncheckedUpdateWithoutAgencyInput>
+  }
+
+  export type RequirementAssignmentUpdateManyWithWhereWithoutAgencyInput = {
+    where: RequirementAssignmentScalarWhereInput
+    data: XOR<RequirementAssignmentUpdateManyMutationInput, RequirementAssignmentUncheckedUpdateManyWithoutAgencyInput>
+  }
+
+  export type RequirementAssignmentScalarWhereInput = {
+    AND?: RequirementAssignmentScalarWhereInput | RequirementAssignmentScalarWhereInput[]
+    OR?: RequirementAssignmentScalarWhereInput[]
+    NOT?: RequirementAssignmentScalarWhereInput | RequirementAssignmentScalarWhereInput[]
+    id?: StringFilter<"RequirementAssignment"> | string
+    requirementId?: StringFilter<"RequirementAssignment"> | string
+    jobRoleId?: StringFilter<"RequirementAssignment"> | string
+    agencyId?: StringFilter<"RequirementAssignment"> | string
+    quantity?: IntFilter<"RequirementAssignment"> | number
+    status?: EnumRequirementStatusFilter<"RequirementAssignment"> | $Enums.RequirementStatus
+    metadata?: JsonNullableFilter<"RequirementAssignment">
+    createdAt?: DateTimeFilter<"RequirementAssignment"> | Date | string
+    updatedAt?: DateTimeFilter<"RequirementAssignment"> | Date | string
+  }
+
   export type UserCreateWithoutAdminProfileInput = {
     id?: string
     name: string
@@ -28276,7 +30275,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutAdminProfileInput = {
@@ -28306,7 +30305,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationUncheckedCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutAdminProfileInput = {
@@ -28352,7 +30351,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAdminProfileInput = {
@@ -28382,7 +30381,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUncheckedUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type ClientCreateWithoutRequirementsInput = {
@@ -28442,6 +30441,7 @@ export namespace Prisma {
     user: UserCreateNestedOneWithoutAgencyProfileInput
     labourProfiles?: LabourProfileCreateNestedManyWithoutAgencyInput
     documents?: AgencyDocumentCreateNestedManyWithoutAgencyInput
+    RequirementAssignment?: RequirementAssignmentCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyUncheckedCreateWithoutRequirementsInput = {
@@ -28460,6 +30460,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutAgencyInput
     documents?: AgencyDocumentUncheckedCreateNestedManyWithoutAgencyInput
+    RequirementAssignment?: RequirementAssignmentUncheckedCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyCreateOrConnectWithoutRequirementsInput = {
@@ -28478,6 +30479,7 @@ export namespace Prisma {
     contractDuration?: $Enums.ContractDuration | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    RequirementAssignment?: RequirementAssignmentCreateNestedManyWithoutJobRoleInput
   }
 
   export type JobRoleUncheckedCreateWithoutRequirementInput = {
@@ -28491,6 +30493,7 @@ export namespace Prisma {
     contractDuration?: $Enums.ContractDuration | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    RequirementAssignment?: RequirementAssignmentUncheckedCreateNestedManyWithoutJobRoleInput
   }
 
   export type JobRoleCreateOrConnectWithoutRequirementInput = {
@@ -28500,96 +30503,6 @@ export namespace Prisma {
 
   export type JobRoleCreateManyRequirementInputEnvelope = {
     data: JobRoleCreateManyRequirementInput | JobRoleCreateManyRequirementInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type LabourProfileCreateWithoutRequirementInput = {
-    id?: string
-    name: string
-    age: number
-    gender: $Enums.Gender
-    nationality: string
-    maritalStatus?: string | null
-    skills?: LabourProfileCreateskillsInput | string[]
-    experienceYears: number
-    education?: string | null
-    currentPosition?: string | null
-    currentCompany?: string | null
-    languages?: LabourProfileCreatelanguagesInput | string[]
-    englishProficiency?: string | null
-    email?: string | null
-    phone: string
-    address?: string | null
-    city?: string | null
-    country?: string | null
-    cvUrl: string
-    passportNumber?: string | null
-    passportExpiry?: Date | string | null
-    visaType?: string | null
-    visaExpiry?: Date | string | null
-    medicalStatus?: string | null
-    medicalExpiry?: Date | string | null
-    photo?: string | null
-    otherDocs?: LabourProfileCreateotherDocsInput | string[]
-    status?: $Enums.LabourProfileStatus
-    statusReason?: string | null
-    deploymentDate?: Date | string | null
-    contractStartDate?: Date | string | null
-    contractEndDate?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    agency: AgencyCreateNestedOneWithoutLabourProfilesInput
-    statusLogs?: LabourStatusLogCreateNestedManyWithoutLabourProfileInput
-    procedures?: ProcedureCreateNestedManyWithoutLabourProfileInput
-  }
-
-  export type LabourProfileUncheckedCreateWithoutRequirementInput = {
-    id?: string
-    name: string
-    age: number
-    gender: $Enums.Gender
-    nationality: string
-    maritalStatus?: string | null
-    skills?: LabourProfileCreateskillsInput | string[]
-    experienceYears: number
-    education?: string | null
-    currentPosition?: string | null
-    currentCompany?: string | null
-    languages?: LabourProfileCreatelanguagesInput | string[]
-    englishProficiency?: string | null
-    email?: string | null
-    phone: string
-    address?: string | null
-    city?: string | null
-    country?: string | null
-    cvUrl: string
-    passportNumber?: string | null
-    passportExpiry?: Date | string | null
-    visaType?: string | null
-    visaExpiry?: Date | string | null
-    medicalStatus?: string | null
-    medicalExpiry?: Date | string | null
-    photo?: string | null
-    otherDocs?: LabourProfileCreateotherDocsInput | string[]
-    status?: $Enums.LabourProfileStatus
-    statusReason?: string | null
-    agencyId: string
-    deploymentDate?: Date | string | null
-    contractStartDate?: Date | string | null
-    contractEndDate?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutLabourProfileInput
-    procedures?: ProcedureUncheckedCreateNestedManyWithoutLabourProfileInput
-  }
-
-  export type LabourProfileCreateOrConnectWithoutRequirementInput = {
-    where: LabourProfileWhereUniqueInput
-    create: XOR<LabourProfileCreateWithoutRequirementInput, LabourProfileUncheckedCreateWithoutRequirementInput>
-  }
-
-  export type LabourProfileCreateManyRequirementInputEnvelope = {
-    data: LabourProfileCreateManyRequirementInput | LabourProfileCreateManyRequirementInput[]
     skipDuplicates?: boolean
   }
 
@@ -28631,35 +30544,37 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type RequirementDocumentCreateWithoutRequirementInput = {
+  export type RequirementAssignmentCreateWithoutRequirementInput = {
     id?: string
-    type: $Enums.DocumentType
-    url: string
-    name?: string | null
-    description?: string | null
+    quantity: number
+    status?: $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
-    uploadedBy: UserCreateNestedOneWithoutRequirementDocumentsInput
+    jobRole: JobRoleCreateNestedOneWithoutRequirementAssignmentInput
+    agency: AgencyCreateNestedOneWithoutRequirementAssignmentInput
+    LabourProfile?: LabourProfileCreateNestedManyWithoutRequirementAssignmentInput
   }
 
-  export type RequirementDocumentUncheckedCreateWithoutRequirementInput = {
+  export type RequirementAssignmentUncheckedCreateWithoutRequirementInput = {
     id?: string
-    type: $Enums.DocumentType
-    url: string
-    name?: string | null
-    description?: string | null
-    uploadedById: string
+    jobRoleId: string
+    agencyId: string
+    quantity: number
+    status?: $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    LabourProfile?: LabourProfileUncheckedCreateNestedManyWithoutRequirementAssignmentInput
   }
 
-  export type RequirementDocumentCreateOrConnectWithoutRequirementInput = {
-    where: RequirementDocumentWhereUniqueInput
-    create: XOR<RequirementDocumentCreateWithoutRequirementInput, RequirementDocumentUncheckedCreateWithoutRequirementInput>
+  export type RequirementAssignmentCreateOrConnectWithoutRequirementInput = {
+    where: RequirementAssignmentWhereUniqueInput
+    create: XOR<RequirementAssignmentCreateWithoutRequirementInput, RequirementAssignmentUncheckedCreateWithoutRequirementInput>
   }
 
-  export type RequirementDocumentCreateManyRequirementInputEnvelope = {
-    data: RequirementDocumentCreateManyRequirementInput | RequirementDocumentCreateManyRequirementInput[]
+  export type RequirementAssignmentCreateManyRequirementInputEnvelope = {
+    data: RequirementAssignmentCreateManyRequirementInput | RequirementAssignmentCreateManyRequirementInput[]
     skipDuplicates?: boolean
   }
 
@@ -28737,6 +30652,7 @@ export namespace Prisma {
     user?: UserUpdateOneRequiredWithoutAgencyProfileNestedInput
     labourProfiles?: LabourProfileUpdateManyWithoutAgencyNestedInput
     documents?: AgencyDocumentUpdateManyWithoutAgencyNestedInput
+    RequirementAssignment?: RequirementAssignmentUpdateManyWithoutAgencyNestedInput
   }
 
   export type AgencyUncheckedUpdateWithoutRequirementsInput = {
@@ -28755,6 +30671,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     labourProfiles?: LabourProfileUncheckedUpdateManyWithoutAgencyNestedInput
     documents?: AgencyDocumentUncheckedUpdateManyWithoutAgencyNestedInput
+    RequirementAssignment?: RequirementAssignmentUncheckedUpdateManyWithoutAgencyNestedInput
   }
 
   export type JobRoleUpsertWithWhereUniqueWithoutRequirementInput = {
@@ -28788,22 +30705,6 @@ export namespace Prisma {
     requirementId?: StringFilter<"JobRole"> | string
     createdAt?: DateTimeFilter<"JobRole"> | Date | string
     updatedAt?: DateTimeFilter<"JobRole"> | Date | string
-  }
-
-  export type LabourProfileUpsertWithWhereUniqueWithoutRequirementInput = {
-    where: LabourProfileWhereUniqueInput
-    update: XOR<LabourProfileUpdateWithoutRequirementInput, LabourProfileUncheckedUpdateWithoutRequirementInput>
-    create: XOR<LabourProfileCreateWithoutRequirementInput, LabourProfileUncheckedCreateWithoutRequirementInput>
-  }
-
-  export type LabourProfileUpdateWithWhereUniqueWithoutRequirementInput = {
-    where: LabourProfileWhereUniqueInput
-    data: XOR<LabourProfileUpdateWithoutRequirementInput, LabourProfileUncheckedUpdateWithoutRequirementInput>
-  }
-
-  export type LabourProfileUpdateManyWithWhereWithoutRequirementInput = {
-    where: LabourProfileScalarWhereInput
-    data: XOR<LabourProfileUpdateManyMutationInput, LabourProfileUncheckedUpdateManyWithoutRequirementInput>
   }
 
   export type ProcedureUpsertWithWhereUniqueWithoutRequirementInput = {
@@ -28840,20 +30741,20 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Procedure"> | Date | string
   }
 
-  export type RequirementDocumentUpsertWithWhereUniqueWithoutRequirementInput = {
-    where: RequirementDocumentWhereUniqueInput
-    update: XOR<RequirementDocumentUpdateWithoutRequirementInput, RequirementDocumentUncheckedUpdateWithoutRequirementInput>
-    create: XOR<RequirementDocumentCreateWithoutRequirementInput, RequirementDocumentUncheckedCreateWithoutRequirementInput>
+  export type RequirementAssignmentUpsertWithWhereUniqueWithoutRequirementInput = {
+    where: RequirementAssignmentWhereUniqueInput
+    update: XOR<RequirementAssignmentUpdateWithoutRequirementInput, RequirementAssignmentUncheckedUpdateWithoutRequirementInput>
+    create: XOR<RequirementAssignmentCreateWithoutRequirementInput, RequirementAssignmentUncheckedCreateWithoutRequirementInput>
   }
 
-  export type RequirementDocumentUpdateWithWhereUniqueWithoutRequirementInput = {
-    where: RequirementDocumentWhereUniqueInput
-    data: XOR<RequirementDocumentUpdateWithoutRequirementInput, RequirementDocumentUncheckedUpdateWithoutRequirementInput>
+  export type RequirementAssignmentUpdateWithWhereUniqueWithoutRequirementInput = {
+    where: RequirementAssignmentWhereUniqueInput
+    data: XOR<RequirementAssignmentUpdateWithoutRequirementInput, RequirementAssignmentUncheckedUpdateWithoutRequirementInput>
   }
 
-  export type RequirementDocumentUpdateManyWithWhereWithoutRequirementInput = {
-    where: RequirementDocumentScalarWhereInput
-    data: XOR<RequirementDocumentUpdateManyMutationInput, RequirementDocumentUncheckedUpdateManyWithoutRequirementInput>
+  export type RequirementAssignmentUpdateManyWithWhereWithoutRequirementInput = {
+    where: RequirementAssignmentScalarWhereInput
+    data: XOR<RequirementAssignmentUpdateManyMutationInput, RequirementAssignmentUncheckedUpdateManyWithoutRequirementInput>
   }
 
   export type RequirementCreateWithoutJobRolesInput = {
@@ -28871,9 +30772,8 @@ export namespace Prisma {
     reviewedAt?: Date | string | null
     client: ClientCreateNestedOneWithoutRequirementsInput
     assignedAgency?: AgencyCreateNestedOneWithoutRequirementsInput
-    labourProfiles?: LabourProfileCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureCreateNestedManyWithoutRequirementInput
-    documents?: RequirementDocumentCreateNestedManyWithoutRequirementInput
+    RequirementAssignment?: RequirementAssignmentCreateNestedManyWithoutRequirementInput
   }
 
   export type RequirementUncheckedCreateWithoutJobRolesInput = {
@@ -28891,14 +30791,47 @@ export namespace Prisma {
     updatedAt?: Date | string
     submittedAt?: Date | string | null
     reviewedAt?: Date | string | null
-    labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureUncheckedCreateNestedManyWithoutRequirementInput
-    documents?: RequirementDocumentUncheckedCreateNestedManyWithoutRequirementInput
+    RequirementAssignment?: RequirementAssignmentUncheckedCreateNestedManyWithoutRequirementInput
   }
 
   export type RequirementCreateOrConnectWithoutJobRolesInput = {
     where: RequirementWhereUniqueInput
     create: XOR<RequirementCreateWithoutJobRolesInput, RequirementUncheckedCreateWithoutJobRolesInput>
+  }
+
+  export type RequirementAssignmentCreateWithoutJobRoleInput = {
+    id?: string
+    quantity: number
+    status?: $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    requirement: RequirementCreateNestedOneWithoutRequirementAssignmentInput
+    agency: AgencyCreateNestedOneWithoutRequirementAssignmentInput
+    LabourProfile?: LabourProfileCreateNestedManyWithoutRequirementAssignmentInput
+  }
+
+  export type RequirementAssignmentUncheckedCreateWithoutJobRoleInput = {
+    id?: string
+    requirementId: string
+    agencyId: string
+    quantity: number
+    status?: $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    LabourProfile?: LabourProfileUncheckedCreateNestedManyWithoutRequirementAssignmentInput
+  }
+
+  export type RequirementAssignmentCreateOrConnectWithoutJobRoleInput = {
+    where: RequirementAssignmentWhereUniqueInput
+    create: XOR<RequirementAssignmentCreateWithoutJobRoleInput, RequirementAssignmentUncheckedCreateWithoutJobRoleInput>
+  }
+
+  export type RequirementAssignmentCreateManyJobRoleInputEnvelope = {
+    data: RequirementAssignmentCreateManyJobRoleInput | RequirementAssignmentCreateManyJobRoleInput[]
+    skipDuplicates?: boolean
   }
 
   export type RequirementUpsertWithoutJobRolesInput = {
@@ -28927,9 +30860,8 @@ export namespace Prisma {
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     client?: ClientUpdateOneRequiredWithoutRequirementsNestedInput
     assignedAgency?: AgencyUpdateOneWithoutRequirementsNestedInput
-    labourProfiles?: LabourProfileUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUpdateManyWithoutRequirementNestedInput
-    documents?: RequirementDocumentUpdateManyWithoutRequirementNestedInput
+    RequirementAssignment?: RequirementAssignmentUpdateManyWithoutRequirementNestedInput
   }
 
   export type RequirementUncheckedUpdateWithoutJobRolesInput = {
@@ -28947,12 +30879,27 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    labourProfiles?: LabourProfileUncheckedUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUncheckedUpdateManyWithoutRequirementNestedInput
-    documents?: RequirementDocumentUncheckedUpdateManyWithoutRequirementNestedInput
+    RequirementAssignment?: RequirementAssignmentUncheckedUpdateManyWithoutRequirementNestedInput
   }
 
-  export type RequirementCreateWithoutLabourProfilesInput = {
+  export type RequirementAssignmentUpsertWithWhereUniqueWithoutJobRoleInput = {
+    where: RequirementAssignmentWhereUniqueInput
+    update: XOR<RequirementAssignmentUpdateWithoutJobRoleInput, RequirementAssignmentUncheckedUpdateWithoutJobRoleInput>
+    create: XOR<RequirementAssignmentCreateWithoutJobRoleInput, RequirementAssignmentUncheckedCreateWithoutJobRoleInput>
+  }
+
+  export type RequirementAssignmentUpdateWithWhereUniqueWithoutJobRoleInput = {
+    where: RequirementAssignmentWhereUniqueInput
+    data: XOR<RequirementAssignmentUpdateWithoutJobRoleInput, RequirementAssignmentUncheckedUpdateWithoutJobRoleInput>
+  }
+
+  export type RequirementAssignmentUpdateManyWithWhereWithoutJobRoleInput = {
+    where: RequirementAssignmentScalarWhereInput
+    data: XOR<RequirementAssignmentUpdateManyMutationInput, RequirementAssignmentUncheckedUpdateManyWithoutJobRoleInput>
+  }
+
+  export type RequirementCreateWithoutRequirementAssignmentInput = {
     id?: string
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
@@ -28969,10 +30916,9 @@ export namespace Prisma {
     assignedAgency?: AgencyCreateNestedOneWithoutRequirementsInput
     jobRoles?: JobRoleCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureCreateNestedManyWithoutRequirementInput
-    documents?: RequirementDocumentCreateNestedManyWithoutRequirementInput
   }
 
-  export type RequirementUncheckedCreateWithoutLabourProfilesInput = {
+  export type RequirementUncheckedCreateWithoutRequirementAssignmentInput = {
     id?: string
     specialNotes?: string | null
     status?: $Enums.RequirementStatus
@@ -28989,12 +30935,326 @@ export namespace Prisma {
     reviewedAt?: Date | string | null
     jobRoles?: JobRoleUncheckedCreateNestedManyWithoutRequirementInput
     procedures?: ProcedureUncheckedCreateNestedManyWithoutRequirementInput
-    documents?: RequirementDocumentUncheckedCreateNestedManyWithoutRequirementInput
   }
 
-  export type RequirementCreateOrConnectWithoutLabourProfilesInput = {
+  export type RequirementCreateOrConnectWithoutRequirementAssignmentInput = {
     where: RequirementWhereUniqueInput
-    create: XOR<RequirementCreateWithoutLabourProfilesInput, RequirementUncheckedCreateWithoutLabourProfilesInput>
+    create: XOR<RequirementCreateWithoutRequirementAssignmentInput, RequirementUncheckedCreateWithoutRequirementAssignmentInput>
+  }
+
+  export type JobRoleCreateWithoutRequirementAssignmentInput = {
+    id?: string
+    title: string
+    quantity?: number
+    nationality: string
+    salary?: number | null
+    salaryCurrency?: string
+    startDate?: Date | string | null
+    contractDuration?: $Enums.ContractDuration | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    requirement: RequirementCreateNestedOneWithoutJobRolesInput
+  }
+
+  export type JobRoleUncheckedCreateWithoutRequirementAssignmentInput = {
+    id?: string
+    title: string
+    quantity?: number
+    nationality: string
+    salary?: number | null
+    salaryCurrency?: string
+    startDate?: Date | string | null
+    contractDuration?: $Enums.ContractDuration | null
+    requirementId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type JobRoleCreateOrConnectWithoutRequirementAssignmentInput = {
+    where: JobRoleWhereUniqueInput
+    create: XOR<JobRoleCreateWithoutRequirementAssignmentInput, JobRoleUncheckedCreateWithoutRequirementAssignmentInput>
+  }
+
+  export type AgencyCreateWithoutRequirementAssignmentInput = {
+    id?: string
+    agencyName: string
+    registrationNo?: string | null
+    licenseNumber: string
+    licenseExpiry: Date | string
+    country: string
+    website?: string | null
+    address: string
+    city: string
+    postalCode?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutAgencyProfileInput
+    labourProfiles?: LabourProfileCreateNestedManyWithoutAgencyInput
+    requirements?: RequirementCreateNestedManyWithoutAssignedAgencyInput
+    documents?: AgencyDocumentCreateNestedManyWithoutAgencyInput
+  }
+
+  export type AgencyUncheckedCreateWithoutRequirementAssignmentInput = {
+    id?: string
+    userId: string
+    agencyName: string
+    registrationNo?: string | null
+    licenseNumber: string
+    licenseExpiry: Date | string
+    country: string
+    website?: string | null
+    address: string
+    city: string
+    postalCode?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutAgencyInput
+    requirements?: RequirementUncheckedCreateNestedManyWithoutAssignedAgencyInput
+    documents?: AgencyDocumentUncheckedCreateNestedManyWithoutAgencyInput
+  }
+
+  export type AgencyCreateOrConnectWithoutRequirementAssignmentInput = {
+    where: AgencyWhereUniqueInput
+    create: XOR<AgencyCreateWithoutRequirementAssignmentInput, AgencyUncheckedCreateWithoutRequirementAssignmentInput>
+  }
+
+  export type LabourProfileCreateWithoutRequirementAssignmentInput = {
+    id?: string
+    name: string
+    age: number
+    gender: $Enums.Gender
+    nationality: string
+    jobRoleName: string
+    status?: $Enums.LabourProfileStatus
+    email?: string | null
+    phone?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    passportCopy?: string | null
+    passportVerified?: boolean
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    visaCopy?: string | null
+    visaVerified?: boolean
+    medicalReport?: string | null
+    medicalExpiry?: Date | string | null
+    medicalVerified?: boolean
+    policeClearance?: string | null
+    policeVerified?: boolean
+    contractCopy?: string | null
+    contractVerified?: boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: $Enums.DocumentVerificationStatus
+    statusReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    documentsSubmittedAt?: Date | string | null
+    documentsVerifiedAt?: Date | string | null
+    agency: AgencyCreateNestedOneWithoutLabourProfilesInput
+    statusLogs?: LabourStatusLogCreateNestedManyWithoutLabourProfileInput
+    procedures?: ProcedureCreateNestedManyWithoutLabourProfileInput
+    documentVerifications?: DocumentVerificationCreateNestedManyWithoutLabourProfileInput
+  }
+
+  export type LabourProfileUncheckedCreateWithoutRequirementAssignmentInput = {
+    id?: string
+    name: string
+    age: number
+    gender: $Enums.Gender
+    nationality: string
+    jobRoleName: string
+    status?: $Enums.LabourProfileStatus
+    email?: string | null
+    phone?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    passportCopy?: string | null
+    passportVerified?: boolean
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    visaCopy?: string | null
+    visaVerified?: boolean
+    medicalReport?: string | null
+    medicalExpiry?: Date | string | null
+    medicalVerified?: boolean
+    policeClearance?: string | null
+    policeVerified?: boolean
+    contractCopy?: string | null
+    contractVerified?: boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: $Enums.DocumentVerificationStatus
+    statusReason?: string | null
+    agencyId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    documentsSubmittedAt?: Date | string | null
+    documentsVerifiedAt?: Date | string | null
+    statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutLabourProfileInput
+    procedures?: ProcedureUncheckedCreateNestedManyWithoutLabourProfileInput
+    documentVerifications?: DocumentVerificationUncheckedCreateNestedManyWithoutLabourProfileInput
+  }
+
+  export type LabourProfileCreateOrConnectWithoutRequirementAssignmentInput = {
+    where: LabourProfileWhereUniqueInput
+    create: XOR<LabourProfileCreateWithoutRequirementAssignmentInput, LabourProfileUncheckedCreateWithoutRequirementAssignmentInput>
+  }
+
+  export type LabourProfileCreateManyRequirementAssignmentInputEnvelope = {
+    data: LabourProfileCreateManyRequirementAssignmentInput | LabourProfileCreateManyRequirementAssignmentInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type RequirementUpsertWithoutRequirementAssignmentInput = {
+    update: XOR<RequirementUpdateWithoutRequirementAssignmentInput, RequirementUncheckedUpdateWithoutRequirementAssignmentInput>
+    create: XOR<RequirementCreateWithoutRequirementAssignmentInput, RequirementUncheckedCreateWithoutRequirementAssignmentInput>
+    where?: RequirementWhereInput
+  }
+
+  export type RequirementUpdateToOneWithWhereWithoutRequirementAssignmentInput = {
+    where?: RequirementWhereInput
+    data: XOR<RequirementUpdateWithoutRequirementAssignmentInput, RequirementUncheckedUpdateWithoutRequirementAssignmentInput>
+  }
+
+  export type RequirementUpdateWithoutRequirementAssignmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    client?: ClientUpdateOneRequiredWithoutRequirementsNestedInput
+    assignedAgency?: AgencyUpdateOneWithoutRequirementsNestedInput
+    jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
+    procedures?: ProcedureUpdateManyWithoutRequirementNestedInput
+  }
+
+  export type RequirementUncheckedUpdateWithoutRequirementAssignmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    languages?: RequirementUpdatelanguagesInput | string[]
+    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
+    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
+    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
+    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
+    clientId?: StringFieldUpdateOperationsInput | string
+    assignedAgencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    jobRoles?: JobRoleUncheckedUpdateManyWithoutRequirementNestedInput
+    procedures?: ProcedureUncheckedUpdateManyWithoutRequirementNestedInput
+  }
+
+  export type JobRoleUpsertWithoutRequirementAssignmentInput = {
+    update: XOR<JobRoleUpdateWithoutRequirementAssignmentInput, JobRoleUncheckedUpdateWithoutRequirementAssignmentInput>
+    create: XOR<JobRoleCreateWithoutRequirementAssignmentInput, JobRoleUncheckedCreateWithoutRequirementAssignmentInput>
+    where?: JobRoleWhereInput
+  }
+
+  export type JobRoleUpdateToOneWithWhereWithoutRequirementAssignmentInput = {
+    where?: JobRoleWhereInput
+    data: XOR<JobRoleUpdateWithoutRequirementAssignmentInput, JobRoleUncheckedUpdateWithoutRequirementAssignmentInput>
+  }
+
+  export type JobRoleUpdateWithoutRequirementAssignmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    nationality?: StringFieldUpdateOperationsInput | string
+    salary?: NullableFloatFieldUpdateOperationsInput | number | null
+    salaryCurrency?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    requirement?: RequirementUpdateOneRequiredWithoutJobRolesNestedInput
+  }
+
+  export type JobRoleUncheckedUpdateWithoutRequirementAssignmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    nationality?: StringFieldUpdateOperationsInput | string
+    salary?: NullableFloatFieldUpdateOperationsInput | number | null
+    salaryCurrency?: StringFieldUpdateOperationsInput | string
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
+    requirementId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AgencyUpsertWithoutRequirementAssignmentInput = {
+    update: XOR<AgencyUpdateWithoutRequirementAssignmentInput, AgencyUncheckedUpdateWithoutRequirementAssignmentInput>
+    create: XOR<AgencyCreateWithoutRequirementAssignmentInput, AgencyUncheckedCreateWithoutRequirementAssignmentInput>
+    where?: AgencyWhereInput
+  }
+
+  export type AgencyUpdateToOneWithWhereWithoutRequirementAssignmentInput = {
+    where?: AgencyWhereInput
+    data: XOR<AgencyUpdateWithoutRequirementAssignmentInput, AgencyUncheckedUpdateWithoutRequirementAssignmentInput>
+  }
+
+  export type AgencyUpdateWithoutRequirementAssignmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    agencyName?: StringFieldUpdateOperationsInput | string
+    registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
+    licenseNumber?: StringFieldUpdateOperationsInput | string
+    licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
+    country?: StringFieldUpdateOperationsInput | string
+    website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutAgencyProfileNestedInput
+    labourProfiles?: LabourProfileUpdateManyWithoutAgencyNestedInput
+    requirements?: RequirementUpdateManyWithoutAssignedAgencyNestedInput
+    documents?: AgencyDocumentUpdateManyWithoutAgencyNestedInput
+  }
+
+  export type AgencyUncheckedUpdateWithoutRequirementAssignmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    agencyName?: StringFieldUpdateOperationsInput | string
+    registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
+    licenseNumber?: StringFieldUpdateOperationsInput | string
+    licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
+    country?: StringFieldUpdateOperationsInput | string
+    website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    labourProfiles?: LabourProfileUncheckedUpdateManyWithoutAgencyNestedInput
+    requirements?: RequirementUncheckedUpdateManyWithoutAssignedAgencyNestedInput
+    documents?: AgencyDocumentUncheckedUpdateManyWithoutAgencyNestedInput
+  }
+
+  export type LabourProfileUpsertWithWhereUniqueWithoutRequirementAssignmentInput = {
+    where: LabourProfileWhereUniqueInput
+    update: XOR<LabourProfileUpdateWithoutRequirementAssignmentInput, LabourProfileUncheckedUpdateWithoutRequirementAssignmentInput>
+    create: XOR<LabourProfileCreateWithoutRequirementAssignmentInput, LabourProfileUncheckedCreateWithoutRequirementAssignmentInput>
+  }
+
+  export type LabourProfileUpdateWithWhereUniqueWithoutRequirementAssignmentInput = {
+    where: LabourProfileWhereUniqueInput
+    data: XOR<LabourProfileUpdateWithoutRequirementAssignmentInput, LabourProfileUncheckedUpdateWithoutRequirementAssignmentInput>
+  }
+
+  export type LabourProfileUpdateManyWithWhereWithoutRequirementAssignmentInput = {
+    where: LabourProfileScalarWhereInput
+    data: XOR<LabourProfileUpdateManyMutationInput, LabourProfileUncheckedUpdateManyWithoutRequirementAssignmentInput>
   }
 
   export type AgencyCreateWithoutLabourProfilesInput = {
@@ -29013,6 +31273,7 @@ export namespace Prisma {
     user: UserCreateNestedOneWithoutAgencyProfileInput
     requirements?: RequirementCreateNestedManyWithoutAssignedAgencyInput
     documents?: AgencyDocumentCreateNestedManyWithoutAgencyInput
+    RequirementAssignment?: RequirementAssignmentCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyUncheckedCreateWithoutLabourProfilesInput = {
@@ -29031,11 +31292,41 @@ export namespace Prisma {
     updatedAt?: Date | string
     requirements?: RequirementUncheckedCreateNestedManyWithoutAssignedAgencyInput
     documents?: AgencyDocumentUncheckedCreateNestedManyWithoutAgencyInput
+    RequirementAssignment?: RequirementAssignmentUncheckedCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyCreateOrConnectWithoutLabourProfilesInput = {
     where: AgencyWhereUniqueInput
     create: XOR<AgencyCreateWithoutLabourProfilesInput, AgencyUncheckedCreateWithoutLabourProfilesInput>
+  }
+
+  export type RequirementAssignmentCreateWithoutLabourProfileInput = {
+    id?: string
+    quantity: number
+    status?: $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    requirement: RequirementCreateNestedOneWithoutRequirementAssignmentInput
+    jobRole: JobRoleCreateNestedOneWithoutRequirementAssignmentInput
+    agency: AgencyCreateNestedOneWithoutRequirementAssignmentInput
+  }
+
+  export type RequirementAssignmentUncheckedCreateWithoutLabourProfileInput = {
+    id?: string
+    requirementId: string
+    jobRoleId: string
+    agencyId: string
+    quantity: number
+    status?: $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RequirementAssignmentCreateOrConnectWithoutLabourProfileInput = {
+    where: RequirementAssignmentWhereUniqueInput
+    create: XOR<RequirementAssignmentCreateWithoutLabourProfileInput, RequirementAssignmentUncheckedCreateWithoutLabourProfileInput>
   }
 
   export type LabourStatusLogCreateWithoutLabourProfileInput = {
@@ -29104,55 +31395,38 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type RequirementUpsertWithoutLabourProfilesInput = {
-    update: XOR<RequirementUpdateWithoutLabourProfilesInput, RequirementUncheckedUpdateWithoutLabourProfilesInput>
-    create: XOR<RequirementCreateWithoutLabourProfilesInput, RequirementUncheckedCreateWithoutLabourProfilesInput>
-    where?: RequirementWhereInput
+  export type DocumentVerificationCreateWithoutLabourProfileInput = {
+    id?: string
+    documentType: string
+    documentUrl: string
+    status?: $Enums.VerificationStatus
+    comments?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    verifiedAt?: Date | string | null
+    verifiedBy?: UserCreateNestedOneWithoutDocumentVerificationInput
   }
 
-  export type RequirementUpdateToOneWithWhereWithoutLabourProfilesInput = {
-    where?: RequirementWhereInput
-    data: XOR<RequirementUpdateWithoutLabourProfilesInput, RequirementUncheckedUpdateWithoutLabourProfilesInput>
+  export type DocumentVerificationUncheckedCreateWithoutLabourProfileInput = {
+    id?: string
+    documentType: string
+    documentUrl: string
+    status?: $Enums.VerificationStatus
+    comments?: string | null
+    verifiedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    verifiedAt?: Date | string | null
   }
 
-  export type RequirementUpdateWithoutLabourProfilesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
-    languages?: RequirementUpdatelanguagesInput | string[]
-    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
-    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
-    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
-    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    client?: ClientUpdateOneRequiredWithoutRequirementsNestedInput
-    assignedAgency?: AgencyUpdateOneWithoutRequirementsNestedInput
-    jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
-    procedures?: ProcedureUpdateManyWithoutRequirementNestedInput
-    documents?: RequirementDocumentUpdateManyWithoutRequirementNestedInput
+  export type DocumentVerificationCreateOrConnectWithoutLabourProfileInput = {
+    where: DocumentVerificationWhereUniqueInput
+    create: XOR<DocumentVerificationCreateWithoutLabourProfileInput, DocumentVerificationUncheckedCreateWithoutLabourProfileInput>
   }
 
-  export type RequirementUncheckedUpdateWithoutLabourProfilesInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
-    languages?: RequirementUpdatelanguagesInput | string[]
-    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
-    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
-    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
-    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
-    clientId?: StringFieldUpdateOperationsInput | string
-    assignedAgencyId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    jobRoles?: JobRoleUncheckedUpdateManyWithoutRequirementNestedInput
-    procedures?: ProcedureUncheckedUpdateManyWithoutRequirementNestedInput
-    documents?: RequirementDocumentUncheckedUpdateManyWithoutRequirementNestedInput
+  export type DocumentVerificationCreateManyLabourProfileInputEnvelope = {
+    data: DocumentVerificationCreateManyLabourProfileInput | DocumentVerificationCreateManyLabourProfileInput[]
+    skipDuplicates?: boolean
   }
 
   export type AgencyUpsertWithoutLabourProfilesInput = {
@@ -29182,6 +31456,7 @@ export namespace Prisma {
     user?: UserUpdateOneRequiredWithoutAgencyProfileNestedInput
     requirements?: RequirementUpdateManyWithoutAssignedAgencyNestedInput
     documents?: AgencyDocumentUpdateManyWithoutAgencyNestedInput
+    RequirementAssignment?: RequirementAssignmentUpdateManyWithoutAgencyNestedInput
   }
 
   export type AgencyUncheckedUpdateWithoutLabourProfilesInput = {
@@ -29200,6 +31475,42 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     requirements?: RequirementUncheckedUpdateManyWithoutAssignedAgencyNestedInput
     documents?: AgencyDocumentUncheckedUpdateManyWithoutAgencyNestedInput
+    RequirementAssignment?: RequirementAssignmentUncheckedUpdateManyWithoutAgencyNestedInput
+  }
+
+  export type RequirementAssignmentUpsertWithoutLabourProfileInput = {
+    update: XOR<RequirementAssignmentUpdateWithoutLabourProfileInput, RequirementAssignmentUncheckedUpdateWithoutLabourProfileInput>
+    create: XOR<RequirementAssignmentCreateWithoutLabourProfileInput, RequirementAssignmentUncheckedCreateWithoutLabourProfileInput>
+    where?: RequirementAssignmentWhereInput
+  }
+
+  export type RequirementAssignmentUpdateToOneWithWhereWithoutLabourProfileInput = {
+    where?: RequirementAssignmentWhereInput
+    data: XOR<RequirementAssignmentUpdateWithoutLabourProfileInput, RequirementAssignmentUncheckedUpdateWithoutLabourProfileInput>
+  }
+
+  export type RequirementAssignmentUpdateWithoutLabourProfileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    requirement?: RequirementUpdateOneRequiredWithoutRequirementAssignmentNestedInput
+    jobRole?: JobRoleUpdateOneRequiredWithoutRequirementAssignmentNestedInput
+    agency?: AgencyUpdateOneRequiredWithoutRequirementAssignmentNestedInput
+  }
+
+  export type RequirementAssignmentUncheckedUpdateWithoutLabourProfileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requirementId?: StringFieldUpdateOperationsInput | string
+    jobRoleId?: StringFieldUpdateOperationsInput | string
+    agencyId?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type LabourStatusLogUpsertWithWhereUniqueWithoutLabourProfileInput = {
@@ -29234,6 +31545,326 @@ export namespace Prisma {
     data: XOR<ProcedureUpdateManyMutationInput, ProcedureUncheckedUpdateManyWithoutLabourProfileInput>
   }
 
+  export type DocumentVerificationUpsertWithWhereUniqueWithoutLabourProfileInput = {
+    where: DocumentVerificationWhereUniqueInput
+    update: XOR<DocumentVerificationUpdateWithoutLabourProfileInput, DocumentVerificationUncheckedUpdateWithoutLabourProfileInput>
+    create: XOR<DocumentVerificationCreateWithoutLabourProfileInput, DocumentVerificationUncheckedCreateWithoutLabourProfileInput>
+  }
+
+  export type DocumentVerificationUpdateWithWhereUniqueWithoutLabourProfileInput = {
+    where: DocumentVerificationWhereUniqueInput
+    data: XOR<DocumentVerificationUpdateWithoutLabourProfileInput, DocumentVerificationUncheckedUpdateWithoutLabourProfileInput>
+  }
+
+  export type DocumentVerificationUpdateManyWithWhereWithoutLabourProfileInput = {
+    where: DocumentVerificationScalarWhereInput
+    data: XOR<DocumentVerificationUpdateManyMutationInput, DocumentVerificationUncheckedUpdateManyWithoutLabourProfileInput>
+  }
+
+  export type LabourProfileCreateWithoutDocumentVerificationsInput = {
+    id?: string
+    name: string
+    age: number
+    gender: $Enums.Gender
+    nationality: string
+    jobRoleName: string
+    status?: $Enums.LabourProfileStatus
+    email?: string | null
+    phone?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    passportCopy?: string | null
+    passportVerified?: boolean
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    visaCopy?: string | null
+    visaVerified?: boolean
+    medicalReport?: string | null
+    medicalExpiry?: Date | string | null
+    medicalVerified?: boolean
+    policeClearance?: string | null
+    policeVerified?: boolean
+    contractCopy?: string | null
+    contractVerified?: boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: $Enums.DocumentVerificationStatus
+    statusReason?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    documentsSubmittedAt?: Date | string | null
+    documentsVerifiedAt?: Date | string | null
+    agency: AgencyCreateNestedOneWithoutLabourProfilesInput
+    requirementAssignment?: RequirementAssignmentCreateNestedOneWithoutLabourProfileInput
+    statusLogs?: LabourStatusLogCreateNestedManyWithoutLabourProfileInput
+    procedures?: ProcedureCreateNestedManyWithoutLabourProfileInput
+  }
+
+  export type LabourProfileUncheckedCreateWithoutDocumentVerificationsInput = {
+    id?: string
+    name: string
+    age: number
+    gender: $Enums.Gender
+    nationality: string
+    jobRoleName: string
+    status?: $Enums.LabourProfileStatus
+    email?: string | null
+    phone?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    passportCopy?: string | null
+    passportVerified?: boolean
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    visaCopy?: string | null
+    visaVerified?: boolean
+    medicalReport?: string | null
+    medicalExpiry?: Date | string | null
+    medicalVerified?: boolean
+    policeClearance?: string | null
+    policeVerified?: boolean
+    contractCopy?: string | null
+    contractVerified?: boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: $Enums.DocumentVerificationStatus
+    statusReason?: string | null
+    agencyId: string
+    requirementAssignmentId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    documentsSubmittedAt?: Date | string | null
+    documentsVerifiedAt?: Date | string | null
+    statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutLabourProfileInput
+    procedures?: ProcedureUncheckedCreateNestedManyWithoutLabourProfileInput
+  }
+
+  export type LabourProfileCreateOrConnectWithoutDocumentVerificationsInput = {
+    where: LabourProfileWhereUniqueInput
+    create: XOR<LabourProfileCreateWithoutDocumentVerificationsInput, LabourProfileUncheckedCreateWithoutDocumentVerificationsInput>
+  }
+
+  export type UserCreateWithoutDocumentVerificationInput = {
+    id?: string
+    name: string
+    email: string
+    password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
+    role: $Enums.UserRole
+    status?: $Enums.AccountStatus
+    resetRequired?: boolean
+    lastLogin?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deleteAt?: Date | string | null
+    deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
+    deletionRequestedBy?: string | null
+    clientProfile?: ClientCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyCreateNestedOneWithoutUserInput
+    adminProfile?: AdminCreateNestedOneWithoutUserInput
+    createdBy?: UserCreateNestedOneWithoutCreatedUsersInput
+    createdUsers?: UserCreateNestedManyWithoutCreatedByInput
+    auditLogs?: AuditLogCreateNestedManyWithoutPerformedByInput
+    notifications?: NotificationCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
+  }
+
+  export type UserUncheckedCreateWithoutDocumentVerificationInput = {
+    id?: string
+    name: string
+    email: string
+    password: string
+    phone?: string | null
+    altContact?: string | null
+    profilePicture?: string | null
+    role: $Enums.UserRole
+    status?: $Enums.AccountStatus
+    resetRequired?: boolean
+    lastLogin?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    deleteAt?: Date | string | null
+    deletionType?: $Enums.DeletionType | null
+    deletionReason?: string | null
+    deletionRequestedBy?: string | null
+    createdById?: string | null
+    clientProfile?: ClientUncheckedCreateNestedOneWithoutUserInput
+    agencyProfile?: AgencyUncheckedCreateNestedOneWithoutUserInput
+    adminProfile?: AdminUncheckedCreateNestedOneWithoutUserInput
+    createdUsers?: UserUncheckedCreateNestedManyWithoutCreatedByInput
+    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutPerformedByInput
+    notifications?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
+    statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
+    clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+    agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
+  }
+
+  export type UserCreateOrConnectWithoutDocumentVerificationInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutDocumentVerificationInput, UserUncheckedCreateWithoutDocumentVerificationInput>
+  }
+
+  export type LabourProfileUpsertWithoutDocumentVerificationsInput = {
+    update: XOR<LabourProfileUpdateWithoutDocumentVerificationsInput, LabourProfileUncheckedUpdateWithoutDocumentVerificationsInput>
+    create: XOR<LabourProfileCreateWithoutDocumentVerificationsInput, LabourProfileUncheckedCreateWithoutDocumentVerificationsInput>
+    where?: LabourProfileWhereInput
+  }
+
+  export type LabourProfileUpdateToOneWithWhereWithoutDocumentVerificationsInput = {
+    where?: LabourProfileWhereInput
+    data: XOR<LabourProfileUpdateWithoutDocumentVerificationsInput, LabourProfileUncheckedUpdateWithoutDocumentVerificationsInput>
+  }
+
+  export type LabourProfileUpdateWithoutDocumentVerificationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    age?: IntFieldUpdateOperationsInput | number
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    nationality?: StringFieldUpdateOperationsInput | string
+    jobRoleName?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportVerified?: BoolFieldUpdateOperationsInput | boolean
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    visaVerified?: BoolFieldUpdateOperationsInput | boolean
+    medicalReport?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalVerified?: BoolFieldUpdateOperationsInput | boolean
+    policeClearance?: NullableStringFieldUpdateOperationsInput | string | null
+    policeVerified?: BoolFieldUpdateOperationsInput | boolean
+    contractCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    contractVerified?: BoolFieldUpdateOperationsInput | boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documentsSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    documentsVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    agency?: AgencyUpdateOneRequiredWithoutLabourProfilesNestedInput
+    requirementAssignment?: RequirementAssignmentUpdateOneWithoutLabourProfileNestedInput
+    statusLogs?: LabourStatusLogUpdateManyWithoutLabourProfileNestedInput
+    procedures?: ProcedureUpdateManyWithoutLabourProfileNestedInput
+  }
+
+  export type LabourProfileUncheckedUpdateWithoutDocumentVerificationsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    age?: IntFieldUpdateOperationsInput | number
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    nationality?: StringFieldUpdateOperationsInput | string
+    jobRoleName?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportVerified?: BoolFieldUpdateOperationsInput | boolean
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    visaVerified?: BoolFieldUpdateOperationsInput | boolean
+    medicalReport?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalVerified?: BoolFieldUpdateOperationsInput | boolean
+    policeClearance?: NullableStringFieldUpdateOperationsInput | string | null
+    policeVerified?: BoolFieldUpdateOperationsInput | boolean
+    contractCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    contractVerified?: BoolFieldUpdateOperationsInput | boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
+    agencyId?: StringFieldUpdateOperationsInput | string
+    requirementAssignmentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documentsSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    documentsVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutLabourProfileNestedInput
+    procedures?: ProcedureUncheckedUpdateManyWithoutLabourProfileNestedInput
+  }
+
+  export type UserUpsertWithoutDocumentVerificationInput = {
+    update: XOR<UserUpdateWithoutDocumentVerificationInput, UserUncheckedUpdateWithoutDocumentVerificationInput>
+    create: XOR<UserCreateWithoutDocumentVerificationInput, UserUncheckedCreateWithoutDocumentVerificationInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutDocumentVerificationInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutDocumentVerificationInput, UserUncheckedUpdateWithoutDocumentVerificationInput>
+  }
+
+  export type UserUpdateWithoutDocumentVerificationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
+    resetRequired?: BoolFieldUpdateOperationsInput | boolean
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    clientProfile?: ClientUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUpdateOneWithoutUserNestedInput
+    createdBy?: UserUpdateOneWithoutCreatedUsersNestedInput
+    createdUsers?: UserUpdateManyWithoutCreatedByNestedInput
+    auditLogs?: AuditLogUpdateManyWithoutPerformedByNestedInput
+    notifications?: NotificationUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutDocumentVerificationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    altContact?: NullableStringFieldUpdateOperationsInput | string | null
+    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
+    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
+    status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
+    resetRequired?: BoolFieldUpdateOperationsInput | boolean
+    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
+    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
+    deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
+    createdById?: NullableStringFieldUpdateOperationsInput | string | null
+    clientProfile?: ClientUncheckedUpdateOneWithoutUserNestedInput
+    agencyProfile?: AgencyUncheckedUpdateOneWithoutUserNestedInput
+    adminProfile?: AdminUncheckedUpdateOneWithoutUserNestedInput
+    createdUsers?: UserUncheckedUpdateManyWithoutCreatedByNestedInput
+    auditLogs?: AuditLogUncheckedUpdateManyWithoutPerformedByNestedInput
+    notifications?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
+    statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
+    clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+  }
+
   export type RequirementCreateWithoutProceduresInput = {
     id?: string
     specialNotes?: string | null
@@ -29250,8 +31881,7 @@ export namespace Prisma {
     client: ClientCreateNestedOneWithoutRequirementsInput
     assignedAgency?: AgencyCreateNestedOneWithoutRequirementsInput
     jobRoles?: JobRoleCreateNestedManyWithoutRequirementInput
-    labourProfiles?: LabourProfileCreateNestedManyWithoutRequirementInput
-    documents?: RequirementDocumentCreateNestedManyWithoutRequirementInput
+    RequirementAssignment?: RequirementAssignmentCreateNestedManyWithoutRequirementInput
   }
 
   export type RequirementUncheckedCreateWithoutProceduresInput = {
@@ -29270,8 +31900,7 @@ export namespace Prisma {
     submittedAt?: Date | string | null
     reviewedAt?: Date | string | null
     jobRoles?: JobRoleUncheckedCreateNestedManyWithoutRequirementInput
-    labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutRequirementInput
-    documents?: RequirementDocumentUncheckedCreateNestedManyWithoutRequirementInput
+    RequirementAssignment?: RequirementAssignmentUncheckedCreateNestedManyWithoutRequirementInput
   }
 
   export type RequirementCreateOrConnectWithoutProceduresInput = {
@@ -29285,38 +31914,36 @@ export namespace Prisma {
     age: number
     gender: $Enums.Gender
     nationality: string
-    maritalStatus?: string | null
-    skills?: LabourProfileCreateskillsInput | string[]
-    experienceYears: number
-    education?: string | null
-    currentPosition?: string | null
-    currentCompany?: string | null
-    languages?: LabourProfileCreatelanguagesInput | string[]
-    englishProficiency?: string | null
+    jobRoleName: string
+    status?: $Enums.LabourProfileStatus
     email?: string | null
-    phone: string
-    address?: string | null
-    city?: string | null
-    country?: string | null
-    cvUrl: string
+    phone?: string | null
     passportNumber?: string | null
     passportExpiry?: Date | string | null
+    passportCopy?: string | null
+    passportVerified?: boolean
     visaType?: string | null
     visaExpiry?: Date | string | null
-    medicalStatus?: string | null
+    visaCopy?: string | null
+    visaVerified?: boolean
+    medicalReport?: string | null
     medicalExpiry?: Date | string | null
-    photo?: string | null
-    otherDocs?: LabourProfileCreateotherDocsInput | string[]
-    status?: $Enums.LabourProfileStatus
+    medicalVerified?: boolean
+    policeClearance?: string | null
+    policeVerified?: boolean
+    contractCopy?: string | null
+    contractVerified?: boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: $Enums.DocumentVerificationStatus
     statusReason?: string | null
-    deploymentDate?: Date | string | null
-    contractStartDate?: Date | string | null
-    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    requirement: RequirementCreateNestedOneWithoutLabourProfilesInput
+    documentsSubmittedAt?: Date | string | null
+    documentsVerifiedAt?: Date | string | null
     agency: AgencyCreateNestedOneWithoutLabourProfilesInput
+    requirementAssignment?: RequirementAssignmentCreateNestedOneWithoutLabourProfileInput
     statusLogs?: LabourStatusLogCreateNestedManyWithoutLabourProfileInput
+    documentVerifications?: DocumentVerificationCreateNestedManyWithoutLabourProfileInput
   }
 
   export type LabourProfileUncheckedCreateWithoutProceduresInput = {
@@ -29325,38 +31952,36 @@ export namespace Prisma {
     age: number
     gender: $Enums.Gender
     nationality: string
-    maritalStatus?: string | null
-    skills?: LabourProfileCreateskillsInput | string[]
-    experienceYears: number
-    education?: string | null
-    currentPosition?: string | null
-    currentCompany?: string | null
-    languages?: LabourProfileCreatelanguagesInput | string[]
-    englishProficiency?: string | null
+    jobRoleName: string
+    status?: $Enums.LabourProfileStatus
     email?: string | null
-    phone: string
-    address?: string | null
-    city?: string | null
-    country?: string | null
-    cvUrl: string
+    phone?: string | null
     passportNumber?: string | null
     passportExpiry?: Date | string | null
+    passportCopy?: string | null
+    passportVerified?: boolean
     visaType?: string | null
     visaExpiry?: Date | string | null
-    medicalStatus?: string | null
+    visaCopy?: string | null
+    visaVerified?: boolean
+    medicalReport?: string | null
     medicalExpiry?: Date | string | null
-    photo?: string | null
-    otherDocs?: LabourProfileCreateotherDocsInput | string[]
-    status?: $Enums.LabourProfileStatus
+    medicalVerified?: boolean
+    policeClearance?: string | null
+    policeVerified?: boolean
+    contractCopy?: string | null
+    contractVerified?: boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: $Enums.DocumentVerificationStatus
     statusReason?: string | null
-    requirementId: string
     agencyId: string
-    deploymentDate?: Date | string | null
-    contractStartDate?: Date | string | null
-    contractEndDate?: Date | string | null
+    requirementAssignmentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    documentsSubmittedAt?: Date | string | null
+    documentsVerifiedAt?: Date | string | null
     statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutLabourProfileInput
+    documentVerifications?: DocumentVerificationUncheckedCreateNestedManyWithoutLabourProfileInput
   }
 
   export type LabourProfileCreateOrConnectWithoutProceduresInput = {
@@ -29391,8 +32016,7 @@ export namespace Prisma {
     client?: ClientUpdateOneRequiredWithoutRequirementsNestedInput
     assignedAgency?: AgencyUpdateOneWithoutRequirementsNestedInput
     jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
-    labourProfiles?: LabourProfileUpdateManyWithoutRequirementNestedInput
-    documents?: RequirementDocumentUpdateManyWithoutRequirementNestedInput
+    RequirementAssignment?: RequirementAssignmentUpdateManyWithoutRequirementNestedInput
   }
 
   export type RequirementUncheckedUpdateWithoutProceduresInput = {
@@ -29411,8 +32035,7 @@ export namespace Prisma {
     submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     jobRoles?: JobRoleUncheckedUpdateManyWithoutRequirementNestedInput
-    labourProfiles?: LabourProfileUncheckedUpdateManyWithoutRequirementNestedInput
-    documents?: RequirementDocumentUncheckedUpdateManyWithoutRequirementNestedInput
+    RequirementAssignment?: RequirementAssignmentUncheckedUpdateManyWithoutRequirementNestedInput
   }
 
   export type LabourProfileUpsertWithoutProceduresInput = {
@@ -29432,38 +32055,36 @@ export namespace Prisma {
     age?: IntFieldUpdateOperationsInput | number
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
-    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: LabourProfileUpdateskillsInput | string[]
-    experienceYears?: IntFieldUpdateOperationsInput | number
-    education?: NullableStringFieldUpdateOperationsInput | string | null
-    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
-    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
-    languages?: LabourProfileUpdatelanguagesInput | string[]
-    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    jobRoleName?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: StringFieldUpdateOperationsInput | string
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    cvUrl?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
     passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportVerified?: BoolFieldUpdateOperationsInput | boolean
     visaType?: NullableStringFieldUpdateOperationsInput | string | null
     visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    visaCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    visaVerified?: BoolFieldUpdateOperationsInput | boolean
+    medicalReport?: NullableStringFieldUpdateOperationsInput | string | null
     medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    photo?: NullableStringFieldUpdateOperationsInput | string | null
-    otherDocs?: LabourProfileUpdateotherDocsInput | string[]
-    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    medicalVerified?: BoolFieldUpdateOperationsInput | boolean
+    policeClearance?: NullableStringFieldUpdateOperationsInput | string | null
+    policeVerified?: BoolFieldUpdateOperationsInput | boolean
+    contractCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    contractVerified?: BoolFieldUpdateOperationsInput | boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
     statusReason?: NullableStringFieldUpdateOperationsInput | string | null
-    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    requirement?: RequirementUpdateOneRequiredWithoutLabourProfilesNestedInput
+    documentsSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    documentsVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     agency?: AgencyUpdateOneRequiredWithoutLabourProfilesNestedInput
+    requirementAssignment?: RequirementAssignmentUpdateOneWithoutLabourProfileNestedInput
     statusLogs?: LabourStatusLogUpdateManyWithoutLabourProfileNestedInput
+    documentVerifications?: DocumentVerificationUpdateManyWithoutLabourProfileNestedInput
   }
 
   export type LabourProfileUncheckedUpdateWithoutProceduresInput = {
@@ -29472,38 +32093,36 @@ export namespace Prisma {
     age?: IntFieldUpdateOperationsInput | number
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
-    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: LabourProfileUpdateskillsInput | string[]
-    experienceYears?: IntFieldUpdateOperationsInput | number
-    education?: NullableStringFieldUpdateOperationsInput | string | null
-    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
-    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
-    languages?: LabourProfileUpdatelanguagesInput | string[]
-    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    jobRoleName?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: StringFieldUpdateOperationsInput | string
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    cvUrl?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
     passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportVerified?: BoolFieldUpdateOperationsInput | boolean
     visaType?: NullableStringFieldUpdateOperationsInput | string | null
     visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    visaCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    visaVerified?: BoolFieldUpdateOperationsInput | boolean
+    medicalReport?: NullableStringFieldUpdateOperationsInput | string | null
     medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    photo?: NullableStringFieldUpdateOperationsInput | string | null
-    otherDocs?: LabourProfileUpdateotherDocsInput | string[]
-    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    medicalVerified?: BoolFieldUpdateOperationsInput | boolean
+    policeClearance?: NullableStringFieldUpdateOperationsInput | string | null
+    policeVerified?: BoolFieldUpdateOperationsInput | boolean
+    contractCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    contractVerified?: BoolFieldUpdateOperationsInput | boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
     statusReason?: NullableStringFieldUpdateOperationsInput | string | null
-    requirementId?: StringFieldUpdateOperationsInput | string
     agencyId?: StringFieldUpdateOperationsInput | string
-    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    requirementAssignmentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documentsSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    documentsVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutLabourProfileNestedInput
+    documentVerifications?: DocumentVerificationUncheckedUpdateManyWithoutLabourProfileNestedInput
   }
 
   export type LabourProfileCreateWithoutStatusLogsInput = {
@@ -29512,38 +32131,36 @@ export namespace Prisma {
     age: number
     gender: $Enums.Gender
     nationality: string
-    maritalStatus?: string | null
-    skills?: LabourProfileCreateskillsInput | string[]
-    experienceYears: number
-    education?: string | null
-    currentPosition?: string | null
-    currentCompany?: string | null
-    languages?: LabourProfileCreatelanguagesInput | string[]
-    englishProficiency?: string | null
+    jobRoleName: string
+    status?: $Enums.LabourProfileStatus
     email?: string | null
-    phone: string
-    address?: string | null
-    city?: string | null
-    country?: string | null
-    cvUrl: string
+    phone?: string | null
     passportNumber?: string | null
     passportExpiry?: Date | string | null
+    passportCopy?: string | null
+    passportVerified?: boolean
     visaType?: string | null
     visaExpiry?: Date | string | null
-    medicalStatus?: string | null
+    visaCopy?: string | null
+    visaVerified?: boolean
+    medicalReport?: string | null
     medicalExpiry?: Date | string | null
-    photo?: string | null
-    otherDocs?: LabourProfileCreateotherDocsInput | string[]
-    status?: $Enums.LabourProfileStatus
+    medicalVerified?: boolean
+    policeClearance?: string | null
+    policeVerified?: boolean
+    contractCopy?: string | null
+    contractVerified?: boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: $Enums.DocumentVerificationStatus
     statusReason?: string | null
-    deploymentDate?: Date | string | null
-    contractStartDate?: Date | string | null
-    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    requirement: RequirementCreateNestedOneWithoutLabourProfilesInput
+    documentsSubmittedAt?: Date | string | null
+    documentsVerifiedAt?: Date | string | null
     agency: AgencyCreateNestedOneWithoutLabourProfilesInput
+    requirementAssignment?: RequirementAssignmentCreateNestedOneWithoutLabourProfileInput
     procedures?: ProcedureCreateNestedManyWithoutLabourProfileInput
+    documentVerifications?: DocumentVerificationCreateNestedManyWithoutLabourProfileInput
   }
 
   export type LabourProfileUncheckedCreateWithoutStatusLogsInput = {
@@ -29552,38 +32169,36 @@ export namespace Prisma {
     age: number
     gender: $Enums.Gender
     nationality: string
-    maritalStatus?: string | null
-    skills?: LabourProfileCreateskillsInput | string[]
-    experienceYears: number
-    education?: string | null
-    currentPosition?: string | null
-    currentCompany?: string | null
-    languages?: LabourProfileCreatelanguagesInput | string[]
-    englishProficiency?: string | null
+    jobRoleName: string
+    status?: $Enums.LabourProfileStatus
     email?: string | null
-    phone: string
-    address?: string | null
-    city?: string | null
-    country?: string | null
-    cvUrl: string
+    phone?: string | null
     passportNumber?: string | null
     passportExpiry?: Date | string | null
+    passportCopy?: string | null
+    passportVerified?: boolean
     visaType?: string | null
     visaExpiry?: Date | string | null
-    medicalStatus?: string | null
+    visaCopy?: string | null
+    visaVerified?: boolean
+    medicalReport?: string | null
     medicalExpiry?: Date | string | null
-    photo?: string | null
-    otherDocs?: LabourProfileCreateotherDocsInput | string[]
-    status?: $Enums.LabourProfileStatus
+    medicalVerified?: boolean
+    policeClearance?: string | null
+    policeVerified?: boolean
+    contractCopy?: string | null
+    contractVerified?: boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: $Enums.DocumentVerificationStatus
     statusReason?: string | null
-    requirementId: string
     agencyId: string
-    deploymentDate?: Date | string | null
-    contractStartDate?: Date | string | null
-    contractEndDate?: Date | string | null
+    requirementAssignmentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    documentsSubmittedAt?: Date | string | null
+    documentsVerifiedAt?: Date | string | null
     procedures?: ProcedureUncheckedCreateNestedManyWithoutLabourProfileInput
+    documentVerifications?: DocumentVerificationUncheckedCreateNestedManyWithoutLabourProfileInput
   }
 
   export type LabourProfileCreateOrConnectWithoutStatusLogsInput = {
@@ -29618,7 +32233,7 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutRecipientInput
     clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutStatusLogsInput = {
@@ -29648,7 +32263,7 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
     clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationUncheckedCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutStatusLogsInput = {
@@ -29673,38 +32288,36 @@ export namespace Prisma {
     age?: IntFieldUpdateOperationsInput | number
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
-    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: LabourProfileUpdateskillsInput | string[]
-    experienceYears?: IntFieldUpdateOperationsInput | number
-    education?: NullableStringFieldUpdateOperationsInput | string | null
-    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
-    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
-    languages?: LabourProfileUpdatelanguagesInput | string[]
-    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    jobRoleName?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: StringFieldUpdateOperationsInput | string
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    cvUrl?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
     passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportVerified?: BoolFieldUpdateOperationsInput | boolean
     visaType?: NullableStringFieldUpdateOperationsInput | string | null
     visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    visaCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    visaVerified?: BoolFieldUpdateOperationsInput | boolean
+    medicalReport?: NullableStringFieldUpdateOperationsInput | string | null
     medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    photo?: NullableStringFieldUpdateOperationsInput | string | null
-    otherDocs?: LabourProfileUpdateotherDocsInput | string[]
-    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    medicalVerified?: BoolFieldUpdateOperationsInput | boolean
+    policeClearance?: NullableStringFieldUpdateOperationsInput | string | null
+    policeVerified?: BoolFieldUpdateOperationsInput | boolean
+    contractCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    contractVerified?: BoolFieldUpdateOperationsInput | boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
     statusReason?: NullableStringFieldUpdateOperationsInput | string | null
-    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    requirement?: RequirementUpdateOneRequiredWithoutLabourProfilesNestedInput
+    documentsSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    documentsVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     agency?: AgencyUpdateOneRequiredWithoutLabourProfilesNestedInput
+    requirementAssignment?: RequirementAssignmentUpdateOneWithoutLabourProfileNestedInput
     procedures?: ProcedureUpdateManyWithoutLabourProfileNestedInput
+    documentVerifications?: DocumentVerificationUpdateManyWithoutLabourProfileNestedInput
   }
 
   export type LabourProfileUncheckedUpdateWithoutStatusLogsInput = {
@@ -29713,38 +32326,36 @@ export namespace Prisma {
     age?: IntFieldUpdateOperationsInput | number
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
-    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: LabourProfileUpdateskillsInput | string[]
-    experienceYears?: IntFieldUpdateOperationsInput | number
-    education?: NullableStringFieldUpdateOperationsInput | string | null
-    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
-    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
-    languages?: LabourProfileUpdatelanguagesInput | string[]
-    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    jobRoleName?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: StringFieldUpdateOperationsInput | string
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    cvUrl?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
     passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportVerified?: BoolFieldUpdateOperationsInput | boolean
     visaType?: NullableStringFieldUpdateOperationsInput | string | null
     visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    visaCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    visaVerified?: BoolFieldUpdateOperationsInput | boolean
+    medicalReport?: NullableStringFieldUpdateOperationsInput | string | null
     medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    photo?: NullableStringFieldUpdateOperationsInput | string | null
-    otherDocs?: LabourProfileUpdateotherDocsInput | string[]
-    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    medicalVerified?: BoolFieldUpdateOperationsInput | boolean
+    policeClearance?: NullableStringFieldUpdateOperationsInput | string | null
+    policeVerified?: BoolFieldUpdateOperationsInput | boolean
+    contractCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    contractVerified?: BoolFieldUpdateOperationsInput | boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
     statusReason?: NullableStringFieldUpdateOperationsInput | string | null
-    requirementId?: StringFieldUpdateOperationsInput | string
     agencyId?: StringFieldUpdateOperationsInput | string
-    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    requirementAssignmentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documentsSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    documentsVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     procedures?: ProcedureUncheckedUpdateManyWithoutLabourProfileNestedInput
+    documentVerifications?: DocumentVerificationUncheckedUpdateManyWithoutLabourProfileNestedInput
   }
 
   export type UserUpsertWithoutStatusLogsInput = {
@@ -29785,7 +32396,7 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutRecipientNestedInput
     clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutStatusLogsInput = {
@@ -29815,7 +32426,7 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
     clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUncheckedUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type ClientCreateWithoutDocumentsInput = {
@@ -29886,7 +32497,7 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutRecipientInput
     statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
     agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutClientDocumentsInput = {
@@ -29916,7 +32527,7 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
     statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
     agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationUncheckedCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutClientDocumentsInput = {
@@ -30009,7 +32620,7 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutRecipientNestedInput
     statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
     agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutClientDocumentsInput = {
@@ -30039,7 +32650,7 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
     statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
     agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUncheckedUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type AgencyCreateWithoutDocumentsInput = {
@@ -30058,6 +32669,7 @@ export namespace Prisma {
     user: UserCreateNestedOneWithoutAgencyProfileInput
     labourProfiles?: LabourProfileCreateNestedManyWithoutAgencyInput
     requirements?: RequirementCreateNestedManyWithoutAssignedAgencyInput
+    RequirementAssignment?: RequirementAssignmentCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyUncheckedCreateWithoutDocumentsInput = {
@@ -30076,6 +32688,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutAgencyInput
     requirements?: RequirementUncheckedCreateNestedManyWithoutAssignedAgencyInput
+    RequirementAssignment?: RequirementAssignmentUncheckedCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyCreateOrConnectWithoutDocumentsInput = {
@@ -30110,7 +32723,7 @@ export namespace Prisma {
     notifications?: NotificationCreateNestedManyWithoutRecipientInput
     statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutAgencyDocumentsInput = {
@@ -30140,7 +32753,7 @@ export namespace Prisma {
     notifications?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
     statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationUncheckedCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutAgencyDocumentsInput = {
@@ -30175,6 +32788,7 @@ export namespace Prisma {
     user?: UserUpdateOneRequiredWithoutAgencyProfileNestedInput
     labourProfiles?: LabourProfileUpdateManyWithoutAgencyNestedInput
     requirements?: RequirementUpdateManyWithoutAssignedAgencyNestedInput
+    RequirementAssignment?: RequirementAssignmentUpdateManyWithoutAgencyNestedInput
   }
 
   export type AgencyUncheckedUpdateWithoutDocumentsInput = {
@@ -30193,6 +32807,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     labourProfiles?: LabourProfileUncheckedUpdateManyWithoutAgencyNestedInput
     requirements?: RequirementUncheckedUpdateManyWithoutAssignedAgencyNestedInput
+    RequirementAssignment?: RequirementAssignmentUncheckedUpdateManyWithoutAgencyNestedInput
   }
 
   export type UserUpsertWithoutAgencyDocumentsInput = {
@@ -30233,7 +32848,7 @@ export namespace Prisma {
     notifications?: NotificationUpdateManyWithoutRecipientNestedInput
     statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAgencyDocumentsInput = {
@@ -30263,239 +32878,7 @@ export namespace Prisma {
     notifications?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
     statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
-  }
-
-  export type RequirementCreateWithoutDocumentsInput = {
-    id?: string
-    specialNotes?: string | null
-    status?: $Enums.RequirementStatus
-    languages?: RequirementCreatelanguagesInput | string[]
-    minExperience?: $Enums.ExperienceLevel | null
-    maxAge?: number | null
-    ticketType?: $Enums.TicketType | null
-    ticketProvided?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    submittedAt?: Date | string | null
-    reviewedAt?: Date | string | null
-    client: ClientCreateNestedOneWithoutRequirementsInput
-    assignedAgency?: AgencyCreateNestedOneWithoutRequirementsInput
-    jobRoles?: JobRoleCreateNestedManyWithoutRequirementInput
-    labourProfiles?: LabourProfileCreateNestedManyWithoutRequirementInput
-    procedures?: ProcedureCreateNestedManyWithoutRequirementInput
-  }
-
-  export type RequirementUncheckedCreateWithoutDocumentsInput = {
-    id?: string
-    specialNotes?: string | null
-    status?: $Enums.RequirementStatus
-    languages?: RequirementCreatelanguagesInput | string[]
-    minExperience?: $Enums.ExperienceLevel | null
-    maxAge?: number | null
-    ticketType?: $Enums.TicketType | null
-    ticketProvided?: boolean
-    clientId: string
-    assignedAgencyId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    submittedAt?: Date | string | null
-    reviewedAt?: Date | string | null
-    jobRoles?: JobRoleUncheckedCreateNestedManyWithoutRequirementInput
-    labourProfiles?: LabourProfileUncheckedCreateNestedManyWithoutRequirementInput
-    procedures?: ProcedureUncheckedCreateNestedManyWithoutRequirementInput
-  }
-
-  export type RequirementCreateOrConnectWithoutDocumentsInput = {
-    where: RequirementWhereUniqueInput
-    create: XOR<RequirementCreateWithoutDocumentsInput, RequirementUncheckedCreateWithoutDocumentsInput>
-  }
-
-  export type UserCreateWithoutRequirementDocumentsInput = {
-    id?: string
-    name: string
-    email: string
-    password: string
-    phone?: string | null
-    altContact?: string | null
-    profilePicture?: string | null
-    role: $Enums.UserRole
-    status?: $Enums.AccountStatus
-    resetRequired?: boolean
-    lastLogin?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deleteAt?: Date | string | null
-    deletionType?: $Enums.DeletionType | null
-    deletionReason?: string | null
-    deletionRequestedBy?: string | null
-    clientProfile?: ClientCreateNestedOneWithoutUserInput
-    agencyProfile?: AgencyCreateNestedOneWithoutUserInput
-    adminProfile?: AdminCreateNestedOneWithoutUserInput
-    createdBy?: UserCreateNestedOneWithoutCreatedUsersInput
-    createdUsers?: UserCreateNestedManyWithoutCreatedByInput
-    auditLogs?: AuditLogCreateNestedManyWithoutPerformedByInput
-    notifications?: NotificationCreateNestedManyWithoutRecipientInput
-    statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
-    clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
-    agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-  }
-
-  export type UserUncheckedCreateWithoutRequirementDocumentsInput = {
-    id?: string
-    name: string
-    email: string
-    password: string
-    phone?: string | null
-    altContact?: string | null
-    profilePicture?: string | null
-    role: $Enums.UserRole
-    status?: $Enums.AccountStatus
-    resetRequired?: boolean
-    lastLogin?: Date | string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    deleteAt?: Date | string | null
-    deletionType?: $Enums.DeletionType | null
-    deletionReason?: string | null
-    deletionRequestedBy?: string | null
-    createdById?: string | null
-    clientProfile?: ClientUncheckedCreateNestedOneWithoutUserInput
-    agencyProfile?: AgencyUncheckedCreateNestedOneWithoutUserInput
-    adminProfile?: AdminUncheckedCreateNestedOneWithoutUserInput
-    createdUsers?: UserUncheckedCreateNestedManyWithoutCreatedByInput
-    auditLogs?: AuditLogUncheckedCreateNestedManyWithoutPerformedByInput
-    notifications?: NotificationUncheckedCreateNestedManyWithoutRecipientInput
-    statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
-    clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-  }
-
-  export type UserCreateOrConnectWithoutRequirementDocumentsInput = {
-    where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutRequirementDocumentsInput, UserUncheckedCreateWithoutRequirementDocumentsInput>
-  }
-
-  export type RequirementUpsertWithoutDocumentsInput = {
-    update: XOR<RequirementUpdateWithoutDocumentsInput, RequirementUncheckedUpdateWithoutDocumentsInput>
-    create: XOR<RequirementCreateWithoutDocumentsInput, RequirementUncheckedCreateWithoutDocumentsInput>
-    where?: RequirementWhereInput
-  }
-
-  export type RequirementUpdateToOneWithWhereWithoutDocumentsInput = {
-    where?: RequirementWhereInput
-    data: XOR<RequirementUpdateWithoutDocumentsInput, RequirementUncheckedUpdateWithoutDocumentsInput>
-  }
-
-  export type RequirementUpdateWithoutDocumentsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
-    languages?: RequirementUpdatelanguagesInput | string[]
-    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
-    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
-    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
-    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    client?: ClientUpdateOneRequiredWithoutRequirementsNestedInput
-    assignedAgency?: AgencyUpdateOneWithoutRequirementsNestedInput
-    jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
-    labourProfiles?: LabourProfileUpdateManyWithoutRequirementNestedInput
-    procedures?: ProcedureUpdateManyWithoutRequirementNestedInput
-  }
-
-  export type RequirementUncheckedUpdateWithoutDocumentsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    specialNotes?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
-    languages?: RequirementUpdatelanguagesInput | string[]
-    minExperience?: NullableEnumExperienceLevelFieldUpdateOperationsInput | $Enums.ExperienceLevel | null
-    maxAge?: NullableIntFieldUpdateOperationsInput | number | null
-    ticketType?: NullableEnumTicketTypeFieldUpdateOperationsInput | $Enums.TicketType | null
-    ticketProvided?: BoolFieldUpdateOperationsInput | boolean
-    clientId?: StringFieldUpdateOperationsInput | string
-    assignedAgencyId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    jobRoles?: JobRoleUncheckedUpdateManyWithoutRequirementNestedInput
-    labourProfiles?: LabourProfileUncheckedUpdateManyWithoutRequirementNestedInput
-    procedures?: ProcedureUncheckedUpdateManyWithoutRequirementNestedInput
-  }
-
-  export type UserUpsertWithoutRequirementDocumentsInput = {
-    update: XOR<UserUpdateWithoutRequirementDocumentsInput, UserUncheckedUpdateWithoutRequirementDocumentsInput>
-    create: XOR<UserCreateWithoutRequirementDocumentsInput, UserUncheckedCreateWithoutRequirementDocumentsInput>
-    where?: UserWhereInput
-  }
-
-  export type UserUpdateToOneWithWhereWithoutRequirementDocumentsInput = {
-    where?: UserWhereInput
-    data: XOR<UserUpdateWithoutRequirementDocumentsInput, UserUncheckedUpdateWithoutRequirementDocumentsInput>
-  }
-
-  export type UserUpdateWithoutRequirementDocumentsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    password?: StringFieldUpdateOperationsInput | string
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    altContact?: NullableStringFieldUpdateOperationsInput | string | null
-    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-    status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
-    resetRequired?: BoolFieldUpdateOperationsInput | boolean
-    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
-    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
-    deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
-    clientProfile?: ClientUpdateOneWithoutUserNestedInput
-    agencyProfile?: AgencyUpdateOneWithoutUserNestedInput
-    adminProfile?: AdminUpdateOneWithoutUserNestedInput
-    createdBy?: UserUpdateOneWithoutCreatedUsersNestedInput
-    createdUsers?: UserUpdateManyWithoutCreatedByNestedInput
-    auditLogs?: AuditLogUpdateManyWithoutPerformedByNestedInput
-    notifications?: NotificationUpdateManyWithoutRecipientNestedInput
-    statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
-    clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
-    agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-  }
-
-  export type UserUncheckedUpdateWithoutRequirementDocumentsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    email?: StringFieldUpdateOperationsInput | string
-    password?: StringFieldUpdateOperationsInput | string
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    altContact?: NullableStringFieldUpdateOperationsInput | string | null
-    profilePicture?: NullableStringFieldUpdateOperationsInput | string | null
-    role?: EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole
-    status?: EnumAccountStatusFieldUpdateOperationsInput | $Enums.AccountStatus
-    resetRequired?: BoolFieldUpdateOperationsInput | boolean
-    lastLogin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    deleteAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    deletionType?: NullableEnumDeletionTypeFieldUpdateOperationsInput | $Enums.DeletionType | null
-    deletionReason?: NullableStringFieldUpdateOperationsInput | string | null
-    deletionRequestedBy?: NullableStringFieldUpdateOperationsInput | string | null
-    createdById?: NullableStringFieldUpdateOperationsInput | string | null
-    clientProfile?: ClientUncheckedUpdateOneWithoutUserNestedInput
-    agencyProfile?: AgencyUncheckedUpdateOneWithoutUserNestedInput
-    adminProfile?: AdminUncheckedUpdateOneWithoutUserNestedInput
-    createdUsers?: UserUncheckedUpdateManyWithoutCreatedByNestedInput
-    auditLogs?: AuditLogUncheckedUpdateManyWithoutPerformedByNestedInput
-    notifications?: NotificationUncheckedUpdateManyWithoutRecipientNestedInput
-    statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
-    clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
+    DocumentVerification?: DocumentVerificationUncheckedUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserCreateWithoutAuditLogsInput = {
@@ -30525,7 +32908,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutAuditLogsInput = {
@@ -30555,7 +32938,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationUncheckedCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutAuditLogsInput = {
@@ -30601,7 +32984,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAuditLogsInput = {
@@ -30631,7 +33014,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUncheckedUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserCreateWithoutNotificationsInput = {
@@ -30661,7 +33044,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserUncheckedCreateWithoutNotificationsInput = {
@@ -30691,7 +33074,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUncheckedCreateNestedManyWithoutChangedByInput
     clientDocuments?: ClientDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
     agencyDocuments?: AgencyDocumentUncheckedCreateNestedManyWithoutVerifiedByInput
-    requirementDocuments?: RequirementDocumentUncheckedCreateNestedManyWithoutUploadedByInput
+    DocumentVerification?: DocumentVerificationUncheckedCreateNestedManyWithoutVerifiedByInput
   }
 
   export type UserCreateOrConnectWithoutNotificationsInput = {
@@ -30737,7 +33120,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotificationsInput = {
@@ -30767,7 +33150,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUncheckedUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserCreateManyCreatedByInput = {
@@ -30854,15 +33237,16 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
-  export type RequirementDocumentCreateManyUploadedByInput = {
+  export type DocumentVerificationCreateManyVerifiedByInput = {
     id?: string
-    type: $Enums.DocumentType
-    url: string
-    name?: string | null
-    description?: string | null
-    requirementId: string
+    documentType: string
+    documentUrl: string
+    status?: $Enums.VerificationStatus
+    comments?: string | null
+    labourProfileId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    verifiedAt?: Date | string | null
   }
 
   export type UserUpdateWithoutCreatedByInput = {
@@ -30892,7 +33276,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCreatedByInput = {
@@ -30922,7 +33306,7 @@ export namespace Prisma {
     statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutChangedByNestedInput
     clientDocuments?: ClientDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
     agencyDocuments?: AgencyDocumentUncheckedUpdateManyWithoutVerifiedByNestedInput
-    requirementDocuments?: RequirementDocumentUncheckedUpdateManyWithoutUploadedByNestedInput
+    DocumentVerification?: DocumentVerificationUncheckedUpdateManyWithoutVerifiedByNestedInput
   }
 
   export type UserUncheckedUpdateManyWithoutCreatedByInput = {
@@ -31137,37 +33521,40 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type RequirementDocumentUpdateWithoutUploadedByInput = {
+  export type DocumentVerificationUpdateWithoutVerifiedByInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
+    documentType?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    requirement?: RequirementUpdateOneRequiredWithoutDocumentsNestedInput
+    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    labourProfile?: LabourProfileUpdateOneRequiredWithoutDocumentVerificationsNestedInput
   }
 
-  export type RequirementDocumentUncheckedUpdateWithoutUploadedByInput = {
+  export type DocumentVerificationUncheckedUpdateWithoutVerifiedByInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    requirementId?: StringFieldUpdateOperationsInput | string
+    documentType?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    labourProfileId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type RequirementDocumentUncheckedUpdateManyWithoutUploadedByInput = {
+  export type DocumentVerificationUncheckedUpdateManyWithoutVerifiedByInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    requirementId?: StringFieldUpdateOperationsInput | string
+    documentType?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    labourProfileId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type RequirementCreateManyClientInput = {
@@ -31215,9 +33602,8 @@ export namespace Prisma {
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     assignedAgency?: AgencyUpdateOneWithoutRequirementsNestedInput
     jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
-    labourProfiles?: LabourProfileUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUpdateManyWithoutRequirementNestedInput
-    documents?: RequirementDocumentUpdateManyWithoutRequirementNestedInput
+    RequirementAssignment?: RequirementAssignmentUpdateManyWithoutRequirementNestedInput
   }
 
   export type RequirementUncheckedUpdateWithoutClientInput = {
@@ -31235,9 +33621,8 @@ export namespace Prisma {
     submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     jobRoles?: JobRoleUncheckedUpdateManyWithoutRequirementNestedInput
-    labourProfiles?: LabourProfileUncheckedUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUncheckedUpdateManyWithoutRequirementNestedInput
-    documents?: RequirementDocumentUncheckedUpdateManyWithoutRequirementNestedInput
+    RequirementAssignment?: RequirementAssignmentUncheckedUpdateManyWithoutRequirementNestedInput
   }
 
   export type RequirementUncheckedUpdateManyWithoutClientInput = {
@@ -31304,36 +33689,33 @@ export namespace Prisma {
     age: number
     gender: $Enums.Gender
     nationality: string
-    maritalStatus?: string | null
-    skills?: LabourProfileCreateskillsInput | string[]
-    experienceYears: number
-    education?: string | null
-    currentPosition?: string | null
-    currentCompany?: string | null
-    languages?: LabourProfileCreatelanguagesInput | string[]
-    englishProficiency?: string | null
+    jobRoleName: string
+    status?: $Enums.LabourProfileStatus
     email?: string | null
-    phone: string
-    address?: string | null
-    city?: string | null
-    country?: string | null
-    cvUrl: string
+    phone?: string | null
     passportNumber?: string | null
     passportExpiry?: Date | string | null
+    passportCopy?: string | null
+    passportVerified?: boolean
     visaType?: string | null
     visaExpiry?: Date | string | null
-    medicalStatus?: string | null
+    visaCopy?: string | null
+    visaVerified?: boolean
+    medicalReport?: string | null
     medicalExpiry?: Date | string | null
-    photo?: string | null
-    otherDocs?: LabourProfileCreateotherDocsInput | string[]
-    status?: $Enums.LabourProfileStatus
+    medicalVerified?: boolean
+    policeClearance?: string | null
+    policeVerified?: boolean
+    contractCopy?: string | null
+    contractVerified?: boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: $Enums.DocumentVerificationStatus
     statusReason?: string | null
-    requirementId: string
-    deploymentDate?: Date | string | null
-    contractStartDate?: Date | string | null
-    contractEndDate?: Date | string | null
+    requirementAssignmentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    documentsSubmittedAt?: Date | string | null
+    documentsVerifiedAt?: Date | string | null
   }
 
   export type RequirementCreateManyAssignedAgencyInput = {
@@ -31366,44 +33748,53 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type RequirementAssignmentCreateManyAgencyInput = {
+    id?: string
+    requirementId: string
+    jobRoleId: string
+    quantity: number
+    status?: $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type LabourProfileUpdateWithoutAgencyInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     age?: IntFieldUpdateOperationsInput | number
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
-    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: LabourProfileUpdateskillsInput | string[]
-    experienceYears?: IntFieldUpdateOperationsInput | number
-    education?: NullableStringFieldUpdateOperationsInput | string | null
-    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
-    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
-    languages?: LabourProfileUpdatelanguagesInput | string[]
-    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    jobRoleName?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: StringFieldUpdateOperationsInput | string
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    cvUrl?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
     passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportVerified?: BoolFieldUpdateOperationsInput | boolean
     visaType?: NullableStringFieldUpdateOperationsInput | string | null
     visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    visaCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    visaVerified?: BoolFieldUpdateOperationsInput | boolean
+    medicalReport?: NullableStringFieldUpdateOperationsInput | string | null
     medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    photo?: NullableStringFieldUpdateOperationsInput | string | null
-    otherDocs?: LabourProfileUpdateotherDocsInput | string[]
-    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    medicalVerified?: BoolFieldUpdateOperationsInput | boolean
+    policeClearance?: NullableStringFieldUpdateOperationsInput | string | null
+    policeVerified?: BoolFieldUpdateOperationsInput | boolean
+    contractCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    contractVerified?: BoolFieldUpdateOperationsInput | boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
     statusReason?: NullableStringFieldUpdateOperationsInput | string | null
-    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    requirement?: RequirementUpdateOneRequiredWithoutLabourProfilesNestedInput
+    documentsSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    documentsVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    requirementAssignment?: RequirementAssignmentUpdateOneWithoutLabourProfileNestedInput
     statusLogs?: LabourStatusLogUpdateManyWithoutLabourProfileNestedInput
     procedures?: ProcedureUpdateManyWithoutLabourProfileNestedInput
+    documentVerifications?: DocumentVerificationUpdateManyWithoutLabourProfileNestedInput
   }
 
   export type LabourProfileUncheckedUpdateWithoutAgencyInput = {
@@ -31412,38 +33803,36 @@ export namespace Prisma {
     age?: IntFieldUpdateOperationsInput | number
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
-    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: LabourProfileUpdateskillsInput | string[]
-    experienceYears?: IntFieldUpdateOperationsInput | number
-    education?: NullableStringFieldUpdateOperationsInput | string | null
-    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
-    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
-    languages?: LabourProfileUpdatelanguagesInput | string[]
-    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    jobRoleName?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: StringFieldUpdateOperationsInput | string
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    cvUrl?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
     passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportVerified?: BoolFieldUpdateOperationsInput | boolean
     visaType?: NullableStringFieldUpdateOperationsInput | string | null
     visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    visaCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    visaVerified?: BoolFieldUpdateOperationsInput | boolean
+    medicalReport?: NullableStringFieldUpdateOperationsInput | string | null
     medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    photo?: NullableStringFieldUpdateOperationsInput | string | null
-    otherDocs?: LabourProfileUpdateotherDocsInput | string[]
-    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    medicalVerified?: BoolFieldUpdateOperationsInput | boolean
+    policeClearance?: NullableStringFieldUpdateOperationsInput | string | null
+    policeVerified?: BoolFieldUpdateOperationsInput | boolean
+    contractCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    contractVerified?: BoolFieldUpdateOperationsInput | boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
     statusReason?: NullableStringFieldUpdateOperationsInput | string | null
-    requirementId?: StringFieldUpdateOperationsInput | string
-    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    requirementAssignmentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documentsSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    documentsVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutLabourProfileNestedInput
     procedures?: ProcedureUncheckedUpdateManyWithoutLabourProfileNestedInput
+    documentVerifications?: DocumentVerificationUncheckedUpdateManyWithoutLabourProfileNestedInput
   }
 
   export type LabourProfileUncheckedUpdateManyWithoutAgencyInput = {
@@ -31452,36 +33841,33 @@ export namespace Prisma {
     age?: IntFieldUpdateOperationsInput | number
     gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
     nationality?: StringFieldUpdateOperationsInput | string
-    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: LabourProfileUpdateskillsInput | string[]
-    experienceYears?: IntFieldUpdateOperationsInput | number
-    education?: NullableStringFieldUpdateOperationsInput | string | null
-    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
-    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
-    languages?: LabourProfileUpdatelanguagesInput | string[]
-    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
+    jobRoleName?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: StringFieldUpdateOperationsInput | string
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    cvUrl?: StringFieldUpdateOperationsInput | string
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
     passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportVerified?: BoolFieldUpdateOperationsInput | boolean
     visaType?: NullableStringFieldUpdateOperationsInput | string | null
     visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
+    visaCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    visaVerified?: BoolFieldUpdateOperationsInput | boolean
+    medicalReport?: NullableStringFieldUpdateOperationsInput | string | null
     medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    photo?: NullableStringFieldUpdateOperationsInput | string | null
-    otherDocs?: LabourProfileUpdateotherDocsInput | string[]
-    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    medicalVerified?: BoolFieldUpdateOperationsInput | boolean
+    policeClearance?: NullableStringFieldUpdateOperationsInput | string | null
+    policeVerified?: BoolFieldUpdateOperationsInput | boolean
+    contractCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    contractVerified?: BoolFieldUpdateOperationsInput | boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
     statusReason?: NullableStringFieldUpdateOperationsInput | string | null
-    requirementId?: StringFieldUpdateOperationsInput | string
-    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    requirementAssignmentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documentsSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    documentsVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type RequirementUpdateWithoutAssignedAgencyInput = {
@@ -31499,9 +33885,8 @@ export namespace Prisma {
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     client?: ClientUpdateOneRequiredWithoutRequirementsNestedInput
     jobRoles?: JobRoleUpdateManyWithoutRequirementNestedInput
-    labourProfiles?: LabourProfileUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUpdateManyWithoutRequirementNestedInput
-    documents?: RequirementDocumentUpdateManyWithoutRequirementNestedInput
+    RequirementAssignment?: RequirementAssignmentUpdateManyWithoutRequirementNestedInput
   }
 
   export type RequirementUncheckedUpdateWithoutAssignedAgencyInput = {
@@ -31519,9 +33904,8 @@ export namespace Prisma {
     submittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     jobRoles?: JobRoleUncheckedUpdateManyWithoutRequirementNestedInput
-    labourProfiles?: LabourProfileUncheckedUpdateManyWithoutRequirementNestedInput
     procedures?: ProcedureUncheckedUpdateManyWithoutRequirementNestedInput
-    documents?: RequirementDocumentUncheckedUpdateManyWithoutRequirementNestedInput
+    RequirementAssignment?: RequirementAssignmentUncheckedUpdateManyWithoutRequirementNestedInput
   }
 
   export type RequirementUncheckedUpdateManyWithoutAssignedAgencyInput = {
@@ -31582,6 +33966,41 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type RequirementAssignmentUpdateWithoutAgencyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    requirement?: RequirementUpdateOneRequiredWithoutRequirementAssignmentNestedInput
+    jobRole?: JobRoleUpdateOneRequiredWithoutRequirementAssignmentNestedInput
+    LabourProfile?: LabourProfileUpdateManyWithoutRequirementAssignmentNestedInput
+  }
+
+  export type RequirementAssignmentUncheckedUpdateWithoutAgencyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requirementId?: StringFieldUpdateOperationsInput | string
+    jobRoleId?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    LabourProfile?: LabourProfileUncheckedUpdateManyWithoutRequirementAssignmentNestedInput
+  }
+
+  export type RequirementAssignmentUncheckedUpdateManyWithoutAgencyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requirementId?: StringFieldUpdateOperationsInput | string
+    jobRoleId?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type JobRoleCreateManyRequirementInput = {
     id?: string
     title: string
@@ -31591,44 +34010,6 @@ export namespace Prisma {
     salaryCurrency?: string
     startDate?: Date | string | null
     contractDuration?: $Enums.ContractDuration | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type LabourProfileCreateManyRequirementInput = {
-    id?: string
-    name: string
-    age: number
-    gender: $Enums.Gender
-    nationality: string
-    maritalStatus?: string | null
-    skills?: LabourProfileCreateskillsInput | string[]
-    experienceYears: number
-    education?: string | null
-    currentPosition?: string | null
-    currentCompany?: string | null
-    languages?: LabourProfileCreatelanguagesInput | string[]
-    englishProficiency?: string | null
-    email?: string | null
-    phone: string
-    address?: string | null
-    city?: string | null
-    country?: string | null
-    cvUrl: string
-    passportNumber?: string | null
-    passportExpiry?: Date | string | null
-    visaType?: string | null
-    visaExpiry?: Date | string | null
-    medicalStatus?: string | null
-    medicalExpiry?: Date | string | null
-    photo?: string | null
-    otherDocs?: LabourProfileCreateotherDocsInput | string[]
-    status?: $Enums.LabourProfileStatus
-    statusReason?: string | null
-    agencyId: string
-    deploymentDate?: Date | string | null
-    contractStartDate?: Date | string | null
-    contractEndDate?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -31647,13 +34028,13 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
-  export type RequirementDocumentCreateManyRequirementInput = {
+  export type RequirementAssignmentCreateManyRequirementInput = {
     id?: string
-    type: $Enums.DocumentType
-    url: string
-    name?: string | null
-    description?: string | null
-    uploadedById: string
+    jobRoleId: string
+    agencyId: string
+    quantity: number
+    status?: $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -31669,6 +34050,7 @@ export namespace Prisma {
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    RequirementAssignment?: RequirementAssignmentUpdateManyWithoutJobRoleNestedInput
   }
 
   export type JobRoleUncheckedUpdateWithoutRequirementInput = {
@@ -31682,6 +34064,7 @@ export namespace Prisma {
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    RequirementAssignment?: RequirementAssignmentUncheckedUpdateManyWithoutJobRoleNestedInput
   }
 
   export type JobRoleUncheckedUpdateManyWithoutRequirementInput = {
@@ -31693,124 +34076,6 @@ export namespace Prisma {
     salaryCurrency?: StringFieldUpdateOperationsInput | string
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type LabourProfileUpdateWithoutRequirementInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    age?: IntFieldUpdateOperationsInput | number
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    nationality?: StringFieldUpdateOperationsInput | string
-    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: LabourProfileUpdateskillsInput | string[]
-    experienceYears?: IntFieldUpdateOperationsInput | number
-    education?: NullableStringFieldUpdateOperationsInput | string | null
-    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
-    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
-    languages?: LabourProfileUpdatelanguagesInput | string[]
-    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: StringFieldUpdateOperationsInput | string
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    cvUrl?: StringFieldUpdateOperationsInput | string
-    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    visaType?: NullableStringFieldUpdateOperationsInput | string | null
-    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    photo?: NullableStringFieldUpdateOperationsInput | string | null
-    otherDocs?: LabourProfileUpdateotherDocsInput | string[]
-    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
-    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
-    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    agency?: AgencyUpdateOneRequiredWithoutLabourProfilesNestedInput
-    statusLogs?: LabourStatusLogUpdateManyWithoutLabourProfileNestedInput
-    procedures?: ProcedureUpdateManyWithoutLabourProfileNestedInput
-  }
-
-  export type LabourProfileUncheckedUpdateWithoutRequirementInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    age?: IntFieldUpdateOperationsInput | number
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    nationality?: StringFieldUpdateOperationsInput | string
-    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: LabourProfileUpdateskillsInput | string[]
-    experienceYears?: IntFieldUpdateOperationsInput | number
-    education?: NullableStringFieldUpdateOperationsInput | string | null
-    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
-    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
-    languages?: LabourProfileUpdatelanguagesInput | string[]
-    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: StringFieldUpdateOperationsInput | string
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    cvUrl?: StringFieldUpdateOperationsInput | string
-    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    visaType?: NullableStringFieldUpdateOperationsInput | string | null
-    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    photo?: NullableStringFieldUpdateOperationsInput | string | null
-    otherDocs?: LabourProfileUpdateotherDocsInput | string[]
-    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
-    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
-    agencyId?: StringFieldUpdateOperationsInput | string
-    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutLabourProfileNestedInput
-    procedures?: ProcedureUncheckedUpdateManyWithoutLabourProfileNestedInput
-  }
-
-  export type LabourProfileUncheckedUpdateManyWithoutRequirementInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    age?: IntFieldUpdateOperationsInput | number
-    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
-    nationality?: StringFieldUpdateOperationsInput | string
-    maritalStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    skills?: LabourProfileUpdateskillsInput | string[]
-    experienceYears?: IntFieldUpdateOperationsInput | number
-    education?: NullableStringFieldUpdateOperationsInput | string | null
-    currentPosition?: NullableStringFieldUpdateOperationsInput | string | null
-    currentCompany?: NullableStringFieldUpdateOperationsInput | string | null
-    languages?: LabourProfileUpdatelanguagesInput | string[]
-    englishProficiency?: NullableStringFieldUpdateOperationsInput | string | null
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: StringFieldUpdateOperationsInput | string
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    country?: NullableStringFieldUpdateOperationsInput | string | null
-    cvUrl?: StringFieldUpdateOperationsInput | string
-    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
-    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    visaType?: NullableStringFieldUpdateOperationsInput | string | null
-    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    medicalStatus?: NullableStringFieldUpdateOperationsInput | string | null
-    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    photo?: NullableStringFieldUpdateOperationsInput | string | null
-    otherDocs?: LabourProfileUpdateotherDocsInput | string[]
-    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
-    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
-    agencyId?: StringFieldUpdateOperationsInput | string
-    deploymentDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractStartDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    contractEndDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -31857,37 +34122,231 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type RequirementDocumentUpdateWithoutRequirementInput = {
+  export type RequirementAssignmentUpdateWithoutRequirementInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
+    quantity?: IntFieldUpdateOperationsInput | number
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    uploadedBy?: UserUpdateOneRequiredWithoutRequirementDocumentsNestedInput
+    jobRole?: JobRoleUpdateOneRequiredWithoutRequirementAssignmentNestedInput
+    agency?: AgencyUpdateOneRequiredWithoutRequirementAssignmentNestedInput
+    LabourProfile?: LabourProfileUpdateManyWithoutRequirementAssignmentNestedInput
   }
 
-  export type RequirementDocumentUncheckedUpdateWithoutRequirementInput = {
+  export type RequirementAssignmentUncheckedUpdateWithoutRequirementInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    uploadedById?: StringFieldUpdateOperationsInput | string
+    jobRoleId?: StringFieldUpdateOperationsInput | string
+    agencyId?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    LabourProfile?: LabourProfileUncheckedUpdateManyWithoutRequirementAssignmentNestedInput
+  }
+
+  export type RequirementAssignmentUncheckedUpdateManyWithoutRequirementInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobRoleId?: StringFieldUpdateOperationsInput | string
+    agencyId?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type RequirementDocumentUncheckedUpdateManyWithoutRequirementInput = {
+  export type RequirementAssignmentCreateManyJobRoleInput = {
+    id?: string
+    requirementId: string
+    agencyId: string
+    quantity: number
+    status?: $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RequirementAssignmentUpdateWithoutJobRoleInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: EnumDocumentTypeFieldUpdateOperationsInput | $Enums.DocumentType
-    url?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    uploadedById?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    requirement?: RequirementUpdateOneRequiredWithoutRequirementAssignmentNestedInput
+    agency?: AgencyUpdateOneRequiredWithoutRequirementAssignmentNestedInput
+    LabourProfile?: LabourProfileUpdateManyWithoutRequirementAssignmentNestedInput
+  }
+
+  export type RequirementAssignmentUncheckedUpdateWithoutJobRoleInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requirementId?: StringFieldUpdateOperationsInput | string
+    agencyId?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    LabourProfile?: LabourProfileUncheckedUpdateManyWithoutRequirementAssignmentNestedInput
+  }
+
+  export type RequirementAssignmentUncheckedUpdateManyWithoutJobRoleInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requirementId?: StringFieldUpdateOperationsInput | string
+    agencyId?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    status?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type LabourProfileCreateManyRequirementAssignmentInput = {
+    id?: string
+    name: string
+    age: number
+    gender: $Enums.Gender
+    nationality: string
+    jobRoleName: string
+    status?: $Enums.LabourProfileStatus
+    email?: string | null
+    phone?: string | null
+    passportNumber?: string | null
+    passportExpiry?: Date | string | null
+    passportCopy?: string | null
+    passportVerified?: boolean
+    visaType?: string | null
+    visaExpiry?: Date | string | null
+    visaCopy?: string | null
+    visaVerified?: boolean
+    medicalReport?: string | null
+    medicalExpiry?: Date | string | null
+    medicalVerified?: boolean
+    policeClearance?: string | null
+    policeVerified?: boolean
+    contractCopy?: string | null
+    contractVerified?: boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: $Enums.DocumentVerificationStatus
+    statusReason?: string | null
+    agencyId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    documentsSubmittedAt?: Date | string | null
+    documentsVerifiedAt?: Date | string | null
+  }
+
+  export type LabourProfileUpdateWithoutRequirementAssignmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    age?: IntFieldUpdateOperationsInput | number
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    nationality?: StringFieldUpdateOperationsInput | string
+    jobRoleName?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportVerified?: BoolFieldUpdateOperationsInput | boolean
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    visaVerified?: BoolFieldUpdateOperationsInput | boolean
+    medicalReport?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalVerified?: BoolFieldUpdateOperationsInput | boolean
+    policeClearance?: NullableStringFieldUpdateOperationsInput | string | null
+    policeVerified?: BoolFieldUpdateOperationsInput | boolean
+    contractCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    contractVerified?: BoolFieldUpdateOperationsInput | boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documentsSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    documentsVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    agency?: AgencyUpdateOneRequiredWithoutLabourProfilesNestedInput
+    statusLogs?: LabourStatusLogUpdateManyWithoutLabourProfileNestedInput
+    procedures?: ProcedureUpdateManyWithoutLabourProfileNestedInput
+    documentVerifications?: DocumentVerificationUpdateManyWithoutLabourProfileNestedInput
+  }
+
+  export type LabourProfileUncheckedUpdateWithoutRequirementAssignmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    age?: IntFieldUpdateOperationsInput | number
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    nationality?: StringFieldUpdateOperationsInput | string
+    jobRoleName?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportVerified?: BoolFieldUpdateOperationsInput | boolean
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    visaVerified?: BoolFieldUpdateOperationsInput | boolean
+    medicalReport?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalVerified?: BoolFieldUpdateOperationsInput | boolean
+    policeClearance?: NullableStringFieldUpdateOperationsInput | string | null
+    policeVerified?: BoolFieldUpdateOperationsInput | boolean
+    contractCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    contractVerified?: BoolFieldUpdateOperationsInput | boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
+    agencyId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documentsSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    documentsVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    statusLogs?: LabourStatusLogUncheckedUpdateManyWithoutLabourProfileNestedInput
+    procedures?: ProcedureUncheckedUpdateManyWithoutLabourProfileNestedInput
+    documentVerifications?: DocumentVerificationUncheckedUpdateManyWithoutLabourProfileNestedInput
+  }
+
+  export type LabourProfileUncheckedUpdateManyWithoutRequirementAssignmentInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    age?: IntFieldUpdateOperationsInput | number
+    gender?: EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+    nationality?: StringFieldUpdateOperationsInput | string
+    jobRoleName?: StringFieldUpdateOperationsInput | string
+    status?: EnumLabourProfileStatusFieldUpdateOperationsInput | $Enums.LabourProfileStatus
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    passportNumber?: NullableStringFieldUpdateOperationsInput | string | null
+    passportExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    passportCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    passportVerified?: BoolFieldUpdateOperationsInput | boolean
+    visaType?: NullableStringFieldUpdateOperationsInput | string | null
+    visaExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    visaCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    visaVerified?: BoolFieldUpdateOperationsInput | boolean
+    medicalReport?: NullableStringFieldUpdateOperationsInput | string | null
+    medicalExpiry?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    medicalVerified?: BoolFieldUpdateOperationsInput | boolean
+    policeClearance?: NullableStringFieldUpdateOperationsInput | string | null
+    policeVerified?: BoolFieldUpdateOperationsInput | boolean
+    contractCopy?: NullableStringFieldUpdateOperationsInput | string | null
+    contractVerified?: BoolFieldUpdateOperationsInput | boolean
+    otherDocs?: NullableJsonNullValueInput | InputJsonValue
+    verificationStatus?: EnumDocumentVerificationStatusFieldUpdateOperationsInput | $Enums.DocumentVerificationStatus
+    statusReason?: NullableStringFieldUpdateOperationsInput | string | null
+    agencyId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    documentsSubmittedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    documentsVerifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type LabourStatusLogCreateManyLabourProfileInput = {
@@ -31911,6 +34370,18 @@ export namespace Prisma {
     requirementId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type DocumentVerificationCreateManyLabourProfileInput = {
+    id?: string
+    documentType: string
+    documentUrl: string
+    status?: $Enums.VerificationStatus
+    comments?: string | null
+    verifiedById?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    verifiedAt?: Date | string | null
   }
 
   export type LabourStatusLogUpdateWithoutLabourProfileInput = {
@@ -31980,6 +34451,42 @@ export namespace Prisma {
     requirementId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type DocumentVerificationUpdateWithoutLabourProfileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    documentType?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    verifiedBy?: UserUpdateOneWithoutDocumentVerificationNestedInput
+  }
+
+  export type DocumentVerificationUncheckedUpdateWithoutLabourProfileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    documentType?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    verifiedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type DocumentVerificationUncheckedUpdateManyWithoutLabourProfileInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    documentType?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
+    status?: EnumVerificationStatusFieldUpdateOperationsInput | $Enums.VerificationStatus
+    comments?: NullableStringFieldUpdateOperationsInput | string | null
+    verifiedById?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    verifiedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
 

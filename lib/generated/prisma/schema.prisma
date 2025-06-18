@@ -179,6 +179,20 @@ enum DeletionType {
   IMMEDIATE
 }
 
+enum DocumentVerificationStatus {
+  PENDING
+  PARTIALLY_VERIFIED
+  VERIFIED
+  REJECTED
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
 // ========== MODELS ==========
 model User {
   id             String        @id @default(uuid())
@@ -207,15 +221,15 @@ model User {
   adminProfile  Admin?
 
   // Relations
-  createdBy            User?                 @relation("UserCreation", fields: [createdById], references: [id])
+  createdBy            User?                  @relation("UserCreation", fields: [createdById], references: [id])
   createdById          String?
-  createdUsers         User[]                @relation("UserCreation")
+  createdUsers         User[]                 @relation("UserCreation")
   auditLogs            AuditLog[]
   notifications        Notification[]
   statusLogs           LabourStatusLog[]
   clientDocuments      ClientDocument[]
   agencyDocuments      AgencyDocument[]
-  requirementDocuments RequirementDocument[]
+  DocumentVerification DocumentVerification[]
 
   // Indexes
   @@index([email])
@@ -284,8 +298,9 @@ model Agency {
   documents      AgencyDocument[]
 
   // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  RequirementAssignment RequirementAssignment[]
 
   // Indexes
   @@index([agencyName])
@@ -326,19 +341,18 @@ model Requirement {
 
   // Relationships
   clientId         String
-  client           Client                @relation(fields: [clientId], references: [id])
-  assignedAgency   Agency?               @relation("AgencyRequirements", fields: [assignedAgencyId], references: [id])
+  client           Client      @relation(fields: [clientId], references: [id])
+  assignedAgency   Agency?     @relation("AgencyRequirements", fields: [assignedAgencyId], references: [id])
   assignedAgencyId String?
   jobRoles         JobRole[]
-  labourProfiles   LabourProfile[]
   procedures       Procedure[]
-  documents        RequirementDocument[]
 
   // Timestamps
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  submittedAt DateTime?
-  reviewedAt  DateTime?
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  submittedAt           DateTime?
+  reviewedAt            DateTime?
+  RequirementAssignment RequirementAssignment[]
 
   // Indexes
   @@index([clientId])
@@ -364,8 +378,9 @@ model JobRole {
   requirement   Requirement @relation(fields: [requirementId], references: [id])
 
   // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt             DateTime                @default(now())
+  updatedAt             DateTime                @updatedAt
+  RequirementAssignment RequirementAssignment[]
 
   // Indexes
   @@index([requirementId])
@@ -376,74 +391,119 @@ model JobRole {
   @@map("job_roles")
 }
 
-model LabourProfile {
-  id            String  @id @default(uuid())
-  // Personal Info
-  name          String  @db.VarChar(255)
-  age           Int
-  gender        Gender
-  nationality   String  @db.VarChar(100)
-  maritalStatus String? @db.VarChar(50)
-
-  // Professional Info
-  skills          String[]
-  experienceYears Int
-  education       String?
-  currentPosition String?  @db.VarChar(100)
-  currentCompany  String?  @db.VarChar(100)
-
-  // Language
-  languages          String[]
-  englishProficiency String?  @db.VarChar(50)
-
-  // Contact Info
-  email   String? @db.VarChar(255)
-  phone   String  @db.VarChar(20)
-  address String?
-  city    String? @db.VarChar(100)
-  country String? @db.VarChar(100)
-
-  // Documents
-  cvUrl          String
-  passportNumber String?   @db.VarChar(50)
-  passportExpiry DateTime?
-  visaType       String?   @db.VarChar(50)
-  visaExpiry     DateTime?
-  medicalStatus  String?   @db.VarChar(50)
-  medicalExpiry  DateTime?
-  photo          String?
-  otherDocs      String[]
-
-  // Status
-  status       LabourProfileStatus @default(RECEIVED)
-  statusReason String?
-
-  // Relationships
+model RequirementAssignment {
+  id            String            @id @default(uuid())
   requirementId String
   requirement   Requirement       @relation(fields: [requirementId], references: [id])
+  jobRoleId     String
+  jobRole       JobRole           @relation(fields: [jobRoleId], references: [id])
   agencyId      String
   agency        Agency            @relation(fields: [agencyId], references: [id])
-  statusLogs    LabourStatusLog[]
-  procedures    Procedure[]
-
-  // For tracking deployment
-  deploymentDate    DateTime?
-  contractStartDate DateTime?
-  contractEndDate   DateTime?
+  quantity      Int
+  status        RequirementStatus @default(SUBMITTED)
+  metadata      Json?
 
   // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  LabourProfile LabourProfile[]
+
+  @@unique([requirementId, jobRoleId, agencyId])
+  // Indexes
+  @@index([requirementId])
+  @@index([jobRoleId])
+  @@index([agencyId])
+  @@index([status])
+}
+
+model LabourProfile {
+  id          String              @id @default(uuid())
+  // Stage 1 - Basic Info (required for creation)
+  name        String              @db.VarChar(255)
+  age         Int
+  gender      Gender
+  nationality String              @db.VarChar(100)
+  jobRoleName String              @db.VarChar(255)
+  status      LabourProfileStatus @default(RECEIVED)
+
+  // Stage 2 - Additional Info (required when assigned to requirement)
+  email String? @unique @db.VarChar(255)
+  phone String? @unique @db.VarChar(20)
+
+  // Documents (Stage 2)
+  passportNumber   String?   @db.VarChar(50)
+  passportExpiry   DateTime?
+  passportCopy     String?
+  passportVerified Boolean   @default(false)
+
+  visaType     String?   @db.VarChar(50)
+  visaExpiry   DateTime?
+  visaCopy     String?
+  visaVerified Boolean   @default(false)
+
+  medicalReport   String?
+  medicalExpiry   DateTime?
+  medicalVerified Boolean   @default(false)
+
+  policeClearance String?
+  policeVerified  Boolean @default(false)
+
+  contractCopy     String?
+  contractVerified Boolean @default(false)
+
+  otherDocs Json?
+
+  // Verification Status
+  verificationStatus DocumentVerificationStatus @default(PENDING)
+  statusReason       String?
+
+  // Relationships
+  agencyId                String
+  agency                  Agency                 @relation(fields: [agencyId], references: [id])
+  requirementAssignmentId String?
+  requirementAssignment   RequirementAssignment? @relation(fields: [requirementAssignmentId], references: [id])
+  statusLogs              LabourStatusLog[]
+  procedures              Procedure[]
+  documentVerifications   DocumentVerification[]
+
+  // Timestamps
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  documentsSubmittedAt DateTime?
+  documentsVerifiedAt  DateTime?
 
   // Indexes
   @@index([agencyId])
-  @@index([requirementId])
   @@index([status])
   @@index([nationality])
-  @@index([agencyId, status])
-  @@index([nationality, gender])
-  @@index([status, createdAt])
+  @@index([requirementAssignmentId])
+  @@index([verificationStatus])
   @@map("labour_profiles")
+}
+
+model DocumentVerification {
+  id           String             @id @default(uuid())
+  documentType String // e.g., "PASSPORT", "VISA", etc.
+  documentUrl  String
+  status       VerificationStatus @default(PENDING)
+  comments     String?
+
+  // Relationships
+  labourProfileId String
+  labourProfile   LabourProfile @relation(fields: [labourProfileId], references: [id])
+  verifiedById    String?
+  verifiedBy      User?         @relation(fields: [verifiedById], references: [id])
+
+  // Timestamps
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  verifiedAt DateTime?
+
+  // Indexes
+  @@index([labourProfileId])
+  @@index([documentType])
+  @@index([status])
+  @@map("document_verifications")
 }
 
 model Procedure {
@@ -551,30 +611,6 @@ model AgencyDocument {
   @@index([verified])
   @@index([expiryDate])
   @@map("agency_documents")
-}
-
-model RequirementDocument {
-  id          String       @id @default(uuid())
-  type        DocumentType
-  url         String
-  name        String?      @db.VarChar(255)
-  description String?
-
-  // Relationships
-  requirementId String
-  requirement   Requirement @relation(fields: [requirementId], references: [id])
-  uploadedById  String
-  uploadedBy    User        @relation(fields: [uploadedById], references: [id])
-
-  // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Indexes
-  @@index([requirementId])
-  @@index([type])
-  @@index([createdAt])
-  @@map("requirement_documents")
 }
 
 model AuditLog {

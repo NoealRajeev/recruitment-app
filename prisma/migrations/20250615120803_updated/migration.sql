@@ -2,7 +2,7 @@
 CREATE TYPE "UserRole" AS ENUM ('RECRUITMENT_ADMIN', 'CLIENT_ADMIN', 'RECRUITMENT_AGENCY');
 
 -- CreateEnum
-CREATE TYPE "AccountStatus" AS ENUM ('PENDING_REVIEW', 'SUBMITTED', 'VERIFIED', 'REJECTED', 'NOT_VERIFIED', 'SUSPENDED');
+CREATE TYPE "AccountStatus" AS ENUM ('PENDING_REVIEW', 'SUBMITTED', 'PENDING_SUBMISSION', 'VERIFIED', 'REJECTED', 'NOT_VERIFIED', 'SUSPENDED');
 
 -- CreateEnum
 CREATE TYPE "RequirementStatus" AS ENUM ('DRAFT', 'SUBMITTED', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'FULFILLED', 'CLOSED');
@@ -32,7 +32,7 @@ CREATE TYPE "ExperienceLevel" AS ENUM ('FRESH', 'ONE_YEAR', 'TWO_YEARS', 'THREE_
 CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE', 'OTHER');
 
 -- CreateEnum
-CREATE TYPE "AuditAction" AS ENUM ('USER_CREATED', 'USER_UPDATED', 'USER_DELETED', 'USER_STATUS_CHANGED', 'USER_PASSWORD_RESET', 'CLIENT_CREATED', 'CLIENT_UPDATED', 'CLIENT_VERIFIED', 'CLIENT_REJECTED', 'AGENCY_CREATED', 'AGENCY_UPDATED', 'AGENCY_VERIFIED', 'AGENCY_REJECTED', 'REQUIREMENT_CREATED', 'REQUIREMENT_UPDATED', 'REQUIREMENT_STATUS_CHANGED', 'REQUIREMENT_ASSIGNED', 'DRAFT_CREATED', 'DRAFT_UPDATED', 'LABOUR_PROFILE_CREATED', 'LABOUR_PROFILE_UPDATED', 'LABOUR_STATUS_CHANGED', 'DOCUMENT_UPLOADED', 'DOCUMENT_VERIFIED', 'DOCUMENT_REJECTED', 'LOGIN', 'LOGOUT', 'PASSWORD_CHANGE', 'ACCOUNT_RECOVERY');
+CREATE TYPE "AuditAction" AS ENUM ('USER_CREATED', 'USER_UPDATED', 'USER_DELETED', 'USER_STATUS_CHANGED', 'USER_PASSWORD_RESET', 'CLIENT_CREATED', 'CLIENT_UPDATED', 'CLIENT_VERIFIED', 'CLIENT_REJECTED', 'AGENCY_CREATED', 'AGENCY_UPDATED', 'AGENCY_VERIFIED', 'AGENCY_REJECTED', 'AGENCY_DELETION_REQUESTED', 'REQUIREMENT_CREATED', 'REQUIREMENT_UPDATED', 'REQUIREMENT_DELETE', 'REQUIREMENT_REJECTED', 'REQUIREMENT_STATUS_CHANGED', 'REQUIREMENT_ASSIGNED', 'DRAFT_CREATED', 'DRAFT_UPDATED', 'LABOUR_PROFILE_CREATED', 'LABOUR_PROFILE_UPDATED', 'LABOUR_STATUS_CHANGED', 'DOCUMENT_UPLOADED', 'DOCUMENT_VERIFIED', 'DOCUMENT_REJECTED', 'LOGIN', 'LOGOUT', 'PASSWORD_CHANGE', 'ACCOUNT_RECOVERY');
 
 -- CreateEnum
 CREATE TYPE "ProcedureStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'FAILED');
@@ -42,6 +42,12 @@ CREATE TYPE "NotificationType" AS ENUM ('SYSTEM', 'REQUIREMENT', 'LABOUR', 'DOCU
 
 -- CreateEnum
 CREATE TYPE "DeletionType" AS ENUM ('SCHEDULED', 'IMMEDIATE');
+
+-- CreateEnum
+CREATE TYPE "DocumentVerificationStatus" AS ENUM ('PENDING', 'PARTIALLY_VERIFIED', 'VERIFIED', 'REJECTED');
+
+-- CreateEnum
+CREATE TYPE "VerificationStatus" AS ENUM ('PENDING', 'VERIFIED', 'REJECTED', 'EXPIRED');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -53,7 +59,7 @@ CREATE TABLE "users" (
     "altContact" VARCHAR(20),
     "profilePicture" TEXT,
     "role" "UserRole" NOT NULL,
-    "status" "AccountStatus" NOT NULL DEFAULT 'NOT_VERIFIED',
+    "status" "AccountStatus" NOT NULL DEFAULT 'PENDING_REVIEW',
     "resetRequired" BOOLEAN NOT NULL DEFAULT true,
     "lastLogin" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -96,7 +102,6 @@ CREATE TABLE "agencies" (
     "licenseNumber" VARCHAR(50) NOT NULL,
     "licenseExpiry" TIMESTAMP(3) NOT NULL,
     "country" VARCHAR(100) NOT NULL,
-    "regions" TEXT[],
     "website" VARCHAR(255),
     "address" TEXT NOT NULL,
     "city" VARCHAR(100) NOT NULL,
@@ -123,9 +128,6 @@ CREATE TABLE "admins" (
 -- CreateTable
 CREATE TABLE "requirements" (
     "id" TEXT NOT NULL,
-    "projectLocation" TEXT,
-    "startDate" TIMESTAMP(3),
-    "contractDuration" "ContractDuration",
     "specialNotes" TEXT,
     "status" "RequirementStatus" NOT NULL DEFAULT 'DRAFT',
     "languages" TEXT[],
@@ -151,11 +153,28 @@ CREATE TABLE "job_roles" (
     "nationality" VARCHAR(100) NOT NULL,
     "salary" DOUBLE PRECISION,
     "salaryCurrency" VARCHAR(3) NOT NULL DEFAULT 'QAR',
+    "startDate" TIMESTAMP(3),
+    "contractDuration" "ContractDuration",
     "requirementId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "job_roles_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "RequirementAssignment" (
+    "id" TEXT NOT NULL,
+    "requirementId" TEXT NOT NULL,
+    "jobRoleId" TEXT NOT NULL,
+    "agencyId" TEXT NOT NULL,
+    "quantity" INTEGER NOT NULL,
+    "status" "RequirementStatus" NOT NULL DEFAULT 'SUBMITTED',
+    "metadata" JSONB,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "RequirementAssignment_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -165,30 +184,27 @@ CREATE TABLE "labour_profiles" (
     "age" INTEGER NOT NULL,
     "gender" "Gender" NOT NULL,
     "nationality" VARCHAR(100) NOT NULL,
-    "maritalStatus" VARCHAR(50),
-    "skills" TEXT[],
-    "experienceYears" INTEGER NOT NULL,
-    "education" TEXT,
-    "currentPosition" VARCHAR(100),
-    "currentCompany" VARCHAR(100),
-    "languages" TEXT[],
-    "englishProficiency" VARCHAR(50),
     "email" VARCHAR(255),
-    "phone" VARCHAR(20) NOT NULL,
-    "address" TEXT,
-    "city" VARCHAR(100),
-    "country" VARCHAR(100),
-    "cvUrl" TEXT NOT NULL,
+    "phone" VARCHAR(20),
     "passportNumber" VARCHAR(50),
     "passportExpiry" TIMESTAMP(3),
+    "passportCopy" TEXT,
+    "passportVerified" BOOLEAN NOT NULL DEFAULT false,
     "visaType" VARCHAR(50),
     "visaExpiry" TIMESTAMP(3),
-    "medicalStatus" VARCHAR(50),
+    "visaCopy" TEXT,
+    "visaVerified" BOOLEAN NOT NULL DEFAULT false,
+    "medicalReport" TEXT,
     "medicalExpiry" TIMESTAMP(3),
-    "photo" TEXT,
-    "otherDocs" TEXT[],
+    "medicalVerified" BOOLEAN NOT NULL DEFAULT false,
+    "policeClearance" TEXT,
+    "policeVerified" BOOLEAN NOT NULL DEFAULT false,
+    "contractCopy" TEXT,
+    "contractVerified" BOOLEAN NOT NULL DEFAULT false,
+    "otherDocs" JSONB,
     "status" "LabourProfileStatus" NOT NULL DEFAULT 'RECEIVED',
     "statusReason" TEXT,
+    "verificationStatus" "DocumentVerificationStatus" NOT NULL DEFAULT 'PENDING',
     "requirementId" TEXT NOT NULL,
     "agencyId" TEXT NOT NULL,
     "deploymentDate" TIMESTAMP(3),
@@ -196,8 +212,26 @@ CREATE TABLE "labour_profiles" (
     "contractEndDate" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "documentsSubmittedAt" TIMESTAMP(3),
+    "documentsVerifiedAt" TIMESTAMP(3),
 
     CONSTRAINT "labour_profiles_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "document_verifications" (
+    "id" TEXT NOT NULL,
+    "documentType" TEXT NOT NULL,
+    "documentUrl" TEXT NOT NULL,
+    "status" "VerificationStatus" NOT NULL DEFAULT 'PENDING',
+    "comments" TEXT,
+    "labourProfileId" TEXT NOT NULL,
+    "verifiedById" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "verifiedAt" TIMESTAMP(3),
+
+    CONSTRAINT "document_verifications_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -265,21 +299,6 @@ CREATE TABLE "agency_documents" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "agency_documents_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "requirement_documents" (
-    "id" TEXT NOT NULL,
-    "type" "DocumentType" NOT NULL,
-    "url" TEXT NOT NULL,
-    "name" VARCHAR(255),
-    "description" TEXT,
-    "requirementId" TEXT NOT NULL,
-    "uploadedById" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "requirement_documents_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -378,9 +397,6 @@ CREATE INDEX "requirements_clientId_idx" ON "requirements"("clientId");
 CREATE INDEX "requirements_status_idx" ON "requirements"("status");
 
 -- CreateIndex
-CREATE INDEX "requirements_startDate_idx" ON "requirements"("startDate");
-
--- CreateIndex
 CREATE INDEX "requirements_createdAt_idx" ON "requirements"("createdAt");
 
 -- CreateIndex
@@ -390,9 +406,6 @@ CREATE INDEX "requirements_clientId_status_idx" ON "requirements"("clientId", "s
 CREATE INDEX "requirements_assignedAgencyId_status_idx" ON "requirements"("assignedAgencyId", "status");
 
 -- CreateIndex
-CREATE INDEX "requirements_startDate_contractDuration_idx" ON "requirements"("startDate", "contractDuration");
-
--- CreateIndex
 CREATE INDEX "job_roles_requirementId_idx" ON "job_roles"("requirementId");
 
 -- CreateIndex
@@ -400,6 +413,33 @@ CREATE INDEX "job_roles_nationality_idx" ON "job_roles"("nationality");
 
 -- CreateIndex
 CREATE INDEX "job_roles_salary_idx" ON "job_roles"("salary");
+
+-- CreateIndex
+CREATE INDEX "job_roles_startDate_idx" ON "job_roles"("startDate");
+
+-- CreateIndex
+CREATE INDEX "job_roles_contractDuration_idx" ON "job_roles"("contractDuration");
+
+-- CreateIndex
+CREATE INDEX "RequirementAssignment_requirementId_idx" ON "RequirementAssignment"("requirementId");
+
+-- CreateIndex
+CREATE INDEX "RequirementAssignment_jobRoleId_idx" ON "RequirementAssignment"("jobRoleId");
+
+-- CreateIndex
+CREATE INDEX "RequirementAssignment_agencyId_idx" ON "RequirementAssignment"("agencyId");
+
+-- CreateIndex
+CREATE INDEX "RequirementAssignment_status_idx" ON "RequirementAssignment"("status");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "RequirementAssignment_requirementId_jobRoleId_agencyId_key" ON "RequirementAssignment"("requirementId", "jobRoleId", "agencyId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "labour_profiles_email_key" ON "labour_profiles"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "labour_profiles_phone_key" ON "labour_profiles"("phone");
 
 -- CreateIndex
 CREATE INDEX "labour_profiles_agencyId_idx" ON "labour_profiles"("agencyId");
@@ -421,6 +461,18 @@ CREATE INDEX "labour_profiles_nationality_gender_idx" ON "labour_profiles"("nati
 
 -- CreateIndex
 CREATE INDEX "labour_profiles_status_createdAt_idx" ON "labour_profiles"("status", "createdAt");
+
+-- CreateIndex
+CREATE INDEX "labour_profiles_verificationStatus_idx" ON "labour_profiles"("verificationStatus");
+
+-- CreateIndex
+CREATE INDEX "document_verifications_labourProfileId_idx" ON "document_verifications"("labourProfileId");
+
+-- CreateIndex
+CREATE INDEX "document_verifications_documentType_idx" ON "document_verifications"("documentType");
+
+-- CreateIndex
+CREATE INDEX "document_verifications_status_idx" ON "document_verifications"("status");
 
 -- CreateIndex
 CREATE INDEX "procedures_requirementId_idx" ON "procedures"("requirementId");
@@ -469,15 +521,6 @@ CREATE INDEX "agency_documents_verified_idx" ON "agency_documents"("verified");
 
 -- CreateIndex
 CREATE INDEX "agency_documents_expiryDate_idx" ON "agency_documents"("expiryDate");
-
--- CreateIndex
-CREATE INDEX "requirement_documents_requirementId_idx" ON "requirement_documents"("requirementId");
-
--- CreateIndex
-CREATE INDEX "requirement_documents_type_idx" ON "requirement_documents"("type");
-
--- CreateIndex
-CREATE INDEX "requirement_documents_createdAt_idx" ON "requirement_documents"("createdAt");
 
 -- CreateIndex
 CREATE INDEX "audit_logs_entityType_entityId_idx" ON "audit_logs"("entityType", "entityId");
@@ -531,10 +574,25 @@ ALTER TABLE "requirements" ADD CONSTRAINT "requirements_assignedAgencyId_fkey" F
 ALTER TABLE "job_roles" ADD CONSTRAINT "job_roles_requirementId_fkey" FOREIGN KEY ("requirementId") REFERENCES "requirements"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "RequirementAssignment" ADD CONSTRAINT "RequirementAssignment_requirementId_fkey" FOREIGN KEY ("requirementId") REFERENCES "requirements"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RequirementAssignment" ADD CONSTRAINT "RequirementAssignment_jobRoleId_fkey" FOREIGN KEY ("jobRoleId") REFERENCES "job_roles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RequirementAssignment" ADD CONSTRAINT "RequirementAssignment_agencyId_fkey" FOREIGN KEY ("agencyId") REFERENCES "agencies"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "labour_profiles" ADD CONSTRAINT "labour_profiles_requirementId_fkey" FOREIGN KEY ("requirementId") REFERENCES "requirements"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "labour_profiles" ADD CONSTRAINT "labour_profiles_agencyId_fkey" FOREIGN KEY ("agencyId") REFERENCES "agencies"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "document_verifications" ADD CONSTRAINT "document_verifications_labourProfileId_fkey" FOREIGN KEY ("labourProfileId") REFERENCES "labour_profiles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "document_verifications" ADD CONSTRAINT "document_verifications_verifiedById_fkey" FOREIGN KEY ("verifiedById") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "procedures" ADD CONSTRAINT "procedures_requirementId_fkey" FOREIGN KEY ("requirementId") REFERENCES "requirements"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -559,12 +617,6 @@ ALTER TABLE "agency_documents" ADD CONSTRAINT "agency_documents_agencyId_fkey" F
 
 -- AddForeignKey
 ALTER TABLE "agency_documents" ADD CONSTRAINT "agency_documents_verifiedById_fkey" FOREIGN KEY ("verifiedById") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "requirement_documents" ADD CONSTRAINT "requirement_documents_requirementId_fkey" FOREIGN KEY ("requirementId") REFERENCES "requirements"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "requirement_documents" ADD CONSTRAINT "requirement_documents_uploadedById_fkey" FOREIGN KEY ("uploadedById") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_performedById_fkey" FOREIGN KEY ("performedById") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

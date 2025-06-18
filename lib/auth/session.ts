@@ -3,7 +3,8 @@
 
 import { User } from "@prisma/client";
 import prisma from "@/lib/prisma";
-import { getCurrentAuth } from "./options";
+import { authOptions, getCurrentAuth } from "./options";
+import { getServerSession } from "next-auth";
 
 /**
  * Updates both database and session atomically
@@ -26,6 +27,31 @@ export async function updateAuthSession(
   } catch (error) {
     console.error("Session update failed:", error);
     throw new Error("Failed to update session");
+  }
+}
+
+export async function getCurrentUser() {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return null;
+    }
+
+    // Fetch the full user data including related profiles
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        clientProfile: true,
+        agencyProfile: true,
+        adminProfile: true,
+      },
+    });
+
+    return user;
+  } catch (error) {
+    console.error("Error getting current user:", error);
+    return null;
   }
 }
 

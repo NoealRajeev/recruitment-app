@@ -10,7 +10,10 @@ import {
   Check,
   X,
   Clock,
+  User,
   Trash2,
+  FileText,
+  Edit,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/context/toast-provider";
@@ -27,10 +30,23 @@ import { Card } from "@/components/shared/Card";
 import { Select } from "@/components/ui/select";
 import { AutocompleteInput } from "@/components/ui/AutocompleteInput";
 import { useLanguage } from "@/context/LanguageContext";
+import Image from "next/image";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/DropdownMenu";
+import { FixedSizeGrid as Grid } from "react-window";
 
 interface LabourProfile {
+  experience: string;
+  education: string;
+  languages: never[];
+  jobRole: string;
   id: string;
   name: string;
+  profileImage?: string;
   age: number;
   gender: Gender;
   nationality: string;
@@ -39,14 +55,6 @@ interface LabourProfile {
   passportNumber?: string;
   passportExpiry?: Date;
   passportVerified: boolean;
-  visaType?: string;
-  visaExpiry?: Date;
-  visaVerified: boolean;
-  medicalReport?: string;
-  medicalVerified: boolean;
-  policeClearance?: string;
-  policeVerified: boolean;
-  contractVerified: boolean;
   status: LabourProfileStatus;
   verificationStatus: DocumentVerificationStatus;
   createdAt: Date;
@@ -59,10 +67,20 @@ interface LabourProfile {
       title: string;
     }[];
   };
+  documents: {
+    id: string;
+    type: string;
+    url: string;
+    status: string;
+  }[];
+  skills: string[];
 }
 
 interface FormData {
+  id?: string;
   name: string;
+  profileImage: File | null;
+  passportCopy: File | null;
   age: number;
   gender: Gender;
   nationality: string;
@@ -70,13 +88,14 @@ interface FormData {
   phone: string;
   passportNumber: string;
   passportExpiry: string;
-  visaType: string;
-  visaExpiry: string;
-  medicalReport: File | null;
-  policeClearance: File | null;
-  contractCopy: File | null;
   countryCode: string;
   jobRole: string;
+  skills: string[];
+  experience: string;
+  education: string;
+  languages: string[];
+  status: LabourProfileStatus;
+  verificationStatus: DocumentVerificationStatus;
 }
 
 interface ReviewFieldProps {
@@ -100,22 +119,57 @@ const countryCodes = [
   { code: "+977", name: "Nepal" },
 ];
 
+const languageOptions = [
+  "English",
+  "Arabic",
+  "Hindi",
+  "Urdu",
+  "Bengali",
+  "Tamil",
+  "Malayalam",
+  "Tagalog",
+  "Nepali",
+  "Sinhala",
+];
+
+const skillOptions = [
+  "Construction",
+  "Plumbing",
+  "Electrical",
+  "Carpentry",
+  "Welding",
+  "Masonry",
+  "Painting",
+  "Driving",
+  "Cleaning",
+  "Cooking",
+  "Housekeeping",
+  "Gardening",
+  "Security",
+  "Mechanical",
+  "Fabrication",
+];
+
 export default function Candidates() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [labourProfiles, setLabourProfiles] = useState<LabourProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [isConfirmed, setIsConfirmed] = useState(false);
   const { t } = useLanguage();
   const [filters, setFilters] = useState({
     status: "",
     nationality: "",
     verificationStatus: "",
+    jobRole: "",
   });
   const { toast } = useToast();
   const [formData, setFormData] = useState<FormData>({
     name: "",
+    profileImage: null,
+    passportCopy: null,
     age: 18,
     gender: "MALE",
     nationality: "",
@@ -123,13 +177,14 @@ export default function Candidates() {
     phone: "",
     passportNumber: "",
     passportExpiry: "",
-    visaType: "",
-    visaExpiry: "",
-    medicalReport: null,
-    policeClearance: null,
-    contractCopy: null,
     countryCode: "+974",
     jobRole: "",
+    skills: [],
+    experience: "",
+    education: "",
+    languages: [],
+    status: "RECEIVED",
+    verificationStatus: "PENDING",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -159,6 +214,105 @@ export default function Candidates() {
     fetchLabourProfiles();
   }, [toast]);
 
+  const columnCount = 4;
+  const CARD_WIDTH = 300; // px
+  const CARD_HEIGHT = 500; // px
+
+  const GridVirtual = () => {
+    const items = [null, ...filteredProfiles]; // index 0 reserved for AddCard
+    const rowCount = Math.ceil(items.length / columnCount);
+
+    return (
+      <div className="overflow-auto">
+        <Grid
+          columnCount={columnCount}
+          columnWidth={CARD_WIDTH}
+          height={window.innerHeight - 160} // or container height
+          rowCount={rowCount}
+          rowHeight={CARD_HEIGHT}
+          width={columnCount * CARD_WIDTH + 40}
+        >
+          {({ columnIndex, rowIndex, style }) => {
+            const index = rowIndex * columnCount + columnIndex;
+            const profile = items[index];
+
+            return (
+              <div style={style}>
+                <div className="px-2 py-2 h-full w-full">
+                  {index === 0 ? (
+                    <AddCard />
+                  ) : profile ? (
+                    <LabourProfileCard profile={profile} />
+                  ) : null}
+                </div>
+              </div>
+            );
+          }}
+        </Grid>
+      </div>
+    );
+  };
+
+  // Delete a labour profile
+  const handleDeleteProfile = async (id: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/agencies/labour-profiles?id=${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setLabourProfiles((prev) =>
+          prev.filter((profile) => profile.id !== id)
+        );
+        toast({
+          type: "success",
+          message: "Labour profile deleted successfully",
+        });
+      } else {
+        throw new Error("Failed to delete profile");
+      }
+    } catch (error) {
+      console.error("Error deleting labour profile:", error);
+      toast({
+        type: "error",
+        message: "Failed to delete labour profile",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Edit a labour profile
+  const handleEditProfile = (profile: LabourProfile) => {
+    setIsEditMode(true);
+    setFormData({
+      id: profile.id,
+      name: profile.name,
+      profileImage: null,
+      passportCopy: null,
+      age: profile.age,
+      gender: profile.gender,
+      nationality: profile.nationality,
+      email: profile.email || "",
+      phone: profile.phone || "",
+      passportNumber: profile.passportNumber || "",
+      passportExpiry: profile.passportExpiry
+        ? format(profile.passportExpiry, "yyyy-MM-dd")
+        : "",
+      countryCode: "+974",
+      jobRole: profile.jobRole || "",
+      skills: profile.skills || [],
+      experience: profile.experience || "",
+      education: profile.education || "",
+      languages: profile.languages || [],
+      status: profile.status,
+      verificationStatus: profile.verificationStatus,
+    });
+    setIsConfirmed(false);
+    setIsModalOpen(true);
+  };
+
   // Download Excel template
   const downloadTemplate = () => {
     const templateData = [
@@ -171,9 +325,12 @@ export default function Candidates() {
         Phone: "+1234567890",
         "Passport Number": "A12345678",
         "Passport Expiry": "2025-12-31",
-        "Visa Type": "Employment/Work/etc",
-        "Visa Expiry": "2024-12-31",
         Status: "RECEIVED/UNDER_REVIEW/APPROVED/REJECTED",
+        "Job Role": "Construction/Plumbing/etc",
+        Skills: "Construction,Plumbing",
+        Experience: "5 years",
+        Education: "High School",
+        Languages: "English,Hindi",
       },
     ];
 
@@ -194,6 +351,10 @@ export default function Candidates() {
       { wch: 15 },
       { wch: 12 },
       { wch: 15 },
+      { wch: 15 },
+      { wch: 20 },
+      { wch: 15 },
+      { wch: 20 },
     ];
     worksheet["!cols"] = columnWidths;
 
@@ -253,14 +414,13 @@ export default function Candidates() {
 
   // Filter profiles based on search and filters
   const filteredProfiles = labourProfiles.filter((profile) => {
-    const searchLower = searchTerm.toLowerCase();
     return (
-      (profile.name.toLowerCase().includes(searchLower) ||
-        profile.nationality.toLowerCase().includes(searchLower)) &&
       (!filters.status || profile.status === filters.status) &&
       (!filters.nationality || profile.nationality === filters.nationality) &&
       (!filters.verificationStatus ||
-        profile.verificationStatus === filters.verificationStatus)
+        profile.verificationStatus === filters.verificationStatus) &&
+      (!filters.jobRole ||
+        (profile.jobRole && profile.jobRole === filters.jobRole))
     );
   });
 
@@ -316,11 +476,11 @@ export default function Candidates() {
       if (!formData.jobRole) newErrors.jobRole = "Job role is required";
     }
 
-    if (step === 2) {
-      if (!formData.medicalReport)
-        newErrors.medicalReport = "Medical report is required";
-      if (!formData.policeClearance)
-        newErrors.policeClearance = "Police clearance is required";
+    if (step === 2 && !isEditMode) {
+      if (!formData.profileImage)
+        newErrors.profileImage = "Profile image is required";
+      if (!formData.passportCopy)
+        newErrors.passportCopy = "Passport copy is required";
     }
 
     return newErrors;
@@ -332,6 +492,12 @@ export default function Candidates() {
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("name", formData.name);
+      if (formData.profileImage) {
+        formDataToSend.append("profileImage", formData.profileImage);
+      }
+      if (formData.passportCopy) {
+        formDataToSend.append("passportCopy", formData.passportCopy);
+      }
       formDataToSend.append("age", formData.age.toString());
       formDataToSend.append("gender", formData.gender);
       formDataToSend.append("nationality", formData.nationality);
@@ -339,38 +505,56 @@ export default function Candidates() {
       formDataToSend.append("phone", formData.phone);
       formDataToSend.append("passportNumber", formData.passportNumber);
       formDataToSend.append("passportExpiry", formData.passportExpiry);
-      formDataToSend.append("visaType", formData.visaType);
-      formDataToSend.append("visaExpiry", formData.visaExpiry);
       formDataToSend.append("jobRole", formData.jobRole);
-      if (formData.medicalReport)
-        formDataToSend.append("medicalReport", formData.medicalReport);
-      if (formData.policeClearance)
-        formDataToSend.append("policeClearance", formData.policeClearance);
-      if (formData.contractCopy)
-        formDataToSend.append("contractCopy", formData.contractCopy);
+      formDataToSend.append("skills", formData.skills.join(","));
+      formDataToSend.append("experience", formData.experience);
+      formDataToSend.append("education", formData.education);
+      formDataToSend.append("languages", formData.languages.join(","));
+      formDataToSend.append("status", formData.status);
+      formDataToSend.append("verificationStatus", formData.verificationStatus);
 
-      const response = await fetch("/api/agencies/labour-profiles", {
-        method: "POST",
+      const url =
+        isEditMode && formData.id
+          ? `/api/agencies/labour-profiles?id=${formData.id}`
+          : "/api/agencies/labour-profiles";
+
+      const method = isEditMode ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
         body: formDataToSend,
       });
 
       if (response.ok) {
-        const newProfile = await response.json();
-        setLabourProfiles((prev) => [newProfile, ...prev]);
+        const updatedProfile = await response.json();
+        if (isEditMode) {
+          setLabourProfiles((prev) =>
+            prev.map((profile) =>
+              profile.id === updatedProfile.id ? updatedProfile : profile
+            )
+          );
+        } else {
+          setLabourProfiles((prev) => [updatedProfile, ...prev]);
+        }
         toast({
           type: "success",
-          message: "Labour profile submitted successfully",
+          message: `Labour profile ${isEditMode ? "updated" : "submitted"} successfully`,
         });
         setIsModalOpen(false);
         resetForm();
       } else {
-        throw new Error("Failed to submit profile");
+        throw new Error(
+          `Failed to ${isEditMode ? "update" : "submit"} profile`
+        );
       }
     } catch (error) {
-      console.error("Error submitting profile:", error);
+      console.error(
+        `Error ${isEditMode ? "updating" : "submitting"} profile:`,
+        error
+      );
       toast({
         type: "error",
-        message: "Failed to submit profile. Please try again.",
+        message: `Failed to ${isEditMode ? "update" : "submit"} profile. Please try again.`,
       });
     } finally {
       setIsSubmitting(false);
@@ -381,6 +565,8 @@ export default function Candidates() {
   const resetForm = () => {
     setFormData({
       name: "",
+      profileImage: null,
+      passportCopy: null,
       age: 18,
       gender: "MALE",
       nationality: "",
@@ -388,16 +574,19 @@ export default function Candidates() {
       phone: "",
       passportNumber: "",
       passportExpiry: "",
-      visaType: "",
-      visaExpiry: "",
-      medicalReport: null,
-      policeClearance: null,
-      contractCopy: null,
       countryCode: "+974",
       jobRole: "",
+      skills: [],
+      experience: "",
+      education: "",
+      languages: [],
+      status: "RECEIVED",
+      verificationStatus: "PENDING",
     });
     setCurrentStep(1);
     setErrors({});
+    setIsEditMode(false);
+    setIsConfirmed(false);
   };
 
   // Handle file upload
@@ -414,6 +603,44 @@ export default function Candidates() {
       });
     }
   };
+
+  const toggleSkill = (skill: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      skills: prev.skills.includes(skill)
+        ? prev.skills.filter((s) => s !== skill)
+        : [...prev.skills, skill],
+    }));
+  };
+
+  const toggleLanguage = (language: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      languages: prev.languages.includes(language)
+        ? prev.languages.filter((l) => l !== language)
+        : [...prev.languages, language],
+    }));
+  };
+
+  const LabourProfileSkeleton = () => (
+    <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden h-full flex flex-col animate-pulse">
+      <div className="relative h-40 bg-gray-200"></div>
+      <div className="p-4 space-y-3">
+        <div className="h-6 bg-gray-200 rounded w-3/4"></div>
+        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        <div className="flex justify-between">
+          <div className="h-4 bg-gray-200 rounded w-16"></div>
+          <div className="h-4 bg-gray-200 rounded w-16"></div>
+        </div>
+        <div className="h-4 bg-gray-200 rounded w-full"></div>
+        <div className="flex flex-wrap gap-1">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-6 bg-gray-200 rounded w-16"></div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
   const renderModalFooter = () => {
     return (
@@ -436,9 +663,15 @@ export default function Candidates() {
           <Button
             variant="default"
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            disabled={isSubmitting || !isConfirmed}
           >
-            {isSubmitting ? "Submitting..." : "Submit"}
+            {isSubmitting
+              ? isEditMode
+                ? "Updating..."
+                : "Submitting..."
+              : isEditMode
+                ? "Update"
+                : "Submit"}
           </Button>
         )}
       </div>
@@ -465,6 +698,20 @@ export default function Candidates() {
 
     return (
       <div className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col">
+        <div className="relative h-40 bg-gray-100">
+          {profile.profileImage ? (
+            <img
+              src={profile.profileImage}
+              alt={profile.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-200">
+              <User className="w-16 h-16 text-gray-400" />
+            </div>
+          )}
+        </div>
+
         <div className="p-4 flex justify-between items-start border-b border-gray-200">
           <div>
             <h3 className="font-semibold text-lg text-gray-900">
@@ -474,6 +721,11 @@ export default function Candidates() {
               {profile.nationality} • {profile.age} years •{" "}
               {profile.gender.toLowerCase()}
             </p>
+            {profile.jobRole && (
+              <p className="text-xs text-gray-500 mt-1">
+                Job Role: {profile.jobRole}
+              </p>
+            )}
             {profile.requirement?.jobRoles?.length > 0 && (
               <p className="text-xs text-gray-500 mt-1">
                 For:{" "}
@@ -481,9 +733,26 @@ export default function Candidates() {
               </p>
             )}
           </div>
-          <button className="text-gray-400 hover:text-gray-600">
-            <MoreVertical className="w-5 h-5" />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="text-gray-400 hover:text-gray-600">
+                <MoreVertical className="w-5 h-5" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => handleEditProfile(profile)}>
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                onClick={() => handleDeleteProfile(profile.id)}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         <div className="p-4 space-y-3">
@@ -503,63 +772,59 @@ export default function Candidates() {
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div>
-              <p className="text-gray-500">Passport</p>
-              <div className="flex items-center gap-1">
-                {profile.passportVerified ? (
-                  <Check className="w-3 h-3 text-green-500" />
-                ) : (
-                  <X className="w-3 h-3 text-red-500" />
-                )}
-                <span>{profile.passportNumber || "Not provided"}</span>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-gray-500">Visa</p>
-              <div className="flex items-center gap-1">
-                {profile.visaVerified ? (
-                  <Check className="w-3 h-3 text-green-500" />
-                ) : (
-                  <X className="w-3 h-3 text-red-500" />
-                )}
-                <span>{profile.visaType || "Not provided"}</span>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-gray-500">Medical</p>
-              <div className="flex items-center gap-1">
-                {profile.medicalVerified ? (
-                  <Check className="w-3 h-3 text-green-500" />
-                ) : profile.medicalReport ? (
-                  <Clock className="w-3 h-3 text-yellow-500" />
-                ) : (
-                  <X className="w-3 h-3 text-red-500" />
-                )}
-                <span>
-                  {profile.medicalReport ? "Submitted" : "Not provided"}
-                </span>
-              </div>
-            </div>
-
-            <div>
-              <p className="text-gray-500">Police</p>
-              <div className="flex items-center gap-1">
-                {profile.policeVerified ? (
-                  <Check className="w-3 h-3 text-green-500" />
-                ) : profile.policeClearance ? (
-                  <Clock className="w-3 h-3 text-yellow-500" />
-                ) : (
-                  <X className="w-3 h-3 text-red-500" />
-                )}
-                <span>
-                  {profile.policeClearance ? "Submitted" : "Not provided"}
-                </span>
-              </div>
+          <div className="text-sm">
+            <p className="text-gray-500">Passport</p>
+            <div className="flex items-center gap-1">
+              {profile.passportVerified ? (
+                <Check className="w-3 h-3 text-green-500" />
+              ) : (
+                <X className="w-3 h-3 text-red-500" />
+              )}
+              <span>{profile.passportNumber || "Not provided"}</span>
             </div>
           </div>
+
+          {profile.skills?.length > 0 && (
+            <div className="mt-2">
+              <p className="text-xs text-gray-500 mb-1">Skills</p>
+              <div className="flex flex-wrap gap-1">
+                {profile.skills.slice(0, 3).map((skill: string) => (
+                  <span
+                    key={skill}
+                    className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                  >
+                    {skill}
+                  </span>
+                ))}
+                {profile.skills.length > 3 && (
+                  <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                    +{profile.skills.length - 3} more
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          {profile.documents?.length > 0 && (
+            <div className="mt-2">
+              <p className="text-xs text-gray-500 mb-1">Documents</p>
+              <div className="flex flex-wrap gap-1">
+                {profile.documents.slice(0, 3).map((doc) => (
+                  <span
+                    key={doc.id}
+                    className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded"
+                  >
+                    {doc.type}
+                  </span>
+                ))}
+                {profile.documents.length > 3 && (
+                  <span className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
+                    +{profile.documents.length - 3} more
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
 
           {profile.documentsSubmittedAt && (
             <div className="text-xs text-gray-500 mt-2">
@@ -576,7 +841,10 @@ export default function Candidates() {
   const AddCard = () => (
     <div className="flex flex-col gap-4">
       <div
-        onClick={() => setIsModalOpen(true)}
+        onClick={() => {
+          setIsEditMode(false);
+          setIsModalOpen(true);
+        }}
         className="bg-purple-50 rounded-lg border-2 border-dashed border-purple-300 p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-purple-100 transition-colors h-full"
       >
         <Plus className="w-10 h-10 text-purple-600 mb-2" />
@@ -608,11 +876,11 @@ export default function Candidates() {
   );
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-gray-50">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Filter controls */}
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="flex gap-2 w-full md:w-auto">
+          <div className="flex gap-2 w-full md:w-auto flex-wrap">
             <select
               value={filters.status}
               onChange={(e) =>
@@ -625,7 +893,10 @@ export default function Candidates() {
               <option value="UNDER_REVIEW">Under Review</option>
               <option value="APPROVED">Approved</option>
               <option value="REJECTED">Rejected</option>
+              <option value="SHORTLISTED">Shortlisted</option>
+              <option value="DEPLOYED">Deployed</option>
             </select>
+
             <select
               value={filters.verificationStatus}
               onChange={(e) =>
@@ -639,32 +910,59 @@ export default function Candidates() {
               <option value="VERIFIED">Verified</option>
               <option value="REJECTED">Rejected</option>
             </select>
+
+            <select
+              value={filters.nationality}
+              onChange={(e) =>
+                setFilters({ ...filters, nationality: e.target.value })
+              }
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            >
+              <option value="">All Nationalities</option>
+              {countryOptions.map((country) => (
+                <option key={country.value} value={country.value}>
+                  {country.label}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={filters.jobRole}
+              onChange={(e) =>
+                setFilters({ ...filters, jobRole: e.target.value })
+              }
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            >
+              <option value="">All Job Roles</option>
+              {t.jobPositions.map((role) => (
+                <option key={role} value={role}>
+                  {role}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
-
-        {/* Profiles Grid */}
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <p className="text-gray-500">Loading labour profiles...</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {[...Array(8)].map((_, i) => (
+              <LabourProfileSkeleton key={i} />
+            ))}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <AddCard />
-            {filteredProfiles.map((profile) => (
-              <LabourProfileCard key={profile.id} profile={profile} />
-            ))}
+          <div className="overflow-x-auto">
+            <GridVirtual />
           </div>
         )}
       </div>
 
-      {/* Add Profile Modal */}
+      {/* Add/Edit Profile Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
           resetForm();
         }}
-        title="Add Labour Profile"
+        title={isEditMode ? "Edit Labour Profile" : "Add Labour Profile"}
         size="7xl"
         showFooter={true}
         footerContent={renderModalFooter()}
@@ -740,7 +1038,8 @@ export default function Candidates() {
                     Personal Information
                   </h1>
                   <p className="text-base text-gray-700 mb-2">
-                    Enter the labour&apos;s personal details
+                    {isEditMode ? "Update" : "Enter"} the labour&apos;s personal
+                    details
                   </p>
                 </div>
 
@@ -763,7 +1062,6 @@ export default function Candidates() {
                       label="Age"
                       name="age"
                       type="number"
-                      min="18"
                       max="70"
                       value={formData.age.toString()}
                       onChange={(e) => {
@@ -807,6 +1105,7 @@ export default function Candidates() {
                       placeholder="Type nationality..."
                       error={errors.nationality}
                     />
+
                     <Select
                       label="Job Role"
                       name="jobRole"
@@ -819,7 +1118,7 @@ export default function Candidates() {
                       }
                       options={[
                         { value: "", label: "Select a job role" },
-                        ...t.sectorOptions.map((role) => ({
+                        ...t.jobPositions.map((role) => ({
                           value: role,
                           label: role,
                         })),
@@ -827,6 +1126,28 @@ export default function Candidates() {
                       required
                       error={errors.jobRole}
                     />
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Skills
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {skillOptions.map((skill) => (
+                          <button
+                            key={skill}
+                            type="button"
+                            onClick={() => toggleSkill(skill)}
+                            className={`px-3 py-1 text-xs rounded-full ${
+                              formData.skills.includes(skill)
+                                ? "bg-blue-100 text-blue-800 border border-blue-300"
+                                : "bg-gray-100 text-gray-800 border border-gray-200"
+                            }`}
+                          >
+                            {skill}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
                   <div className="col-span-2 flex justify-center items-center">
@@ -844,6 +1165,7 @@ export default function Candidates() {
                       }
                       placeholder="Enter email address"
                     />
+
                     <div className="flex gap-2">
                       <Select
                         label="Country Code"
@@ -909,24 +1231,46 @@ export default function Candidates() {
                     />
 
                     <Input
-                      label="Visa Type"
-                      name="visaType"
-                      value={formData.visaType}
+                      label="Experience"
+                      name="experience"
+                      value={formData.experience}
                       onChange={(e) =>
-                        setFormData({ ...formData, visaType: e.target.value })
+                        setFormData({ ...formData, experience: e.target.value })
                       }
-                      placeholder="Enter visa type"
+                      placeholder="e.g. 5 years in construction"
                     />
 
                     <Input
-                      label="Visa Expiry"
-                      name="visaExpiry"
-                      type="date"
-                      value={formData.visaExpiry}
+                      label="Education"
+                      name="education"
+                      value={formData.education}
                       onChange={(e) =>
-                        setFormData({ ...formData, visaExpiry: e.target.value })
+                        setFormData({ ...formData, education: e.target.value })
                       }
+                      placeholder="e.g. High School Diploma"
                     />
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Languages
+                      </label>
+                      <div className="flex flex-wrap gap-2">
+                        {languageOptions.map((language) => (
+                          <button
+                            key={language}
+                            type="button"
+                            onClick={() => toggleLanguage(language)}
+                            className={`px-3 py-1 text-xs rounded-full ${
+                              formData.languages.includes(language)
+                                ? "bg-green-100 text-green-800 border border-green-300"
+                                : "bg-gray-100 text-gray-800 border border-gray-200"
+                            }`}
+                          >
+                            {language}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -939,135 +1283,128 @@ export default function Candidates() {
                     Document Submission
                   </h1>
                   <p className="text-base text-gray-700 mb-2">
-                    Upload required documents for verification
+                    {isEditMode ? "Update" : "Upload"} required documents for
+                    verification
                   </p>
                 </div>
 
                 <div className="space-y-6 mt-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Medical Report
-                      <span className="text-red-500 ml-1">*</span>
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) =>
-                          handleFileChange(
-                            "medicalReport",
-                            e.target.files?.[0] || null
-                          )
-                        }
-                        className="hidden"
-                        id="medicalReport"
-                      />
-                      <label
-                        htmlFor="medicalReport"
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
-                      >
-                        {formData.medicalReport
-                          ? formData.medicalReport.name
-                          : "Select file"}
-                      </label>
-                      {formData.medicalReport && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handleFileChange("medicalReport", null)
-                          }
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                      Profile Photo
+                      {!isEditMode && (
+                        <span className="text-red-500 ml-1">*</span>
                       )}
+                    </label>
+                    <div className="flex items-center gap-4">
+                      <div className="relative w-24 h-24 rounded-full bg-gray-100 overflow-hidden border-2 border-dashed border-gray-300">
+                        {formData.profileImage ? (
+                          <Image
+                            src={URL.createObjectURL(formData.profileImage)}
+                            alt="Profile preview"
+                            layout="fill"
+                            objectFit="cover"
+                          />
+                        ) : isEditMode && formData.id ? (
+                          <img
+                            src={
+                              labourProfiles.find((p) => p.id === formData.id)
+                                ?.profileImage || ""
+                            }
+                            alt="Current profile"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400">
+                            <User className="w-10 h-10" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) =>
+                            handleFileChange(
+                              "profileImage",
+                              e.target.files?.[0] || null
+                            )
+                          }
+                          className="hidden"
+                          id="profileImage"
+                        />
+                        <label
+                          htmlFor="profileImage"
+                          className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                        >
+                          {formData.profileImage || (isEditMode && formData.id)
+                            ? "Change Photo"
+                            : "Upload Photo"}
+                        </label>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Clear face photo, max 5MB
+                        </p>
+                        {errors.profileImage && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {errors.profileImage}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    {errors.medicalReport && (
-                      <p className="text-sm text-red-500 mt-1">
-                        {errors.medicalReport}
-                      </p>
-                    )}
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Police Clearance
-                      <span className="text-red-500 ml-1">*</span>
+                      Passport Copy (PDF)
+                      {!isEditMode && (
+                        <span className="text-red-500 ml-1">*</span>
+                      )}
                     </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) =>
-                          handleFileChange(
-                            "policeClearance",
-                            e.target.files?.[0] || null
-                          )
-                        }
-                        className="hidden"
-                        id="policeClearance"
-                      />
-                      <label
-                        htmlFor="policeClearance"
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
-                      >
-                        {formData.policeClearance
-                          ? formData.policeClearance.name
-                          : "Select file"}
-                      </label>
-                      {formData.policeClearance && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            handleFileChange("policeClearance", null)
+                    <div className="flex items-center gap-4">
+                      <div className="relative w-24 h-24 rounded-md bg-gray-100 overflow-hidden border-2 border-dashed border-gray-300 flex items-center justify-center">
+                        {formData.passportCopy ? (
+                          <div className="p-2 text-center">
+                            <FileText className="w-8 h-8 text-blue-500" />
+                            <p className="text-xs mt-1 text-gray-600 truncate w-20">
+                              {formData.passportCopy.name}
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400">
+                            <FileText className="w-10 h-10" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <input
+                          type="file"
+                          accept=".pdf"
+                          onChange={(e) =>
+                            handleFileChange(
+                              "passportCopy",
+                              e.target.files?.[0] || null
+                            )
                           }
+                          className="hidden"
+                          id="passportCopy"
+                        />
+                        <label
+                          htmlFor="passportCopy"
+                          className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
                         >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                    {errors.policeClearance && (
-                      <p className="text-sm text-red-500 mt-1">
-                        {errors.policeClearance}
-                      </p>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Contract Copy
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) =>
-                          handleFileChange(
-                            "contractCopy",
-                            e.target.files?.[0] || null
-                          )
-                        }
-                        className="hidden"
-                        id="contractCopy"
-                      />
-                      <label
-                        htmlFor="contractCopy"
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
-                      >
-                        {formData.contractCopy
-                          ? formData.contractCopy.name
-                          : "Select file"}
-                      </label>
-                      {formData.contractCopy && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleFileChange("contractCopy", null)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
+                          {formData.passportCopy
+                            ? "Change Passport"
+                            : "Upload Passport"}
+                        </label>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Scanned copy of passport, PDF only, max 5MB
+                        </p>
+                        {errors.passportCopy && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {errors.passportCopy}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1078,10 +1415,11 @@ export default function Candidates() {
               <Card className="p-6">
                 <div className="text-center mb-2">
                   <h1 className="text-2xl font-semibold mb-1">
-                    Review & Submit
+                    Review & {isEditMode ? "Update" : "Submit"}
                   </h1>
                   <p className="text-base text-gray-700 mb-2">
-                    Verify all information before submission
+                    Verify all information before{" "}
+                    {isEditMode ? "updating" : "submission"}
                   </p>
                 </div>
 
@@ -1126,20 +1464,73 @@ export default function Candidates() {
                         }
                       />
                       <ReviewField
-                        label="Visa Type"
-                        value={formData.visaType || "Not provided"}
+                        label="Experience"
+                        value={formData.experience || "Not provided"}
                       />
                       <ReviewField
-                        label="Visa Expiry"
+                        label="Education"
+                        value={formData.education || "Not provided"}
+                      />
+                      <ReviewField
+                        label="Skills"
                         value={
-                          formData.visaExpiry
-                            ? format(
-                                new Date(formData.visaExpiry),
-                                "MMM d, yyyy"
-                              )
+                          formData.skills.length > 0
+                            ? formData.skills.join(", ")
                             : "Not provided"
                         }
                       />
+                      <ReviewField
+                        label="Languages"
+                        value={
+                          formData.languages.length > 0
+                            ? formData.languages.join(", ")
+                            : "Not provided"
+                        }
+                      />
+                      <div className="flex items-center gap-4">
+                        <Select
+                          label="Status"
+                          name="status"
+                          value={formData.status}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              status: e.target.value as LabourProfileStatus,
+                            })
+                          }
+                          options={[
+                            { value: "RECEIVED", label: "Received" },
+                            { value: "UNDER_REVIEW", label: "Under Review" },
+                            { value: "APPROVED", label: "Approved" },
+                            { value: "REJECTED", label: "Rejected" },
+                            { value: "SHORTLISTED", label: "Shortlisted" },
+                            { value: "DEPLOYED", label: "Deployed" },
+                          ]}
+                          className="flex-1"
+                        />
+                        <Select
+                          label="Verification Status"
+                          name="verificationStatus"
+                          value={formData.verificationStatus}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              verificationStatus: e.target
+                                .value as DocumentVerificationStatus,
+                            })
+                          }
+                          options={[
+                            { value: "PENDING", label: "Pending" },
+                            {
+                              value: "PARTIALLY_VERIFIED",
+                              label: "Partially Verified",
+                            },
+                            { value: "VERIFIED", label: "Verified" },
+                            { value: "REJECTED", label: "Rejected" },
+                          ]}
+                          className="flex-1"
+                        />
+                      </div>
                     </div>
                   </div>
 
@@ -1148,18 +1539,56 @@ export default function Candidates() {
                       Documents
                     </h2>
                     <div className="space-y-3">
-                      <ReviewField
-                        label="Medical Report"
-                        value={formData.medicalReport?.name || "Not provided"}
-                      />
-                      <ReviewField
-                        label="Police Clearance"
-                        value={formData.policeClearance?.name || "Not provided"}
-                      />
-                      <ReviewField
-                        label="Contract Copy"
-                        value={formData.contractCopy?.name || "Not provided"}
-                      />
+                      <div className="mb-3">
+                        <p className="text-sm font-medium text-gray-700">
+                          Profile Photo
+                        </p>
+                        {formData.profileImage ? (
+                          <div className="mt-2 w-24 h-24 rounded-full overflow-hidden border border-gray-200">
+                            <Image
+                              src={URL.createObjectURL(formData.profileImage)}
+                              alt="Profile preview"
+                              width={96}
+                              height={96}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : isEditMode && formData.id ? (
+                          <div className="mt-2 w-24 h-24 rounded-full overflow-hidden border border-gray-200">
+                            <img
+                              src={
+                                labourProfiles.find((p) => p.id === formData.id)
+                                  ?.profileImage || ""
+                              }
+                              alt="Current profile"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-600 mt-1">
+                            Not provided
+                          </p>
+                        )}
+                      </div>
+                      <div className="mb-3">
+                        <p className="text-sm font-medium text-gray-700">
+                          Passport Copy
+                        </p>
+                        {formData.passportCopy ? (
+                          <div className="mt-2 flex items-center gap-2">
+                            <FileText className="w-5 h-5 text-blue-500" />
+                            <span className="text-sm text-gray-600">
+                              {formData.passportCopy.name}
+                            </span>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-gray-600 mt-1">
+                            {isEditMode
+                              ? "Existing document will remain unchanged"
+                              : "Not provided"}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1169,14 +1598,16 @@ export default function Candidates() {
                     <input
                       type="checkbox"
                       id="confirm"
-                      required
+                      checked={isConfirmed}
+                      onChange={(e) => setIsConfirmed(e.target.checked)}
                       className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
                     />
                     <label
                       htmlFor="confirm"
                       className="ml-2 text-sm text-gray-700"
                     >
-                      I confirm all information is accurate
+                      I confirm all information is accurate and documents are
+                      genuine
                     </label>
                   </div>
                 </div>

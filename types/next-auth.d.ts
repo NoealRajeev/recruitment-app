@@ -9,19 +9,18 @@ declare module "next-auth" {
     role: UserRole;
     status: AccountStatus;
     resetRequired?: boolean;
-    image?: string | null;
+    profilePicture?: string | null;
   }
 
   interface Session {
     user: {
-      image: string;
       id: string;
       name: string | null;
       email: string;
       role: UserRole;
       status: AccountStatus;
       resetRequired?: boolean;
-      image?: string | null;
+      profilePicture?: string | null;
     };
   }
 }
@@ -34,5 +33,6 @@ declare module "next-auth/jwt" {
     role: UserRole;
     status: AccountStatus;
     resetRequired?: boolean;
+    profilePicture?: string | null;
   }
 }

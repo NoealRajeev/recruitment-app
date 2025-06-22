@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import {
   getSectorEnumMapping,
@@ -55,6 +55,15 @@ const RegistrationSchema = z.object({
   altCountryCode: z.string().optional(),
 });
 
+const steps = [
+  { id: 1, label: "Company Details" },
+  { id: 2, label: "Documents" },
+];
+
+const solidWidths: Record<number, string> = {
+  2: "100%",
+};
+
 export default function RegisterPage() {
   const { language, setLanguage, t } = useLanguage();
   const router = useRouter();
@@ -64,9 +73,13 @@ export default function RegisterPage() {
   const [phoneCheckInProgress, setPhoneCheckInProgress] = useState(false);
   const [emailOtpSent, setEmailOtpSent] = useState(false);
   const [phoneOtpSent, setPhoneOtpSent] = useState(false);
+  const [isSendingOtp, setIsSendingOtp] = useState({
+    email: false,
+    phone: false,
+  });
   const [emailOtpResendTime, setEmailOtpResendTime] = useState(0);
   const [phoneOtpResendTime, setPhoneOtpResendTime] = useState(0);
-  const [autoFillingCity, setAutoFillingCity] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({
     companyName: "",
     registrationNumber: "",
@@ -90,6 +103,15 @@ export default function RegisterPage() {
     phoneVerified: false,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [documents, setDocuments] = useState<{
+    crFile: File | null;
+    licenseFile: File | null;
+    otherDocuments: File[];
+  }>({
+    crFile: null,
+    licenseFile: null,
+    otherDocuments: [],
+  });
 
   // Memoize enum mappings based on language
   const sectorMapping = useMemo(
@@ -175,6 +197,29 @@ export default function RegisterPage() {
     []
   );
 
+  // Fix the useEffect timer setup
+  useEffect(() => {
+    let emailTimer: NodeJS.Timeout | null = null;
+    let phoneTimer: NodeJS.Timeout | null = null;
+
+    if (emailOtpResendTime > 0) {
+      emailTimer = setInterval(() => {
+        setEmailOtpResendTime((prev) => prev - 1);
+      }, 1000);
+    }
+
+    if (phoneOtpResendTime > 0) {
+      phoneTimer = setInterval(() => {
+        setPhoneOtpResendTime((prev) => prev - 1);
+      }, 1000);
+    }
+
+    return () => {
+      if (emailTimer) clearInterval(emailTimer);
+      if (phoneTimer) clearInterval(phoneTimer);
+    };
+  }, [emailOtpResendTime, phoneOtpResendTime]);
+
   const sendOtp = useCallback(
     async (type: "email" | "phone", value: string): Promise<boolean> => {
       try {
@@ -248,25 +293,6 @@ export default function RegisterPage() {
     [toast]
   );
 
-  const handleSendEmailOtp = useCallback(async () => {
-    if (!formData.email || !/^\S+@\S+\.\S+$/.test(formData.email)) {
-      toast({ type: "error", message: "Please enter a valid email first" });
-      return;
-    }
-
-    const isAvailable = await checkEmailAvailability(formData.email);
-    if (!isAvailable) {
-      toast({ type: "error", message: "Email is already in use" });
-      return;
-    }
-
-    const success = await sendOtp("email", formData.email);
-    if (success) {
-      setEmailOtpSent(true);
-      setEmailOtpResendTime(60); // 60 seconds countdown
-    }
-  }, [formData.email, checkEmailAvailability, sendOtp, toast]);
-
   const handleVerifyEmailOtp = useCallback(async () => {
     if (!formData.emailOtp || formData.emailOtp.length !== 6) {
       toast({ type: "error", message: "Please enter a valid 6-digit OTP" });
@@ -282,35 +308,6 @@ export default function RegisterPage() {
       setFormData((prev) => ({ ...prev, emailVerified: true }));
     }
   }, [formData.email, formData.emailOtp, verifyOtp, toast]);
-
-  const handleSendPhoneOtp = useCallback(async () => {
-    if (!formData.phone || !/^[0-9]{8,15}$/.test(formData.phone)) {
-      toast({
-        type: "error",
-        message: "Please enter a valid phone number first",
-      });
-      return;
-    }
-
-    const fullPhone = `${formData.countryCode}${formData.phone}`;
-    const isAvailable = await checkPhoneAvailability(fullPhone);
-    if (!isAvailable) {
-      toast({ type: "error", message: "Phone number is already in use" });
-      return;
-    }
-
-    const success = await sendOtp("phone", fullPhone);
-    if (success) {
-      setPhoneOtpSent(true);
-      setPhoneOtpResendTime(60); // 60 seconds countdown
-    }
-  }, [
-    formData.countryCode,
-    formData.phone,
-    checkPhoneAvailability,
-    sendOtp,
-    toast,
-  ]);
 
   const handleVerifyPhoneOtp = useCallback(async () => {
     if (!formData.phoneOtp || formData.phoneOtp.length !== 6) {
@@ -328,6 +325,66 @@ export default function RegisterPage() {
     formData.phone,
     formData.phoneOtp,
     verifyOtp,
+    toast,
+  ]);
+
+  const handleSendEmailOtp = useCallback(async () => {
+    if (!formData.email || !/^\S+@\S+\.\S+$/.test(formData.email)) {
+      toast({ type: "error", message: "Please enter a valid email first" });
+      return;
+    }
+
+    setIsSendingOtp((prev) => ({ ...prev, email: true }));
+
+    try {
+      const isAvailable = await checkEmailAvailability(formData.email);
+      if (!isAvailable) {
+        toast({ type: "error", message: "Email is already in use" });
+        return;
+      }
+
+      const success = await sendOtp("email", formData.email);
+      if (success) {
+        setEmailOtpSent(true);
+        setEmailOtpResendTime(60); // 60 seconds countdown
+      }
+    } finally {
+      setIsSendingOtp((prev) => ({ ...prev, email: false }));
+    }
+  }, [formData.email, checkEmailAvailability, sendOtp, toast]);
+
+  const handleSendPhoneOtp = useCallback(async () => {
+    if (!formData.phone || !/^[0-9]{8,15}$/.test(formData.phone)) {
+      toast({
+        type: "error",
+        message: "Please enter a valid phone number first",
+      });
+      return;
+    }
+
+    setIsSendingOtp((prev) => ({ ...prev, phone: true }));
+
+    try {
+      const fullPhone = `${formData.countryCode}${formData.phone}`;
+      const isAvailable = await checkPhoneAvailability(fullPhone);
+      if (!isAvailable) {
+        toast({ type: "error", message: "Phone number is already in use" });
+        return;
+      }
+
+      const success = await sendOtp("phone", fullPhone);
+      if (success) {
+        setPhoneOtpSent(true);
+        setPhoneOtpResendTime(60); // 60 seconds countdown
+      }
+    } finally {
+      setIsSendingOtp((prev) => ({ ...prev, phone: false }));
+    }
+  }, [
+    formData.countryCode,
+    formData.phone,
+    checkPhoneAvailability,
+    sendOtp,
     toast,
   ]);
 
@@ -352,6 +409,25 @@ export default function RegisterPage() {
     },
     [errors]
   );
+
+  const handleFileChange = (
+    field: keyof typeof documents,
+    files: FileList | null
+  ) => {
+    if (!files) return;
+
+    if (field === "otherDocuments") {
+      setDocuments((prev) => ({
+        ...prev,
+        otherDocuments: Array.from(files),
+      }));
+    } else {
+      setDocuments((prev) => ({
+        ...prev,
+        [field]: files[0],
+      }));
+    }
+  };
 
   const validateForm = async () => {
     try {
@@ -416,52 +492,72 @@ export default function RegisterPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleNextStep = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const isValid = await validateForm();
     if (!isValid) return;
 
+    setCurrentStep(2);
+  };
+
+  const handleRegister = async () => {
+    if (!documents.crFile || !documents.licenseFile) {
+      toast({
+        type: "error",
+        message: "Please upload all required documents",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/auth/register/client", {
+      const formDataToSend = new FormData();
+
+      // Add all form data
+      formDataToSend.append("companyName", formData.companyName);
+      formDataToSend.append("registrationNumber", formData.registrationNumber);
+      formDataToSend.append("sector", formData.sector as CompanySector);
+      formDataToSend.append("companySize", formData.companySize as CompanySize);
+      formDataToSend.append("website", formData.website || "");
+      formDataToSend.append("address", formData.address);
+      formDataToSend.append("city", formData.city);
+      formDataToSend.append("country", formData.country);
+      formDataToSend.append("postcode", formData.postcode || "");
+      formDataToSend.append("fullName", formData.fullName);
+      formDataToSend.append("jobTitle", formData.jobTitle);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("phone", formData.phone);
+      formDataToSend.append("countryCode", formData.countryCode);
+      formDataToSend.append("altContact", formData.altContact || "");
+      formDataToSend.append("altCountryCode", formData.altCountryCode || "");
+
+      // Add documents
+      if (documents.crFile) formDataToSend.append("crFile", documents.crFile);
+      if (documents.licenseFile)
+        formDataToSend.append("licenseFile", documents.licenseFile);
+      documents.otherDocuments.forEach((file) => {
+        formDataToSend.append("otherDocuments", file);
+      });
+
+      const response = await fetch("/api/auth/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          companyName: formData.companyName,
-          registrationNumber: formData.registrationNumber,
-          sector: formData.sector as CompanySector,
-          companySize: formData.companySize as CompanySize,
-          website: formData.website,
-          address: formData.address,
-          city: formData.city,
-          country: formData.country,
-          postalCode: formData.postcode,
-          fullName: formData.fullName,
-          jobTitle: formData.jobTitle,
-          email: formData.email,
-          phone: formData.phone,
-          countryCode: formData.countryCode,
-          altContact: formData.altContact,
-          altCountryCode: formData.altCountryCode,
-        }),
+        body: formDataToSend,
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Registration failed");
+        throw new Error(errorData.error || "Registration failed");
       }
 
-      // Registration successful
+      await response.json();
+
       toast({
         type: "success",
-        message: "Registration Successful",
+        message: "Registration Successful - Please check your email",
       });
 
-      // Redirect to pending review page
       router.push(
         `/auth/verify-account?email=${encodeURIComponent(formData.email)}`
       );
@@ -469,7 +565,7 @@ export default function RegisterPage() {
       console.error("Registration failed:", error);
       toast({
         type: "error",
-        message: `Registration Failed ${error instanceof Error ? error.message : "An error occurred"}`,
+        message: `Registration Failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       });
     } finally {
       setIsSubmitting(false);
@@ -480,22 +576,10 @@ export default function RegisterPage() {
     router.push("/auth/login");
   };
 
-  return (
-    <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
-      <div className="w-[1500px] h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
-        <div className="absolute top-4 right-4 z-20">
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value as "en" | "ar")}
-            className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
-            aria-label="Select language"
-          >
-            <option value="en">English</option>
-            <option value="ar">العربية</option>
-          </select>
-        </div>
-
-        <div className="flex-1 mx-16 rounded-lg py-8 flex flex-col justify-between">
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
           <Card className="p-6">
             <div className="text-center mb-2">
               <h1 className="text-2xl font-semibold mb-1">
@@ -541,6 +625,7 @@ export default function RegisterPage() {
                   required
                   options={sectorOptions}
                   id="sector"
+                  className="!bg-white"
                 />
                 <Select
                   label={t.companySize}
@@ -551,6 +636,7 @@ export default function RegisterPage() {
                   required
                   options={companySizeOptions}
                   id="companySize"
+                  className="!bg-white"
                 />
                 <Input
                   label={t.address || "Company Address"}
@@ -571,6 +657,7 @@ export default function RegisterPage() {
                   required
                   options={countryOptions}
                   id="country"
+                  className="!bg-white"
                 />
                 <div className="grid grid-cols-2 gap-4">
                   <Input
@@ -582,7 +669,6 @@ export default function RegisterPage() {
                     required
                     placeholder="Enter city"
                     id="city"
-                    disabled={autoFillingCity}
                   />
                   <Input
                     label={t.postcode || "Postcode"}
@@ -658,9 +744,9 @@ export default function RegisterPage() {
                           onClick={handleSendEmailOtp}
                           variant="outline"
                           size="sm"
-                          disabled={emailCheckInProgress}
+                          disabled={emailCheckInProgress || isSendingOtp.email}
                         >
-                          Send OTP
+                          {isSendingOtp.email ? "Sending..." : "Send OTP"}
                         </Button>
                       ) : (
                         <div className="flex gap-2 items-center">
@@ -686,11 +772,15 @@ export default function RegisterPage() {
                             onClick={handleSendEmailOtp}
                             variant="ghost"
                             size="sm"
-                            disabled={emailOtpResendTime > 0}
+                            disabled={
+                              emailOtpResendTime > 0 || isSendingOtp.email
+                            }
                           >
-                            Resend{" "}
-                            {emailOtpResendTime > 0 &&
-                              `(${emailOtpResendTime}s)`}
+                            {isSendingOtp.email
+                              ? "Sending..."
+                              : emailOtpResendTime > 0
+                                ? `Resend (${emailOtpResendTime}s)`
+                                : "Resend"}
                           </Button>
                         </div>
                       )}
@@ -727,7 +817,7 @@ export default function RegisterPage() {
                         value: cc.code,
                         label: `${cc.code} (${cc.name})`,
                       }))}
-                      className="w-32"
+                      className="w-32 !bg-white"
                       disabled={formData.phoneVerified}
                     />
                     <div className="flex-1">
@@ -761,9 +851,9 @@ export default function RegisterPage() {
                           onClick={handleSendPhoneOtp}
                           variant="outline"
                           size="sm"
-                          disabled={phoneCheckInProgress}
+                          disabled={phoneCheckInProgress || isSendingOtp.phone}
                         >
-                          Send OTP
+                          {isSendingOtp.phone ? "Sending..." : "Send OTP"}
                         </Button>
                       ) : (
                         <div className="flex gap-2 items-center">
@@ -789,11 +879,15 @@ export default function RegisterPage() {
                             onClick={handleSendPhoneOtp}
                             variant="ghost"
                             size="sm"
-                            disabled={phoneOtpResendTime > 0}
+                            disabled={
+                              phoneOtpResendTime > 0 || isSendingOtp.phone
+                            }
                           >
-                            Resend{" "}
-                            {phoneOtpResendTime > 0 &&
-                              `(${phoneOtpResendTime}s)`}
+                            {isSendingOtp.phone
+                              ? "Sending..."
+                              : phoneOtpResendTime > 0
+                                ? `Resend (${phoneOtpResendTime}s)`
+                                : "Resend"}
                           </Button>
                         </div>
                       )}
@@ -828,7 +922,7 @@ export default function RegisterPage() {
                       value: cc.code,
                       label: `${cc.code} (${cc.name})`,
                     }))}
-                    className="w-32"
+                    className="w-32 !bg-white"
                   />
                   <div className="flex-1">
                     <Input
@@ -845,51 +939,251 @@ export default function RegisterPage() {
               </div>
             </div>
           </Card>
+        );
+
+      case 2:
+        return (
+          <Card className="p-6">
+            <div className="text-center mb-2">
+              <h1 className="text-2xl font-semibold mb-1">
+                Upload Required Documents
+              </h1>
+              <p className="text-base text-gray-700 mb-2">
+                Please upload the required documents to complete your
+                registration
+              </p>
+              <p className="text-xs text-gray-500 italic text-left">
+                All documents must be clear and legible
+              </p>
+            </div>
+
+            <div className="mt-6 space-y-6">
+              <div className="space-y-4">
+                <Input
+                  label="Company Registration Document (Required)"
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={(e) => handleFileChange("crFile", e.target.files)}
+                  required
+                  id="crFile"
+                />
+                {documents.crFile && (
+                  <p className="text-sm text-green-600">
+                    {documents.crFile.name} uploaded
+                  </p>
+                )}
+                <Input
+                  label="Business License (Required)"
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={(e) =>
+                    handleFileChange("licenseFile", e.target.files)
+                  }
+                  required
+                  id="licenseFile"
+                />
+                {documents.licenseFile && (
+                  <p className="text-sm text-green-600">
+                    {documents.licenseFile.name} uploaded
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <Input
+                  label="Other Supporting Documents (Optional)"
+                  type="file"
+                  multiple
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  onChange={(e) =>
+                    handleFileChange("otherDocuments", e.target.files)
+                  }
+                  id="otherDocuments"
+                />
+                {documents.otherDocuments.length > 0 && (
+                  <div className="text-sm text-green-600">
+                    {documents.otherDocuments.length} files uploaded
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
+      <div className="w-[1500px] h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
+        <div className="absolute top-4 right-4 z-20">
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value as "en" | "ar")}
+            className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+            aria-label="Select language"
+          >
+            <option value="en">English</option>
+            <option value="ar">العربية</option>
+          </select>
+        </div>
+
+        <div className="relative px-16 pt-10 pb-6">
+          <div className="absolute inset-x-0 top-1/2 h-0.5 z-0">
+            <div className="absolute -left-44 right-0 h-full flex w-full max-w-[1380px] mx-auto">
+              <div
+                className="h-full bg-[#2C0053] transition-all duration-300"
+                style={{
+                  width:
+                    currentStep === 1
+                      ? "calc(15%)"
+                      : solidWidths[currentStep as keyof typeof solidWidths] ||
+                        "100%",
+                }}
+              />
+
+              <div
+                className="h-full border-t-2 border-dotted border-gray-300 transition-all duration-300"
+                style={{
+                  width:
+                    currentStep === 1
+                      ? `calc(85%)`
+                      : `calc(${
+                          100 - ((currentStep - 1) / (steps.length - 1)) * 100
+                        }%)`,
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-between relative z-10 mt-4">
+            {steps.map((step) => (
+              <div
+                key={step.id}
+                className="text-center flex-1 max-w-[200px] relative"
+              >
+                <div
+                  className={`w-12 h-12 mx-auto rounded-full text-lg font-bold mb-3 flex items-center justify-center ${
+                    currentStep >= step.id
+                      ? "bg-[#2C0053] text-white"
+                      : "bg-gray-200 text-gray-600"
+                  } ${currentStep > step.id ? "ring-2 ring-[#2C0053]" : ""}`}
+                  aria-current={currentStep === step.id ? "step" : undefined}
+                >
+                  {step.id}
+                </div>
+                <span
+                  className={`text-sm font-medium ${
+                    currentStep >= step.id ? "text-[#2C0053]" : "text-gray-500"
+                  }`}
+                >
+                  {step.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex-1 mx-16 rounded-lg py-8 flex flex-col justify-between">
+          {renderStepContent()}
 
           <div className="col-span-12 mt-6 flex justify-center gap-12">
-            <Button
-              type="button"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className="px-8 py-2"
-            >
-              {isSubmitting ? (
-                <>
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  {t.processing}
-                </>
-              ) : (
-                t.register
-              )}
-            </Button>
-            <Button
-              type="button"
-              onClick={handleLoginRedirect}
-              disabled={isSubmitting}
-              variant="outline"
-              className="px-8 py-2 border-none shadow-sm"
-            >
-              {t.logIn}
-            </Button>
+            {currentStep === 1 ? (
+              <>
+                <Button
+                  type="button"
+                  onClick={handleNextStep}
+                  disabled={isSubmitting}
+                  className="px-8 py-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      {t.processing}
+                    </>
+                  ) : (
+                    "Continue to Documents"
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleLoginRedirect}
+                  disabled={isSubmitting}
+                  variant="outline"
+                  className="px-8 py-2 border-none shadow-sm"
+                >
+                  {t.logIn}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  onClick={() => setCurrentStep(1)}
+                  variant="outline"
+                  className="px-8 py-2"
+                >
+                  Back
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleRegister}
+                  disabled={
+                    isSubmitting || !documents.crFile || !documents.licenseFile
+                  }
+                  className="px-8 py-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      {t.processing}
+                    </>
+                  ) : (
+                    "Complete Registration"
+                  )}
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>

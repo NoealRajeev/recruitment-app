@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ArrowUpRight, Plus, Trash2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Card } from "@/components/shared/Card";
@@ -8,81 +8,61 @@ import { Button } from "@/components/ui/Button";
 import { AutocompleteInput } from "@/components/ui/AutocompleteInput";
 import { useLanguage } from "@/context/LanguageContext";
 import { format } from "date-fns";
-import {
-  ContractDuration,
-  ExperienceLevel,
-  RequirementStatus,
-  TicketType,
-} from "@/lib/generated/prisma";
 import { getContractDurationEnumMapping } from "@/lib/utils/enum-mappings";
 import { useToast } from "@/context/toast-provider";
-
-interface JobRole {
-  title: string;
-  quantity: number;
-  nationality: string;
-  salary: string;
-  salaryCurrency: string;
-  startDate: string;
-  contractDuration: ContractDuration | "";
-  // Salary breakdown fields
-  basicSalary?: string;
-  foodAllowance?: string;
-  foodProvidedByCompany?: boolean;
-  housingAllowance?: string;
-  housingProvidedByCompany?: boolean;
-  transportationAllowance?: string;
-  transportationProvidedByCompany?: boolean;
-  healthInsurance?: "asPerLaw" | "providedByCompany";
-  mobileAllowance?: string;
-  mobileProvidedByCompany?: boolean;
-  natureOfWorkAllowance?: string;
-  otherAllowance?: string;
-  // Updated fields (removed optional marker since we initialize them)
-  ticketFrequency: string[];
-  workLocations: string[];
-  previousExperience: string[];
-  totalExperienceYears?: number;
-  preferredAge?: number;
-}
-
-interface FormData {
-  jobRoles: JobRole[];
-  languageRequirements: string[];
-  minExperience?: ExperienceLevel | "";
-  maxAge?: number;
-  specialRequirements: string;
-  ticketType?: TicketType | "";
-  ticketProvided?: boolean;
-}
-
-interface Requirement {
-  id: string;
-  jobRoles: JobRole[];
-  status: RequirementStatus;
-  createdAt: string;
-  languageRequirements: string[];
-  minExperience: ExperienceLevel | null;
-  maxAge: number | null;
-  specialNotes: string | null;
-  ticketType: TicketType | null;
-  ticketProvided: boolean;
-  client: {
-    companyName: string;
-    fullName: string;
-    jobTitle: string;
-    email: string;
-    phone: string;
-  };
-}
-
-interface Errors {
-  [key: string]: string;
-}
+import { RequirementStatus, ContractDuration } from "@/lib/generated/prisma";
 
 interface ReviewFieldProps {
   label: string;
   value: string;
+}
+
+interface JobRole {
+  id?: string;
+  requirementId?: string;
+  title: string;
+  quantity: number;
+  nationality: string;
+  startDate: string | Date;
+  contractDuration?: ContractDuration | null;
+  basicSalary: number;
+  salaryCurrency?: string | null;
+  foodAllowance?: number | null;
+  foodProvidedByCompany: boolean;
+  housingAllowance?: number | null;
+  housingProvidedByCompany: boolean;
+  transportationAllowance?: number | null;
+  transportationProvidedByCompany: boolean;
+  mobileAllowance?: number | null;
+  mobileProvidedByCompany: boolean;
+  natureOfWorkAllowance?: number | null;
+  otherAllowance?: number | null;
+  healthInsurance: string;
+  ticketFrequency: string[];
+  workLocations: string[];
+  previousExperience: string[];
+  totalExperienceYears?: number | null;
+  preferredAge?: number | null;
+  languageRequirements: string[];
+  specialRequirements?: string | null;
+  assignedAgencyId?: string | null;
+  agencyStatus?: RequirementStatus;
+}
+
+interface Requirement {
+  id: string;
+  status: RequirementStatus;
+  createdAt: Date;
+  updatedAt: Date;
+  jobRoles: JobRole[];
+  client: {
+    id: string;
+    companyName: string;
+  };
+}
+
+interface RequirementFormData {
+  jobRoles: JobRole[];
 }
 
 function ReviewField({ label, value }: ReviewFieldProps) {
@@ -94,22 +74,176 @@ function ReviewField({ label, value }: ReviewFieldProps) {
   );
 }
 
+// Add these API call functions at the top of your file, right after the imports
+async function getRequirements(): Promise<Requirement[]> {
+  try {
+    const response = await fetch("/api/requirements", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch requirements");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching requirements:", error);
+    throw error;
+  }
+}
+
+async function getRequirementById(id: string): Promise<Requirement> {
+  try {
+    const response = await fetch(`/api/requirements/${id}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch requirement");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching requirement:", error);
+    throw error;
+  }
+}
+
+async function createRequirement(
+  jobRoles: Omit<JobRole, "id" | "requirementId">[],
+  status: RequirementStatus
+): Promise<Requirement> {
+  try {
+    const response = await fetch("/api/requirements", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        jobRoles,
+        status,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to create requirement");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error creating requirement:", error);
+    throw error;
+  }
+}
+
+async function updateRequirement(
+  id: string,
+  data: {
+    jobRoles: JobRole[];
+    status: RequirementStatus;
+  }
+): Promise<Requirement> {
+  try {
+    const response = await fetch(`/api/requirements/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update requirement");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error updating requirement:", error);
+    throw error;
+  }
+}
+
 export default function Requirements() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [languageOptions, setLanguageOptions] = useState<string[]>([]);
-  const [newLanguage, setNewLanguage] = useState("");
-  const [requirements, setRequirements] = useState<Requirement[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [hasChanges, setHasChanges] = useState(false);
-  const [isViewMode, setIsViewMode] = useState(false);
+  const { t, language, setLanguage } = useLanguage();
   const { toast } = useToast();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isViewMode, setIsViewMode] = useState(false);
   const [editingRequirement, setEditingRequirement] =
     useState<Requirement | null>(null);
-  const { language, setLanguage, t } = useLanguage();
+  const [requirements, setRequirements] = useState<Requirement[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [newLanguage, setNewLanguage] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Memoize enum mappings based on language
+  const [formData, setFormData] = useState<RequirementFormData>({
+    jobRoles: [
+      {
+        title: "",
+        quantity: 1,
+        nationality: "",
+        startDate: "",
+        contractDuration: undefined,
+        basicSalary: 0,
+        salaryCurrency: "QAR",
+        foodAllowance: undefined,
+        foodProvidedByCompany: false,
+        housingAllowance: undefined,
+        housingProvidedByCompany: false,
+        transportationAllowance: undefined,
+        transportationProvidedByCompany: false,
+        mobileAllowance: undefined,
+        mobileProvidedByCompany: false,
+        natureOfWorkAllowance: undefined,
+        otherAllowance: undefined,
+        healthInsurance: "asPerLaw",
+        ticketFrequency: [],
+        workLocations: [],
+        previousExperience: [],
+        totalExperienceYears: undefined,
+        preferredAge: undefined,
+        languageRequirements: [],
+        specialRequirements: "",
+      },
+    ],
+  });
+
+  useEffect(() => {
+    const fetchRequirements = async () => {
+      try {
+        const data = await getRequirements();
+        setRequirements(data);
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Failed to load requirements";
+        toast({
+          message: errorMessage,
+          type: "error",
+        });
+      }
+    };
+
+    fetchRequirements();
+  }, [toast]);
+
+  const steps = [
+    { id: 1, label: t.jobDetails },
+    { id: 2, label: t.reviewTitle },
+  ];
+
+  const solidWidths = {
+    1: "20%",
+    2: "100%",
+  };
+
   const contractDurationMapping = useMemo(
     () => getContractDurationEnumMapping(language),
     [language]
@@ -126,353 +260,147 @@ export default function Requirements() {
     [t.contractDurationOptions, contractDurationMapping]
   );
 
-  const experienceLevelOptions = useMemo(
-    () => [
-      { value: "FRESH", label: "Fresh" },
-      { value: "ONE_YEAR", label: "1 Year" },
-      { value: "TWO_YEARS", label: "2 Years" },
-      { value: "THREE_YEARS", label: "3 Years" },
-      { value: "FOUR_YEARS", label: "4 Years" },
-      { value: "FIVE_PLUS_YEARS", label: "5+ Years" },
-    ],
-    []
-  );
-
-  const ticketTypeOptions = useMemo(
-    () => [
-      { value: "ONE_WAY", label: "One Way" },
-      { value: "TWO_WAY", label: "Two Way" },
-      { value: "NONE", label: "None" },
-    ],
-    []
-  );
-
-  // New options for additional fields
-  const ticketFrequencyOptions = useMemo(
-    () => [
-      { value: "EVERY_YEAR", label: "Every year" },
-      { value: "EVERY_TWO_YEARS", label: "Every 2 years" },
-    ],
-    []
-  );
-
-  const workLocationOptions = useMemo(
-    () => [
-      { value: "QATAR", label: "Qatar" },
-      { value: "DUBAI", label: "Dubai" },
-      { value: "SAUDI_ARABIA", label: "Saudi Arabia" },
-      { value: "KUWAIT", label: "Kuwait" },
-    ],
-    []
-  );
-
-  const previousExperienceOptions = useMemo(
-    () => [
-      { value: "FRESH", label: "Fresh" },
-      { value: "GCC_EXPERIENCE", label: "GCC Experience" },
-      { value: "LOCAL_EXPERIENCE", label: "Local Experience" },
-      { value: "ANY", label: "Any" },
-    ],
-    []
-  );
-
-  const initialFormData: FormData = useMemo(
-    () => ({
-      jobRoles: [
-        {
-          title: "",
-          quantity: 1,
-          nationality: "",
-          salary: "",
-          salaryCurrency: "QAR",
-          startDate: "",
-          contractDuration: "",
-          basicSalary: "",
-          foodAllowance: "",
-          foodProvidedByCompany: false,
-          housingAllowance: "",
-          housingProvidedByCompany: false,
-          transportationAllowance: "",
-          transportationProvidedByCompany: false,
-          healthInsurance: undefined,
-          mobileAllowance: "",
-          mobileProvidedByCompany: false,
-          natureOfWorkAllowance: "",
-          otherAllowance: "",
-          ticketFrequency: [],
-          workLocations: [],
-          previousExperience: [],
-          totalExperienceYears: undefined,
-          preferredAge: undefined,
-        },
-      ],
-      languageRequirements: [],
-      minExperience: "",
-      maxAge: undefined,
-      specialRequirements: "",
-      ticketType: "",
-      ticketProvided: false,
-    }),
-    []
-  );
-
-  const [formData, setFormData] = useState<FormData>(initialFormData);
-  const [errors, setErrors] = useState<Errors>({});
-
-  const steps = [
-    { id: 1, label: t.jobDetails || "Job Details" },
-    { id: 2, label: t.requirements || "Requirements" },
-    { id: 3, label: t.reviewTitle || "Review" },
+  const ticketFrequencyOptions = [
+    { value: "ANNUAL", label: "Annual" },
+    { value: "BIENNIAL", label: "Biennial" },
+    { value: "END_OF_CONTRACT", label: "End of Contract" },
   ];
 
-  const solidWidths: Record<number, string> = {
-    2: "calc(50% + 340px)",
-    3: "2800px",
-  };
+  const workLocationOptions = [
+    { value: "OFFICE", label: "Office" },
+    { value: "SITE", label: "Site" },
+    { value: "HYBRID", label: "Hybrid" },
+    { value: "REMOTE", label: "Remote" },
+  ];
 
-  useEffect(() => {
-    const fetchRequirements = async () => {
+  const previousExperienceOptions = [
+    { value: "GCC", label: "GCC Experience" },
+    { value: "QATAR", label: "Qatar Experience" },
+    { value: "OVERSEAS", label: "Overseas Experience" },
+  ];
+
+  const languageOptions = [
+    "English",
+    "Arabic",
+    "Hindi",
+    "Urdu",
+    "Malayalam",
+    "Tagalog",
+  ];
+
+  const handleOpenModal = async (requirement?: Requirement) => {
+    if (requirement?.id) {
       try {
-        setLoading(true);
-        const response = await fetch("/api/requirements");
-        if (response.ok) {
-          const data = await response.json();
-          const requirementsWithJobRoles = data.map((req: Requirement) => ({
-            ...req,
-            jobRoles: req.jobRoles || [],
-            languageRequirements: req.languageRequirements || [],
-          }));
-          setRequirements(requirementsWithJobRoles);
-        } else {
-          throw new Error("Failed to fetch requirements");
+        const fullRequirement = await getRequirementById(requirement.id);
+        if (fullRequirement) {
+          setEditingRequirement(fullRequirement);
+
+          // Determine if we're in view mode (not a DRAFT)
+          const isDraft = fullRequirement.status === "DRAFT";
+          setIsViewMode(!isDraft);
+
+          // Set initial step based on status
+          setCurrentStep(isDraft ? 1 : 2);
+          setFormData({
+            jobRoles: fullRequirement.jobRoles.map((role) => ({
+              ...role,
+              startDate:
+                role.startDate instanceof Date
+                  ? format(role.startDate, "yyyy-MM-dd")
+                  : role.startDate,
+              contractDuration: role.contractDuration || undefined,
+              salaryCurrency: role.salaryCurrency || "QAR",
+              foodAllowance: role.foodAllowance ?? undefined,
+              housingAllowance: role.housingAllowance ?? undefined,
+              transportationAllowance:
+                role.transportationAllowance ?? undefined,
+              mobileAllowance: role.mobileAllowance ?? undefined,
+              natureOfWorkAllowance: role.natureOfWorkAllowance ?? undefined,
+              otherAllowance: role.otherAllowance ?? undefined,
+              totalExperienceYears: role.totalExperienceYears ?? undefined,
+              preferredAge: role.preferredAge ?? undefined,
+              specialRequirements: role.specialRequirements || "",
+              languageRequirements: role.languageRequirements || [],
+            })),
+          });
         }
-      } catch (error) {
-        console.error("Error fetching requirements:", error);
+      } catch (error: unknown) {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Failed to load requirement details";
         toast({
+          message: errorMessage,
           type: "error",
-          message: "Failed to load requirements. Please try again.",
         });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRequirements();
-  }, [toast]);
-
-  const checkForChanges = useCallback(() => {
-    if (editingRequirement && editingRequirement.status !== "DRAFT") {
-      return false;
-    }
-    const initialState = JSON.stringify(initialFormData);
-    const currentState = JSON.stringify(formData);
-    return currentState !== initialState;
-  }, [formData, editingRequirement, initialFormData]);
-
-  useEffect(() => {
-    setHasChanges(checkForChanges());
-  }, [formData, checkForChanges]);
-
-  const handleOpenModal = (requirement?: Requirement) => {
-    if (requirement) {
-      setEditingRequirement(requirement);
-      setIsViewMode(requirement.status !== "DRAFT");
-
-      setFormData({
-        jobRoles: requirement.jobRoles.map((role) => ({
-          title: role.title,
-          quantity: Number(role.quantity),
-          nationality: role.nationality,
-          salary: role.salary?.toString() || "",
-          salaryCurrency: role.salaryCurrency || "QAR",
-          startDate: role.startDate
-            ? format(new Date(role.startDate), "yyyy-MM-dd")
-            : "",
-          contractDuration: role.contractDuration || "",
-          basicSalary: role.basicSalary?.toString() || "",
-          foodAllowance: role.foodAllowance?.toString() || "",
-          foodProvidedByCompany: role.foodProvidedByCompany || false,
-          housingAllowance: role.housingAllowance?.toString() || "",
-          housingProvidedByCompany: role.housingProvidedByCompany || false,
-          transportationAllowance:
-            role.transportationAllowance?.toString() || "",
-          transportationProvidedByCompany:
-            role.transportationProvidedByCompany || false,
-          healthInsurance: role.healthInsurance,
-          mobileAllowance: role.mobileAllowance?.toString() || "",
-          mobileProvidedByCompany: role.mobileProvidedByCompany || false,
-          natureOfWorkAllowance: role.natureOfWorkAllowance?.toString() || "",
-          otherAllowance: role.otherAllowance?.toString() || "",
-          ticketFrequency: role.ticketFrequency || [],
-          workLocations: role.workLocations || [],
-          previousExperience: role.previousExperience || [],
-          totalExperienceYears: role.totalExperienceYears,
-          preferredAge: role.preferredAge,
-        })),
-        languageRequirements: requirement.languageRequirements || [],
-        minExperience: requirement.minExperience || "",
-        maxAge: requirement.maxAge || undefined,
-        specialRequirements: requirement.specialNotes || "",
-        ticketType: requirement.ticketType || "",
-        ticketProvided: requirement.ticketProvided || false,
-      });
-
-      if (requirement.status !== "DRAFT") {
-        setCurrentStep(3);
-      } else {
-        setCurrentStep(1);
       }
     } else {
       setEditingRequirement(null);
       setIsViewMode(false);
-      setFormData(initialFormData);
       setCurrentStep(1);
+      setFormData({
+        jobRoles: [
+          {
+            title: "",
+            quantity: 1,
+            nationality: "",
+            startDate: "",
+            contractDuration: undefined,
+            basicSalary: 0,
+            salaryCurrency: "QAR",
+            foodAllowance: undefined,
+            foodProvidedByCompany: false,
+            housingAllowance: undefined,
+            housingProvidedByCompany: false,
+            transportationAllowance: undefined,
+            transportationProvidedByCompany: false,
+            mobileAllowance: undefined,
+            mobileProvidedByCompany: false,
+            natureOfWorkAllowance: undefined,
+            otherAllowance: undefined,
+            healthInsurance: "asPerLaw",
+            ticketFrequency: [],
+            workLocations: [],
+            previousExperience: [],
+            totalExperienceYears: undefined,
+            preferredAge: undefined,
+            languageRequirements: [],
+            specialRequirements: "",
+          },
+        ],
+      });
     }
+    setCurrentStep(1);
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    if (
-      hasChanges &&
-      (!editingRequirement || editingRequirement.status === "DRAFT")
-    ) {
-      if (confirm("You have unsaved changes. Save as draft?")) {
-        saveAsDraft();
-      } else {
-        resetAndCloseModal();
-      }
-    } else {
-      resetAndCloseModal();
-    }
-  };
-
-  const saveAsDraft = async () => {
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        ...preparePayload(),
-        status: "DRAFT",
-      };
-
-      const response = await fetch("/api/requirements", {
-        method: editingRequirement ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        const savedRequirement = await response.json();
-        const requirementWithRoles = {
-          ...savedRequirement,
-          jobRoles: savedRequirement.jobRoles || formData.jobRoles,
-        };
-
-        if (editingRequirement) {
-          setRequirements((prev) =>
-            prev.map((req) =>
-              req.id === requirementWithRoles.id ? requirementWithRoles : req
-            )
-          );
-        } else {
-          setRequirements((prev) => [requirementWithRoles, ...prev]);
-        }
-        resetAndCloseModal();
-        toast({
-          type: "success",
-          message: "Requirement saved as draft successfully",
-        });
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to save draft");
-      }
-    } catch (error) {
-      console.error("Error saving draft:", error);
-      toast({
-        type: "error",
-        message:
-          error instanceof Error ? error.message : "Failed to save draft",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const preparePayload = () => {
-    return {
-      languageRequirements: formData.languageRequirements,
-      minExperience: formData.minExperience || null,
-      maxAge: Number(formData.maxAge) || null,
-      ticketType: formData.ticketType || null,
-      ticketProvided: formData.ticketProvided || false,
-      specialNotes: formData.specialRequirements,
-      jobRoles: formData.jobRoles.map((role) => ({
-        title: role.title,
-        quantity: Number(role.quantity),
-        nationality: role.nationality,
-        salary: role.salary ? parseFloat(role.salary) : null,
-        salaryCurrency: role.salaryCurrency || "QAR",
-        startDate: role.startDate || null,
-        contractDuration: role.contractDuration || null,
-        basicSalary: role.basicSalary ? parseFloat(role.basicSalary) : null,
-        foodAllowance: role.foodAllowance
-          ? parseFloat(role.foodAllowance)
-          : null,
-        foodProvidedByCompany: role.foodProvidedByCompany || false,
-        housingAllowance: role.housingAllowance
-          ? parseFloat(role.housingAllowance)
-          : null,
-        housingProvidedByCompany: role.housingProvidedByCompany || false,
-        transportationAllowance: role.transportationAllowance
-          ? parseFloat(role.transportationAllowance)
-          : null,
-        transportationProvidedByCompany:
-          role.transportationProvidedByCompany || false,
-        healthInsurance: role.healthInsurance,
-        mobileAllowance: role.mobileAllowance
-          ? parseFloat(role.mobileAllowance)
-          : null,
-        mobileProvidedByCompany: role.mobileProvidedByCompany || false,
-        natureOfWorkAllowance: role.natureOfWorkAllowance
-          ? parseFloat(role.natureOfWorkAllowance)
-          : null,
-        otherAllowance: role.otherAllowance
-          ? parseFloat(role.otherAllowance)
-          : null,
-        ticketFrequency: role.ticketFrequency || [],
-        workLocations: role.workLocations || [],
-        previousExperience: role.previousExperience || [],
-        totalExperienceYears: role.totalExperienceYears,
-        preferredAge: role.preferredAge,
-      })),
-      id: editingRequirement?.id,
-    };
-  };
-
-  const resetAndCloseModal = () => {
-    setFormData(initialFormData);
     setIsModalOpen(false);
-    setEditingRequirement(null);
-    setCurrentStep(1);
     setErrors({});
   };
 
-  const validateStep1 = (isDraft: boolean): boolean => {
-    const newErrors: Errors = {};
+  const handleNext = () => {
+    if (validateStep(currentStep)) {
+      setCurrentStep((prev) => prev + 1);
+    }
+  };
 
-    if (!isDraft) {
-      // Validate job roles
+  const handleBack = () => {
+    setCurrentStep((prev) => prev - 1);
+  };
+
+  const validateStep = (step: number): boolean => {
+    const newErrors: Record<string, string> = {};
+
+    if (step === 1) {
       formData.jobRoles.forEach((role, index) => {
+        // Basic job role info validation
         if (!role.title) {
           newErrors[`jobRoles[${index}].title`] = "Job title is required";
         }
-        if (!role.basicSalary) {
-          newErrors[`jobRoles[${index}].basicSalary`] =
-            "Basic salary is required";
-        } else if (isNaN(parseFloat(role.basicSalary))) {
-          newErrors[`jobRoles[${index}].basicSalary`] =
-            "Basic salary must be a number";
+        if (!role.quantity || role.quantity < 1) {
+          newErrors[`jobRoles[${index}].quantity`] =
+            "Valid quantity is required";
         }
         if (!role.nationality) {
           newErrors[`jobRoles[${index}].nationality`] =
@@ -480,112 +408,98 @@ export default function Requirements() {
         }
         if (!role.startDate) {
           newErrors[`jobRoles[${index}].startDate`] = "Start date is required";
-        } else {
-          const date = new Date(role.startDate);
-          const twoWeeksFromNow = new Date();
-          twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 14);
-          if (date < twoWeeksFromNow) {
-            newErrors[`jobRoles[${index}].startDate`] =
-              "Start date must be at least 2 weeks from today";
-          }
         }
-
         if (!role.contractDuration) {
           newErrors[`jobRoles[${index}].contractDuration`] =
-            "Duration is required";
+            "Contract duration is required";
+        }
+
+        // Salary validation
+        if (!role.basicSalary || role.basicSalary <= 0) {
+          newErrors[`jobRoles[${index}].basicSalary`] =
+            "Basic salary is required";
+        }
+
+        // Additional Job Details validation
+        if (role.ticketFrequency.length === 0) {
+          newErrors[`jobRoles[${index}].ticketFrequency`] =
+            "At least one ticket frequency option is required";
+        }
+
+        if (role.workLocations.length === 0) {
+          newErrors[`jobRoles[${index}].workLocations`] =
+            "At least one work location is required";
+        }
+
+        if (role.previousExperience.length === 0) {
+          newErrors[`jobRoles[${index}].previousExperience`] =
+            "At least one previous experience option is required";
+        }
+
+        if (!role.totalExperienceYears || role.totalExperienceYears <= 0) {
+          newErrors[`jobRoles[${index}].totalExperienceYears`] =
+            "Total experience years is required";
+        }
+
+        if (!role.preferredAge || role.preferredAge <= 0) {
+          newErrors[`jobRoles[${index}].preferredAge`] =
+            "Preferred age is required";
+        }
+
+        // Language validation
+        if (role.languageRequirements.length === 0) {
+          newErrors[`jobRoles[${index}].languageRequirements`] =
+            "At least one language is required";
         }
       });
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const validateStep2 = (isDraft: boolean): boolean => {
-    const newErrors: Errors = {};
-
-    if (!isDraft) {
-      if (formData.languageRequirements.length === 0) {
-        newErrors.languageRequirements = "At least one language is required";
-      }
-      if (formData.maxAge && (formData.maxAge < 18 || formData.maxAge > 70)) {
-        newErrors.maxAge = "Age must be between 18 and 70";
-      }
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleNext = async () => {
-    let isValid = true;
-    const isDraft = false;
-
-    if (currentStep === 1) isValid = validateStep1(isDraft);
-    if (currentStep === 2) isValid = validateStep2(isDraft);
-
-    if (!isValid) {
-      toast({
-        type: "error",
-        message: "Please fix all errors before proceeding",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setCurrentStep((prev) => Math.min(prev + 1, steps.length));
-      setIsSubmitting(false);
-    }, 800);
-  };
-
-  const handleBack = () => {
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
-  };
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
   };
 
   const handleJobRoleChange = (
     index: number,
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
-    const target = e.target as HTMLInputElement;
-    const { name, value, type } = target;
-    const fieldName = name.replace(`jobRoles[${index}].`, "");
+    const { name, value, type } = e.target as HTMLInputElement;
+    const checked =
+      type === "checkbox" ? (e.target as HTMLInputElement).checked : undefined;
 
     setFormData((prev) => {
       const updatedJobRoles = [...prev.jobRoles];
-      updatedJobRoles[index] = {
-        ...updatedJobRoles[index],
-        [fieldName]:
-          type === "checkbox" || type === "radio"
-            ? (target as HTMLInputElement).checked
-            : type === "number"
-              ? Number(value)
-              : value,
+      const key = name.replace(`jobRoles[${index}].`, "") as keyof JobRole;
+
+      if (type === "checkbox") {
+        updatedJobRoles[index] = {
+          ...updatedJobRoles[index],
+          [key]: checked,
+        };
+      } else if (type === "number") {
+        updatedJobRoles[index] = {
+          ...updatedJobRoles[index],
+          [key]: value === "" ? undefined : parseFloat(value),
+        };
+      } else {
+        updatedJobRoles[index] = {
+          ...updatedJobRoles[index],
+          [key]: value,
+        };
+      }
+
+      return {
+        ...prev,
+        jobRoles: updatedJobRoles,
       };
-      return { ...prev, jobRoles: updatedJobRoles };
     });
 
-    // Clear any errors for this field
-    if (errors[`jobRoles[${index}].${fieldName}`]) {
+    // Clear error when field is changed
+    if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
-        delete newErrors[`jobRoles[${index}].${fieldName}`];
+        delete newErrors[name];
         return newErrors;
       });
     }
@@ -593,23 +507,88 @@ export default function Requirements() {
 
   const handleMultiSelectChange = (
     index: number,
-    fieldName: string,
+    field: string,
     value: string,
     isChecked: boolean
   ) => {
     setFormData((prev) => {
       const updatedJobRoles = [...prev.jobRoles];
       const currentValues =
-        (updatedJobRoles[index][fieldName as keyof JobRole] as string[]) || [];
+        (updatedJobRoles[index][field as keyof JobRole] as string[]) || [];
 
-      updatedJobRoles[index] = {
-        ...updatedJobRoles[index],
-        [fieldName]: isChecked
-          ? [...currentValues, value]
-          : currentValues.filter((v) => v !== value),
+      if (isChecked) {
+        updatedJobRoles[index] = {
+          ...updatedJobRoles[index],
+          [field]: [...currentValues, value],
+        };
+      } else {
+        updatedJobRoles[index] = {
+          ...updatedJobRoles[index],
+          [field]: currentValues.filter((v) => v !== value),
+        };
+      }
+
+      return {
+        ...prev,
+        jobRoles: updatedJobRoles,
       };
-      return { ...prev, jobRoles: updatedJobRoles };
     });
+  };
+
+  const toggleLanguageRequirement = (language: string, index: number) => {
+    setFormData((prev) => {
+      const updatedJobRoles = [...prev.jobRoles];
+      const currentLanguages =
+        updatedJobRoles[index].languageRequirements || [];
+
+      if (currentLanguages.includes(language)) {
+        updatedJobRoles[index] = {
+          ...updatedJobRoles[index],
+          languageRequirements: currentLanguages.filter(
+            (lang) => lang !== language
+          ),
+        };
+      } else {
+        updatedJobRoles[index] = {
+          ...updatedJobRoles[index],
+          languageRequirements: [...currentLanguages, language],
+        };
+      }
+
+      return {
+        ...prev,
+        jobRoles: updatedJobRoles,
+      };
+    });
+
+    // Clear error when language is selected
+    if (errors[`jobRoles[${index}].languageRequirements`]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[`jobRoles[${index}].languageRequirements`];
+        return newErrors;
+      });
+    }
+  };
+
+  const handleAddLanguage = (index: number) => {
+    if (newLanguage.trim() && !languageOptions.includes(newLanguage.trim())) {
+      setFormData((prev) => {
+        const updatedJobRoles = [...prev.jobRoles];
+        updatedJobRoles[index] = {
+          ...updatedJobRoles[index],
+          languageRequirements: [
+            ...(updatedJobRoles[index].languageRequirements || []),
+            newLanguage.trim(),
+          ],
+        };
+        return {
+          ...prev,
+          jobRoles: updatedJobRoles,
+        };
+      });
+      setNewLanguage("");
+    }
   };
 
   const addJobRole = () => {
@@ -621,169 +600,128 @@ export default function Requirements() {
           title: "",
           quantity: 1,
           nationality: "",
-          salary: "",
-          salaryCurrency: "QAR",
           startDate: "",
-          contractDuration: "",
-          basicSalary: "",
-          foodAllowance: "",
+          contractDuration: undefined,
+          basicSalary: 0,
+          salaryCurrency: "QAR",
+          foodAllowance: undefined,
           foodProvidedByCompany: false,
-          housingAllowance: "",
+          housingAllowance: undefined,
           housingProvidedByCompany: false,
-          transportationAllowance: "",
+          transportationAllowance: undefined,
           transportationProvidedByCompany: false,
-          healthInsurance: undefined,
-          mobileAllowance: "",
+          mobileAllowance: undefined,
           mobileProvidedByCompany: false,
-          natureOfWorkAllowance: "",
-          otherAllowance: "",
+          natureOfWorkAllowance: undefined,
+          otherAllowance: undefined,
+          healthInsurance: "asPerLaw",
           ticketFrequency: [],
           workLocations: [],
           previousExperience: [],
           totalExperienceYears: undefined,
           preferredAge: undefined,
+          languageRequirements: [],
+          specialRequirements: "",
         },
       ],
     }));
   };
 
   const removeJobRole = (index: number) => {
-    if (formData.jobRoles.length <= 1) {
-      toast({
-        type: "error",
-        message: "You must have at least one job role",
-      });
-      return;
-    }
-    setFormData((prev) => ({
-      ...prev,
-      jobRoles: prev.jobRoles.filter((_, i) => i !== index),
-    }));
-  };
-
-  const toggleLanguageRequirement = (language: string) => {
-    setFormData((prev) => {
-      const exists = prev.languageRequirements.includes(language);
-      const updated = exists
-        ? prev.languageRequirements.filter((l) => l !== language)
-        : [...prev.languageRequirements, language];
-      return { ...prev, languageRequirements: updated };
-    });
-
-    if (errors.languageRequirements) {
-      setErrors((prev) => ({ ...prev, languageRequirements: "" }));
-    }
-  };
-
-  const handleAddLanguage = () => {
-    const trimmedLang = newLanguage.trim();
-    if (!trimmedLang) {
-      toast({
-        type: "error",
-        message: "Please enter a language",
-      });
-      return;
-    }
-
-    if (!languageOptions.includes(trimmedLang)) {
-      setLanguageOptions((prev) => [...prev, trimmedLang]);
-    }
-
-    if (!formData.languageRequirements.includes(trimmedLang)) {
-      setFormData((prev) => ({
-        ...prev,
-        languageRequirements: [...prev.languageRequirements, trimmedLang],
-      }));
-    }
-
-    setNewLanguage("");
-  };
-
-  const handleSubmit = async () => {
-    const isDraft = false;
-    const step1Valid = validateStep1(isDraft);
-    const step2Valid = validateStep2(isDraft);
-
-    if (!step1Valid || !step2Valid) {
-      toast({
-        type: "error",
-        message: "Please fix all errors before submitting",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        ...preparePayload(),
-        status: "SUBMITTED",
-      };
-
-      const response = await fetch("/api/requirements", {
-        method: editingRequirement ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        const savedRequirement = await response.json();
-        const requirementWithRoles = {
-          ...savedRequirement,
-          jobRoles: savedRequirement.jobRoles || formData.jobRoles,
+    if (formData.jobRoles.length > 1) {
+      setFormData((prev) => {
+        const updatedJobRoles = [...prev.jobRoles];
+        updatedJobRoles.splice(index, 1);
+        return {
+          ...prev,
+          jobRoles: updatedJobRoles,
         };
-
-        if (editingRequirement) {
-          setRequirements((prev) =>
-            prev.map((req) =>
-              req.id === requirementWithRoles.id ? requirementWithRoles : req
-            )
-          );
-        } else {
-          setRequirements((prev) => [requirementWithRoles, ...prev]);
-        }
-
-        resetAndCloseModal();
-        toast({
-          type: "success",
-          message: editingRequirement
-            ? "Requirement updated successfully"
-            : "Requirement submitted successfully",
-        });
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to submit requirement");
-      }
-    } catch (error) {
-      console.error("Error submitting requirement:", error);
-      toast({
-        type: "error",
-        message: error instanceof Error ? error.message : "Submission failed",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   const calculateTotalSalary = (role: JobRole) => {
-    const basic = parseFloat(role.basicSalary || "0") || 0;
-    const food = role.foodProvidedByCompany
-      ? 0
-      : parseFloat(role.foodAllowance || "0") || 0;
+    const basic = role.basicSalary || 0;
+    const food = role.foodProvidedByCompany ? 0 : role.foodAllowance || 0;
     const housing = role.housingProvidedByCompany
       ? 0
-      : parseFloat(role.housingAllowance || "0") || 0;
+      : role.housingAllowance || 0;
     const transport = role.transportationProvidedByCompany
       ? 0
-      : parseFloat(role.transportationAllowance || "0") || 0;
-    const mobile = role.mobileProvidedByCompany
-      ? 0
-      : parseFloat(role.mobileAllowance || "0") || 0;
-    const natureOfWork = parseFloat(role.natureOfWorkAllowance || "0") || 0;
-    const other = parseFloat(role.otherAllowance || "0") || 0;
+      : role.transportationAllowance || 0;
+    const mobile = role.mobileProvidedByCompany ? 0 : role.mobileAllowance || 0;
+    const nature = role.natureOfWorkAllowance || 0;
+    const other = role.otherAllowance || 0;
 
-    return basic + food + housing + transport + mobile + natureOfWork + other;
+    return basic + food + housing + transport + mobile + nature + other;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateStep(currentStep)) return;
+
+    setIsSubmitting(true);
+    try {
+      const submissionData = {
+        jobRoles: formData.jobRoles.map((role) => ({
+          ...role,
+          startDate: new Date(role.startDate),
+          basicSalary: parseFloat(role.basicSalary.toString()),
+          foodAllowance: role.foodAllowance
+            ? parseFloat(role.foodAllowance.toString())
+            : null,
+          housingAllowance: role.housingAllowance
+            ? parseFloat(role.housingAllowance.toString())
+            : null,
+          transportationAllowance: role.transportationAllowance
+            ? parseFloat(role.transportationAllowance.toString())
+            : null,
+          mobileAllowance: role.mobileAllowance
+            ? parseFloat(role.mobileAllowance.toString())
+            : null,
+          natureOfWorkAllowance: role.natureOfWorkAllowance
+            ? parseFloat(role.natureOfWorkAllowance.toString())
+            : null,
+          otherAllowance: role.otherAllowance
+            ? parseFloat(role.otherAllowance.toString())
+            : null,
+          languageRequirements: role.languageRequirements,
+        })),
+      };
+
+      if (editingRequirement) {
+        await updateRequirement(editingRequirement.id, {
+          jobRoles: submissionData.jobRoles,
+          status: "SUBMITTED",
+        });
+      } else {
+        await createRequirement(
+          submissionData.jobRoles as Omit<JobRole, "id" | "requirementId">[],
+          "SUBMITTED"
+        );
+      }
+
+      toast({
+        message: editingRequirement
+          ? "Requirement updated successfully"
+          : "Requirement submitted successfully",
+        type: "success",
+      });
+
+      // Refresh the list
+      const updatedRequirements = await getRequirements();
+      setRequirements(updatedRequirements);
+
+      handleCloseModal();
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to submit requirement";
+      toast({
+        message: errorMessage,
+        type: "error",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const renderStepContent = () => {
@@ -844,7 +782,7 @@ export default function Requirements() {
                                 disabled={isViewMode}
                               >
                                 <option value="">{t.selectOption}</option>
-                                {t.jobPositions?.map((job) => (
+                                {t.jobPositions?.map((job: string) => (
                                   <option key={job} value={job}>
                                     {job}
                                   </option>
@@ -899,7 +837,14 @@ export default function Requirements() {
                               <input
                                 type="date"
                                 name={`jobRoles[${index}].startDate`}
-                                value={role.startDate}
+                                value={
+                                  typeof role.startDate === "string"
+                                    ? role.startDate
+                                    : format(
+                                        role.startDate as Date,
+                                        "yyyy-MM-dd"
+                                      )
+                                }
                                 onChange={(e) => handleJobRoleChange(index, e)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
                                 disabled={isViewMode}
@@ -913,7 +858,7 @@ export default function Requirements() {
                             <td className="px-6 py-4 whitespace-nowrap">
                               <select
                                 name={`jobRoles[${index}].contractDuration`}
-                                value={role.contractDuration}
+                                value={role.contractDuration || ""}
                                 onChange={(e) => handleJobRoleChange(index, e)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
                                 disabled={isViewMode}
@@ -989,7 +934,7 @@ export default function Requirements() {
                                         />
                                         <select
                                           name={`jobRoles[${index}].salaryCurrency`}
-                                          value={role.salaryCurrency}
+                                          value={role.salaryCurrency || "QAR"}
                                           onChange={(e) =>
                                             handleJobRoleChange(index, e)
                                           }
@@ -1276,7 +1221,21 @@ export default function Requirements() {
                                       <div className="mb-4">
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                           Ticket Frequency
+                                          <span className="text-[#FF0404] ml-1">
+                                            *
+                                          </span>
                                         </label>
+                                        {errors[
+                                          `jobRoles[${index}].ticketFrequency`
+                                        ] && (
+                                          <p className="text-xs text-red-500 mb-2">
+                                            {
+                                              errors[
+                                                `jobRoles[${index}].ticketFrequency`
+                                              ]
+                                            }
+                                          </p>
+                                        )}
                                         <div className="space-y-2">
                                           {ticketFrequencyOptions.map(
                                             (option) => (
@@ -1318,7 +1277,21 @@ export default function Requirements() {
                                       <div className="mb-4">
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                           Work Locations
+                                          <span className="text-[#FF0404] ml-1">
+                                            *
+                                          </span>
                                         </label>
+                                        {errors[
+                                          `jobRoles[${index}].workLocations`
+                                        ] && (
+                                          <p className="text-xs text-red-500 mb-2">
+                                            {
+                                              errors[
+                                                `jobRoles[${index}].workLocations`
+                                              ]
+                                            }
+                                          </p>
+                                        )}
                                         <div className="space-y-2">
                                           {workLocationOptions.map((option) => (
                                             <div
@@ -1360,7 +1333,21 @@ export default function Requirements() {
                                       <div className="mb-4">
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                           Previous Experience
+                                          <span className="text-[#FF0404] ml-1">
+                                            *
+                                          </span>
                                         </label>
+                                        {errors[
+                                          `jobRoles[${index}].previousExperience`
+                                        ] && (
+                                          <p className="text-xs text-red-500 mb-2">
+                                            {
+                                              errors[
+                                                `jobRoles[${index}].previousExperience`
+                                              ]
+                                            }
+                                          </p>
+                                        )}
                                         <div className="space-y-2">
                                           {previousExperienceOptions.map(
                                             (option) => (
@@ -1402,7 +1389,21 @@ export default function Requirements() {
                                       <div className="mb-4">
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                           Total Experience Years
+                                          <span className="text-[#FF0404] ml-1">
+                                            *
+                                          </span>
                                         </label>
+                                        {errors[
+                                          `jobRoles[${index}].totalExperienceYears`
+                                        ] && (
+                                          <p className="text-xs text-red-500 mb-1">
+                                            {
+                                              errors[
+                                                `jobRoles[${index}].totalExperienceYears`
+                                              ]
+                                            }
+                                          </p>
+                                        )}
                                         <input
                                           type="number"
                                           name={`jobRoles[${index}].totalExperienceYears`}
@@ -1412,16 +1413,30 @@ export default function Requirements() {
                                           onChange={(e) =>
                                             handleJobRoleChange(index, e)
                                           }
+                                          required
                                           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
                                           placeholder="e.g., 5"
                                           disabled={isViewMode}
                                         />
                                       </div>
-
                                       <div className="mb-4">
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
                                           Preferred Age (±5 years)
+                                          <span className="text-[#FF0404] ml-1">
+                                            *
+                                          </span>
                                         </label>
+                                        {errors[
+                                          `jobRoles[${index}].preferredAge`
+                                        ] && (
+                                          <p className="text-xs text-red-500 mb-1">
+                                            {
+                                              errors[
+                                                `jobRoles[${index}].preferredAge`
+                                              ]
+                                            }
+                                          </p>
+                                        )}
                                         <input
                                           type="number"
                                           name={`jobRoles[${index}].preferredAge`}
@@ -1434,6 +1449,120 @@ export default function Requirements() {
                                           disabled={isViewMode}
                                         />
                                       </div>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Language Requirements and Special Notes */}
+                                <div className="mt-8">
+                                  <h3 className="text-lg font-semibold mb-4">
+                                    Language & Special Requirements
+                                  </h3>
+                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div>
+                                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        {t.languageRequirements}
+                                        <span className="text-[#FF0404] ml-1">
+                                          *
+                                        </span>
+                                      </label>
+
+                                      {errors[
+                                        `jobRoles[${index}].languageRequirements`
+                                      ] && (
+                                        <p className="text-sm text-[#FF0404] mb-2">
+                                          {
+                                            errors[
+                                              `jobRoles[${index}].languageRequirements`
+                                            ]
+                                          }
+                                        </p>
+                                      )}
+
+                                      <div className="space-y-2 mb-3">
+                                        {languageOptions.map((language) => (
+                                          <div
+                                            key={language}
+                                            className="flex items-center"
+                                          >
+                                            <input
+                                              type="checkbox"
+                                              id={`lang-${index}-${language}`}
+                                              checked={
+                                                role.languageRequirements?.includes(
+                                                  language
+                                                ) || false
+                                              }
+                                              onChange={() =>
+                                                toggleLanguageRequirement(
+                                                  language,
+                                                  index
+                                                )
+                                              }
+                                              className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
+                                              disabled={isViewMode}
+                                            />
+                                            <label
+                                              htmlFor={`lang-${index}-${language}`}
+                                              className="ml-2 text-sm text-gray-700"
+                                            >
+                                              {language}
+                                            </label>
+                                          </div>
+                                        ))}
+                                      </div>
+
+                                      {!isViewMode && (
+                                        <div className="flex items-center gap-2">
+                                          <Input
+                                            type="text"
+                                            value={newLanguage}
+                                            onChange={(e) =>
+                                              setNewLanguage(e.target.value)
+                                            }
+                                            onKeyDown={(e) => {
+                                              if (e.key === "Enter") {
+                                                e.preventDefault();
+                                                handleAddLanguage(index);
+                                              }
+                                            }}
+                                            placeholder="Add another language"
+                                            className="w-full"
+                                          />
+                                          <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() =>
+                                              handleAddLanguage(index)
+                                            }
+                                          >
+                                            Add
+                                          </Button>
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    <div>
+                                      <label
+                                        htmlFor={`specialRequirements-${index}`}
+                                        className="block text-sm font-medium text-gray-700 mb-1"
+                                      >
+                                        {t.specialRequirements}
+                                      </label>
+                                      <textarea
+                                        id={`specialRequirements-${index}`}
+                                        name={`jobRoles[${index}].specialRequirements`}
+                                        value={role.specialRequirements || ""}
+                                        onChange={(e) =>
+                                          handleJobRoleChange(index, e)
+                                        }
+                                        rows={5}
+                                        className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C0053] focus:border-[#2C0053] "
+                                        placeholder={
+                                          t.specialRequirementsPlaceholder
+                                        }
+                                        disabled={isViewMode}
+                                      />
                                     </div>
                                   </div>
                                 </div>
@@ -1465,346 +1594,108 @@ export default function Requirements() {
       case 2:
         return (
           <Card className="p-6">
-            <div className="text-center mb-2">
-              <h1 className="text-2xl font-semibold mb-1">
-                {t.workerRequirements}
-              </h1>
-              <p className="text-base text-gray-700 mb-2">{t.specifySkills}</p>
-              <p className="text-xs text-gray-500 italic text-left">
-                {t.sectionNoteRequirements}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-12 gap-8 mt-6">
-              <div className="col-span-5 space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {t.languageRequirements}
-                    <span className="text-[#FF0404] ml-1">*</span>
-                  </label>
-
-                  {errors.languageRequirements && (
-                    <p className="text-sm text-[#FF0404] mb-2">
-                      {errors.languageRequirements}
-                    </p>
-                  )}
-
-                  <div className="space-y-2 mb-3">
-                    {languageOptions.map((language) => (
-                      <div key={language} className="flex items-center">
-                        <input
-                          type="checkbox"
-                          id={`lang-${language}`}
-                          checked={formData.languageRequirements.includes(
-                            language
-                          )}
-                          onChange={() => toggleLanguageRequirement(language)}
-                          className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
-                          disabled={isViewMode}
-                        />
-                        <label
-                          htmlFor={`lang-${language}`}
-                          className="ml-2 text-sm text-gray-700"
-                        >
-                          {language}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-
-                  {!isViewMode && (
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="text"
-                        value={newLanguage}
-                        onChange={(e) => setNewLanguage(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            handleAddLanguage();
-                          }
-                        }}
-                        placeholder="Add another language"
-                        className="w-full"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleAddLanguage}
-                      >
-                        Add
-                      </Button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Minimum Experience
-                    </label>
-                    <select
-                      name="minExperience"
-                      value={formData.minExperience}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                      disabled={isViewMode}
-                    >
-                      <option value="">Select</option>
-                      {experienceLevelOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <Input
-                      label="Maximum Age"
-                      name="maxAge"
-                      value={formData.maxAge || ""}
-                      onChange={handleChange}
-                      type="number"
-                      min="18"
-                      max="70"
-                      placeholder="e.g., 45"
-                      error={errors.maxAge}
-                      disabled={isViewMode}
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Ticket Details
-                  </label>
-                  <div className="space-y-2">
-                    <div>
-                      <select
-                        name="ticketType"
-                        value={formData.ticketType}
-                        onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                        disabled={isViewMode}
-                      >
-                        <option value="">Select ticket type</option>
-                        {ticketTypeOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id="ticketProvided"
-                        name="ticketProvided"
-                        checked={formData.ticketProvided || false}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            ticketProvided: e.target.checked,
-                          })
-                        }
-                        className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
-                        disabled={isViewMode}
-                      />
-                      <label
-                        htmlFor="ticketProvided"
-                        className="ml-2 text-sm text-gray-700"
-                      >
-                        Ticket provided by employer
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-span-2 flex justify-center items-center">
-                <div className="w-[2px] h-2/3 bg-[#2C0053]/30 rounded-full"></div>
-              </div>
-
-              <div className="col-span-5 space-y-4">
-                <h2 className="text-lg font-semibold mb-2">
-                  {t.additionalRequirements}
-                </h2>
-                <div>
-                  <label
-                    htmlFor="specialRequirements"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    {t.specialRequirements}
-                  </label>
-                  <textarea
-                    id="specialRequirements"
-                    name="specialRequirements"
-                    value={formData.specialRequirements}
-                    onChange={handleChange}
-                    rows={5}
-                    className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C0053] focus:border-[#2C0053] bg-white"
-                    placeholder={t.specialRequirementsPlaceholder}
-                    disabled={isViewMode}
-                  />
-                </div>
-              </div>
-            </div>
-          </Card>
-        );
-
-      case 3:
-        return (
-          <Card className="p-6">
             <div className="text-center mb-0">
               <h1 className="text-2xl font-semibold mb-1">{t.reviewTitle}</h1>
               <p className="text-base text-gray-700 mb-2">{t.verifyInfo}</p>
             </div>
 
-            <div className="grid grid-cols-12 gap-8 mt-6">
-              <div className="col-span-6 space-y-6">
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h2 className="text-lg font-semibold mb-4 border-b pb-2">
-                    {t.jobDetails}
-                  </h2>
-                  <div className="mb-2">
-                    <p className="text-sm font-medium text-gray-700">
-                      {t.jobRoles}:
-                    </p>
-                    <ul className="list-disc list-inside text-sm text-gray-600 mt-1">
-                      {formData.jobRoles.map((role, index) => (
-                        <li key={index}>
-                          {role.title} ({t.quantity}: {role.quantity},{" "}
-                          {t.nationality}: {role.nationality}, Salary:{" "}
-                          {role.basicSalary} {role.salaryCurrency}
-                          {role.startDate &&
-                            `, Start Date: ${format(new Date(role.startDate), "MMM d, yyyy")}`}
-                          {role.contractDuration &&
-                            `, Duration: ${contractDurationOptions.find((o) => o.value === role.contractDuration)?.label || role.contractDuration}`}
-                          <br />
-                          {role.ticketFrequency?.length > 0 && (
-                            <>
-                              <span className="font-medium">
-                                Ticket Frequency:{" "}
-                              </span>
-                              {role.ticketFrequency
-                                .map(
-                                  (freq) =>
-                                    ticketFrequencyOptions.find(
-                                      (o) => o.value === freq
-                                    )?.label
-                                )
-                                .join(", ")}
-                              <br />
-                            </>
-                          )}
-                          {role.workLocations?.length > 0 && (
-                            <>
-                              <span className="font-medium">
-                                Work Locations:{" "}
-                              </span>
-                              {role.workLocations
-                                .map(
-                                  (loc) =>
-                                    workLocationOptions.find(
-                                      (o) => o.value === loc
-                                    )?.label
-                                )
-                                .join(", ")}
-                              <br />
-                            </>
-                          )}
-                          {role.previousExperience?.length > 0 && (
-                            <>
-                              <span className="font-medium">
-                                Previous Experience:{" "}
-                              </span>
-                              {role.previousExperience
-                                .map(
-                                  (exp) =>
-                                    previousExperienceOptions.find(
-                                      (o) => o.value === exp
-                                    )?.label
-                                )
-                                .join(", ")}
-                              <br />
-                            </>
-                          )}
-                          {role.totalExperienceYears && (
-                            <>
-                              <span className="font-medium">
-                                Total Experience:{" "}
-                              </span>
-                              {role.totalExperienceYears} years
-                              <br />
-                            </>
-                          )}
-                          {role.preferredAge && (
-                            <>
-                              <span className="font-medium">
-                                Preferred Age:{" "}
-                              </span>
-                              {role.preferredAge} (±5 years)
-                            </>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
+            <div className="mt-6 space-y-6">
+              {formData.jobRoles.map((role, index) => {
+                const totalSalary = calculateTotalSalary(role);
+                const formattedStartDate = role.startDate
+                  ? format(new Date(role.startDate), "MMM d, yyyy")
+                  : "Not specified";
+                const contractDuration = contractDurationOptions.find(
+                  (o) => o.value === role.contractDuration
+                )?.label;
+
+                return (
+                  <div
+                    key={index}
+                    className="bg-white p-6 rounded-lg shadow-sm"
+                  >
+                    <h2 className="text-lg font-semibold mb-4 border-b pb-2">
+                      Job Role {index + 1}
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <ReviewField label="Job Title" value={role.title} />
+                        <ReviewField
+                          label="Quantity"
+                          value={role.quantity.toString()}
+                        />
+                        <ReviewField
+                          label="Nationality"
+                          value={role.nationality}
+                        />
+                        <ReviewField
+                          label="Start Date"
+                          value={formattedStartDate}
+                        />
+                        <ReviewField
+                          label="Contract Duration"
+                          value={contractDuration || "Not specified"}
+                        />
+                        <ReviewField
+                          label="Basic Salary"
+                          value={`${role.basicSalary} ${role.salaryCurrency || "QAR"}`}
+                        />
+                      </div>
+                      <div>
+                        <ReviewField
+                          label="Total Salary"
+                          value={`${totalSalary.toFixed(2)} ${role.salaryCurrency || "QAR"}`}
+                        />
+                        <ReviewField
+                          label="Language Requirements"
+                          value={
+                            role.languageRequirements?.join(", ") ||
+                            "Not specified"
+                          }
+                        />
+                        <ReviewField
+                          label="Work Locations"
+                          value={
+                            role.workLocations
+                              ?.map(
+                                (loc) =>
+                                  workLocationOptions.find(
+                                    (o) => o.value === loc
+                                  )?.label
+                              )
+                              .join(", ") || "Not specified"
+                          }
+                        />
+                        <ReviewField
+                          label="Previous Experience"
+                          value={
+                            role.previousExperience
+                              ?.map(
+                                (exp) =>
+                                  previousExperienceOptions.find(
+                                    (o) => o.value === exp
+                                  )?.label
+                              )
+                              .join(", ") || "Not specified"
+                          }
+                        />
+                        {role.totalExperienceYears && (
+                          <ReviewField
+                            label="Total Experience"
+                            value={`${role.totalExperienceYears} years`}
+                          />
+                        )}
+                        {role.specialRequirements && (
+                          <ReviewField
+                            label="Special Requirements"
+                            value={role.specialRequirements || ""}
+                          />
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-
-              <div className="col-span-2 flex justify-center items-center">
-                <div className="w-[2px] h-2/3 bg-[#2C0053]/30 rounded-full"></div>
-              </div>
-
-              <div className="col-span-4 space-y-6">
-                <div className="bg-white p-6 rounded-lg shadow-sm">
-                  <h2 className="text-lg font-semibold mb-4 border-b pb-2">
-                    {t.requirements}
-                  </h2>
-                  <ReviewField
-                    label={t.languagesRequired}
-                    value={
-                      formData.languageRequirements &&
-                      formData.languageRequirements.length > 0
-                        ? formData.languageRequirements.join(", ")
-                        : "None specified"
-                    }
-                  />
-                  <ReviewField
-                    label="Minimum Experience"
-                    value={
-                      formData.minExperience
-                        ? experienceLevelOptions.find(
-                            (o) => o.value === formData.minExperience
-                          )?.label || formData.minExperience
-                        : "Not specified"
-                    }
-                  />
-                  <ReviewField
-                    label="Maximum Age"
-                    value={formData.maxAge?.toString() || "Not specified"}
-                  />
-                  <ReviewField
-                    label="Ticket Type"
-                    value={
-                      formData.ticketType
-                        ? ticketTypeOptions.find(
-                            (o) => o.value === formData.ticketType
-                          )?.label || formData.ticketType
-                        : "Not specified"
-                    }
-                  />
-                  <ReviewField
-                    label="Ticket Provided"
-                    value={formData.ticketProvided ? "Yes" : "No"}
-                  />
-                  <ReviewField
-                    label={t.specialRequirements}
-                    value={formData.specialRequirements || "None specified"}
-                  />
-                </div>
-              </div>
+                );
+              })}
             </div>
           </Card>
         );
@@ -1824,17 +1715,21 @@ export default function Requirements() {
   );
 
   const RequirementCard = ({ requirement }: { requirement: Requirement }) => {
-    const statusMap = {
-      DRAFT: { text: "Draft", color: "text-gray-500" },
+    const statusMap: Record<string, { text: string; color: string }> = {
+      DRAFT: { text: "Draft", color: "text-gray-600" },
       SUBMITTED: { text: "Submitted", color: "text-blue-600" },
       UNDER_REVIEW: { text: "Under Review", color: "text-yellow-600" },
-      APPROVED: { text: "Approved", color: "text-green-600" },
+      FORWARDED: { text: "Forwarded", color: "text-purple-600" },
+      ACCEPTED: { text: "Accepted", color: "text-green-600" },
       REJECTED: { text: "Rejected", color: "text-red-600" },
-      FULFILLED: { text: "Fulfilled", color: "text-purple-600" },
-      CLOSED: { text: "Closed", color: "text-gray-600" },
+      CLIENT_REVIEW: { text: "Review Pending", color: "text-indigo-600" },
+      COMPLETED: { text: "Completed", color: "text-gray-600" },
     };
 
-    const statusInfo = statusMap[requirement.status] || statusMap.DRAFT;
+    const statusInfo = statusMap[requirement.status] || {
+      text: "Unknown",
+      color: "text-gray-500",
+    };
     const formattedDate = format(
       new Date(requirement.createdAt),
       "MMM d, yyyy"
@@ -1891,20 +1786,14 @@ export default function Requirements() {
     : "Submit New Requirement";
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <p>Loading requirements...</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            <AddCard />
-            {requirements.map((requirement) => (
-              <RequirementCard key={requirement.id} requirement={requirement} />
-            ))}
-          </div>
-        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <AddCard />
+          {requirements.map((requirement) => (
+            <RequirementCard key={requirement.id} requirement={requirement} />
+          ))}
+        </div>
       </div>
 
       <Modal

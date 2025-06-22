@@ -17,12 +17,11 @@ interface ProvidersWrapperProps {
   userName: string;
 }
 
+// context/ProvidersWrapper.tsx
 export default function ProvidersWrapper({
   children,
   session,
   role,
-  avatarUrl,
-  userName,
 }: ProvidersWrapperProps) {
   return (
     <SessionProvider session={session}>
@@ -30,8 +29,8 @@ export default function ProvidersWrapper({
         <ToastProvider>
           <DashboardLayoutClient
             role={role}
-            avatarUrl={avatarUrl}
-            userName={userName}
+            avatarUrl={session.user.profilePicture || ""}
+            userName={session.user.name || ""}
           >
             {children}
           </DashboardLayoutClient>

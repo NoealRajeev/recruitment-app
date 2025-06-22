@@ -5,9 +5,11 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { z } from "zod";
 import { AuditAction } from "@prisma/client";
+import { getAccountApprovalEmail } from "@/lib/utils/email-templates";
+import { sendTemplateEmail } from "@/lib/utils/email-service";
 
 const StatusUpdateSchema = z.object({
-  status: z.enum(["VERIFIED", "REJECTED", "SUBMITTED", "PENDING_SUBMISSION"]),
+  status: z.enum(["VERIFIED", "REJECTED", "NOT_VERIFIED"]),
   reason: z.string().min(10, "Reason must be at least 10 characters").max(500),
 });
 
@@ -73,10 +75,29 @@ export async function PUT(
         throw new Error("Client or associated user not found");
       }
 
-      // Update user status
+      // If verifying, also verify all important documents
+      if (status === "VERIFIED") {
+        await tx.document.updateMany({
+          where: {
+            ownerId: client.user.id,
+            status: { not: "VERIFIED" },
+          },
+          data: {
+            status: "VERIFIED",
+          },
+        });
+      }
+
+      if (client.user.tempPassword) {
+        await sendTemplateEmail(
+          getAccountApprovalEmail(client.user.email, client.user.tempPassword),
+          client.user.email
+        );
+      }
+
       const updatedUser = await tx.user.update({
         where: { id: client.user.id },
-        data: { status },
+        data: { tempPassword: null, status },
         include: { clientProfile: true },
       });
 
@@ -84,19 +105,16 @@ export async function PUT(
       let auditAction: AuditAction;
       switch (status) {
         case "VERIFIED":
-          auditAction = AuditAction.CLIENT_VERIFIED;
+          auditAction = AuditAction.CLIENT_UPDATE;
           break;
         case "REJECTED":
-          auditAction = AuditAction.CLIENT_REJECTED;
+          auditAction = AuditAction.CLIENT_UPDATE;
           break;
-        case "SUBMITTED":
-          auditAction = AuditAction.CLIENT_UPDATED;
-          break;
-        case "PENDING_SUBMISSION":
-          auditAction = AuditAction.CLIENT_UPDATED;
+        case "NOT_VERIFIED":
+          auditAction = AuditAction.CLIENT_UPDATE;
           break;
         default:
-          auditAction = AuditAction.CLIENT_UPDATED;
+          auditAction = AuditAction.CLIENT_UPDATE;
       }
 
       await tx.auditLog.create({
@@ -111,23 +129,6 @@ export async function PUT(
           affectedFields: ["status"],
         },
       });
-
-      // Create notification only for VERIFIED/REJECTED
-      if (status === "VERIFIED" || status === "REJECTED") {
-        await tx.notification.create({
-          data: {
-            title: `Company ${status.toLowerCase()}`,
-            message: `Your company status has been ${status.toLowerCase()}. ${reason}`,
-            type: "ACCOUNT",
-            recipientId: client.user.id,
-            metadata: {
-              companyId: id,
-              oldStatus: client.user.status,
-              newStatus: status,
-            },
-          },
-        });
-      }
 
       return updatedUser.clientProfile;
     });

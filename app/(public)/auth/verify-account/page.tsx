@@ -96,7 +96,7 @@ export default function VerifyAccount() {
           formDataToSend.append("licenseFile", formData.licenseFile);
       }
 
-      formData.otherDocuments.forEach((file, index) => {
+      formData.otherDocuments.forEach((file) => {
         formDataToSend.append(`otherDocuments`, file);
       });
 
@@ -122,17 +122,13 @@ export default function VerifyAccount() {
           error instanceof Error ? error.message : "Failed to submit documents",
       });
       console.error("Submission failed:", error);
-      // You might want to show an error message to the user here
     } finally {
       setIsSubmitting(false);
     }
   };
 
   // If documents have been submitted, show success message
-  if (
-    userStatus === "SUBMITTED" ||
-    searchParams.get("status") === "submitted"
-  ) {
+  if (searchParams.get("status") === "submitted") {
     return (
       <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
         <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
@@ -184,8 +180,11 @@ export default function VerifyAccount() {
     );
   }
 
-  // Show document upload form for users with PENDING_SUBMISSION status
-  if (userStatus === "PENDING_SUBMISSION") {
+  // Show document submission page for RECRUITMENT_AGENCY with NOT_VERIFIED status
+  if (
+    userRole === UserRole.RECRUITMENT_AGENCY &&
+    userStatus === "NOT_VERIFIED"
+  ) {
     return (
       <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
         <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
@@ -213,67 +212,43 @@ export default function VerifyAccount() {
               </div>
 
               <div className="grid grid-cols-1 gap-8 mt-6">
-                {/* Show different documents based on user role */}
-                {userRole === UserRole.RECRUITMENT_AGENCY ? (
-                  <>
-                    <div className="space-y-4">
-                      <Input
-                        label={t.businessLicense}
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) => handleFileChange(e, "licenseFile")}
-                        required
-                        id="licenseFile"
-                      />
-                      <Input
-                        label={t.insuranceCertificate}
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) => handleFileChange(e, "insuranceFile")}
-                        required
-                        id="insuranceFile"
-                      />
-                      <Input
-                        label={t.idProof}
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) => handleFileChange(e, "idProof")}
-                        required
-                        id="idProof"
-                      />
-                    </div>
+                <div className="space-y-4">
+                  <Input
+                    label={t.businessLicense}
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => handleFileChange(e, "licenseFile")}
+                    required
+                    id="licenseFile"
+                  />
+                  <Input
+                    label={t.insuranceCertificate}
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => handleFileChange(e, "insuranceFile")}
+                    required
+                    id="insuranceFile"
+                  />
+                  <Input
+                    label={t.idProof}
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => handleFileChange(e, "idProof")}
+                    required
+                    id="idProof"
+                  />
+                </div>
 
-                    <div className="space-y-4">
-                      <Input
-                        label={t.addressProof}
-                        type="file"
-                        accept=".pdf,.jpg,.jpeg,.png"
-                        onChange={(e) => handleFileChange(e, "addressProof")}
-                        required
-                        id="addressProof"
-                      />
-                    </div>
-                  </>
-                ) : userRole === UserRole.CLIENT_ADMIN ? (
-                  <div className="space-y-4">
-                    <Input
-                      label={t.companyRegistration}
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => handleFileChange(e, "crFile")}
-                      required
-                      id="crFile"
-                    />
-                    <Input
-                      label={t.businessLicense}
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => handleFileChange(e, "licenseFile")}
-                      required
-                      id="licenseFile"
-                    />
-                  </div>
-                ) : null}
+                <div className="space-y-4">
+                  <Input
+                    label={t.addressProof}
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => handleFileChange(e, "addressProof")}
+                    required
+                    id="addressProof"
+                  />
+                </div>
 
                 <div className="space-y-4">
                   <Input
@@ -292,13 +267,10 @@ export default function VerifyAccount() {
                   onClick={handleSubmit}
                   disabled={
                     isSubmitting ||
-                    (userRole === UserRole.RECRUITMENT_AGENCY &&
-                      (!formData.licenseFile ||
-                        !formData.insuranceFile ||
-                        !formData.idProof ||
-                        !formData.addressProof)) ||
-                    (userRole === UserRole.CLIENT_ADMIN &&
-                      (!formData.crFile || !formData.licenseFile))
+                    !formData.licenseFile ||
+                    !formData.insuranceFile ||
+                    !formData.idProof ||
+                    !formData.addressProof
                   }
                   className="px-8 py-2 w-full max-w-xs"
                 >
@@ -338,10 +310,10 @@ export default function VerifyAccount() {
     );
   }
 
-  // Default view for users not in PENDING_SUBMISSION status
+  // Default view - show under review page for all other cases
   return (
     <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
-      <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative ">
+      <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
         <div className="flex-1 mx-16 rounded-lg py-8 flex flex-col justify-between">
           <div className="absolute top-6 right-6">
             <select
@@ -372,16 +344,16 @@ export default function VerifyAccount() {
               </svg>
             </div>
             <h1 className="text-2xl font-semibold text-gray-800 mb-2">
-              {userStatus === "PENDING_REVIEW"
+              {userStatus === AccountStatus.NOT_VERIFIED
                 ? t.registrationSubmitted
                 : t.verificationComplete}
             </h1>
             <p className="text-gray-600 mb-4">
-              {userStatus === "PENDING_REVIEW"
+              {userStatus === AccountStatus.NOT_VERIFIED
                 ? t.registrationUnderReview
                 : t.accountVerified}
             </p>
-            {userStatus === "PENDING_REVIEW" && (
+            {userStatus === AccountStatus.NOT_VERIFIED && (
               <p className="text-gray-500 text-sm mb-6">
                 {t.reviewProcessTime}
               </p>

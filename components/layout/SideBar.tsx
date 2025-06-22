@@ -68,6 +68,12 @@ const navItems = {
       exact: false,
     },
     {
+      href: "/dashboard/client/labour",
+      label: "Labour Profiles",
+      icon: User,
+      exact: false,
+    },
+    {
       href: "/dashboard/client/trackers",
       label: "Recruitment Trackers",
       icon: BarChart2,

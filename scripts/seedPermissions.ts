@@ -1,5 +1,5 @@
 // scripts/seedPermissions.ts
-import { applyExtras } from "@/lib/seed/seedExtras";
+import { seedLabourProfiles } from "@/lib/seed/labourProfiles";
 import { seedDatabase } from "../lib/seed/seed";
 
 (async () => {

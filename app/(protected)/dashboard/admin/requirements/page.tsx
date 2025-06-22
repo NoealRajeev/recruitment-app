@@ -6,10 +6,10 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
-import { ExperienceLevel, TicketType } from "@/lib/generated/prisma";
 import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import { RequirementStatus, ContractDuration } from "@/lib/generated/prisma";
 
-interface Company {
+interface Client {
   id: string;
   companyName: string;
   user: {
@@ -31,32 +31,44 @@ interface JobRole {
   title: string;
   quantity: number;
   nationality: string;
-  salary: string;
+  basicSalary: number;
   salaryCurrency: string;
-  startDate: string;
-  contractDuration: string;
+  startDate: Date;
+  contractDuration: ContractDuration | null;
+  foodAllowance: number | null;
+  foodProvidedByCompany: boolean;
+  housingAllowance: number | null;
+  housingProvidedByCompany: boolean;
+  transportationAllowance: number | null;
+  transportationProvidedByCompany: boolean;
+  mobileAllowance: number | null;
+  mobileProvidedByCompany: boolean;
+  natureOfWorkAllowance: number | null;
+  otherAllowance: number | null;
+  healthInsurance: string;
+  ticketFrequency: string[];
+  workLocations: string[];
+  previousExperience: string[];
+  totalExperienceYears: number | null;
+  preferredAge: number | null;
+  languageRequirements: string[];
+  specialRequirements: string | null;
+  assignedAgencyId: string | null;
+  agencyStatus: RequirementStatus | null;
+  assignedAgency?: {
+    agencyName: string;
+  } | null;
 }
 
 interface Requirement {
   id: string;
-  projectLocation: string;
-  startDate: string | null;
-  contractDuration: string | null;
-  languageRequirements: string[];
-  minExperience: ExperienceLevel | null;
-  maxAge: number | null;
-  specialNotes: string | null;
-  ticketType: TicketType | null;
-  ticketProvided: boolean;
-  status: string;
+  status: RequirementStatus;
+  createdAt: Date;
+  updatedAt: Date;
   jobRoles: JobRole[];
-  createdAt: string;
-  client?: {
+  client: {
+    id: string;
     companyName: string;
-    fullName: string;
-    jobTitle: string;
-    email: string;
-    phone: string;
   };
 }
 
@@ -67,6 +79,26 @@ interface RequirementSection {
     value: string | number;
   }[];
   hasActions?: boolean;
+  id: string;
+  foodProvidedByCompany: boolean;
+  foodAllowance: number | null;
+  housingProvidedByCompany: boolean;
+  housingAllowance: number | null;
+  transportationProvidedByCompany: boolean;
+  transportationAllowance: number | null;
+  mobileProvidedByCompany: boolean;
+  mobileAllowance: number | null;
+  natureOfWorkAllowance: number | null;
+  otherAllowance: number | null;
+  salaryCurrency: string;
+  workLocations: string[];
+  previousExperience: string[];
+  languageRequirements: string[];
+  healthInsurance: string;
+  ticketFrequency: string[];
+  totalExperienceYears: number | null;
+  preferredAge: number | null;
+  specialRequirements: string | null;
 }
 
 interface ForwardingJobRole {
@@ -85,28 +117,17 @@ interface ForwardRequirementModalProps {
   requirement: Requirement | undefined;
   agencies: Agency[];
   onForward: (assignments: ForwardingJobRole[]) => Promise<void>;
+  jobRoleId?: string;
 }
 
-const experienceLevelMap: Record<string, string> = {
-  FRESH: "Fresh",
+const contractDurationMap: Record<ContractDuration, string> = {
+  ONE_MONTH: "1 Month",
+  THREE_MONTHS: "3 Months",
+  SIX_MONTHS: "6 Months",
   ONE_YEAR: "1 Year",
   TWO_YEARS: "2 Years",
   THREE_YEARS: "3 Years",
-  FOUR_YEARS: "4 Years",
   FIVE_PLUS_YEARS: "5+ Years",
-};
-
-const ticketTypeMap: Record<string, string> = {
-  ONE_WAY: "One Way",
-  TWO_WAY: "Two Way",
-  NONE: "None",
-};
-
-const contractDurationMap: Record<string, string> = {
-  ONE_YEAR: "1 Year",
-  TWO_YEARS: "2 Years",
-  THREE_YEARS: "3 Years",
-  UNLIMITED: "Unlimited",
 };
 
 const ForwardRequirementModal = ({
@@ -115,6 +136,7 @@ const ForwardRequirementModal = ({
   requirement,
   agencies,
   onForward,
+  jobRoleId,
 }: ForwardRequirementModalProps) => {
   const [mode, setMode] = useState<"SINGLE" | "SPLIT">("SINGLE");
   const [selectedAgency, setSelectedAgency] = useState<string>("");
@@ -124,6 +146,8 @@ const ForwardRequirementModal = ({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+
+  const isSingleRoleForward = !!jobRoleId;
 
   const allRolesAssigned = useMemo(() => {
     if (mode !== "SPLIT") return true;
@@ -135,7 +159,11 @@ const ForwardRequirementModal = ({
 
   useEffect(() => {
     if (requirement) {
-      const initialJobRoles: ForwardingJobRole[] = requirement.jobRoles.map(
+      const rolesToForward = isSingleRoleForward
+        ? requirement.jobRoles.filter((role) => role.id === jobRoleId)
+        : requirement.jobRoles;
+
+      const initialJobRoles: ForwardingJobRole[] = rolesToForward.map(
         (role) => ({
           id: role.id,
           title: role.title,
@@ -146,12 +174,12 @@ const ForwardRequirementModal = ({
       setJobRoles(initialJobRoles);
 
       const expandedState: Record<string, boolean> = {};
-      requirement.jobRoles.forEach((role) => {
+      rolesToForward.forEach((role) => {
         expandedState[role.id] = false;
       });
       setExpandedRoles(expandedState);
     }
-  }, [requirement]);
+  }, [requirement, jobRoleId, isSingleRoleForward]);
 
   useEffect(() => {
     if (agencies.length > 0 && mode === "SINGLE") {
@@ -238,6 +266,23 @@ const ForwardRequirementModal = ({
             quantity: Math.max(0, quantity),
           };
           return { ...role, forwarded: newForwarded };
+        }
+        return role;
+      })
+    );
+  };
+
+  const handleSingleModeQuantityChange = (
+    jobRoleId: string,
+    quantity: number
+  ) => {
+    setJobRoles((prev) =>
+      prev.map((role) => {
+        if (role.id === jobRoleId) {
+          return {
+            ...role,
+            originalQuantity: Math.max(0, quantity),
+          };
         }
         return role;
       })
@@ -341,7 +386,7 @@ const ForwardRequirementModal = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="Forward Requirement"
+      title={`Forward ${isSingleRoleForward ? "Job Role" : "Requirement"}`}
       size="3xl"
       showFooter
       onConfirm={handleSubmit}
@@ -392,11 +437,29 @@ const ForwardRequirementModal = ({
               <div className="border rounded-lg divide-y">
                 {jobRoles.map((role) => (
                   <div key={role.id} className="p-4">
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center mb-2">
                       <span className="font-medium">{role.title}</span>
                       <span className="text-gray-600">
-                        Quantity: {role.originalQuantity}
+                        Original Requirement: {role.originalQuantity}
                       </span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <label className="text-sm text-gray-600">
+                        Forward Quantity:
+                      </label>
+                      <Input
+                        type="number"
+                        min="0"
+                        value={role.originalQuantity}
+                        onChange={(e) => {
+                          const newQuantity = Math.max(
+                            0,
+                            parseInt(e.target.value) || 0
+                          );
+                          handleSingleModeQuantityChange(role.id, newQuantity);
+                        }}
+                        className="w-24"
+                      />
                     </div>
                   </div>
                 ))}
@@ -522,13 +585,16 @@ const ForwardRequirementModal = ({
 
 export default function Requirements() {
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
-  const [companies, setCompanies] = useState<Company[]>([]);
+  const [companies, setCompanies] = useState<Client[]>([]);
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [currentRequirementIndex, setCurrentRequirementIndex] = useState(0);
   const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [loadingRequirements, setLoadingRequirements] = useState(true);
   const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
+  const [forwardingJobRoleId, setForwardingJobRoleId] = useState<string | null>(
+    null
+  );
   const { toast } = useToast();
 
   const currentRequirement = requirements[currentRequirementIndex];
@@ -575,7 +641,10 @@ export default function Requirements() {
       try {
         setLoadingRequirements(true);
         const response = await fetch(
-          `/api/admin/requirements?clientId=${companyId}`
+          `/api/requirements?clientId=${companyId}&status=SUBMITTED`,
+          {
+            credentials: "include",
+          }
         );
 
         if (!response.ok) {
@@ -603,15 +672,14 @@ export default function Requirements() {
   );
 
   const updateRequirementStatus = useCallback(
-    async (requirementId: string, status: "APPROVED" | "REJECTED") => {
+    async (requirementId: string, status: RequirementStatus) => {
       try {
-        const response = await fetch(`/api/admin/requirements`, {
-          method: "PUT",
+        const response = await fetch(`/api/requirements/${requirementId}`, {
+          method: "PATCH",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            id: requirementId,
             status,
           }),
         });
@@ -651,27 +719,16 @@ export default function Requirements() {
         if (!currentRequirement) return;
 
         const forwardedRoles = assignments.flatMap((role) =>
-          role.forwarded
-            .filter((a) => a.quantity > 0)
-            .map((a) => ({
-              id: role.id,
-              title: role.title,
-              quantity: role.originalQuantity,
-              nationality: "",
-              salary: "",
-              salaryCurrency: "QAR",
-              startDate: "",
-              contractDuration: "",
-              agencyId: a.agencyId,
-              forwardedQuantity: a.quantity,
-            }))
+          role.forwarded.map((a) => ({
+            jobRoleId: role.id,
+            agencyId: a.agencyId,
+            quantity: a.quantity,
+          }))
         );
 
-        if (forwardedRoles.length === 0) {
-          throw new Error("No valid assignments to forward");
-        }
+        const isForwardingAll = !forwardingJobRoleId;
 
-        const response = await fetch(`/api/admin/requirements/forward`, {
+        const response = await fetch(`/api/requirements/forward`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -679,6 +736,7 @@ export default function Requirements() {
           body: JSON.stringify({
             requirementId: currentRequirement.id,
             forwardedRoles,
+            forwardAll: isForwardingAll,
           }),
         });
 
@@ -689,9 +747,10 @@ export default function Requirements() {
 
         toast({
           type: "success",
-          message: "Requirement forwarded successfully",
+          message: `Requirement ${isForwardingAll ? "" : "job role "}forwarded successfully`,
         });
         setIsForwardModalOpen(false);
+        setForwardingJobRoleId(null);
         if (selectedCompany) {
           fetchRequirements(selectedCompany);
         }
@@ -707,7 +766,13 @@ export default function Requirements() {
         throw error;
       }
     },
-    [currentRequirement, toast, selectedCompany, fetchRequirements]
+    [
+      currentRequirement,
+      toast,
+      selectedCompany,
+      fetchRequirements,
+      forwardingJobRoleId,
+    ]
   );
 
   useEffect(() => {
@@ -777,89 +842,200 @@ export default function Requirements() {
     );
   };
 
-  const handleReject = async (requirementId: string) => {
+  const handleReject = async (requirementId: string, jobRoleId?: string) => {
     if (confirm("Are you sure you want to reject this requirement?")) {
       await updateRequirementStatus(requirementId, "REJECTED");
     }
   };
 
-  const handleForwardClick = () => {
+  const handleForwardClick = (jobRoleId?: string) => {
     if (currentRequirement) {
+      setForwardingJobRoleId(jobRoleId || null);
       setIsForwardModalOpen(true);
     }
   };
 
   const requirementSections: RequirementSection[] =
     currentRequirement?.jobRoles.map((role) => ({
+      id: role.id,
       title: role.title,
       fields: [
         { label: "Quantity", value: role.quantity },
         { label: "Nationality", value: role.nationality },
-        { label: "Salary", value: `${role.salary} ${role.salaryCurrency}` },
+        {
+          label: "Salary",
+          value: `${role.basicSalary} ${role.salaryCurrency}`,
+        },
         {
           label: "Start Date",
-          value: role.startDate
-            ? format(new Date(role.startDate), "dd MMM yyyy")
-            : "Not specified",
+          value: format(new Date(role.startDate), "dd MMM yyyy"),
         },
         {
           label: "Duration",
           value: role.contractDuration
-            ? contractDurationMap[role.contractDuration] ||
-              role.contractDuration
+            ? contractDurationMap[role.contractDuration]
             : "Not specified",
         },
       ],
       hasActions: true,
+      foodProvidedByCompany: role.foodProvidedByCompany,
+      foodAllowance: role.foodAllowance,
+      housingProvidedByCompany: role.housingProvidedByCompany,
+      housingAllowance: role.housingAllowance,
+      transportationProvidedByCompany: role.transportationProvidedByCompany,
+      transportationAllowance: role.transportationAllowance,
+      mobileProvidedByCompany: role.mobileProvidedByCompany,
+      mobileAllowance: role.mobileAllowance,
+      natureOfWorkAllowance: role.natureOfWorkAllowance,
+      otherAllowance: role.otherAllowance,
+      salaryCurrency: role.salaryCurrency,
+      workLocations: role.workLocations,
+      previousExperience: role.previousExperience,
+      languageRequirements: role.languageRequirements,
+      healthInsurance: role.healthInsurance,
+      ticketFrequency: role.ticketFrequency,
+      totalExperienceYears: role.totalExperienceYears,
+      preferredAge: role.preferredAge,
+      specialRequirements: role.specialRequirements,
     })) || [];
 
-  const additionalInfo = [
-    {
-      label: "Language Requirements",
-      value:
-        currentRequirement?.languageRequirements?.join(", ") || "Not specified",
-    },
-    {
-      label: "Minimum Experience",
-      value:
-        (currentRequirement?.minExperience &&
-          experienceLevelMap[currentRequirement.minExperience]) ||
-        "Not specified",
-    },
-    {
-      label: "Maximum Age",
-      value: currentRequirement?.maxAge?.toString() || "Not specified",
-    },
-    {
-      label: "Ticket Type",
-      value:
-        (currentRequirement?.ticketType &&
-          ticketTypeMap[currentRequirement.ticketType]) ||
-        "Not specified",
-    },
-    {
-      label: "Ticket Provided",
-      value: currentRequirement?.ticketProvided ? "Yes" : "No",
-    },
-    {
-      label: "Special Requirements",
-      value: currentRequirement?.specialNotes || "None",
-    },
-  ];
-
   const RequirementSection = ({ section }: { section: RequirementSection }) => (
-    <div className="p-6">
-      <div>
-        <h2 className="text-xl font-semibold text-[#150B3D] mb-4">
+    <div className="p-6 rounded-lg shadow-sm mb-4">
+      <div className="flex justify-between items-start mb-4">
+        <h2 className="text-xl font-semibold text-[#150B3D]">
           {section.title}
         </h2>
-        <div className="space-y-4">
-          {section.fields.map((field, index) => (
-            <div key={index} className="flex items-center justify-between">
-              <p className="text-[#150B3D]/70">{field.label}:</p>
-              <p className="text-[#150B3D] font-medium">{field.value}</p>
-            </div>
-          ))}
+        <div className="flex space-x-2">
+          <Button onClick={() => handleForwardClick(section.id)} size="sm">
+            Forward
+          </Button>
+          <Button
+            onClick={() => handleReject(currentRequirement.id, section.id)}
+            variant="outline"
+            size="sm"
+          >
+            Reject
+          </Button>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {section.fields.map((field, index) => (
+          <div key={index} className="flex flex-col">
+            <p className="text-sm text-[#150B3D]/70">{field.label}:</p>
+            <p className="text-[#150B3D] font-medium">{field.value}</p>
+          </div>
+        ))}
+        <div className="flex flex-col">
+          <p className="text-sm text-[#150B3D]/70">Total Experience:</p>
+          <p className="text-[#150B3D] font-medium">
+            {section.totalExperienceYears || "Not specified"} years
+          </p>
+        </div>
+        <div className="flex flex-col">
+          <p className="text-sm text-[#150B3D]/70">Preferred Age:</p>
+          <p className="text-[#150B3D] font-medium">
+            {section.preferredAge || "Not specified"}
+          </p>
+        </div>
+        <div className="flex flex-col">
+          <p className="text-sm text-[#150B3D]/70">Ticket Frequency:</p>
+          <p className="text-[#150B3D] font-medium">
+            {section.ticketFrequency?.join(", ") || "Not specified"}
+          </p>
+        </div>
+        <div className="flex flex-col">
+          <p className="text-sm text-[#150B3D]/70">Special Requirements:</p>
+          <p className="text-[#150B3D] font-medium">
+            {section.specialRequirements || "None"}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4 pt-4 border-t">
+        <h3 className="font-medium text-[#150B3D] mb-2">
+          Allowances & Benefits
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col">
+            <p className="text-sm text-[#150B3D]/70">Food:</p>
+            <p className="text-[#150B3D] font-medium">
+              {section.foodProvidedByCompany
+                ? "Provided by company"
+                : `${section.foodAllowance} ${section.salaryCurrency}`}
+            </p>
+          </div>
+          <div className="flex flex-col">
+            <p className="text-sm text-[#150B3D]/70">Housing:</p>
+            <p className="text-[#150B3D] font-medium">
+              {section.housingProvidedByCompany
+                ? "Provided by company"
+                : `${section.housingAllowance} ${section.salaryCurrency}`}
+            </p>
+          </div>
+          <div className="flex flex-col">
+            <p className="text-sm text-[#150B3D]/70">Transportation:</p>
+            <p className="text-[#150B3D] font-medium">
+              {section.transportationProvidedByCompany
+                ? "Provided by company"
+                : `${section.transportationAllowance} ${section.salaryCurrency}`}
+            </p>
+          </div>
+          <div className="flex flex-col">
+            <p className="text-sm text-[#150B3D]/70">Mobile:</p>
+            <p className="text-[#150B3D] font-medium">
+              {section.mobileProvidedByCompany
+                ? "Provided by company"
+                : `${section.mobileAllowance} ${section.salaryCurrency}`}
+            </p>
+          </div>
+          <div className="flex flex-col">
+            <p className="text-sm text-[#150B3D]/70">
+              Nature of Work Allowance:
+            </p>
+            <p className="text-[#150B3D] font-medium">
+              {section.natureOfWorkAllowance
+                ? `${section.natureOfWorkAllowance} ${section.salaryCurrency}`
+                : "None"}
+            </p>
+          </div>
+          <div className="flex flex-col">
+            <p className="text-sm text-[#150B3D]/70">Other Allowance:</p>
+            <p className="text-[#150B3D] font-medium">
+              {section.otherAllowance
+                ? `${section.otherAllowance} ${section.salaryCurrency}`
+                : "None"}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 pt-4 border-t">
+        <h3 className="font-medium text-[#150B3D] mb-2">Requirements</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="flex flex-col">
+            <p className="text-sm text-[#150B3D]/70">Work Locations:</p>
+            <p className="text-[#150B3D] font-medium">
+              {section.workLocations?.join(", ") || "Not specified"}
+            </p>
+          </div>
+          <div className="flex flex-col">
+            <p className="text-sm text-[#150B3D]/70">Previous Experience:</p>
+            <p className="text-[#150B3D] font-medium">
+              {section.previousExperience?.join(", ") || "Not specified"}
+            </p>
+          </div>
+          <div className="flex flex-col">
+            <p className="text-sm text-[#150B3D]/70">Language Requirements:</p>
+            <p className="text-[#150B3D] font-medium">
+              {section.languageRequirements?.join(", ") || "Not specified"}
+            </p>
+          </div>
+          <div className="flex flex-col">
+            <p className="text-sm text-[#150B3D]/70">Health Insurance:</p>
+            <p className="text-[#150B3D] font-medium">
+              {section.healthInsurance || "Not specified"}
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -916,11 +1092,19 @@ export default function Requirements() {
         ) : currentRequirement ? (
           <>
             <div className="bg-[#EDDDF3]/50 rounded-xl p-6 shadow-sm mb-6">
-              <div className="flex justify-between items-center">
-                <h1 className="text-2xl font-bold text-[#150B3D]">
-                  {companies.find((c) => c.id === selectedCompany)
-                    ?.companyName || "Company"}
-                </h1>
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h1 className="text-2xl font-bold text-[#150B3D]">
+                    {currentRequirement.client.companyName}
+                  </h1>
+                  <p className="text-[#150B3D]/80">
+                    Submitted:{" "}
+                    {format(
+                      new Date(currentRequirement.createdAt),
+                      "dd MMM yyyy"
+                    )}
+                  </p>
+                </div>
                 <div className="flex space-x-2">
                   <Button
                     onClick={handlePrevRequirement}
@@ -943,53 +1127,25 @@ export default function Requirements() {
                   </span>
                 </div>
               </div>
+              <div className="space-y-4">
+                {requirementSections.map((section, index) => (
+                  <RequirementSection key={index} section={section} />
+                ))}
+              </div>
 
-              <div className="flex justify-end space-x-4 mt-4">
+              <div className="flex justify-end space-x-4 mt-6 pt-4 border-t">
                 <Button
-                  onClick={handleForwardClick}
+                  onClick={() => handleForwardClick()}
                   className="bg-[#150B3D] text-white py-2 px-6 rounded-md hover:bg-[#150B3D]/90 transition-colors"
                 >
-                  Forward Requirement
+                  Forward Entire Requirement
                 </Button>
                 <Button
                   onClick={() => handleReject(currentRequirement.id)}
                   className="bg-red-600 text-white py-2 px-6 rounded-md hover:bg-red-700 transition-colors"
                 >
-                  Reject Requirement
+                  Reject Entire Requirement
                 </Button>
-              </div>
-
-              <div className="my-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {requirementSections.map((section, index) => (
-                    <div
-                      key={index}
-                      className={`
-            relative
-            ${index % 3 !== 2 ? "lg:after:block" : "lg:after:hidden"}
-            ${index % 2 !== 1 ? "md:after:block" : "md:after:hidden"}
-            after:absolute after:top-1/2 after:translate-y-[-50%] after:right-0
-            after:w-px after:bg-[#635372]/37 after:h-3/4
-          `}
-                    >
-                      <RequirementSection section={section} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-[#EDDDF3]/50 rounded-xl p-6 shadow-sm">
-              <h2 className="text-xl font-semibold text-[#150B3D] mb-4">
-                Additional Information
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-sm">
-                {additionalInfo.map((info, index) => (
-                  <div key={index} className="flex flex-col">
-                    <p className="text-[#150B3D]/70">{info.label}:</p>
-                    <p className="text-[#150B3D] font-medium">{info.value}</p>
-                  </div>
-                ))}
               </div>
             </div>
           </>
@@ -1003,12 +1159,17 @@ export default function Requirements() {
           </div>
         )}
       </div>
+
       <ForwardRequirementModal
         isOpen={isForwardModalOpen}
-        onClose={() => setIsForwardModalOpen(false)}
+        onClose={() => {
+          setIsForwardModalOpen(false);
+          setForwardingJobRoleId(null);
+        }}
         requirement={currentRequirement}
         agencies={agencies}
         onForward={forwardRequirementToAgencies}
+        jobRoleId={forwardingJobRoleId || undefined}
       />
     </div>
   );

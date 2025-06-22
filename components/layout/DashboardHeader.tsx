@@ -1,9 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { signOut } from "next-auth/react";
 import { UserRole } from "@prisma/client";
-import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Bell,
@@ -14,15 +15,17 @@ import {
   User,
 } from "lucide-react";
 
+interface DashboardHeaderProps {
+  role: UserRole;
+  avatarUrl: string;
+  userName: string;
+}
+
 export default function DashboardHeader({
   role,
   avatarUrl,
   userName,
-}: {
-  role: UserRole;
-  avatarUrl: string;
-  userName: string;
-}) {
+}: DashboardHeaderProps) {
   const pathname = usePathname();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -118,16 +121,18 @@ export default function DashboardHeader({
               >
                 <div className="w-10 h-10 rounded-full bg-gray-300 overflow-hidden">
                   {avatarUrl ? (
-                    <Image
-                      src={avatarUrl}
-                      alt="User avatar"
-                      width={40}
-                      height={40}
-                      className="object-cover"
-                    />
+                    <div className="relative h-10 w-10 rounded-full overflow-hidden border-2 border-purple-100">
+                      <img
+                        src={avatarUrl}
+                        alt="User profile"
+                        className="object-cover"
+                      />
+                    </div>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <User className="h-5 w-5" />
+                    <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
+                      <span className="text-purple-700 font-medium">
+                        {userName?.charAt(0).toUpperCase()}
+                      </span>
                     </div>
                   )}
                 </div>

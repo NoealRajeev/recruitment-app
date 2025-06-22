@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
+import { AuditAction } from "@/lib/generated/prisma";
 
 export async function PUT(
   request: Request,
@@ -37,7 +38,7 @@ export async function PUT(
 
       await tx.auditLog.create({
         data: {
-          action: "ACCOUNT_RECOVERED",
+          action: AuditAction.AGENCY_UPDATE,
           entityType: "AGENCY",
           entityId: params.id,
           performedById: session.user.id,

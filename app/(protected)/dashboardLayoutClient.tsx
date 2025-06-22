@@ -43,7 +43,7 @@ export default function DashboardLayoutClient({
         />
 
         {/* Main content container */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto px-6 pb-6">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto px-6">
           {isValidRoute ? (
             children
           ) : (

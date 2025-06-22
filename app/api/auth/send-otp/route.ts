@@ -1,5 +1,8 @@
+// app/api/auth/send-otp/route.ts
 import { NextResponse } from "next/server";
-import { saveOtp } from "@/lib/otp-store";
+import { saveOtp, canResendOtp } from "@/lib/otp-store";
+import { getOtpEmailTemplate } from "@/lib/utils/email-templates";
+import { sendTemplateEmail } from "@/lib/utils/email-service";
 
 export async function POST(req: Request) {
   const body = await req.json();
@@ -13,11 +16,23 @@ export async function POST(req: Request) {
   }
 
   try {
+    // Check if we can resend
+    if (!canResendOtp(value)) {
+      return NextResponse.json(
+        { message: "Please wait before requesting a new OTP" },
+        { status: 429 }
+      );
+    }
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    saveOtp(value, otp);
 
-    saveOtp(value, otp); // Save using value as key (email/phone)
-
-    console.log(`📨 [MOCK OTP] OTP for ${type} (${value}): ${otp}`);
+    if (type === "email") {
+      const emailTemplate = getOtpEmailTemplate(otp);
+      await sendTemplateEmail(emailTemplate, value);
+    } else {
+      console.log(`📨 [MOCK OTP] OTP for ${type} (${value}): ${otp}`);
+    }
 
     return NextResponse.json(
       { message: `OTP sent to your ${type}` },
@@ -26,9 +41,7 @@ export async function POST(req: Request) {
   } catch (error) {
     return NextResponse.json(
       {
-        message:
-          "Error sending OTP: " +
-          (error instanceof Error ? error.message : "Unknown error"),
+        message: error instanceof Error ? error.message : "Failed to send OTP",
       },
       { status: 500 }
     );

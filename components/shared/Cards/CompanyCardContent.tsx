@@ -1,5 +1,4 @@
 // components/shared/Cards/CompanyCardContent.tsx;
-import Image from "next/image";
 import { Card, CardContent } from "@/components/shared/Card";
 import { MoreVertical } from "lucide-react";
 
@@ -30,7 +29,7 @@ export default function CompanyCardContent({
         {/* Logo */}
         <div className="relative h-15 w-15 rounded-full overflow-hidden">
           {logoUrl ? (
-            <Image src={logoUrl} alt={companyName} fill />
+            <img src={logoUrl} alt={companyName} />
           ) : (
             <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
               <span className="text-lg font-bold text-gray-500">

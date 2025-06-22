@@ -54,19 +54,6 @@ export async function DELETE(
         },
       });
 
-      await tx.notification.create({
-        data: {
-          title: "Account Deletion Scheduled",
-          message: `Your account has been marked for deletion and will be removed on ${deleteAt.toLocaleDateString()}.`,
-          type: "ACCOUNT_DELETION",
-          recipientId: updatedAgency.user.id,
-          metadata: {
-            agencyId: id, // Use the destructured id
-            deleteAt: deleteAt.toISOString(),
-          },
-        },
-      });
-
       return updatedAgency;
     });
 

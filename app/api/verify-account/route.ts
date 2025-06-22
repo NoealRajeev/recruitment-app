@@ -1,28 +1,75 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { saveFileLocally } from "@/lib/local-storage";
-import { AuditAction, NotificationType, UserRole } from "@prisma/client";
+import { getAgencyDocumentsSubmittedEmail } from "@/lib/utils/email-templates";
+import path from "path";
+import { promises as fs } from "fs";
+import {
+  AccountStatus,
+  AuditAction,
+  DocumentCategory,
+  DocumentType,
+  UserRole,
+} from "@/lib/generated/prisma";
+import { sendTemplateEmail } from "@/lib/utils/email-service";
+
+async function saveFileToDisk(file: File, userId: string): Promise<string> {
+  // Create uploads directory if it doesn't exist
+  const uploadsDir = path.join(
+    process.cwd(),
+    "public",
+    "uploads",
+    "agency",
+    userId
+  );
+  await fs.mkdir(uploadsDir, { recursive: true });
+
+  // Convert file to buffer
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+
+  // Generate unique filename
+  const fileExt = path.extname(file.name);
+  const fileName = `${Date.now()}-${file.name.replace(fileExt, "")}${fileExt}`;
+  const filePath = path.join(uploadsDir, fileName);
+
+  // Save file
+  await fs.writeFile(filePath, buffer);
+
+  // Return relative path for database storage
+  return `/uploads/agency/${userId}/${fileName}`;
+}
 
 export async function POST(request: Request) {
   const formData = await request.formData();
   const email = formData.get("email") as string;
   const userRole = formData.get("userRole") as UserRole;
 
-  // Common documents
+  // Agency documents
   const licenseFile = formData.get("licenseFile") as File | null;
-  const otherDocuments = formData.getAll("otherDocuments") as File[];
-
-  // Agency specific documents
   const insuranceFile = formData.get("insuranceFile") as File | null;
   const idProof = formData.get("idProof") as File | null;
   const addressProof = formData.get("addressProof") as File | null;
-
-  // Client specific documents
-  const crFile = formData.get("crFile") as File | null;
+  const otherDocuments = formData.getAll("otherDocuments") as File[];
 
   if (!email || !userRole) {
     return NextResponse.json(
       { error: "Email and user role are required" },
+      { status: 400 }
+    );
+  }
+
+  // Validate we're only processing agency submissions
+  if (userRole !== UserRole.RECRUITMENT_AGENCY) {
+    return NextResponse.json(
+      { error: "Only agency document submissions are currently supported" },
+      { status: 400 }
+    );
+  }
+
+  // Validate required documents
+  if (!licenseFile || !insuranceFile || !idProof || !addressProof) {
+    return NextResponse.json(
+      { error: "All required documents must be provided" },
       { status: 400 }
     );
   }
@@ -34,8 +81,7 @@ export async function POST(request: Request) {
       const user = await tx.user.findUnique({
         where: { email },
         include: {
-          agencyProfile: userRole === UserRole.RECRUITMENT_AGENCY,
-          clientProfile: userRole === UserRole.CLIENT_ADMIN,
+          agencyProfile: true,
         },
       });
 
@@ -43,102 +89,67 @@ export async function POST(request: Request) {
         throw new Error("User not found");
       }
 
-      // Verify user role matches the expected role
-      if (user.role !== userRole) {
-        throw new Error("User role doesn't match document type");
+      if (user.role !== UserRole.RECRUITMENT_AGENCY) {
+        throw new Error("User is not registered as an agency");
       }
 
-      // 2. Process and save files based on user role
-      const uploadFile = async (file: File | null, type: string) => {
-        if (!file) return null;
-        const url = await saveFileLocally(file);
-        return { type, url, name: file.name };
+      if (!user.agencyProfile) {
+        throw new Error("Agency profile not found");
+      }
+
+      // 2. Process and save files
+      const processDocument = async (file: File, type: DocumentType) => {
+        const url = await saveFileToDisk(file, user.id);
+
+        await tx.document.create({
+          data: {
+            ownerId: user.id,
+            type,
+            url,
+            status: AccountStatus.NOT_VERIFIED,
+            category:
+              type === DocumentType.OTHER
+                ? DocumentCategory.SUPPORTING
+                : DocumentCategory.IMPORTANT,
+          },
+        });
       };
 
-      const uploadedFiles = await Promise.all([
-        // Common documents
-        uploadFile(licenseFile, "LICENSE"),
-        ...otherDocuments.map((file) => uploadFile(file, "OTHER")),
-
-        // Role-specific documents
-        ...(userRole === UserRole.RECRUITMENT_AGENCY
-          ? [
-              uploadFile(insuranceFile, "INSURANCE"),
-              uploadFile(idProof, "ID_PROOF"),
-              uploadFile(addressProof, "ADDRESS_PROOF"),
-            ]
-          : []),
-        ...(userRole === UserRole.CLIENT_ADMIN
-          ? [uploadFile(crFile, "COMPANY_REGISTRATION")]
-          : []),
+      // Process all documents in parallel
+      await Promise.all([
+        processDocument(licenseFile, DocumentType.LICENSE),
+        processDocument(insuranceFile, DocumentType.INSURANCE),
+        processDocument(idProof, DocumentType.ID_PROOF),
+        processDocument(addressProof, DocumentType.ADDRESS_PROOF),
+        ...otherDocuments.map((file) =>
+          processDocument(file, DocumentType.OTHER)
+        ),
       ]);
 
-      // 3. Filter out null values and create documents
-      const validFiles = uploadedFiles.filter(Boolean) as {
-        type: string;
-        url: string;
-        name?: string;
-      }[];
-
-      if (userRole === UserRole.RECRUITMENT_AGENCY && user.agencyProfile) {
-        await Promise.all(
-          validFiles.map((file) =>
-            tx.agencyDocument.create({
-              data: {
-                type: file.type as any,
-                url: file.url,
-                name: file.name,
-                agencyId: user.agencyProfile!.id,
-              },
-            })
-          )
-        );
-      } else if (userRole === UserRole.CLIENT_ADMIN && user.clientProfile) {
-        await Promise.all(
-          validFiles.map((file) =>
-            tx.clientDocument.create({
-              data: {
-                type: file.type as any,
-                url: file.url,
-                name: file.name,
-                clientId: user.clientProfile!.id,
-              },
-            })
-          )
-        );
-      }
-
-      // 4. Determine new status based on user role
-      const newStatus =
-        userRole === UserRole.RECRUITMENT_AGENCY
-          ? "PENDING_REVIEW"
-          : "SUBMITTED";
-
-      // 5. Update user status
+      // 3. Update user status
       const updatedUser = await tx.user.update({
         where: { id: user.id },
-        data: { status: newStatus },
+        data: { status: AccountStatus.NOT_VERIFIED },
         select: {
           id: true,
-          status: true,
-          email: true,
           name: true,
-          role: true,
+          email: true,
+          status: true,
+          agencyProfile: {
+            select: {
+              agencyName: true,
+            },
+          },
         },
       });
 
-      // 5. Create audit log
-      const auditAction =
-        userRole === UserRole.RECRUITMENT_AGENCY
-          ? AuditAction.AGENCY_VERIFIED
-          : AuditAction.CLIENT_VERIFIED;
-
+      // 4. Create audit log
       await tx.auditLog.create({
         data: {
-          action: auditAction,
+          action: AuditAction.AGENCY_UPDATE,
           entityType: "USER",
           entityId: user.id,
-          description: "Submitted verification documents",
+          description: "Submitted agency verification documents",
           performedById: user.id,
           oldData: { status: user.status },
           newData: { status: "SUBMITTED" },
@@ -146,45 +157,17 @@ export async function POST(request: Request) {
         },
       });
 
-      // 6. Create notification for admin
-      const adminUsers = await tx.user.findMany({
-        where: {
-          role: "RECRUITMENT_ADMIN",
-        },
-        select: {
-          id: true,
-        },
-      });
-
-      await Promise.all(
-        adminUsers.map((admin) =>
-          tx.notification.create({
-            data: {
-              title: "New Verification Request",
-              message: `${user.name} (${user.email}) has submitted verification documents`,
-              type: NotificationType.ACCOUNT,
-              recipientId: admin.id,
-              metadata: {
-                userId: user.id,
-                ...(userRole === UserRole.RECRUITMENT_AGENCY &&
-                user.agencyProfile
-                  ? { agencyId: user.agencyProfile.id }
-                  : {}),
-                ...(userRole === UserRole.CLIENT_ADMIN && user.clientProfile
-                  ? { clientId: user.clientProfile.id }
-                  : {}),
-              },
-            },
-          })
-        )
+      // 6. Send confirmation email to agency
+      await sendTemplateEmail(
+        getAgencyDocumentsSubmittedEmail(user.name, "Findly"),
+        user.email
       );
-
       return updatedUser;
     });
 
     return NextResponse.json({ success: true, user: result });
   } catch (error) {
-    console.error("Verification error:", error);
+    console.error("Document submission error:", error);
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : "Internal server error",

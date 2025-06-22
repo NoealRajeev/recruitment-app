@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import "../(public)/globals.css";
 import ProvidersWrapper from "@/context/ProvidersWrapper";
 import { UserRole } from "@/lib/generated/prisma";
+
 export default async function DashboardLayout({
   children,
 }: {
@@ -23,7 +24,7 @@ export default async function DashboardLayout({
         <ProvidersWrapper
           session={session}
           role={session.user.role as UserRole}
-          avatarUrl={session.user.image || ""}
+          avatarUrl={session.user.profilePicture || ""}
           userName={session.user.name || ""}
         >
           {children}

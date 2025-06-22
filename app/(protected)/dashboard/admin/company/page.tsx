@@ -1,396 +1,363 @@
+// app/(protected)/dashboard/admin/company/page.tsx
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { Info, ArrowLeft, ArrowRight } from "lucide-react";
 import { useToast } from "@/context/toast-provider";
 import { updateCompanyStatus } from "@/lib/api/client";
 import CompanyCardContent from "@/components/shared/Cards/CompanyCardContent";
 import { Modal } from "@/components/ui/Modal";
-import { DocumentViewer } from "@/components/shared/DocumentViewer";
 import { Button } from "@/components/ui/Button";
-import { AccountStatus } from "@/lib/generated/prisma";
+import { AccountStatus, DocumentCategory } from "@/lib/generated/prisma";
+import { Badge, BadgeProps } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PDFViewer } from "@/components/shared/PDFViewer";
+import { FileIcon } from "lucide-react";
 
-interface ClientDocument {
+interface ClientUser {
   id: string;
-  type: string;
-  url: string;
-  verified: boolean;
-  createdAt: Date;
+  name: string;
+  email: string;
+  phone: string | null;
+  status: AccountStatus;
+  profilePicture?: string;
 }
 
 interface ClientWithUser {
   id: string;
   companyName: string;
   registrationNo: string | null;
-  companySector: string | null;
-  companySize: string | null;
+  companySector: string;
+  companySize: string;
   website: string | null;
-  designation: string | null;
-  image: string | null;
-  createdAt: Date | null;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    status: string;
-  };
-  requirements: {
-    id: string;
-  }[];
-  documents?: ClientDocument[];
+  address: string;
+  city: string;
+  country: string;
+  postalCode: string | null;
+  designation: string;
+  createdAt: string;
+  user: ClientUser;
 }
 
-export default function Company() {
-  const [pendingIndex, setPendingIndex] = useState(0);
-  const [verifiedIndex, setVerifiedIndex] = useState(0);
-  const [rejectionReason, setRejectionReason] = useState("");
-  const [showRejectInput, setShowRejectInput] = useState(false);
+interface ClientDocument {
+  id: string;
+  type: string;
+  url: string;
+  status: AccountStatus;
+  uploadedAt: string;
+  category: DocumentCategory;
+}
 
-  const [pendingCompanies, setPendingCompanies] = useState<ClientWithUser[]>(
-    []
-  );
-  const [verifiedCompanies, setVerifiedCompanies] = useState<ClientWithUser[]>(
-    []
-  );
-  const [submittedCompanies, setSubmittedCompanies] = useState<
-    ClientWithUser[]
-  >([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedCompany, setSelectedCompany] = useState<ClientWithUser | null>(
+export default function ClientReviewPage() {
+  const { toast } = useToast();
+  const [pendingClients, setPendingClients] = useState<ClientWithUser[]>([]);
+  const [verifiedClients, setVerifiedClients] = useState<ClientWithUser[]>([]);
+  const [selectedClient, setSelectedClient] = useState<ClientWithUser | null>(
     null
   );
-  const [companyDocuments, setCompanyDocuments] = useState<ClientDocument[]>(
-    []
-  );
+  const [clientDocuments, setClientDocuments] = useState<ClientDocument[]>([]);
+  const [documentsLoading, setDocumentsLoading] = useState(false);
+  const [documentsError, setDocumentsError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const router = useRouter();
-  const { toast } = useToast();
+  const [showRejectInput, setShowRejectInput] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [documentStatuses, setDocumentStatuses] = useState<
+    Record<string, AccountStatus>
+  >({});
 
-  const fetchCompanies = useCallback(async () => {
+  const fetchClients = useCallback(async () => {
     try {
       setLoading(true);
-      const [pendingRes, verifiedRes, submittedRes] = await Promise.all([
-        fetch("/api/clients?status=PENDING_REVIEW"),
-        fetch("/api/clients?status=VERIFIED"),
-        fetch("/api/clients?status=SUBMITTED"),
+      const [pendingRes, verifiedRes] = await Promise.all([
+        fetch(`/api/clients?status=NOT_VERIFIED`),
+        fetch(`/api/clients?status=VERIFIED`),
       ]);
 
-      if (!pendingRes.ok || !verifiedRes.ok || !submittedRes.ok) {
-        throw new Error("Failed to fetch companies");
+      if (!pendingRes.ok || !verifiedRes.ok) {
+        throw new Error("Failed to load clients");
       }
 
-      const [pendingData, verifiedData, submittedData] = await Promise.all([
+      const [pendingData, verifiedData] = await Promise.all([
         pendingRes.json(),
         verifiedRes.json(),
-        submittedRes.json(),
       ]);
 
-      // For submitted companies, fetch their documents
-      const submittedWithDocs = await Promise.all(
-        submittedData.map(async (client: ClientWithUser) => {
-          if (client.user.status === AccountStatus.SUBMITTED) {
-            const docsResponse = await fetch(
-              `/api/clients/${client.id}/documents`
-            );
-            if (docsResponse.ok) {
-              const documents = await docsResponse.json();
-              return { ...client, documents };
-            }
-          }
-          return client;
-        })
-      );
-
-      setPendingCompanies(pendingData);
-      setVerifiedCompanies(verifiedData);
-      setSubmittedCompanies(submittedWithDocs);
+      setPendingClients(pendingData);
+      setVerifiedClients(verifiedData);
     } catch (error) {
-      console.error("Error fetching companies:", error);
-      toast({
-        type: "error",
-        message: "Failed to load companies. Please try again.",
-      });
+      console.error(error);
+      toast({ type: "error", message: "Could not fetch clients." });
     } finally {
       setLoading(false);
     }
   }, [toast]);
 
-  const fetchCompanyDocuments = async (companyId: string) => {
+  useEffect(() => {
+    fetchClients();
+  }, [fetchClients]);
+
+  const fetchClientDocuments = async (clientId: string) => {
     try {
-      const response = await fetch(`/api/clients/${companyId}/documents`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch documents");
+      setDocumentsLoading(true);
+      setDocumentsError(null);
+      const res = await fetch(`/api/clients/${clientId}/documents`);
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
       }
-      const documents = await response.json();
-      setCompanyDocuments(documents);
+
+      const docs = await res.json();
+
+      if (!Array.isArray(docs)) {
+        throw new Error("Invalid documents format");
+      }
+
+      setClientDocuments(docs);
+
+      const statuses: Record<string, AccountStatus> = {};
+      docs.forEach((doc: ClientDocument) => {
+        statuses[doc.id] = doc.status;
+      });
+      setDocumentStatuses(statuses);
     } catch (error) {
       console.error("Error fetching documents:", error);
-      toast({
-        type: "error",
-        message: "Failed to load documents. Please try again.",
-      });
+      setDocumentsError(
+        error instanceof Error ? error.message : "Failed to load documents"
+      );
+    } finally {
+      setDocumentsLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchCompanies();
-  }, [fetchCompanies]);
+  const handleClientClick = (client: ClientWithUser) => {
+    setSelectedClient(client);
+    fetchClientDocuments(client.id);
+    setIsModalOpen(true);
+    setShowRejectInput(false);
+    setRejectionReason("");
+  };
 
-  const handleUpdateStatus = async (
-    clientId: string,
-    status: "VERIFIED" | "REJECTED" | "PENDING_SUBMISSION"
+  const handleDocumentStatusChange = (docId: string, status: AccountStatus) => {
+    setDocumentStatuses((prev) => ({
+      ...prev,
+      [docId]: status,
+    }));
+  };
+
+  // Check if all important documents are verified
+  const allImportantDocumentsVerified = clientDocuments.every((doc) => {
+    if (doc.category === DocumentCategory.IMPORTANT) {
+      return (
+        (documentStatuses[doc.id] || doc.status) === AccountStatus.VERIFIED
+      );
+    }
+    return true;
+  });
+
+  const handleStatusChange = async (
+    status: "VERIFIED" | "REJECTED" | "NOT_VERIFIED"
   ) => {
+    if (!selectedClient) return;
+
     try {
+      setIsUpdating(true);
       const reason =
         status === "VERIFIED"
-          ? "Approved by admin after review"
-          : "Rejected by admin after review";
+          ? "Approved by admin"
+          : rejectionReason || "Rejected by admin";
 
-      await updateCompanyStatus(clientId, status, reason, toast);
-
-      // Update local state
+      // First update individual document statuses if needed
       if (status === "VERIFIED") {
-        const updatedCompany = pendingCompanies.find((c) => c.id === clientId);
-        if (updatedCompany) {
-          setVerifiedCompanies((prev) => [
-            ...prev,
-            {
-              ...updatedCompany,
-              user: { ...updatedCompany.user, status: "VERIFIED" },
-            },
-          ]);
-        }
+        await Promise.all(
+          clientDocuments.map(async (doc) => {
+            if (
+              doc.category === DocumentCategory.IMPORTANT &&
+              (documentStatuses[doc.id] || doc.status) !==
+                AccountStatus.VERIFIED
+            ) {
+              await fetch(`/api/documents/${doc.id}`, {
+                method: "PATCH",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  status: "VERIFIED",
+                }),
+              });
+            }
+          })
+        );
       }
-      setPendingCompanies((prev) => prev.filter((c) => c.id !== clientId));
-      setPendingIndex((prev) =>
-        Math.max(0, Math.min(prev, pendingCompanies.length - 3))
+
+      // Then update the client status
+      const res = await updateCompanyStatus(
+        selectedClient.id,
+        status,
+        reason,
+        toast
       );
 
-      toast({
-        type: "success",
-        message: `Company ${status.toLowerCase()} successfully`,
-      });
-    } catch (error) {
-      console.error("Error updating status:", error);
+      if (res.ok) {
+        toast({ type: "success", message: `Client ${status.toLowerCase()}` });
+        setIsModalOpen(false);
+        setSelectedClient(null);
+        setClientDocuments([]);
+        await fetchClients();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
-  const handleCompanyClick = async (company: ClientWithUser) => {
-    setSelectedCompany(company);
-    await fetchCompanyDocuments(company.id);
-    setIsModalOpen(true);
+  const getStatusBadge = (status: AccountStatus) => {
+    const variantMap: Record<AccountStatus, BadgeProps["variant"]> = {
+      [AccountStatus.VERIFIED]: "default",
+      [AccountStatus.REJECTED]: "destructive",
+      [AccountStatus.NOT_VERIFIED]: "outline",
+      [AccountStatus.SUBMITTED]: "outline",
+      [AccountStatus.SUSPENDED]: "destructive",
+    };
+
+    return (
+      <Badge variant={variantMap[status]}>
+        {status.replace("_", " ").toLowerCase()}
+      </Badge>
+    );
   };
-
-  const visibleCompanies = pendingCompanies.slice(
-    pendingIndex,
-    pendingIndex + 2
-  );
-
-  const visibleSubmittedCompanies = submittedCompanies.slice(
-    verifiedIndex,
-    verifiedIndex + 4
-  );
 
   if (loading) {
     return (
-      <div className="px-6 py-8 flex justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#3D1673]"></div>
+      <div className="px-6 py-8 space-y-12">
+        <Skeleton className="h-8 w-48 mb-4" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="space-y-2">
+              <Skeleton className="h-32 rounded-lg" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="px-6 space-y-8">
-      {/* Pending Companies */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Pending Review</h2>
-        {pendingCompanies.length === 0 ? (
-          <p className="text-gray-500">No companies pending review</p>
-        ) : (
-          <>
-            <div className="space-y-4">
-              {visibleCompanies.map((company) => (
-                <CompanyCard
-                  key={company.id}
-                  company={company}
-                  onStatusUpdate={handleUpdateStatus}
-                />
-              ))}
-            </div>
-            <PaginationControls
-              currentIndex={pendingIndex}
-              totalItems={pendingCompanies.length}
-              itemsPerPage={2}
-              onPrev={() => setPendingIndex((prev) => Math.max(0, prev - 1))}
-              onNext={() =>
-                setPendingIndex((prev) =>
-                  Math.min(pendingCompanies.length - 2, prev + 1)
-                )
-              }
-            />
-          </>
-        )}
-      </section>
-
-      {/* Submitted Companies (Documents Submitted) */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
-          Documents Review Pending
-        </h2>
-        {submittedCompanies.length === 0 ? (
-          <p className="text-gray-500">No companies with submitted documents</p>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {visibleSubmittedCompanies.map((company) => (
-                <div
-                  key={company.id}
-                  onClick={() => handleCompanyClick(company)}
-                  className="cursor-pointer"
-                >
-                  <CompanyCardContent
-                    companyName={company.companyName}
-                    email={company.user.email}
-                    phoneNo={company.user.phone || "N/A"}
-                    logoUrl={company.image || ""}
-                    onClick={() => {}}
-                    noSub={""}
-                  />
-                </div>
-              ))}
-            </div>
-            {submittedCompanies.length > 4 && (
-              <PaginationControls
-                currentIndex={verifiedIndex}
-                totalItems={submittedCompanies.length}
-                itemsPerPage={4}
-                onPrev={() => setVerifiedIndex((prev) => Math.max(0, prev - 1))}
-                onNext={() =>
-                  setVerifiedIndex((prev) =>
-                    Math.min(submittedCompanies.length - 4, prev + 1)
-                  )
-                }
-              />
-            )}
-          </>
-        )}
-      </section>
-
-      {/* Verified Companies */}
+    <div className="px-6 py-8 space-y-12">
+      {/* Pending Review Section */}
       <section>
-        <h2 className="text-xl font-semibold mb-4">Verified Companies</h2>
-        {verifiedCompanies.length === 0 ? (
-          <p className="text-gray-500">No verified companies found</p>
+        <h2 className="text-2xl font-semibold mb-4">Pending Review</h2>
+        {pendingClients.length === 0 ? (
+          <p className="text-gray-500">No clients pending review.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
-            {verifiedCompanies.map((company) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {pendingClients.map((client) => (
+              <div
+                key={client.id}
+                onClick={() => handleClientClick(client)}
+                className="cursor-pointer hover:shadow-md transition-shadow"
+              >
+                <CompanyCardContent
+                  companyName={client.companyName}
+                  email={client.user.email}
+                  phoneNo={client.user.phone || "N/A"}
+                  logoUrl={client.user.profilePicture}
+                  noSub={""}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Verified Companies Section */}
+      <section>
+        <h2 className="text-2xl font-semibold mb-4">Verified Companies</h2>
+        {verifiedClients.length === 0 ? (
+          <p className="text-gray-500">No verified companies found.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {verifiedClients.map((client) => (
               <CompanyCardContent
-                key={company.id}
-                companyName={company.companyName}
-                email={company.user.email}
-                phoneNo={company.user.phone || "N/A"}
-                noSub={company.requirements?.length.toString() || "0"}
-                logoUrl={company.image || ""}
-                onClick={() => router.push(`/companies/${company.id}`)}
+                key={client.id}
+                companyName={client.companyName}
+                email={client.user.email}
+                phoneNo={client.user.phone || "N/A"}
+                logoUrl={client.user.profilePicture}
+                noSub={""}
               />
             ))}
           </div>
         )}
       </section>
 
-      {/* Document Viewer Modal */}
+      {/* Review Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
-          setSelectedCompany(null);
-          setCompanyDocuments([]);
-          setRejectionReason("");
+          setSelectedClient(null);
+          setClientDocuments([]);
           setShowRejectInput(false);
+          setRejectionReason("");
         }}
-        title={`Review Documents - ${selectedCompany?.companyName || ""}`}
-        size="xl"
+        title={`Review Client - ${selectedClient?.companyName || ""}`}
+        size="5xl"
         showFooter={true}
         footerContent={
-          <div className="flex flex-col w-full space-y-4">
+          <div className="w-full">
             {showRejectInput && (
-              <div className="w-full">
-                <label
-                  htmlFor="rejectionReason"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Rejection Reason (required)
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-1">
+                  Reason for rejection
                 </label>
                 <textarea
-                  id="rejectionReason"
+                  className="w-full p-2 border rounded min-h-[100px]"
+                  placeholder="Provide specific reasons for rejection..."
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
-                  placeholder="Enter reason for rejection"
-                  className="w-full p-2 border border-gray-300 rounded-md min-h-[80px]"
                   required
                 />
               </div>
             )}
-            <div className="flex justify-end space-x-4">
+            <div className="flex justify-end space-x-3">
+              <Button
+                variant="outline"
+                onClick={() => setIsModalOpen(false)}
+                disabled={isUpdating}
+              >
+                Close
+              </Button>
               {showRejectInput ? (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setShowRejectInput(false);
-                      setRejectionReason("");
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      if (!rejectionReason.trim()) {
-                        toast({
-                          type: "error",
-                          message: "Please provide a rejection reason",
-                        });
-                        return;
-                      }
-                      handleUpdateStatus(selectedCompany!.id, "REJECTED");
-                      setIsModalOpen(false);
-                      setCompanyDocuments([]);
-                      setRejectionReason("");
-                      setShowRejectInput(false);
-                    }}
-                    disabled={!rejectionReason.trim()}
-                  >
-                    Confirm Reject
-                  </Button>
-                </>
+                <Button
+                  onClick={() => handleStatusChange("REJECTED")}
+                  disabled={!rejectionReason.trim() || isUpdating}
+                  variant="destructive"
+                >
+                  {isUpdating ? "Processing..." : "Confirm Rejection"}
+                </Button>
               ) : (
                 <>
                   <Button
-                    variant="outline"
-                    onClick={() => {
-                      setIsModalOpen(false);
-                      setSelectedCompany(null);
-                      setCompanyDocuments([]);
-                    }}
-                  >
-                    Close
-                  </Button>
-                  <Button
                     variant="destructive"
                     onClick={() => setShowRejectInput(true)}
+                    disabled={isUpdating}
                   >
                     Reject
                   </Button>
                   <Button
-                    onClick={() => {
-                      handleUpdateStatus(selectedCompany!.id, "VERIFIED");
-                      setIsModalOpen(false);
-                      setCompanyDocuments([]);
-                    }}
+                    onClick={() => handleStatusChange("VERIFIED")}
+                    disabled={isUpdating || !allImportantDocumentsVerified}
+                    title={
+                      !allImportantDocumentsVerified
+                        ? "Verify all important documents first"
+                        : ""
+                    }
                   >
-                    Approve
+                    {isUpdating ? "Processing..." : "Approve"}
                   </Button>
                 </>
               )}
@@ -398,161 +365,211 @@ export default function Company() {
           </div>
         }
       >
-        {companyDocuments.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
-            {companyDocuments.map((doc) => (
-              <div key={doc.id} className="border rounded-lg p-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-medium capitalize">
-                    {doc.type.toLowerCase().replace("_", " ")}
-                  </h3>
-                  <span className="text-xs text-gray-500">
-                    {new Date(doc.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <div className="mt-2 h-64">
-                  <DocumentViewer url={doc.url} type={doc.type} />
+        {selectedClient && (
+          <div className="space-y-6 max-h-[70vh] overflow-y-auto">
+            {/* Client Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <h3 className="font-semibold text-lg">Company Details</h3>
+                <div className="space-y-1">
+                  <p>
+                    <span className="font-medium">Name:</span>{" "}
+                    {selectedClient.companyName}
+                  </p>
+                  <p>
+                    <span className="font-medium">Registration No:</span>{" "}
+                    {selectedClient.registrationNo || "N/A"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Sector:</span>{" "}
+                    {selectedClient.companySector}
+                  </p>
+                  <p>
+                    <span className="font-medium">Size:</span>{" "}
+                    {selectedClient.companySize}
+                  </p>
+                  <p>
+                    <span className="font-medium">Website:</span>{" "}
+                    {selectedClient.website || "N/A"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Address:</span>{" "}
+                    {selectedClient.address}, {selectedClient.city},{" "}
+                    {selectedClient.country}
+                  </p>
                 </div>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-8">
-            <p className="text-gray-500">No documents submitted for review</p>
+
+              <div className="space-y-2">
+                <h3 className="font-semibold text-lg">Contact Person</h3>
+                <div className="space-y-1">
+                  <p>
+                    <span className="font-medium">Name:</span>{" "}
+                    {selectedClient.user.name}
+                  </p>
+                  <p>
+                    <span className="font-medium">Email:</span>{" "}
+                    {selectedClient.user.email}
+                  </p>
+                  <p>
+                    <span className="font-medium">Phone:</span>{" "}
+                    {selectedClient.user.phone || "N/A"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Designation:</span>{" "}
+                    {selectedClient.designation}
+                  </p>
+                  <p>
+                    <span className="font-medium">Status:</span>{" "}
+                    {getStatusBadge(selectedClient.user.status)}
+                  </p>
+                </div>
+              </div>
+            </div>
+            {/* Documents */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg">Submitted Documents</h3>
+              {!allImportantDocumentsVerified && (
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-5 w-5 text-yellow-400"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-yellow-700">
+                        All <strong>important</strong> documents must be
+                        verified before approval.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {documentsLoading ? (
+                <div className="flex justify-center items-center h-32">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500" />
+                </div>
+              ) : documentsError ? (
+                <div className="text-red-500">{documentsError}</div>
+              ) : clientDocuments.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {clientDocuments.map((doc) => {
+                    const absoluteUrl = `${window.location.origin}${doc.url}`;
+                    const isImage = /\.(png|jpg|jpeg|gif|webp)$/i.test(doc.url);
+                    const isPdf = /\.(pdf)$/i.test(doc.url);
+                    const fileName = doc.url.split("/").pop() || "document";
+                    const currentStatus =
+                      documentStatuses[doc.id] || doc.status;
+                    const isImportant =
+                      doc.category === DocumentCategory.IMPORTANT;
+
+                    return (
+                      <div
+                        key={doc.id}
+                        className={`border rounded-lg p-4 space-y-2 ${isImportant ? "border-l-4 border-blue-500" : ""}`}
+                      >
+                        <div className="flex justify-between items-center">
+                          <h4 className="font-medium capitalize">
+                            {doc.type.toLowerCase().replace(/_/g, " ")}
+                            {isImportant && (
+                              <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                                Important
+                              </span>
+                            )}
+                          </h4>
+                        </div>
+                        <div className="mt-2">
+                          <div className="flex items-center space-x-2 mb-2">
+                            <span className="text-sm font-medium">Status:</span>
+                            <select
+                              value={currentStatus}
+                              onChange={(e) =>
+                                handleDocumentStatusChange(
+                                  doc.id,
+                                  e.target.value as AccountStatus
+                                )
+                              }
+                              className={`text-sm border rounded px-2 py-1 ${isImportant ? "font-semibold" : ""}`}
+                            >
+                              <option value="NOT_VERIFIED">Not Verified</option>
+                              <option value="VERIFIED">Verified</option>
+                              <option value="REJECTED">Rejected</option>
+                            </select>
+                          </div>
+
+                          {/* Document Viewer */}
+                          <div className="border rounded-md p-2 h-64 flex flex-col">
+                            <div className="flex-1 overflow-hidden flex items-center justify-center">
+                              {isImage ? (
+                                <img
+                                  src={absoluteUrl}
+                                  alt={doc.type}
+                                  className="max-w-full max-h-full object-contain"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src =
+                                      "/file-error.png";
+                                  }}
+                                />
+                              ) : isPdf ? (
+                                <div className="w-full h-full">
+                                  <PDFViewer url={absoluteUrl} />
+                                  <div className="mt-2 text-center">
+                                    <a
+                                      href={absoluteUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:underline text-sm"
+                                    >
+                                      Open PDF in new tab
+                                    </a>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex flex-col items-center justify-center h-full">
+                                  <FileIcon className="h-12 w-12 text-gray-400" />
+                                  <p className="mt-2 text-sm text-gray-500">
+                                    Preview not available
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                            <div className="mt-2 flex justify-between items-center">
+                              <span className="text-xs text-gray-500 truncate">
+                                {fileName}
+                              </span>
+                              <a
+                                href={absoluteUrl}
+                                download={fileName}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline text-sm"
+                              >
+                                Download
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-gray-500">No documents submitted.</p>
+              )}
+            </div>
           </div>
         )}
       </Modal>
-    </div>
-  );
-}
-
-function CompanyCard({
-  company,
-  onStatusUpdate,
-}: {
-  company: ClientWithUser;
-  onStatusUpdate: (
-    id: string,
-    status: "PENDING_SUBMISSION" | "REJECTED"
-  ) => void;
-}) {
-  return (
-    <div className="flex w-full">
-      <div className="bg-[#EDDDF3] p-6 rounded-xl flex flex-col lg:flex-row justify-between gap-6 items-center shadow-md text-[#2C0053] w-full">
-        {/* Company Info */}
-        <div className="flex items-center gap-5">
-          {company.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={company.image}
-              alt={company.companyName}
-              className="w-16 h-16 object-contain rounded-full"
-            />
-          ) : (
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
-              <span className="text-lg font-bold text-gray-500">
-                {company.companyName.charAt(0)}
-              </span>
-            </div>
-          )}
-          <div>
-            <h2 className="text-xl font-bold text-[#524B6B]">
-              {company.companyName}
-            </h2>
-            <p className="text-sm text-[#524B6B]">
-              Registration: {company.registrationNo || "N/A"}
-            </p>
-            <p className="text-sm text-[#524B6B]">
-              Sector: {company.companySector || "N/A"}
-            </p>
-            {company.website && (
-              <a
-                href={company.website}
-                className="text-sm text-blue-600 hover:underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Visit Website
-              </a>
-            )}
-          </div>
-        </div>
-
-        {/* Contact Info */}
-        <div className="text-sm text-[#524B6B]">
-          <h3 className="text-lg font-bold mb-2">Contact</h3>
-          <p>{company.user.name}</p>
-          <p>{company.user.email}</p>
-          <p>{company.user.phone}</p>
-        </div>
-
-        {/* Status */}
-        <div className="flex flex-col items-center">
-          <div className="text-center">
-            <Info className="hidden md:inline text-white bg-black/80 rounded-full h-10 w-10 mb-3" />
-            <span className="text-red-700 px-3 py-1 text-xs">Pending</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex flex-col justify-evenly ml-4">
-        <button
-          className="bg-[#3D1673] text-white px-4 py-1.5 rounded-md hover:bg-[#2b0e54]"
-          onClick={() => onStatusUpdate(company.id, "PENDING_SUBMISSION")}
-        >
-          Approve
-        </button>
-        <button
-          className="bg-red-600 text-white px-4 py-1.5 rounded-md hover:bg-red-700 mt-2"
-          onClick={() => onStatusUpdate(company.id, "REJECTED")}
-        >
-          Reject
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function PaginationControls({
-  currentIndex,
-  totalItems,
-  itemsPerPage,
-  onPrev,
-  onNext,
-}: {
-  currentIndex: number;
-  totalItems: number;
-  itemsPerPage: number;
-  onPrev: () => void;
-  onNext: () => void;
-}) {
-  const canPrev = currentIndex > 0;
-  const canNext = currentIndex + itemsPerPage < totalItems;
-
-  return (
-    <div className="flex justify-between items-center mt-4">
-      <button
-        onClick={onPrev}
-        disabled={!canPrev}
-        className={`flex items-center gap-1 ${canPrev ? "text-[#3D1673] hover:text-[#2b0e54]" : "text-gray-400 cursor-not-allowed"}`}
-      >
-        <ArrowLeft className={canPrev ? "" : "opacity-50"} />
-        Previous
-      </button>
-      <span className="text-sm text-gray-600">
-        {Math.min(currentIndex + 1, totalItems)}-
-        {Math.min(currentIndex + itemsPerPage, totalItems)} of {totalItems}
-      </span>
-      <button
-        onClick={onNext}
-        disabled={!canNext}
-        className={`flex items-center gap-1 ${canNext ? "text-[#3D1673] hover:text-[#2b0e54]" : "text-gray-400 cursor-not-allowed"}`}
-      >
-        Next
-        <ArrowRight className={canNext ? "" : "opacity-50"} />
-      </button>
-      More actions
     </div>
   );
 }

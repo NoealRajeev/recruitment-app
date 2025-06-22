@@ -13,10 +13,12 @@ export const getSectorEnumMapping = (lang: Language) => ({
   [translations[lang].sectorOptions[5]]: "RETAIL",
   [translations[lang].sectorOptions[6]]: "CONSTRUCTION",
   [translations[lang].sectorOptions[7]]: "EDUCATION",
-  [translations[lang].sectorOptions[8]]: "OTHER",
+  [translations[lang].sectorOptions[8]]: "HOSPITALITY",
+  [translations[lang].sectorOptions[9]]: "OIL_GAS",
+  [translations[lang].sectorOptions[10]]: "TRANSPORTATION",
+  [translations[lang].sectorOptions[11]]: "OTHER",
 });
 
-// Update the getDisplaySectorMapping function in lib/utils/enum-mappings.ts
 export const getDisplaySectorMapping = (lang: Language) => ({
   IT: translations[lang].sectorOptions[0],
   REAL_ESTATE: translations[lang].sectorOptions[1],
@@ -27,9 +29,9 @@ export const getDisplaySectorMapping = (lang: Language) => ({
   CONSTRUCTION: translations[lang].sectorOptions[6],
   EDUCATION: translations[lang].sectorOptions[7],
   HOSPITALITY: translations[lang].sectorOptions[8],
-  OIL_GAS: translations[lang].sectorOptions[9], // Add this line
-  TRANSPORTATION: translations[lang].sectorOptions[10], // Add this line
-  OTHER: translations[lang].sectorOptions[11], // Update this line
+  OIL_GAS: translations[lang].sectorOptions[9],
+  TRANSPORTATION: translations[lang].sectorOptions[10],
+  OTHER: translations[lang].sectorOptions[11],
 });
 
 // Company size mappings
@@ -47,41 +49,85 @@ export const getDisplayCompanySizeMapping = (lang: Language) => ({
   ENTERPRISE: translations[lang].companySizeOptions[3],
 });
 
-// Contract duration mappings
+// Contract duration mappings - Updated to match Prisma enum
 export const getContractDurationEnumMapping = (lang: Language) => ({
-  [translations[lang].contractDurationOptions[0]]: "ONE_YEAR",
-  [translations[lang].contractDurationOptions[1]]: "TWO_YEARS",
-  [translations[lang].contractDurationOptions[2]]: "UNLIMITED",
+  [translations[lang].contractDurationOptions[0]]: "ONE_MONTH",
+  [translations[lang].contractDurationOptions[1]]: "THREE_MONTHS",
+  [translations[lang].contractDurationOptions[2]]: "SIX_MONTHS",
+  [translations[lang].contractDurationOptions[3]]: "ONE_YEAR",
+  [translations[lang].contractDurationOptions[4]]: "TWO_YEARS",
+  [translations[lang].contractDurationOptions[5]]: "THREE_YEARS",
+  [translations[lang].contractDurationOptions[6]]: "FIVE_PLUS_YEARS",
 });
 
 export const getDisplayContractDurationMapping = (lang: Language) => ({
-  ONE_YEAR: translations[lang].contractDurationOptions[0],
-  TWO_YEARS: translations[lang].contractDurationOptions[1],
-  UNLIMITED: translations[lang].contractDurationOptions[2],
+  ONE_MONTH: translations[lang].contractDurationOptions[0],
+  THREE_MONTHS: translations[lang].contractDurationOptions[1],
+  SIX_MONTHS: translations[lang].contractDurationOptions[2],
+  ONE_YEAR: translations[lang].contractDurationOptions[3],
+  TWO_YEARS: translations[lang].contractDurationOptions[4],
+  THREE_YEARS: translations[lang].contractDurationOptions[5],
+  FIVE_PLUS_YEARS: translations[lang].contractDurationOptions[6],
 });
 
-// Ticket details mappings
-export const getTicketDetailsEnumMapping = (lang: Language) => ({
-  [translations[lang].ticketDetailsOptions[0]]: "ONE_YEAR",
-  [translations[lang].ticketDetailsOptions[1]]: "TWO_YEARS",
+// Requirement status mappings
+export const getRequirementStatusEnumMapping = (lang: Language) => ({
+  [translations[lang].requirementStatusOptions[0]]: "SUBMITTED",
+  [translations[lang].requirementStatusOptions[1]]: "UNDER_REVIEW",
+  [translations[lang].requirementStatusOptions[2]]: "FORWARDED",
+  [translations[lang].requirementStatusOptions[3]]: "ACCEPTED",
+  [translations[lang].requirementStatusOptions[4]]: "REJECTED",
+  [translations[lang].requirementStatusOptions[5]]: "COMPLETED",
 });
 
-export const getDisplayTicketDetailsMapping = (lang: Language) => ({
-  ONE_YEAR: translations[lang].ticketDetailsOptions[0],
-  TWO_YEARS: translations[lang].ticketDetailsOptions[1],
+export const getDisplayRequirementStatusMapping = (lang: Language) => ({
+  SUBMITTED: translations[lang].requirementStatusOptions[0],
+  UNDER_REVIEW: translations[lang].requirementStatusOptions[1],
+  FORWARDED: translations[lang].requirementStatusOptions[2],
+  ACCEPTED: translations[lang].requirementStatusOptions[3],
+  REJECTED: translations[lang].requirementStatusOptions[4],
+  COMPLETED: translations[lang].requirementStatusOptions[5],
 });
 
-// Previous experience mappings
+// Previous experience mappings - Updated to match Prisma schema
 export const getPreviousExperienceEnumMapping = (lang: Language) => ({
-  [translations[lang].previousExperienceOptions[0]]: "FRESH",
-  [translations[lang].previousExperienceOptions[1]]: "GCC_EXPERIENCE",
-  [translations[lang].previousExperienceOptions[2]]: "LOCAL_EXPERIENCE",
-  [translations[lang].previousExperienceOptions[3]]: "ANY",
+  [translations[lang].previousExperienceOptions[0]]: "GCC",
+  [translations[lang].previousExperienceOptions[1]]: "QATAR",
+  [translations[lang].previousExperienceOptions[2]]: "OVERSEAS",
 });
 
 export const getDisplayPreviousExperienceMapping = (lang: Language) => ({
-  FRESH: translations[lang].previousExperienceOptions[0],
-  GCC_EXPERIENCE: translations[lang].previousExperienceOptions[1],
-  LOCAL_EXPERIENCE: translations[lang].previousExperienceOptions[2],
-  ANY: translations[lang].previousExperienceOptions[3],
+  GCC: translations[lang].previousExperienceOptions[0],
+  QATAR: translations[lang].previousExperienceOptions[1],
+  OVERSEAS: translations[lang].previousExperienceOptions[2],
+});
+
+// User role mappings
+export const getUserRoleEnumMapping = (lang: Language) => ({
+  [translations[lang].userRoleOptions[0]]: "RECRUITMENT_ADMIN",
+  [translations[lang].userRoleOptions[1]]: "CLIENT_ADMIN",
+  [translations[lang].userRoleOptions[2]]: "RECRUITMENT_AGENCY",
+});
+
+export const getDisplayUserRoleMapping = (lang: Language) => ({
+  RECRUITMENT_ADMIN: translations[lang].userRoleOptions[0],
+  CLIENT_ADMIN: translations[lang].userRoleOptions[1],
+  RECRUITMENT_AGENCY: translations[lang].userRoleOptions[2],
+});
+
+// Account status mappings
+export const getAccountStatusEnumMapping = (lang: Language) => ({
+  [translations[lang].accountStatusOptions[0]]: "SUBMITTED",
+  [translations[lang].accountStatusOptions[1]]: "VERIFIED",
+  [translations[lang].accountStatusOptions[2]]: "REJECTED",
+  [translations[lang].accountStatusOptions[3]]: "NOT_VERIFIED",
+  [translations[lang].accountStatusOptions[4]]: "SUSPENDED",
+});
+
+export const getDisplayAccountStatusMapping = (lang: Language) => ({
+  SUBMITTED: translations[lang].accountStatusOptions[0],
+  VERIFIED: translations[lang].accountStatusOptions[1],
+  REJECTED: translations[lang].accountStatusOptions[2],
+  NOT_VERIFIED: translations[lang].accountStatusOptions[3],
+  SUSPENDED: translations[lang].accountStatusOptions[4],
 });

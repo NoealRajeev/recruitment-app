@@ -43,6 +43,7 @@ export const authOptions: AuthOptions = {
           where: { id: user.id },
           data: {
             lastLogin: new Date(),
+            tempPassword: "",
           },
         });
 
@@ -53,7 +54,7 @@ export const authOptions: AuthOptions = {
           role: user.role,
           status: user.status,
           resetRequired: user.resetRequired,
-          image: user.profilePicture || null,
+          profilePicture: user.profilePicture || null,
         };
       },
     }),
@@ -72,6 +73,7 @@ export const authOptions: AuthOptions = {
         token.role = user.role;
         token.status = user.status;
         token.resetRequired = user.resetRequired;
+        token.profilePicture = user.profilePicture;
       }
       return token;
     },
@@ -84,6 +86,7 @@ export const authOptions: AuthOptions = {
           role: token.role,
           status: token.status,
           resetRequired: token.resetRequired,
+          profilePicture: token.profilePicture,
         };
       }
       return session;

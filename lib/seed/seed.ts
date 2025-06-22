@@ -5,9 +5,6 @@ import {
   AccountStatus,
   CompanySector,
   CompanySize,
-  RequirementStatus,
-  ExperienceLevel,
-  TicketType,
 } from "@prisma/client";
 import prisma from "@/lib/prisma";
 import { faker } from "@faker-js/faker";
@@ -56,27 +53,9 @@ interface SeedUser {
     };
   };
 }
-
-interface SeedRequirement {
-  minExperience: ExperienceLevel;
-  maxAge?: number;
-  ticketType?: TicketType;
-  ticketProvided: boolean;
-  languages: string[];
-  specialNotes?: string;
-  jobRoles: {
-    title: string;
-    description?: string;
-    quantity: number;
-    nationality: string;
-    salary: number;
-  }[];
-}
-
 export async function seedDatabase() {
   try {
     await seedBaseData();
-    await seedRequirements();
     console.log("🌱 Database seeding completed successfully!");
   } catch (error) {
     console.error("❌ Database seeding failed:", error);
@@ -113,7 +92,7 @@ async function seedBaseData() {
       password: "Client@123",
       role: UserRole.CLIENT_ADMIN,
       name: "Demo Client",
-      status: AccountStatus.PENDING_REVIEW,
+      status: AccountStatus.NOT_VERIFIED,
       profilePicture: faker.image.avatar(),
       profile: {
         client: {
@@ -242,83 +221,4 @@ async function seedUserWithProfile(userData: SeedUser) {
   });
 
   console.log(`✅ Created ${userData.role} user: ${userData.email}`);
-}
-
-async function seedRequirements() {
-  const client = await prisma.client.findFirst({
-    where: { companyName: "Demo Client Inc" },
-  });
-
-  const agency = await prisma.agency.findFirst({
-    where: { agencyName: "Global Recruiters" },
-  });
-
-  if (!client) {
-    console.log("ℹ️ No client found to create requirements");
-    return;
-  }
-
-  const requirementsToSeed: SeedRequirement[] = [
-    {
-      minExperience: ExperienceLevel.TWO_YEARS,
-      maxAge: 45,
-      ticketType: TicketType.TWO_WAY,
-      ticketProvided: true,
-      languages: ["English", "Hindi"],
-      specialNotes: "Must have experience with high-rise buildings",
-      jobRoles: [
-        {
-          title: "Mason",
-          quantity: 10,
-          nationality: "India",
-          salary: 1200,
-        },
-        {
-          title: "Carpenter",
-          quantity: 5,
-          nationality: "Nepal",
-          salary: 1500,
-        },
-      ],
-    },
-    {
-      minExperience: ExperienceLevel.ONE_YEAR,
-      languages: ["English", "Arabic"],
-      ticketProvided: false,
-      jobRoles: [
-        {
-          title: "Housekeeping Staff",
-          quantity: 20,
-          nationality: "Philippines",
-          salary: 1000,
-        },
-        {
-          title: "Receptionist",
-          quantity: 3,
-          nationality: "Any",
-          salary: 1800,
-        },
-      ],
-    },
-  ];
-
-  for (const reqData of requirementsToSeed) {
-    await prisma.requirement.create({
-      data: {
-        minExperience: reqData.minExperience,
-        maxAge: reqData.maxAge,
-        ticketType: reqData.ticketType,
-        ticketProvided: reqData.ticketProvided,
-        languages: reqData.languages,
-        specialNotes: reqData.specialNotes,
-        status: RequirementStatus.APPROVED,
-        clientId: client.id,
-        assignedAgencyId: agency?.id,
-        jobRoles: {
-          create: reqData.jobRoles,
-        },
-      },
-    });
-    console.log(`✅ Created requirement:`);
-  }
 }

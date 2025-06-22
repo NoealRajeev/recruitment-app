@@ -9,20 +9,23 @@ import AgencyCardContent from "@/components/shared/Cards/AgencyCardContent";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
-import { Trash2, Undo2 } from "lucide-react";
-import { AccountStatus, UserRole } from "@prisma/client";
+import { Trash2, Undo2, FileIcon } from "lucide-react";
+import { AccountStatus, UserRole, DocumentCategory } from "@prisma/client";
 import { useToast } from "@/context/toast-provider";
-import { DocumentViewer } from "@/components/shared/DocumentViewer";
+import { PDFViewer } from "@/components/shared/PDFViewer";
 import logSecurityEvent from "@/lib/utils/helpers";
 import { Pagination } from "@/components/ui/Pagination";
 import { useLanguage } from "@/context/LanguageContext";
 import { HorizontalSelect } from "@/components/ui/HorizontalSelect";
+import { Badge, BadgeProps } from "@/components/ui/badge";
+
 interface AgencyDocument {
   id: string;
   type: string;
   url: string;
-  verified: boolean;
-  createdAt: Date;
+  status: AccountStatus;
+  uploadedAt: string;
+  category: DocumentCategory;
 }
 
 interface Agency {
@@ -106,11 +109,18 @@ export default function Agencies() {
     "all" | "pending" | "verified" | "rejected"
   >("all");
   const [selectedAgency, setSelectedAgency] = useState<Agency | null>(null);
+  const [agencyDocuments, setAgencyDocuments] = useState<AgencyDocument[]>([]);
+  const [documentsLoading, setDocumentsLoading] = useState(false);
+  const [documentsError, setDocumentsError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [agencyToDelete, setAgencyToDelete] = useState<Agency | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [documentStatuses, setDocumentStatuses] = useState<
+    Record<string, AccountStatus>
+  >({});
+  const [isUpdating, setIsUpdating] = useState(false);
 
   // Memoized utility functions
   const isOlderThan12Hours = useCallback((date: Date) => {
@@ -149,8 +159,6 @@ export default function Agencies() {
 
   const getStatusColor = useCallback((status: AccountStatus) => {
     switch (status) {
-      case AccountStatus.PENDING_REVIEW:
-        return "text-[#C86300]/70";
       case AccountStatus.REJECTED:
         return "text-[#ED1C24]/70";
       case AccountStatus.NOT_VERIFIED:
@@ -161,6 +169,72 @@ export default function Agencies() {
         return "text-[#150B3D]/70";
     }
   }, []);
+
+  const getStatusBadge = (status: AccountStatus) => {
+    const variantMap: Record<AccountStatus, BadgeProps["variant"]> = {
+      [AccountStatus.VERIFIED]: "default",
+      [AccountStatus.REJECTED]: "destructive",
+      [AccountStatus.NOT_VERIFIED]: "outline",
+      [AccountStatus.SUBMITTED]: "outline",
+      [AccountStatus.SUSPENDED]: "destructive",
+    };
+
+    return (
+      <Badge variant={variantMap[status]}>
+        {status.replace("_", " ").toLowerCase()}
+      </Badge>
+    );
+  };
+
+  const fetchAgencyDocuments = async (agencyId: string) => {
+    try {
+      setDocumentsLoading(true);
+      setDocumentsError(null);
+      const res = await fetch(`/api/agencies/${agencyId}/documents`);
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const docs = await res.json();
+
+      if (!Array.isArray(docs)) {
+        throw new Error("Invalid documents format");
+      }
+
+      setAgencyDocuments(docs);
+
+      const statuses: Record<string, AccountStatus> = {};
+      docs.forEach((doc: AgencyDocument) => {
+        statuses[doc.id] = doc.status;
+      });
+      setDocumentStatuses(statuses);
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+      setDocumentsError(
+        error instanceof Error ? error.message : "Failed to load documents"
+      );
+    } finally {
+      setDocumentsLoading(false);
+    }
+  };
+
+  const handleDocumentStatusChange = (docId: string, status: AccountStatus) => {
+    setDocumentStatuses((prev) => ({
+      ...prev,
+      [docId]: status,
+    }));
+  };
+
+  // Check if all important documents are verified
+  const allImportantDocumentsVerified = agencyDocuments.every((doc) => {
+    if (doc.category === DocumentCategory.IMPORTANT) {
+      return (
+        (documentStatuses[doc.id] || doc.status) === AccountStatus.VERIFIED
+      );
+    }
+    return true;
+  });
 
   // Fetch agencies from API
   useEffect(() => {
@@ -185,43 +259,9 @@ export default function Agencies() {
         }
 
         const data: Agency[] = await response.json();
-
-        // First normalize ALL data
-        const normalizedData = data.map((agency) => ({
-          ...agency,
-          user: {
-            ...agency.user,
-            deleteAt: agency.user.deleteAt || null, // Ensure deleteAt exists
-          },
-          documents: [], // Initialize empty documents array
-        }));
-
-        // Then fetch documents for pending agencies using the normalized data
-        const agenciesWithDocuments = await Promise.all(
-          normalizedData.map(async (agency) => {
-            if (agency.user.status === AccountStatus.PENDING_REVIEW) {
-              try {
-                const docsResponse = await fetch(
-                  `/api/agencies/${agency.id}/documents`
-                );
-                if (docsResponse.ok) {
-                  const documents = await docsResponse.json();
-                  return { ...agency, documents };
-                }
-              } catch (error) {
-                console.error(
-                  `Error fetching documents for agency ${agency.id}:`,
-                  error
-                );
-              }
-            }
-            return agency; // Return agency as-is (already has empty documents array)
-          })
-        );
-
-        setAgencies(agenciesWithDocuments);
+        setAgencies(data);
         logSecurityEvent("AGENCIES_FETCHED", {
-          count: agenciesWithDocuments.length,
+          count: data.length,
         });
       } catch (error) {
         console.error("Error fetching agencies:", error);
@@ -320,10 +360,12 @@ export default function Agencies() {
     }
   };
 
-  const handleRowClick = (agency: Agency) => {
-    if (agency.user.status === AccountStatus.PENDING_REVIEW) {
+  const handleRowClick = async (agency: Agency) => {
+    if (agency.user.status === AccountStatus.NOT_VERIFIED) {
       setSelectedAgency(agency);
+      await fetchAgencyDocuments(agency.id);
       setIsModalOpen(true);
+      setRejectionReason("");
     }
   };
 
@@ -389,6 +431,7 @@ export default function Agencies() {
     reason?: string
   ) => {
     try {
+      setIsUpdating(true);
       const response = await fetch(`/api/agencies/${agencyId}/status`, {
         method: "PUT",
         headers: {
@@ -396,7 +439,11 @@ export default function Agencies() {
         },
         body: JSON.stringify({
           status: newStatus,
-          reason,
+          reason:
+            reason ||
+            (newStatus === "VERIFIED"
+              ? "Approved by admin"
+              : "Rejected by admin"),
           deletionType:
             newStatus === AccountStatus.REJECTED ? "SCHEDULED" : undefined,
         }),
@@ -413,7 +460,7 @@ export default function Agencies() {
         )
       );
 
-      if (newStatus !== AccountStatus.PENDING_REVIEW) {
+      if (newStatus !== AccountStatus.NOT_VERIFIED) {
         setIsModalOpen(false);
         setSelectedAgency(null);
         setRejectionReason("");
@@ -438,6 +485,8 @@ export default function Agencies() {
         agencyId,
         error: error instanceof Error ? error.message : "Unknown error",
       });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -715,7 +764,7 @@ export default function Agencies() {
                   <tr
                     key={agency.id}
                     className={`hover:bg-blue-25 ${
-                      agency.user.status === AccountStatus.PENDING_REVIEW
+                      agency.user.status === AccountStatus.NOT_VERIFIED
                         ? "cursor-pointer hover:bg-[#EDDDF3]"
                         : ""
                     }`}
@@ -738,10 +787,10 @@ export default function Agencies() {
                         agency.user.status
                       )}`}
                     >
-                      {agency.user.status.toLowerCase().replace("_", " ")}
+                      {getStatusBadge(agency.user.status)}
                     </td>
                     <td className="py-2 px-3 text-sm text-[#150B3D]/70 space-x-2">
-                      {agency.user.status === AccountStatus.PENDING_REVIEW && (
+                      {agency.user.status === AccountStatus.NOT_VERIFIED && (
                         <>
                           <Button
                             size="sm"
@@ -778,7 +827,7 @@ export default function Agencies() {
                               e.stopPropagation();
                               handleStatusUpdate(
                                 agency.id,
-                                AccountStatus.PENDING_REVIEW
+                                AccountStatus.NOT_VERIFIED
                               );
                             }}
                             aria-label={`Re-review ${agency.agencyName}`}
@@ -854,91 +903,274 @@ export default function Agencies() {
           setSelectedAgency(null);
           setRejectionReason("");
         }}
-        title={`Review Documents - ${selectedAgency?.agencyName || ""}`}
-        size="xl"
+        title={`Review Documents - ${selectedAgency ? selectedAgency.agencyName : ""}`}
+        size="5xl"
         showFooter={true}
         footerContent={
-          <div className="flex justify-end space-x-4 w-full">
-            <Input
-              label="Rejection Reason (if rejecting)"
-              value={rejectionReason}
-              onChange={(e) => setRejectionReason(e.target.value)}
-              placeholder="Enter reason for rejection (optional)"
-              className="flex-1"
-              aria-label="Rejection reason"
-            />
-            <div className="flex space-x-4">
+          <div className="w-full">
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">
+                Reason for rejection
+              </label>
+              <textarea
+                className="w-full p-2 border rounded min-h-[100px]"
+                placeholder="Provide specific reasons for rejection..."
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end space-x-3">
               <Button
                 variant="outline"
-                onClick={() => {
-                  setIsModalOpen(false);
-                  setSelectedAgency(null);
-                }}
-                aria-label="Cancel review"
+                onClick={() => setIsModalOpen(false)}
+                disabled={isUpdating}
               >
-                Cancel
-              </Button>
-              <Button
-                onClick={() => {
-                  if (selectedAgency) {
-                    handleStatusUpdate(
-                      selectedAgency.id,
-                      AccountStatus.VERIFIED
-                    );
-                  }
-                }}
-                aria-label="Approve agency"
-              >
-                Approve
+                Close
               </Button>
               <Button
                 variant="destructive"
-                onClick={() => {
-                  if (selectedAgency) {
-                    handleStatusUpdate(
-                      selectedAgency.id,
-                      AccountStatus.REJECTED,
-                      rejectionReason
-                    );
-                  }
-                }}
-                disabled={!rejectionReason}
-                aria-label="Reject agency"
+                onClick={() =>
+                  selectedAgency &&
+                  handleStatusUpdate(
+                    selectedAgency.id,
+                    AccountStatus.REJECTED,
+                    rejectionReason
+                  )
+                }
+                disabled={!rejectionReason.trim() || isUpdating}
               >
-                Reject
+                {isUpdating ? "Processing..." : "Reject"}
+              </Button>
+              <Button
+                onClick={() =>
+                  selectedAgency &&
+                  handleStatusUpdate(selectedAgency.id, AccountStatus.VERIFIED)
+                }
+                disabled={isUpdating || !allImportantDocumentsVerified}
+                title={
+                  !allImportantDocumentsVerified
+                    ? "Verify all important documents first"
+                    : ""
+                }
+              >
+                {isUpdating ? "Processing..." : "Approve"}
               </Button>
             </div>
           </div>
         }
-        aria-labelledby="document-viewer-modal-title"
       >
         {selectedAgency && (
-          <div className="space-y-6">
-            {selectedAgency.documents && selectedAgency.documents.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto">
-                {selectedAgency.documents.map((doc) => (
-                  <div key={doc.id} className="border rounded-lg p-4">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-medium capitalize">
-                        {doc.type.toLowerCase().replace("_", " ")}
-                      </h3>
-                      <span className="text-xs text-gray-500">
-                        {new Date(doc.createdAt).toLocaleDateString()}
-                      </span>
+          <div className="flex flex-col h-full">
+            {/* Agency Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="space-y-2">
+                <h3 className="font-semibold text-lg">Agency Details</h3>
+                <div className="space-y-1">
+                  <p>
+                    <span className="font-medium">Name:</span>{" "}
+                    {selectedAgency.agencyName}
+                  </p>
+                  <p>
+                    <span className="font-medium">Registration No:</span>{" "}
+                    {selectedAgency.registrationNo}
+                  </p>
+                  <p>
+                    <span className="font-medium">License Expiry:</span>{" "}
+                    {new Date(
+                      selectedAgency.licenseExpiry
+                    ).toLocaleDateString()}
+                  </p>
+                  <p>
+                    <span className="font-medium">Country:</span>{" "}
+                    {selectedAgency.country}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="font-semibold text-lg">Contact Person</h3>
+                <div className="space-y-1">
+                  <p>
+                    <span className="font-medium">Name:</span>{" "}
+                    {selectedAgency.contactPerson}
+                  </p>
+                  <p>
+                    <span className="font-medium">Email:</span>{" "}
+                    {selectedAgency.user.email}
+                  </p>
+                  <p>
+                    <span className="font-medium">Phone:</span>{" "}
+                    {selectedAgency.phone}
+                  </p>
+                  <p>
+                    <span className="font-medium">Status:</span>{" "}
+                    {getStatusBadge(selectedAgency.user.status)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Documents Section with single scroll */}
+            <div className="flex-1 overflow-hidden flex flex-col">
+              <h3 className="font-semibold text-lg mb-4">
+                Submitted Documents
+              </h3>
+              {!allImportantDocumentsVerified && (
+                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-5 w-5 text-yellow-400"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
                     </div>
-                    <div className="mt-2 h-64">
-                      <DocumentViewer url={doc.url} type={doc.type} />
+                    <div className="ml-3">
+                      <p className="text-sm text-yellow-700">
+                        All <strong>important</strong> documents must be
+                        verified before approval.
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-gray-500">
-                  No documents submitted for review
-                </p>
-              </div>
-            )}
+                </div>
+              )}
+
+              {documentsLoading ? (
+                <div className="flex-1 flex justify-center items-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500" />
+                </div>
+              ) : documentsError ? (
+                <div className="flex-1 flex items-center justify-center text-red-500">
+                  {documentsError}
+                </div>
+              ) : agencyDocuments.length > 0 ? (
+                <div className="flex-1 overflow-y-auto pr-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
+                    {agencyDocuments.map((doc) => {
+                      const absoluteUrl = `${window.location.origin}${doc.url}`;
+                      const isImage = /\.(png|jpg|jpeg|gif|webp)$/i.test(
+                        doc.url
+                      );
+                      const isPdf = /\.(pdf)$/i.test(doc.url);
+                      const fileName = doc.url.split("/").pop() || "document";
+                      const currentStatus =
+                        documentStatuses[doc.id] || doc.status;
+                      const isImportant =
+                        doc.category === DocumentCategory.IMPORTANT;
+
+                      return (
+                        <div
+                          key={doc.id}
+                          className={`border rounded-lg p-4 space-y-2 ${
+                            isImportant ? "border-l-4 border-blue-500" : ""
+                          }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <h4 className="font-medium capitalize">
+                              {doc.type.toLowerCase().replace(/_/g, " ")}
+                              {isImportant && (
+                                <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
+                                  Important
+                                </span>
+                              )}
+                            </h4>
+                          </div>
+                          <div className="mt-2">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <span className="text-sm font-medium">
+                                Status:
+                              </span>
+                              <select
+                                value={currentStatus}
+                                onChange={(e) =>
+                                  handleDocumentStatusChange(
+                                    doc.id,
+                                    e.target.value as AccountStatus
+                                  )
+                                }
+                                className={`text-sm border rounded px-2 py-1 ${
+                                  isImportant ? "font-semibold" : ""
+                                }`}
+                              >
+                                <option value="NOT_VERIFIED">
+                                  Not Verified
+                                </option>
+                                <option value="VERIFIED">Verified</option>
+                                <option value="REJECTED">Rejected</option>
+                              </select>
+                            </div>
+
+                            {/* Document Viewer */}
+                            <div className="border rounded-md p-2 h-64 flex flex-col">
+                              <div className="flex-1 overflow-hidden flex items-center justify-center">
+                                {isImage ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={absoluteUrl}
+                                    alt={doc.type}
+                                    className="max-w-full max-h-full object-contain"
+                                    onError={(e) => {
+                                      (e.target as HTMLImageElement).src =
+                                        "/file-error.png";
+                                    }}
+                                  />
+                                ) : isPdf ? (
+                                  <div className="w-full h-full">
+                                    <PDFViewer url={absoluteUrl} />
+                                    <div className="mt-2 text-center">
+                                      <a
+                                        href={absoluteUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 hover:underline text-sm"
+                                      >
+                                        Open PDF in new tab
+                                      </a>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex flex-col items-center justify-center h-full">
+                                    <FileIcon className="h-12 w-12 text-gray-400" />
+                                    <p className="mt-2 text-sm text-gray-500">
+                                      Preview not available
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="mt-2 flex justify-between items-center">
+                                <span className="text-xs text-gray-500 truncate">
+                                  {fileName}
+                                </span>
+                                <a
+                                  href={absoluteUrl}
+                                  download={fileName}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline text-sm"
+                                >
+                                  Download
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-gray-500">
+                  No documents submitted.
+                </div>
+              )}
+            </div>
           </div>
         )}
       </Modal>

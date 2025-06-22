@@ -151,7 +151,7 @@ export const AutocompleteInput = React.forwardRef<
         createPortal(
           <ul
             role="listbox"
-            className="z-50 absolute max-h-60 w-auto overflow-auto rounded-md bg-white/65 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+            className="z-50 absolute max-h-60 w-auto overflow-auto rounded-md bg-white/90 py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
             style={{
               position: "absolute",
               top: dropdownPosition.top,

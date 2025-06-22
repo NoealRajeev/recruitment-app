@@ -9,9 +9,11 @@ import { AgencyRegistrationSchema } from "@/lib/validations/agency";
 import prisma from "@/lib/prisma";
 import { hash } from "bcryptjs";
 import { randomBytes } from "crypto";
-import { UserRole, AccountStatus } from "@prisma/client";
+import { UserRole, AccountStatus, AuditAction } from "@prisma/client";
 import { ApiError, UnauthorizedError } from "@/lib/errors";
 import { faker } from "@faker-js/faker";
+import { getAgencyCreationEmail } from "@/lib/utils/email-templates";
+import { sendTemplateEmail } from "@/lib/utils/email-service";
 
 export const POST = handleApiErrors(
   withAdminAuth(
@@ -40,10 +42,11 @@ export const POST = handleApiErrors(
             name: data.agencyName,
             email: data.email,
             password: hashedPassword,
+            tempPassword: randomPassword, // Store temp password
             phone: data.phone,
             profilePicture: faker.image.avatar(),
             role: UserRole.RECRUITMENT_AGENCY,
-            status: AccountStatus.PENDING_SUBMISSION,
+            status: AccountStatus.NOT_VERIFIED,
             resetRequired: true,
             createdById: user.id,
           },
@@ -66,7 +69,7 @@ export const POST = handleApiErrors(
 
         await tx.auditLog.create({
           data: {
-            action: "AGENCY_CREATED",
+            action: AuditAction.AGENCY_CREATE,
             entityType: "AGENCY",
             entityId: agency.id,
             performedById: user.id,
@@ -82,7 +85,18 @@ export const POST = handleApiErrors(
         return { ...agency, user: newUser };
       });
 
-      console.log("Generated temp password: ", randomPassword);
+      try {
+        const verificationLink = `http://localhost:3000/auth/verify-account?email=${encodeURIComponent(data.email)}`;
+        const emailTemplate = getAgencyCreationEmail(
+          data.agencyName,
+          data.email,
+          user.name || "Findly Admin",
+          verificationLink
+        );
+        await sendTemplateEmail(emailTemplate, data.email);
+      } catch (emailError) {
+        console.error("Failed to send agency creation email:", emailError);
+      }
 
       return NextResponse.json(result, { status: 201 });
     })

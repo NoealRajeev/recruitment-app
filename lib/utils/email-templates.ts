@@ -1,0 +1,408 @@
+// lib/email-templates.ts
+export interface EmailTemplate {
+  subject: string;
+  text: string;
+  html: string;
+}
+
+// Base styles for consistent email design
+const baseEmailStyles = {
+  fontFamily: "Arial, sans-serif",
+  maxWidth: "600px",
+  margin: "auto",
+  padding: "20px",
+  backgroundColor: "#ffffff",
+  borderRadius: "8px",
+  border: "1px solid #eee",
+  color: "#333333",
+};
+
+const primaryColor = "#2C0053";
+const secondaryColor = "#635372";
+// const accentColor = "#ff6b35";
+const lightBackground = "#f8f9fa";
+const warningBackground = "#fff8e1";
+const infoBackground = "#f0f8ff";
+
+const headerTemplate = (title: string) => `
+  <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid ${primaryColor}; padding-bottom: 15px;">
+    <img src="${process.env.NEXTAUTH_URL}/logo.png" alt="Findly Logo" style="max-height: 60px;">
+    <h1 style="color: ${primaryColor}; margin-top: 10px; margin-bottom: 5px;">${title}</h1>
+  </div>
+`;
+
+const footerTemplate = `
+  <div style="border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px; text-align: center;">
+    <p style="color: ${primaryColor}; font-weight: bold; margin-bottom: 5px;">Best regards,</p>
+    <p style="color: ${secondaryColor}; margin-top: 0;">The Findly Team</p>
+    <img src="${process.env.NEXTAUTH_URL}/logo-small.png" alt="Findly Logo" style="max-height: 40px; margin-top: 20px;">
+  </div>
+`;
+
+const actionButton = (text: string, url: string) => `
+  <a href="${url}" 
+     style="display: inline-block; padding: 12px 24px; 
+            background-color: ${primaryColor}; color: white; 
+            text-decoration: none; border-radius: 4px; 
+            margin: 10px 0; font-weight: bold;">
+    ${text}
+  </a>
+`;
+
+// Document list for agency registration
+const requiredDocumentsList = `
+<ul style="padding-left: 20px; line-height: 1.6;">
+  <li><strong>Business License</strong> - Copy of your agency's business registration/license</li>
+  <li><strong>Insurance Certificate</strong> - Proof of professional liability insurance</li>
+  <li><strong>ID Proof</strong> - Government-issued ID of primary contact</li>
+  <li><strong>Address Proof</strong> - Utility bill or bank statement showing business address</li>
+  <li><strong>Other Supporting Documents</strong> - Any additional certifications or permits</li>
+</ul>
+`;
+
+export const getOtpEmailTemplate = (otp: string): EmailTemplate => ({
+  subject: "Your One-Time Password (OTP) for Findly",
+  text: `Hello,
+  
+Your One-Time Password (OTP) for verifying your email on Findly is: ${otp}
+
+This code is valid for 5 minutes. If you did not request this, please ignore this email.
+
+Thank you,
+The Findly Team`,
+
+  html: `
+<div style="${Object.entries(baseEmailStyles)
+    .map(([key, value]) => `${key}: ${value};`)
+    .join("")}">
+  ${headerTemplate("Findly Verification Code")}
+  
+  <p>Hello,</p>
+  <p>Your One-Time Password (OTP) for verifying your email on <strong>Findly</strong> is:</p>
+  
+  <div style="text-align: center; margin: 20px 0;">
+    <div style="display: inline-block; padding: 15px 30px; background-color: ${lightBackground}; 
+                border-radius: 8px; font-size: 24px; font-weight: bold; color: ${primaryColor};">
+      ${otp}
+    </div>
+  </div>
+  
+  <p>This code is valid for <strong>5 minutes</strong>.</p>
+  <p>If you did not request this, you can safely ignore this email.</p>
+  
+  ${footerTemplate}
+</div>
+`,
+});
+
+export const getAccountApprovalEmail = (
+  email: string,
+  password: string
+): EmailTemplate => ({
+  subject: "Your Findly Account Has Been Approved",
+  text: `Hello,
+  
+Your Findly account has been approved and is now active. Here are your login credentials:
+
+Email: ${email}
+Temporary Password: ${password}
+
+Please log in and change your password immediately for security reasons.
+
+Login URL: ${process.env.NEXTAUTH_URL}/auth/login
+
+Thank you,
+The Findly Team`,
+
+  html: `
+<div style="${Object.entries(baseEmailStyles)
+    .map(([key, value]) => `${key}: ${value};`)
+    .join("")}">
+  ${headerTemplate("Your Findly Account Is Ready")}
+  
+  <p>Hello,</p>
+  <p>Your Findly account has been approved and is now active. Here are your login credentials:</p>
+  
+  <div style="background: ${lightBackground}; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${primaryColor};">
+    <p><strong>Email:</strong> ${email}</p>
+    <p><strong>Temporary Password:</strong> ${password}</p>
+  </div>
+  
+  <p style="color: #d32f2f; font-weight: bold;">Please log in and change your password immediately for security reasons.</p>
+  
+  ${actionButton("Login to Findly", `${process.env.NEXTAUTH_URL}/auth/login`)}
+  
+  ${footerTemplate}
+</div>
+`,
+});
+
+export const getAdminOnboardingEmail = (
+  name: string,
+  email: string,
+  password: string
+): EmailTemplate => ({
+  subject: `Welcome to Findly's Admin Team, ${name}!`,
+  text: `Dear ${name},
+
+Welcome to Findly's Admin Team!
+
+We're excited to have you join us in managing and optimizing our recruitment platform. Below are your login credentials to access the admin dashboard:
+
+Email: ${email}
+Temporary Password: ${password}
+
+First Steps:
+1. Log in to the admin dashboard
+2. Change your temporary password immediately
+3. Review the admin handbook
+4. Set up your profile and notification preferences
+
+For any assistance, please contact our support team at support@findly.com.
+
+Best regards,
+The Findly Leadership Team`,
+
+  html: `
+<div style="${Object.entries(baseEmailStyles)
+    .map(([key, value]) => `${key}: ${value};`)
+    .join("")}">
+  ${headerTemplate(`Welcome to Findly's Admin Team`)}
+
+  <p>Dear ${name},</p>
+  <p>We're excited to have you join us in managing and optimizing our recruitment platform.</p>
+  
+  <div style="background: ${lightBackground}; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${primaryColor};">
+    <h3 style="margin-top: 0; color: ${primaryColor};">Your Login Credentials</h3>
+    <p><strong>Email:</strong> ${email}</p>
+    <p><strong>Temporary Password:</strong> ${password}</p>
+    ${actionButton("Access Admin Dashboard", `${process.env.NEXTAUTH_URL}/admin/login`)}
+  </div>
+
+  <h3 style="color: ${primaryColor};">First Steps</h3>
+  <ol style="padding-left: 20px; line-height: 1.6;">
+    <li>Log in and change your temporary password</li>
+    <li>Review the admin handbook (attached)</li>
+    <li>Set up your profile and notification preferences</li>
+    <li>Familiarize yourself with the dashboard</li>
+  </ol>
+
+  <div style="background: ${warningBackground}; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+    <h3 style="margin-top: 0; color: #d32f2f;">Security Reminders</h3>
+    <ul style="padding-left: 20px;">
+      <li>Never share your credentials</li>
+      <li>Always log out from shared devices</li>
+      <li>Report any suspicious activity immediately</li>
+    </ul>
+  </div>
+
+  <p>For any assistance, please contact our support team at 
+    <a href="mailto:support@findly.com" style="color: ${primaryColor}; font-weight: bold;">support@findly.com</a>.
+  </p>
+
+  ${footerTemplate}
+</div>
+`,
+});
+
+export const getAgencyCreationEmail = (
+  agencyName: string,
+  email: string,
+  adminName: string,
+  verificationLink: string
+): EmailTemplate => ({
+  subject: `Action Required: Verify Your Findly Agency Account`,
+  text: `Dear ${agencyName},
+
+Thank you for registering with Findly! Your agency account has been created by ${adminName} and is currently being reviewed by our team.
+
+To complete your registration, please verify your email address by clicking the link below:
+${verificationLink}
+
+Please prepare the following documents for verification:
+- Business License
+- Insurance Certificate
+- ID Proof
+- Address Proof
+- Other Supporting Documents
+
+If you have any questions, please contact our support team at support@findly.com.
+
+Thank you for choosing Findly.
+
+Best regards,
+The Findly Team`,
+
+  html: `
+<div style="${Object.entries(baseEmailStyles)
+    .map(([key, value]) => `${key}: ${value};`)
+    .join("")}">
+  ${headerTemplate("Agency Registration in Progress")}
+  
+  <p>Dear ${agencyName},</p>
+  <p>Thank you for registering with Findly! Your agency account has been created by ${adminName} and is currently being reviewed by our team.</p>
+  
+  <div style="background: ${lightBackground}; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${primaryColor};">
+    <h3 style="margin-top: 0; color: ${primaryColor};">Action Required: Verify Your Email</h3>
+    <p>Please click the button below to verify your email address:</p>
+    ${actionButton("Verify Email Address", verificationLink)}
+    <p style="font-size: 12px; color: #666;">Or copy this link to your browser: ${verificationLink}</p>
+  </div>
+
+  <h3 style="color: ${primaryColor};">Required Documents</h3>
+  ${requiredDocumentsList}
+
+  <div style="background: ${infoBackground}; padding: 16px; border-radius: 8px; margin: 20px 0;">
+    <h3 style="margin-top: 0; color: ${primaryColor};">What Happens Next?</h3>
+    <ol style="padding-left: 20px; line-height: 1.6;">
+      <li>Complete email verification using the link above</li>
+      <li>Submit all required documents through the portal</li>
+      <li>Our team will review your submission</li>
+      <li>You'll receive login credentials within 1-2 business days after approval</li>
+    </ol>
+  </div>
+
+  <p>For any questions, please contact our support team at 
+    <a href="mailto:support@findly.com" style="color: ${primaryColor}; font-weight: bold;">support@findly.com</a>.
+  </p>
+
+  ${footerTemplate}
+</div>
+`,
+});
+
+export const getAgencyWelcomeEmail = (
+  agencyName: string,
+  email: string,
+  password: string,
+  loginLink: string = `${process.env.NEXTAUTH_URL}/auth/login`
+): EmailTemplate => ({
+  subject: `Welcome to Findly, ${agencyName}! Your Agency Account is Ready`,
+  text: `Dear ${agencyName},
+
+Congratulations! Your agency account with Findly has been approved and is now active.
+
+Here are your login credentials:
+Email: ${email}
+Temporary Password: ${password}
+
+First Steps:
+1. Log in to your dashboard
+2. Change your temporary password immediately
+3. Complete your agency profile
+4. Review the agency handbook
+5. Set up your recruitment preferences
+
+For assistance, contact our support team at support@findly.com.
+
+Best regards,
+The Findly Team`,
+
+  html: `
+<div style="${Object.entries(baseEmailStyles)
+    .map(([key, value]) => `${key}: ${value};`)
+    .join("")}">
+  ${headerTemplate("Welcome to Findly!")}
+  
+  <p>Dear ${agencyName},</p>
+  <p>Congratulations! Your agency account with Findly has been approved and is now active.</p>
+  
+  <div style="background: ${lightBackground}; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${primaryColor};">
+    <h3 style="margin-top: 0; color: ${primaryColor};">Your Login Credentials</h3>
+    <p><strong>Email:</strong> ${email}</p>
+    <p><strong>Temporary Password:</strong> ${password}</p>
+    ${actionButton("Access Agency Dashboard", loginLink)}
+  </div>
+
+  <h3 style="color: ${primaryColor};">Getting Started Guide</h3>
+  <ol style="padding-left: 20px; line-height: 1.6;">
+    <li><strong>First Login:</strong> Use the credentials above to access your dashboard</li>
+    <li><strong>Security:</strong> Change your temporary password immediately</li>
+    <li><strong>Profile:</strong> Complete your agency profile with all required details</li>
+    <li><strong>Handbook:</strong> Review the attached agency handbook for guidelines</li>
+    <li><strong>Preferences:</strong> Set up your recruitment and notification preferences</li>
+  </ol>
+
+  <div style="background: ${infoBackground}; padding: 16px; border-radius: 8px; margin: 20px 0;">
+    <h3 style="margin-top: 0; color: ${primaryColor};">Need Help?</h3>
+    <p>Our support team is ready to assist you with:</p>
+    <ul style="padding-left: 20px; line-height: 1.6;">
+      <li>Account setup questions</li>
+      <li>Platform navigation</li>
+    </ul>
+    <p>Contact us at <a href="mailto:support@findly.com" style="color: ${primaryColor}; font-weight: bold;">support@findly.com</a></p>
+  </div>
+
+  ${footerTemplate}
+</div>
+`,
+});
+
+// New template for document submission confirmation
+export const getAgencyDocumentsSubmittedEmail = (
+  agencyName: string,
+  adminName: string
+): EmailTemplate => ({
+  subject: `Documents Received - ${agencyName} Account Verification`,
+  text: `Dear ${agencyName},
+
+Thank you for submitting your documents for Findly agency verification. We have received the following documents:
+
+- Business License
+- Insurance Certificate
+- ID Proof
+- Address Proof
+- Other Supporting Documents
+
+Our verification team will review your submission within 1-2 business days. Once approved, you will receive your login credentials via email.
+
+Please check your email frequently during this period. If we need any additional information, we will contact you.
+
+If you have any questions, please contact ${adminName} or our support team at support@findly.com.
+
+Thank you for your patience.
+
+Best regards,
+The Findly Team`,
+
+  html: `
+<div style="${Object.entries(baseEmailStyles)
+    .map(([key, value]) => `${key}: ${value};`)
+    .join("")}">
+  ${headerTemplate("Documents Received")}
+  
+  <p>Dear ${agencyName},</p>
+  <p>Thank you for submitting your documents for Findly agency verification.</p>
+  
+  <div style="background: ${lightBackground}; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${primaryColor};">
+    <h3 style="margin-top: 0; color: ${primaryColor};">Documents Received</h3>
+    ${requiredDocumentsList}
+  </div>
+
+  <div style="background: ${infoBackground}; padding: 16px; border-radius: 8px; margin: 20px 0;">
+    <h3 style="margin-top: 0; color: ${primaryColor};">Next Steps</h3>
+    <ol style="padding-left: 20px; line-height: 1.6;">
+      <li>Our verification team will review your submission</li>
+      <li>This process typically takes <strong>1-2 business days</strong></li>
+      <li>You'll receive login credentials via email once approved</li>
+      <li>Check your email frequently during this period</li>
+    </ol>
+  </div>
+
+  <div style="background: ${warningBackground}; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+    <h3 style="margin-top: 0; color: #d32f2f;">Important Note</h3>
+    <p>If we need any additional information during verification, we will contact you via email.</p>
+  </div>
+
+  <p>If you have any questions, please contact ${adminName} or our support team at 
+    <a href="mailto:support@findly.com" style="color: ${primaryColor}; font-weight: bold;">support@findly.com</a>.
+  </p>
+
+  <p style="color: ${primaryColor}; font-weight: bold; text-align: center; margin: 30px 0 20px;">
+    Thank you for your patience during the verification process.
+  </p>
+  
+  ${footerTemplate}
+</div>
+`,
+});

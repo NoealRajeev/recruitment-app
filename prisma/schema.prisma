@@ -122,26 +122,26 @@
     
   }
 
-  enum LabourStage {
-  DOCUMENTS_PENDING
-  DOCUMENTS_COMPLETED
-  MEDICAL_PENDING
-  MEDICAL_COMPLETED
-  MEDICAL_FAILED
-  QVC_PENDING
-  QVC_COMPLETED
-  POLICE_CLEARANCE_PENDING
-  POLICE_CLEARANCE_COMPLETED
-  VISA_APPLIED
-  VISA_APPROVED
-  VISA_REJECTED
-  FLIGHT_BOOKED
-  DEPARTED
-  ARRIVED
-  WORK_PERMIT_PENDING
-  WORK_PERMIT_APPROVED
-  CONTRACT_SIGNED
-  DEPLOYED
+enum StageStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  REJECTED
+}
+
+enum LabourStage {
+  INITIALIZED
+  DOCUMENTS
+  MEDICAL
+  QVC
+  POLICE_CLEARANCE
+  VISA
+  FLIGHT
+  ARRIVAL
+  WORK_PERMIT
+  CONTRACT
+  DEPLOYMENT
 }
 
   enum DeletionType {
@@ -371,9 +371,9 @@ enum RequirementStatus {
     natureOfWorkAllowance  Float?
     otherAllowance         Float?
 
-    ticketFrequency        String[]          // e.g. ["EVERY_YEAR"]
-    workLocations          String[]          // e.g. ["QATAR","DUBAI"]
-    previousExperience     String[]          // e.g. ["GCC_EXPERIENCE"]
+    ticketFrequency        String          
+    workLocations          String        
+    previousExperience     String         
     totalExperienceYears   Int?
     preferredAge           Int?
 
@@ -428,10 +428,10 @@ model LabourProfile {
   requirementId          String?
   requirement            Requirement?               @relation(fields: [requirementId], references: [id])
   agencyId               String
-  agency                 Agency                    @relation(fields: [agencyId], references: [id])
+  agency                 Agency                     @relation(fields: [agencyId], references: [id])
 
-  currentStage LabourStage @default(DOCUMENTS_PENDING)
-  stages       LabourStageHistory[]
+  currentStage           LabourStage                @default(INITIALIZED)
+  stages                 LabourStageHistory[]
   
   // Audit logs
   auditLogs              AuditLog[]
@@ -480,16 +480,16 @@ model LabourAssignment {
 }
 
 model LabourStageHistory {
-  id          String    @id @default(uuid())
+  id          String         @id @default(uuid())
   labourId    String
-  labour      LabourProfile @relation(fields: [labourId], references: [id])
+  labour      LabourProfile   @relation(fields: [labourId], references: [id])
   stage       LabourStage
-  status      String    // "pending", "completed", "failed"
+  status      StageStatus  
   notes       String?
-  documents   String[]  // Array of document URLs
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  completedAt DateTime?
+  documents   String[]  
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  completedAt DateTime? 
 }
 
   model AuditLog {

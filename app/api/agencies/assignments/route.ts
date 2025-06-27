@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
+import { RequirementStatus } from "@/lib/generated/prisma";
 
 export async function GET() {
   try {
@@ -23,12 +24,27 @@ export async function GET() {
             status: true,
           },
         },
-        _count: {
-          select: {
-            JobRole: {
-              where: {
+        JobRole: {
+          where: {
+            agencyStatus: {
+              in: [
+                "SUBMITTED",
+                "PARTIALLY_SUBMITTED",
+                "ACCEPTED",
+              ] as RequirementStatus[],
+            },
+            requirement: {
+              status: {
+                not: RequirementStatus.ACCEPTED,
+              },
+            },
+            LabourAssignment: {
+              some: {
+                adminStatus: {
+                  not: RequirementStatus.ACCEPTED, // Use RequirementStatus enum
+                },
                 agencyStatus: {
-                  in: ["SUBMITTED", "PARTIALLY_SUBMITTED", "ACCEPTED"],
+                  not: RequirementStatus.ACCEPTED, // Use RequirementStatus enum
                 },
               },
             },
@@ -44,7 +60,7 @@ export async function GET() {
         status: agency.user.status,
       },
       createdAt: agency.createdAt,
-      pendingAssignmentsCount: agency._count.JobRole,
+      pendingAssignmentsCount: agency.JobRole.length, // Count the filtered JobRoles
     }));
 
     return NextResponse.json(agenciesWithCounts);

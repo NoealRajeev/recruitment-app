@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { ArrowUpRight, Plus, Trash2 } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Card } from "@/components/shared/Card";
@@ -11,22 +11,23 @@ import { format } from "date-fns";
 import { getContractDurationEnumMapping } from "@/lib/utils/enum-mappings";
 import { useToast } from "@/context/toast-provider";
 import { RequirementStatus, ContractDuration } from "@/lib/generated/prisma";
+import React from "react";
 
 interface ReviewFieldProps {
   label: string;
   value: string;
 }
 
-interface JobRole {
+interface JobRoleFormData {
   id?: string;
   requirementId?: string;
   title: string;
   quantity: number;
   nationality: string;
-  startDate: string | Date;
+  startDate: string;
   contractDuration?: ContractDuration | null;
   basicSalary: number;
-  salaryCurrency?: string | null;
+  salaryCurrency?: string;
   foodAllowance?: number | null;
   foodProvidedByCompany: boolean;
   housingAllowance?: number | null;
@@ -38,15 +39,19 @@ interface JobRole {
   natureOfWorkAllowance?: number | null;
   otherAllowance?: number | null;
   healthInsurance: string;
-  ticketFrequency: string[];
-  workLocations: string[];
-  previousExperience: string[];
+  ticketFrequency: string;
+  workLocations: string;
+  previousExperience: string;
   totalExperienceYears?: number | null;
   preferredAge?: number | null;
   languageRequirements: string[];
-  specialRequirements?: string | null;
+  specialRequirements?: string;
   assignedAgencyId?: string | null;
   agencyStatus?: RequirementStatus;
+}
+
+interface RequirementFormData {
+  jobRoles: JobRoleFormData[];
 }
 
 interface Requirement {
@@ -54,15 +59,11 @@ interface Requirement {
   status: RequirementStatus;
   createdAt: Date;
   updatedAt: Date;
-  jobRoles: JobRole[];
+  jobRoles: JobRoleFormData[];
   client: {
     id: string;
     companyName: string;
   };
-}
-
-interface RequirementFormData {
-  jobRoles: JobRole[];
 }
 
 function ReviewField({ label, value }: ReviewFieldProps) {
@@ -74,7 +75,6 @@ function ReviewField({ label, value }: ReviewFieldProps) {
   );
 }
 
-// Add these API call functions at the top of your file, right after the imports
 async function getRequirements(): Promise<Requirement[]> {
   try {
     const response = await fetch("/api/requirements", {
@@ -85,10 +85,11 @@ async function getRequirements(): Promise<Requirement[]> {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch requirements");
+      throw new Error(`Failed to fetch requirements: ${response.statusText}`);
     }
 
-    return await response.json();
+    const data = await response.json();
+    return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error("Error fetching requirements:", error);
     throw error;
@@ -105,18 +106,18 @@ async function getRequirementById(id: string): Promise<Requirement> {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch requirement");
+      throw new Error(`Failed to fetch requirement: ${response.statusText}`);
     }
 
     return await response.json();
   } catch (error) {
-    console.error("Error fetching requirement:", error);
+    console.error(`Error fetching requirement ${id}:`, error);
     throw error;
   }
 }
 
 async function createRequirement(
-  jobRoles: Omit<JobRole, "id" | "requirementId">[],
+  jobRoles: Omit<JobRoleFormData, "id" | "requirementId">[],
   status: RequirementStatus
 ): Promise<Requirement> {
   try {
@@ -132,7 +133,8 @@ async function createRequirement(
     });
 
     if (!response.ok) {
-      throw new Error("Failed to create requirement");
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to create requirement");
     }
 
     return await response.json();
@@ -145,7 +147,7 @@ async function createRequirement(
 async function updateRequirement(
   id: string,
   data: {
-    jobRoles: JobRole[];
+    jobRoles: JobRoleFormData[];
     status: RequirementStatus;
   }
 ): Promise<Requirement> {
@@ -159,12 +161,46 @@ async function updateRequirement(
     });
 
     if (!response.ok) {
-      throw new Error("Failed to update requirement");
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to update requirement");
     }
 
     return await response.json();
   } catch (error) {
     console.error("Error updating requirement:", error);
+    throw error;
+  }
+}
+
+async function saveAsDraft(
+  jobRoles: Omit<JobRoleFormData, "id" | "requirementId">[],
+  existingId?: string
+): Promise<Requirement> {
+  try {
+    const url = existingId
+      ? `/api/requirements/${existingId}`
+      : "/api/requirements";
+    const method = existingId ? "PATCH" : "POST";
+
+    const response = await fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        jobRoles,
+        status: "DRAFT",
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to save draft");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error saving draft:", error);
     throw error;
   }
 }
@@ -188,7 +224,7 @@ export default function Requirements() {
         title: "",
         quantity: 1,
         nationality: "",
-        startDate: "",
+        startDate: new Date().toISOString().split("T")[0],
         contractDuration: undefined,
         basicSalary: 0,
         salaryCurrency: "QAR",
@@ -203,9 +239,9 @@ export default function Requirements() {
         natureOfWorkAllowance: undefined,
         otherAllowance: undefined,
         healthInsurance: "asPerLaw",
-        ticketFrequency: [],
-        workLocations: [],
-        previousExperience: [],
+        ticketFrequency: "",
+        workLocations: "",
+        previousExperience: "",
         totalExperienceYears: undefined,
         preferredAge: undefined,
         languageRequirements: [],
@@ -214,25 +250,23 @@ export default function Requirements() {
     ],
   });
 
-  useEffect(() => {
-    const fetchRequirements = async () => {
-      try {
-        const data = await getRequirements();
-        setRequirements(data);
-      } catch (error: unknown) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Failed to load requirements";
-        toast({
-          message: errorMessage,
-          type: "error",
-        });
-      }
-    };
-
-    fetchRequirements();
+  const fetchRequirements = useCallback(async () => {
+    try {
+      const data = await getRequirements();
+      setRequirements(data);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load requirements";
+      toast({
+        message: errorMessage,
+        type: "error",
+      });
+    }
   }, [toast]);
+
+  useEffect(() => {
+    fetchRequirements();
+  }, [fetchRequirements]);
 
   const steps = [
     { id: 1, label: t.jobDetails },
@@ -260,33 +294,45 @@ export default function Requirements() {
     [t.contractDurationOptions, contractDurationMapping]
   );
 
-  const ticketFrequencyOptions = [
-    { value: "ANNUAL", label: "Annual" },
-    { value: "BIENNIAL", label: "Biennial" },
-    { value: "END_OF_CONTRACT", label: "End of Contract" },
-  ];
+  const ticketFrequencyOptions = useMemo(
+    () => [
+      { value: "ANNUAL", label: "Annual" },
+      { value: "BIENNIAL", label: "Biennial" },
+      { value: "END_OF_CONTRACT", label: "End of Contract" },
+    ],
+    []
+  );
 
-  const workLocationOptions = [
-    { value: "OFFICE", label: "Office" },
-    { value: "SITE", label: "Site" },
-    { value: "HYBRID", label: "Hybrid" },
-    { value: "REMOTE", label: "Remote" },
-  ];
+  const workLocationOptions = useMemo(
+    () => [
+      { value: "OFFICE", label: "Office" },
+      { value: "SITE", label: "Site" },
+      { value: "HYBRID", label: "Hybrid" },
+      { value: "REMOTE", label: "Remote" },
+    ],
+    []
+  );
 
-  const previousExperienceOptions = [
-    { value: "GCC", label: "GCC Experience" },
-    { value: "QATAR", label: "Qatar Experience" },
-    { value: "OVERSEAS", label: "Overseas Experience" },
-  ];
+  const previousExperienceOptions = useMemo(
+    () => [
+      { value: "GCC", label: "GCC Experience" },
+      { value: "QATAR", label: "Qatar Experience" },
+      { value: "OVERSEAS", label: "Overseas Experience" },
+    ],
+    []
+  );
 
-  const languageOptions = [
-    "English",
-    "Arabic",
-    "Hindi",
-    "Urdu",
-    "Malayalam",
-    "Tagalog",
-  ];
+  const languageOptions = useMemo(
+    () => ["English", "Arabic", "Hindi", "Urdu", "Malayalam", "Tagalog"],
+    []
+  );
+
+  const getMinStartDate = () => {
+    const today = new Date();
+    const minDate = new Date(today);
+    minDate.setDate(minDate.getDate() + 14); // Add 2 weeks (14 days)
+    return minDate.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+  };
 
   const handleOpenModal = async (requirement?: Requirement) => {
     if (requirement?.id) {
@@ -294,20 +340,18 @@ export default function Requirements() {
         const fullRequirement = await getRequirementById(requirement.id);
         if (fullRequirement) {
           setEditingRequirement(fullRequirement);
-
-          // Determine if we're in view mode (not a DRAFT)
           const isDraft = fullRequirement.status === "DRAFT";
           setIsViewMode(!isDraft);
-
-          // Set initial step based on status
           setCurrentStep(isDraft ? 1 : 2);
+
           setFormData({
             jobRoles: fullRequirement.jobRoles.map((role) => ({
               ...role,
-              startDate:
-                role.startDate instanceof Date
-                  ? format(role.startDate, "yyyy-MM-dd")
-                  : role.startDate,
+              startDate: role.startDate
+                ? typeof role.startDate === "string"
+                  ? role.startDate
+                  : format(role.startDate, "yyyy-MM-dd")
+                : new Date().toISOString().split("T")[0],
               contractDuration: role.contractDuration || undefined,
               salaryCurrency: role.salaryCurrency || "QAR",
               foodAllowance: role.foodAllowance ?? undefined,
@@ -344,7 +388,7 @@ export default function Requirements() {
             title: "",
             quantity: 1,
             nationality: "",
-            startDate: "",
+            startDate: new Date().toISOString().split("T")[0],
             contractDuration: undefined,
             basicSalary: 0,
             salaryCurrency: "QAR",
@@ -359,9 +403,9 @@ export default function Requirements() {
             natureOfWorkAllowance: undefined,
             otherAllowance: undefined,
             healthInsurance: "asPerLaw",
-            ticketFrequency: [],
-            workLocations: [],
-            previousExperience: [],
+            ticketFrequency: "",
+            workLocations: "",
+            previousExperience: "",
             totalExperienceYears: undefined,
             preferredAge: undefined,
             languageRequirements: [],
@@ -370,11 +414,59 @@ export default function Requirements() {
         ],
       });
     }
-    setCurrentStep(1);
     setIsModalOpen(true);
   };
 
-  const handleCloseModal = () => {
+  const hasValidData = useMemo(
+    () =>
+      formData.jobRoles.some(
+        (role) =>
+          role.title ||
+          role.nationality ||
+          role.startDate ||
+          role.contractDuration
+      ),
+    [formData]
+  );
+
+  const handleCloseModal = async () => {
+    if (!isViewMode && hasValidData) {
+      const confirmClose = window.confirm(
+        "You have unsaved changes. Do you want to save as draft before closing?"
+      );
+
+      if (confirmClose) {
+        try {
+          setIsSubmitting(true);
+          const jobRoles = formData.jobRoles.map((role) => ({
+            ...role,
+            startDate: role.startDate,
+          }));
+
+          if (editingRequirement) {
+            await saveAsDraft(jobRoles, editingRequirement.id);
+          } else {
+            await saveAsDraft(jobRoles);
+          }
+
+          await fetchRequirements();
+          toast({
+            message: "Draft saved successfully",
+            type: "success",
+          });
+        } catch (error: unknown) {
+          const errorMessage =
+            error instanceof Error ? error.message : "Failed to save draft";
+          toast({
+            message: errorMessage,
+            type: "error",
+          });
+        } finally {
+          setIsSubmitting(false);
+        }
+      }
+    }
+
     setIsModalOpen(false);
     setErrors({});
   };
@@ -386,7 +478,7 @@ export default function Requirements() {
   };
 
   const handleBack = () => {
-    setCurrentStep((prev) => prev - 1);
+    setCurrentStep((prev) => Math.max(1, prev - 1));
   };
 
   const validateStep = (step: number): boolean => {
@@ -394,7 +486,6 @@ export default function Requirements() {
 
     if (step === 1) {
       formData.jobRoles.forEach((role, index) => {
-        // Basic job role info validation
         if (!role.title) {
           newErrors[`jobRoles[${index}].title`] = "Job title is required";
         }
@@ -408,45 +499,46 @@ export default function Requirements() {
         }
         if (!role.startDate) {
           newErrors[`jobRoles[${index}].startDate`] = "Start date is required";
+        } else if (role.startDate) {
+          const minStartDate = new Date();
+          minStartDate.setDate(minStartDate.getDate() + 14);
+          const selectedDate = new Date(role.startDate);
+
+          if (selectedDate < minStartDate) {
+            newErrors[`jobRoles[${index}].startDate`] =
+              "Start date must be at least 2 weeks from today";
+          }
+        } else if (isNaN(new Date(role.startDate).getTime())) {
+          newErrors[`jobRoles[${index}].startDate`] = "Invalid date format";
         }
         if (!role.contractDuration) {
           newErrors[`jobRoles[${index}].contractDuration`] =
             "Contract duration is required";
         }
-
-        // Salary validation
-        if (!role.basicSalary || role.basicSalary <= 0) {
+        if (role.basicSalary !== undefined && role.basicSalary < 0) {
           newErrors[`jobRoles[${index}].basicSalary`] =
-            "Basic salary is required";
+            "Salary cannot be negative";
         }
-
-        // Additional Job Details validation
-        if (role.ticketFrequency.length === 0) {
+        if (!role.ticketFrequency) {
           newErrors[`jobRoles[${index}].ticketFrequency`] =
-            "At least one ticket frequency option is required";
+            "Ticket frequency is required";
         }
-
-        if (role.workLocations.length === 0) {
+        if (!role.workLocations) {
           newErrors[`jobRoles[${index}].workLocations`] =
-            "At least one work location is required";
+            "Work location is required";
         }
-
-        if (role.previousExperience.length === 0) {
+        if (!role.previousExperience) {
           newErrors[`jobRoles[${index}].previousExperience`] =
-            "At least one previous experience option is required";
+            "Previous experience is required";
         }
-
         if (!role.totalExperienceYears || role.totalExperienceYears <= 0) {
           newErrors[`jobRoles[${index}].totalExperienceYears`] =
             "Total experience years is required";
         }
-
         if (!role.preferredAge || role.preferredAge <= 0) {
           newErrors[`jobRoles[${index}].preferredAge`] =
             "Preferred age is required";
         }
-
-        // Language validation
         if (role.languageRequirements.length === 0) {
           newErrors[`jobRoles[${index}].languageRequirements`] =
             "At least one language is required";
@@ -468,9 +560,16 @@ export default function Requirements() {
     const checked =
       type === "checkbox" ? (e.target as HTMLInputElement).checked : undefined;
 
+    if (type === "number" && parseFloat(value) < 0) {
+      return;
+    }
+
     setFormData((prev) => {
       const updatedJobRoles = [...prev.jobRoles];
-      const key = name.replace(`jobRoles[${index}].`, "") as keyof JobRole;
+      const key = name.replace(
+        `jobRoles[${index}].`,
+        ""
+      ) as keyof JobRoleFormData;
 
       if (type === "checkbox") {
         updatedJobRoles[index] = {
@@ -480,7 +579,7 @@ export default function Requirements() {
       } else if (type === "number") {
         updatedJobRoles[index] = {
           ...updatedJobRoles[index],
-          [key]: value === "" ? undefined : parseFloat(value),
+          [key]: value === "" ? undefined : Math.max(0, parseFloat(value)),
         };
       } else {
         updatedJobRoles[index] = {
@@ -495,7 +594,6 @@ export default function Requirements() {
       };
     });
 
-    // Clear error when field is changed
     if (errors[name]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -505,93 +603,60 @@ export default function Requirements() {
     }
   };
 
-  const handleMultiSelectChange = (
-    index: number,
-    field: string,
-    value: string,
-    isChecked: boolean
-  ) => {
-    setFormData((prev) => {
-      const updatedJobRoles = [...prev.jobRoles];
-      const currentValues =
-        (updatedJobRoles[index][field as keyof JobRole] as string[]) || [];
-
-      if (isChecked) {
-        updatedJobRoles[index] = {
-          ...updatedJobRoles[index],
-          [field]: [...currentValues, value],
-        };
-      } else {
-        updatedJobRoles[index] = {
-          ...updatedJobRoles[index],
-          [field]: currentValues.filter((v) => v !== value),
-        };
-      }
-
-      return {
-        ...prev,
-        jobRoles: updatedJobRoles,
-      };
-    });
-  };
-
-  const toggleLanguageRequirement = (language: string, index: number) => {
-    setFormData((prev) => {
-      const updatedJobRoles = [...prev.jobRoles];
-      const currentLanguages =
-        updatedJobRoles[index].languageRequirements || [];
-
-      if (currentLanguages.includes(language)) {
-        updatedJobRoles[index] = {
-          ...updatedJobRoles[index],
-          languageRequirements: currentLanguages.filter(
-            (lang) => lang !== language
-          ),
-        };
-      } else {
-        updatedJobRoles[index] = {
-          ...updatedJobRoles[index],
-          languageRequirements: [...currentLanguages, language],
-        };
-      }
-
-      return {
-        ...prev,
-        jobRoles: updatedJobRoles,
-      };
-    });
-
-    // Clear error when language is selected
-    if (errors[`jobRoles[${index}].languageRequirements`]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[`jobRoles[${index}].languageRequirements`];
-        return newErrors;
-      });
-    }
-  };
-
-  const handleAddLanguage = (index: number) => {
-    if (newLanguage.trim() && !languageOptions.includes(newLanguage.trim())) {
+  const toggleLanguageRequirement = useCallback(
+    (language: string, index: number) => {
       setFormData((prev) => {
         const updatedJobRoles = [...prev.jobRoles];
+        const currentLanguages = updatedJobRoles[index].languageRequirements;
+
         updatedJobRoles[index] = {
           ...updatedJobRoles[index],
-          languageRequirements: [
-            ...(updatedJobRoles[index].languageRequirements || []),
-            newLanguage.trim(),
-          ],
+          languageRequirements: currentLanguages.includes(language)
+            ? currentLanguages.filter((lang) => lang !== language)
+            : [...currentLanguages, language],
         };
+
         return {
           ...prev,
           jobRoles: updatedJobRoles,
         };
       });
-      setNewLanguage("");
-    }
-  };
 
-  const addJobRole = () => {
+      if (errors[`jobRoles[${index}].languageRequirements`]) {
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[`jobRoles[${index}].languageRequirements`];
+          return newErrors;
+        });
+      }
+    },
+    [errors]
+  );
+
+  const handleAddLanguage = useCallback(
+    (index: number) => {
+      if (newLanguage.trim() && !languageOptions.includes(newLanguage.trim())) {
+        setFormData((prev) => {
+          const updatedJobRoles = [...prev.jobRoles];
+          updatedJobRoles[index] = {
+            ...updatedJobRoles[index],
+            languageRequirements: [
+              ...updatedJobRoles[index].languageRequirements,
+              newLanguage.trim(),
+            ],
+          };
+          return {
+            ...prev,
+            jobRoles: updatedJobRoles,
+          };
+        });
+        setNewLanguage("");
+      }
+    },
+    [languageOptions, newLanguage]
+  );
+
+  const addJobRole = useCallback(() => {
     setFormData((prev) => ({
       ...prev,
       jobRoles: [
@@ -600,7 +665,7 @@ export default function Requirements() {
           title: "",
           quantity: 1,
           nationality: "",
-          startDate: "",
+          startDate: new Date().toISOString().split("T")[0],
           contractDuration: undefined,
           basicSalary: 0,
           salaryCurrency: "QAR",
@@ -615,9 +680,9 @@ export default function Requirements() {
           natureOfWorkAllowance: undefined,
           otherAllowance: undefined,
           healthInsurance: "asPerLaw",
-          ticketFrequency: [],
-          workLocations: [],
-          previousExperience: [],
+          ticketFrequency: "",
+          workLocations: "",
+          previousExperience: "",
           totalExperienceYears: undefined,
           preferredAge: undefined,
           languageRequirements: [],
@@ -625,22 +690,41 @@ export default function Requirements() {
         },
       ],
     }));
-  };
+  }, []);
 
-  const removeJobRole = (index: number) => {
-    if (formData.jobRoles.length > 1) {
-      setFormData((prev) => {
-        const updatedJobRoles = [...prev.jobRoles];
-        updatedJobRoles.splice(index, 1);
-        return {
-          ...prev,
-          jobRoles: updatedJobRoles,
-        };
-      });
-    }
-  };
+  const removeJobRole = useCallback(
+    (index: number) => {
+      if (formData.jobRoles.length > 1) {
+        setFormData((prev) => {
+          const updatedJobRoles = [...prev.jobRoles];
+          updatedJobRoles.splice(index, 1);
+          return {
+            ...prev,
+            jobRoles: updatedJobRoles,
+          };
+        });
+      }
+    },
+    [formData.jobRoles.length]
+  );
 
-  const calculateTotalSalary = (role: JobRole) => {
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isModalOpen && !isViewMode && hasValidData) {
+        e.preventDefault();
+        e.returnValue =
+          "You have unsaved changes. Are you sure you want to leave?";
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isModalOpen, isViewMode, hasValidData]);
+
+  const calculateTotalSalary = useCallback((role: JobRoleFormData) => {
     const basic = role.basicSalary || 0;
     const food = role.foodProvidedByCompany ? 0 : role.foodAllowance || 0;
     const housing = role.housingProvidedByCompany
@@ -654,7 +738,7 @@ export default function Requirements() {
     const other = role.otherAllowance || 0;
 
     return basic + food + housing + transport + mobile + nature + other;
-  };
+  }, []);
 
   const handleSubmit = async () => {
     if (!validateStep(currentStep)) return;
@@ -664,7 +748,7 @@ export default function Requirements() {
       const submissionData = {
         jobRoles: formData.jobRoles.map((role) => ({
           ...role,
-          startDate: new Date(role.startDate),
+          startDate: role.startDate,
           basicSalary: parseFloat(role.basicSalary.toString()),
           foodAllowance: role.foodAllowance
             ? parseFloat(role.foodAllowance.toString())
@@ -694,10 +778,7 @@ export default function Requirements() {
           status: "SUBMITTED",
         });
       } else {
-        await createRequirement(
-          submissionData.jobRoles as Omit<JobRole, "id" | "requirementId">[],
-          "SUBMITTED"
-        );
+        await createRequirement(submissionData.jobRoles, "SUBMITTED");
       }
 
       toast({
@@ -707,10 +788,14 @@ export default function Requirements() {
         type: "success",
       });
 
-      // Refresh the list
-      const updatedRequirements = await getRequirements();
-      setRequirements(updatedRequirements);
+      toast({
+        message: editingRequirement
+          ? "Requirement updated successfully"
+          : "Requirement submitted successfully",
+        type: "success",
+      });
 
+      await fetchRequirements();
       handleCloseModal();
     } catch (error: unknown) {
       const errorMessage =
@@ -771,8 +856,8 @@ export default function Requirements() {
                     {formData.jobRoles.map((role, index) => {
                       const totalSalary = calculateTotalSalary(role);
                       return (
-                        <>
-                          <tr key={index}>
+                        <React.Fragment key={index}>
+                          <tr>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <select
                                 name={`jobRoles[${index}].title`}
@@ -780,6 +865,7 @@ export default function Requirements() {
                                 onChange={(e) => handleJobRoleChange(index, e)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
                                 disabled={isViewMode}
+                                aria-label="Job title"
                               >
                                 <option value="">{t.selectOption}</option>
                                 {t.jobPositions?.map((job: string) => (
@@ -803,6 +889,7 @@ export default function Requirements() {
                                 onChange={(e) => handleJobRoleChange(index, e)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
                                 disabled={isViewMode}
+                                aria-label="Quantity"
                               />
                               {errors[`jobRoles[${index}].quantity`] && (
                                 <p className="text-xs text-red-500 mt-1">
@@ -826,6 +913,7 @@ export default function Requirements() {
                                 placeholder="Type nationality..."
                                 className="w-full"
                                 disabled={isViewMode}
+                                aria-label="Nationality"
                               />
                               {errors[`jobRoles[${index}].nationality`] && (
                                 <p className="text-xs text-red-500 mt-1">
@@ -834,20 +922,22 @@ export default function Requirements() {
                               )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="mt-1 text-xs text-gray-500">
+                                Earliest available start date:{" "}
+                                {format(
+                                  new Date(getMinStartDate()),
+                                  "MMM d, yyyy"
+                                )}
+                              </div>
                               <input
                                 type="date"
                                 name={`jobRoles[${index}].startDate`}
-                                value={
-                                  typeof role.startDate === "string"
-                                    ? role.startDate
-                                    : format(
-                                        role.startDate as Date,
-                                        "yyyy-MM-dd"
-                                      )
-                                }
+                                value={role.startDate}
                                 onChange={(e) => handleJobRoleChange(index, e)}
+                                min={getMinStartDate()}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
                                 disabled={isViewMode}
+                                aria-label="Start date"
                               />
                               {errors[`jobRoles[${index}].startDate`] && (
                                 <p className="text-xs text-red-500 mt-1">
@@ -862,6 +952,7 @@ export default function Requirements() {
                                 onChange={(e) => handleJobRoleChange(index, e)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
                                 disabled={isViewMode}
+                                aria-label="Contract duration"
                               >
                                 <option value="">Select duration</option>
                                 {contractDurationOptions.map((option) => (
@@ -891,6 +982,7 @@ export default function Requirements() {
                                   onClick={() => removeJobRole(index)}
                                   className="text-red-500 hover:text-red-700"
                                   disabled={formData.jobRoles.length <= 1}
+                                  aria-label="Remove job role"
                                 >
                                   <Trash2 className="w-5 h-5" />
                                 </button>
@@ -923,6 +1015,7 @@ export default function Requirements() {
                                       <div className="flex">
                                         <input
                                           type="number"
+                                          min="0"
                                           name={`jobRoles[${index}].basicSalary`}
                                           value={role.basicSalary || ""}
                                           onChange={(e) =>
@@ -931,6 +1024,7 @@ export default function Requirements() {
                                           className="w-full px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
                                           placeholder="Amount"
                                           disabled={isViewMode}
+                                          aria-label="Basic salary"
                                         />
                                         <select
                                           name={`jobRoles[${index}].salaryCurrency`}
@@ -940,6 +1034,7 @@ export default function Requirements() {
                                           }
                                           className="px-2 py-2 border border-gray-300 rounded-r-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
                                           disabled={isViewMode}
+                                          aria-label="Salary currency"
                                         >
                                           <option value="QAR">QAR</option>
                                           <option value="USD">USD</option>
@@ -958,7 +1053,6 @@ export default function Requirements() {
                                         </p>
                                       )}
                                     </div>
-
                                     <div className="mb-4">
                                       <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Food Allowance
@@ -966,8 +1060,13 @@ export default function Requirements() {
                                       <div className="flex items-center">
                                         <input
                                           type="number"
+                                          min="0"
                                           name={`jobRoles[${index}].foodAllowance`}
-                                          value={role.foodAllowance || ""}
+                                          value={
+                                            role.foodProvidedByCompany
+                                              ? 0
+                                              : role.foodAllowance || ""
+                                          }
                                           onChange={(e) =>
                                             handleJobRoleChange(index, e)
                                           }
@@ -977,6 +1076,7 @@ export default function Requirements() {
                                             isViewMode ||
                                             role.foodProvidedByCompany
                                           }
+                                          aria-label="Food allowance"
                                         />
                                         <div className="flex items-center ml-4">
                                           <input
@@ -986,11 +1086,27 @@ export default function Requirements() {
                                               role.foodProvidedByCompany ||
                                               false
                                             }
-                                            onChange={(e) =>
-                                              handleJobRoleChange(index, e)
-                                            }
+                                            onChange={(e) => {
+                                              handleJobRoleChange(index, e);
+                                              if (e.target.checked) {
+                                                setFormData((prev) => {
+                                                  const updatedJobRoles = [
+                                                    ...prev.jobRoles,
+                                                  ];
+                                                  updatedJobRoles[index] = {
+                                                    ...updatedJobRoles[index],
+                                                    foodAllowance: 0,
+                                                  };
+                                                  return {
+                                                    ...prev,
+                                                    jobRoles: updatedJobRoles,
+                                                  };
+                                                });
+                                              }
+                                            }}
                                             className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
                                             disabled={isViewMode}
+                                            aria-label="Food provided by company"
                                           />
                                           <label className="ml-2 block text-sm text-gray-700">
                                             Provided by Company
@@ -998,7 +1114,6 @@ export default function Requirements() {
                                         </div>
                                       </div>
                                     </div>
-
                                     <div className="mb-4">
                                       <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Housing Allowance
@@ -1006,8 +1121,13 @@ export default function Requirements() {
                                       <div className="flex items-center">
                                         <input
                                           type="number"
+                                          min="0"
                                           name={`jobRoles[${index}].housingAllowance`}
-                                          value={role.housingAllowance || ""}
+                                          value={
+                                            role.housingProvidedByCompany
+                                              ? 0
+                                              : role.housingAllowance || ""
+                                          }
                                           onChange={(e) =>
                                             handleJobRoleChange(index, e)
                                           }
@@ -1017,6 +1137,7 @@ export default function Requirements() {
                                             isViewMode ||
                                             role.housingProvidedByCompany
                                           }
+                                          aria-label="Housing allowance"
                                         />
                                         <div className="flex items-center ml-4">
                                           <input
@@ -1026,11 +1147,27 @@ export default function Requirements() {
                                               role.housingProvidedByCompany ||
                                               false
                                             }
-                                            onChange={(e) =>
-                                              handleJobRoleChange(index, e)
-                                            }
+                                            onChange={(e) => {
+                                              handleJobRoleChange(index, e);
+                                              if (e.target.checked) {
+                                                setFormData((prev) => {
+                                                  const updatedJobRoles = [
+                                                    ...prev.jobRoles,
+                                                  ];
+                                                  updatedJobRoles[index] = {
+                                                    ...updatedJobRoles[index],
+                                                    housingAllowance: 0,
+                                                  };
+                                                  return {
+                                                    ...prev,
+                                                    jobRoles: updatedJobRoles,
+                                                  };
+                                                });
+                                              }
+                                            }}
                                             className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
                                             disabled={isViewMode}
+                                            aria-label="Housing provided by company"
                                           />
                                           <label className="ml-2 block text-sm text-gray-700">
                                             Provided by Company
@@ -1038,7 +1175,6 @@ export default function Requirements() {
                                         </div>
                                       </div>
                                     </div>
-
                                     <div className="mb-4">
                                       <label className="block text-sm font-medium text-gray-700 mb-1">
                                         Transportation Allowance
@@ -1046,9 +1182,13 @@ export default function Requirements() {
                                       <div className="flex items-center">
                                         <input
                                           type="number"
+                                          min="0"
                                           name={`jobRoles[${index}].transportationAllowance`}
                                           value={
-                                            role.transportationAllowance || ""
+                                            role.transportationProvidedByCompany
+                                              ? 0
+                                              : role.transportationAllowance ||
+                                                ""
                                           }
                                           onChange={(e) =>
                                             handleJobRoleChange(index, e)
@@ -1059,6 +1199,7 @@ export default function Requirements() {
                                             isViewMode ||
                                             role.transportationProvidedByCompany
                                           }
+                                          aria-label="Transportation allowance"
                                         />
                                         <div className="flex items-center ml-4">
                                           <input
@@ -1068,11 +1209,27 @@ export default function Requirements() {
                                               role.transportationProvidedByCompany ||
                                               false
                                             }
-                                            onChange={(e) =>
-                                              handleJobRoleChange(index, e)
-                                            }
+                                            onChange={(e) => {
+                                              handleJobRoleChange(index, e);
+                                              if (e.target.checked) {
+                                                setFormData((prev) => {
+                                                  const updatedJobRoles = [
+                                                    ...prev.jobRoles,
+                                                  ];
+                                                  updatedJobRoles[index] = {
+                                                    ...updatedJobRoles[index],
+                                                    transportationAllowance: 0,
+                                                  };
+                                                  return {
+                                                    ...prev,
+                                                    jobRoles: updatedJobRoles,
+                                                  };
+                                                });
+                                              }
+                                            }}
                                             className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
                                             disabled={isViewMode}
+                                            aria-label="Transportation provided by company"
                                           />
                                           <label className="ml-2 block text-sm text-gray-700">
                                             Provided by Company
@@ -1081,7 +1238,6 @@ export default function Requirements() {
                                       </div>
                                     </div>
                                   </div>
-
                                   <div>
                                     <div className="mb-4">
                                       <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1102,6 +1258,7 @@ export default function Requirements() {
                                             }
                                             className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300"
                                             disabled={isViewMode}
+                                            aria-label="Health insurance as per law"
                                           />
                                           <label className="ml-2 block text-sm text-gray-700">
                                             As per Qatar Labor law
@@ -1121,6 +1278,7 @@ export default function Requirements() {
                                             }
                                             className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300"
                                             disabled={isViewMode}
+                                            aria-label="Health insurance provided by company"
                                           />
                                           <label className="ml-2 block text-sm text-gray-700">
                                             Provided by Company
@@ -1136,8 +1294,13 @@ export default function Requirements() {
                                       <div className="flex items-center">
                                         <input
                                           type="number"
+                                          min="0"
                                           name={`jobRoles[${index}].mobileAllowance`}
-                                          value={role.mobileAllowance || ""}
+                                          value={
+                                            role.mobileProvidedByCompany
+                                              ? 0
+                                              : role.mobileAllowance || ""
+                                          }
                                           onChange={(e) =>
                                             handleJobRoleChange(index, e)
                                           }
@@ -1147,6 +1310,7 @@ export default function Requirements() {
                                             isViewMode ||
                                             role.mobileProvidedByCompany
                                           }
+                                          aria-label="Mobile allowance"
                                         />
                                         <div className="flex items-center ml-4">
                                           <input
@@ -1156,11 +1320,27 @@ export default function Requirements() {
                                               role.mobileProvidedByCompany ||
                                               false
                                             }
-                                            onChange={(e) =>
-                                              handleJobRoleChange(index, e)
-                                            }
+                                            onChange={(e) => {
+                                              handleJobRoleChange(index, e);
+                                              if (e.target.checked) {
+                                                setFormData((prev) => {
+                                                  const updatedJobRoles = [
+                                                    ...prev.jobRoles,
+                                                  ];
+                                                  updatedJobRoles[index] = {
+                                                    ...updatedJobRoles[index],
+                                                    mobileAllowance: 0,
+                                                  };
+                                                  return {
+                                                    ...prev,
+                                                    jobRoles: updatedJobRoles,
+                                                  };
+                                                });
+                                              }
+                                            }}
                                             className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
                                             disabled={isViewMode}
+                                            aria-label="Mobile provided by company"
                                           />
                                           <label className="ml-2 block text-sm text-gray-700">
                                             Provided by Company
@@ -1176,6 +1356,7 @@ export default function Requirements() {
                                       <div className="flex">
                                         <input
                                           type="number"
+                                          min="0"
                                           name={`jobRoles[${index}].natureOfWorkAllowance`}
                                           value={
                                             role.natureOfWorkAllowance || ""
@@ -1186,6 +1367,7 @@ export default function Requirements() {
                                           className="w-full px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
                                           placeholder="Amount"
                                           disabled={isViewMode}
+                                          aria-label="Nature of work allowance"
                                         />
                                       </div>
                                     </div>
@@ -1197,6 +1379,7 @@ export default function Requirements() {
                                       <div className="flex">
                                         <input
                                           type="number"
+                                          min="0"
                                           name={`jobRoles[${index}].otherAllowance`}
                                           value={role.otherAllowance || ""}
                                           onChange={(e) =>
@@ -1205,6 +1388,7 @@ export default function Requirements() {
                                           className="w-full px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
                                           placeholder="Amount"
                                           disabled={isViewMode}
+                                          aria-label="Other allowance"
                                         />
                                       </div>
                                     </div>
@@ -1244,23 +1428,23 @@ export default function Requirements() {
                                                 className="flex items-center"
                                               >
                                                 <input
-                                                  type="checkbox"
+                                                  type="radio"
                                                   id={`ticketFrequency-${index}-${option.value}`}
+                                                  name={`jobRoles[${index}].ticketFrequency`}
+                                                  value={option.value}
                                                   checked={
-                                                    role.ticketFrequency?.includes(
-                                                      option.value
-                                                    ) || false
+                                                    role.ticketFrequency ===
+                                                    option.value
                                                   }
                                                   onChange={(e) =>
-                                                    handleMultiSelectChange(
+                                                    handleJobRoleChange(
                                                       index,
-                                                      "ticketFrequency",
-                                                      option.value,
-                                                      e.target.checked
+                                                      e
                                                     )
                                                   }
-                                                  className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
+                                                  className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300"
                                                   disabled={isViewMode}
+                                                  aria-label={`Ticket frequency ${option.label}`}
                                                 />
                                                 <label
                                                   htmlFor={`ticketFrequency-${index}-${option.value}`}
@@ -1299,23 +1483,20 @@ export default function Requirements() {
                                               className="flex items-center"
                                             >
                                               <input
-                                                type="checkbox"
+                                                type="radio"
                                                 id={`workLocations-${index}-${option.value}`}
+                                                name={`jobRoles[${index}].workLocations`}
+                                                value={option.value}
                                                 checked={
-                                                  role.workLocations?.includes(
-                                                    option.value
-                                                  ) || false
+                                                  role.workLocations ===
+                                                  option.value
                                                 }
                                                 onChange={(e) =>
-                                                  handleMultiSelectChange(
-                                                    index,
-                                                    "workLocations",
-                                                    option.value,
-                                                    e.target.checked
-                                                  )
+                                                  handleJobRoleChange(index, e)
                                                 }
-                                                className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
+                                                className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300"
                                                 disabled={isViewMode}
+                                                aria-label={`Work location ${option.label}`}
                                               />
                                               <label
                                                 htmlFor={`workLocations-${index}-${option.value}`}
@@ -1356,23 +1537,23 @@ export default function Requirements() {
                                                 className="flex items-center"
                                               >
                                                 <input
-                                                  type="checkbox"
+                                                  type="radio"
                                                   id={`previousExperience-${index}-${option.value}`}
+                                                  name={`jobRoles[${index}].previousExperience`}
+                                                  value={option.value}
                                                   checked={
-                                                    role.previousExperience?.includes(
-                                                      option.value
-                                                    ) || false
+                                                    role.previousExperience ===
+                                                    option.value
                                                   }
                                                   onChange={(e) =>
-                                                    handleMultiSelectChange(
+                                                    handleJobRoleChange(
                                                       index,
-                                                      "previousExperience",
-                                                      option.value,
-                                                      e.target.checked
+                                                      e
                                                     )
                                                   }
-                                                  className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
+                                                  className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300"
                                                   disabled={isViewMode}
+                                                  aria-label={`Previous experience ${option.label}`}
                                                 />
                                                 <label
                                                   htmlFor={`previousExperience-${index}-${option.value}`}
@@ -1417,6 +1598,7 @@ export default function Requirements() {
                                           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
                                           placeholder="e.g., 5"
                                           disabled={isViewMode}
+                                          aria-label="Total experience years"
                                         />
                                       </div>
                                       <div className="mb-4">
@@ -1447,6 +1629,7 @@ export default function Requirements() {
                                           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
                                           placeholder="e.g., 30"
                                           disabled={isViewMode}
+                                          aria-label="Preferred age"
                                         />
                                       </div>
                                     </div>
@@ -1501,6 +1684,7 @@ export default function Requirements() {
                                               }
                                               className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
                                               disabled={isViewMode}
+                                              aria-label={`Language requirement ${language}`}
                                             />
                                             <label
                                               htmlFor={`lang-${index}-${language}`}
@@ -1528,6 +1712,7 @@ export default function Requirements() {
                                             }}
                                             placeholder="Add another language"
                                             className="w-full"
+                                            aria-label="Add custom language"
                                           />
                                           <Button
                                             type="button"
@@ -1535,6 +1720,7 @@ export default function Requirements() {
                                             onClick={() =>
                                               handleAddLanguage(index)
                                             }
+                                            aria-label="Add language button"
                                           >
                                             Add
                                           </Button>
@@ -1562,6 +1748,7 @@ export default function Requirements() {
                                           t.specialRequirementsPlaceholder
                                         }
                                         disabled={isViewMode}
+                                        aria-label="Special requirements"
                                       />
                                     </div>
                                   </div>
@@ -1569,7 +1756,7 @@ export default function Requirements() {
                               </div>
                             </td>
                           </tr>
-                        </>
+                        </React.Fragment>
                       );
                     })}
                   </tbody>
@@ -1582,6 +1769,7 @@ export default function Requirements() {
                     variant="default"
                     onClick={addJobRole}
                     className="mr-4"
+                    aria-label="Add another job role"
                   >
                     {t.addAnotherRole}
                   </Button>
@@ -1654,29 +1842,27 @@ export default function Requirements() {
                           }
                         />
                         <ReviewField
+                          label="Ticket Frequency"
+                          value={
+                            ticketFrequencyOptions.find(
+                              (o) => o.value === role.ticketFrequency
+                            )?.label || "Not specified"
+                          }
+                        />
+                        <ReviewField
                           label="Work Locations"
                           value={
-                            role.workLocations
-                              ?.map(
-                                (loc) =>
-                                  workLocationOptions.find(
-                                    (o) => o.value === loc
-                                  )?.label
-                              )
-                              .join(", ") || "Not specified"
+                            workLocationOptions.find(
+                              (o) => o.value === role.workLocations
+                            )?.label || "Not specified"
                           }
                         />
                         <ReviewField
                           label="Previous Experience"
                           value={
-                            role.previousExperience
-                              ?.map(
-                                (exp) =>
-                                  previousExperienceOptions.find(
-                                    (o) => o.value === exp
-                                  )?.label
-                              )
-                              .join(", ") || "Not specified"
+                            previousExperienceOptions.find(
+                              (o) => o.value === role.previousExperience
+                            )?.label || "Not specified"
                           }
                         />
                         {role.totalExperienceYears && (
@@ -1709,6 +1895,10 @@ export default function Requirements() {
     <div
       onClick={() => handleOpenModal()}
       className="bg-[#EDDDF3]/60 rounded-xl p-6 shadow-sm cursor-pointer hover:bg-[#EDDDF3] transition-colors flex items-center justify-center min-h-[140px] border-2 border-dashed border-purple-300"
+      role="button"
+      aria-label="Add new requirement"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === "Enter" && handleOpenModal()}
     >
       <Plus className="w-12 h-12 text-[#150B3D]" />
     </div>
@@ -1739,6 +1929,10 @@ export default function Requirements() {
       <div
         onClick={() => handleOpenModal(requirement)}
         className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow relative cursor-pointer"
+        role="button"
+        aria-label={`View requirement ${requirement.id}`}
+        tabIndex={0}
+        onKeyDown={(e) => e.key === "Enter" && handleOpenModal(requirement)}
       >
         <div className="absolute top-4 right-4 w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
           <ArrowUpRight className="text-gray-500" />
@@ -1787,7 +1981,7 @@ export default function Requirements() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto p-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           <AddCard />
           {requirements.map((requirement) => (
@@ -1798,21 +1992,29 @@ export default function Requirements() {
 
       <Modal
         isOpen={isModalOpen}
-        onClose={handleCloseModal}
+        onClose={isSubmitting ? () => {} : handleCloseModal}
         title={modalTitle}
         size="7xl"
         showFooter={!isViewMode}
-        onConfirm={currentStep === steps.length ? handleSubmit : handleNext}
-        confirmText={
-          currentStep === steps.length
-            ? editingRequirement
-              ? "Update"
-              : "Submit"
-            : "Continue"
+        onConfirm={
+          isViewMode
+            ? undefined
+            : currentStep === steps.length
+              ? handleSubmit
+              : handleNext
         }
-        confirmVariant="default"
-        isLoading={isSubmitting}
-        className="w-full max-w-[90vw] h-[calc(100vh-40px)] flex flex-col"
+        confirmText={
+          isViewMode
+            ? undefined
+            : currentStep === steps.length
+              ? editingRequirement
+                ? "Update"
+                : "Submit"
+              : "Continue"
+        }
+        isConfirmLoading={isSubmitting}
+        onCancel={currentStep > 1 && !isViewMode ? handleBack : undefined}
+        cancelText={currentStep > 1 && !isViewMode ? "Back" : undefined}
       >
         <div className="flex flex-col h-full relative">
           <div className="absolute top-4 right-4 z-20">
@@ -1829,13 +2031,13 @@ export default function Requirements() {
 
           <div className="relative px-16 pt-10 pb-6">
             <div className="absolute inset-x-0 top-1/2 h-0.5 z-0">
-              <div className="absolute -left-44 right-0 h-full flex w-full max-w-[1555px] mx-auto">
+              <div className="absolute -left-44 right-0 h-full flex w-full max-w-[1100px] mx-auto">
                 <div
                   className="h-full bg-[#2C0053] transition-all duration-300"
                   style={{
                     width:
                       currentStep === 1
-                        ? "calc(20% - 75px)"
+                        ? "calc(20%)"
                         : solidWidths[
                             currentStep as keyof typeof solidWidths
                           ] || "100%",
@@ -1846,10 +2048,10 @@ export default function Requirements() {
                   style={{
                     width:
                       currentStep === 1
-                        ? `calc(100% - 60px)`
+                        ? `calc(100%`
                         : `calc(${
                             100 - ((currentStep - 1) / (steps.length - 1)) * 100
-                          }% + 60px)`,
+                          }%)`,
                   }}
                 />
               </div>
@@ -1887,17 +2089,6 @@ export default function Requirements() {
 
           <div className="flex-1 overflow-y-auto px-4 md:px-8 pt-2">
             {renderStepContent()}
-            {currentStep > 1 && !isViewMode && (
-              <Button
-                type="button"
-                onClick={handleBack}
-                disabled={isSubmitting}
-                variant="outline"
-                className="px-8 py-2 mr-10"
-              >
-                {t.back}
-              </Button>
-            )}
           </div>
         </div>
       </Modal>

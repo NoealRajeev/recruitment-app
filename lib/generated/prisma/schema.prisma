@@ -121,26 +121,26 @@ enum AuditAction {
   ACCOUNT_RECOVERY
 }
 
+enum StageStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  FAILED
+  REJECTED
+}
+
 enum LabourStage {
-  DOCUMENTS_PENDING
-  DOCUMENTS_COMPLETED
-  MEDICAL_PENDING
-  MEDICAL_COMPLETED
-  MEDICAL_FAILED
-  QVC_PENDING
-  QVC_COMPLETED
-  POLICE_CLEARANCE_PENDING
-  POLICE_CLEARANCE_COMPLETED
-  VISA_APPLIED
-  VISA_APPROVED
-  VISA_REJECTED
-  FLIGHT_BOOKED
-  DEPARTED
-  ARRIVED
-  WORK_PERMIT_PENDING
-  WORK_PERMIT_APPROVED
-  CONTRACT_SIGNED
-  DEPLOYED
+  INITIALIZED
+  DOCUMENTS
+  MEDICAL
+  QVC
+  POLICE_CLEARANCE
+  VISA
+  FLIGHT
+  ARRIVAL
+  WORK_PERMIT
+  CONTRACT
+  DEPLOYMENT
 }
 
 enum DeletionType {
@@ -429,7 +429,7 @@ model LabourProfile {
   agencyId      String
   agency        Agency       @relation(fields: [agencyId], references: [id])
 
-  currentStage LabourStage          @default(DOCUMENTS_PENDING)
+  currentStage LabourStage          @default(INITIALIZED)
   stages       LabourStageHistory[]
 
   // Audit logs
@@ -483,9 +483,9 @@ model LabourStageHistory {
   labourId    String
   labour      LabourProfile @relation(fields: [labourId], references: [id])
   stage       LabourStage
-  status      String // "pending", "completed", "failed"
+  status      StageStatus
   notes       String?
-  documents   String[] // Array of document URLs
+  documents   String[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   completedAt DateTime?

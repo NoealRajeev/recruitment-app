@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
+import { RequirementStatus } from "@/lib/generated/prisma";
 
 export async function GET(
   request: Request,
@@ -21,6 +22,11 @@ export async function GET(
         assignedAgencyId: id,
         agencyStatus: {
           in: ["SUBMITTED", "PARTIALLY_SUBMITTED", "ACCEPTED"],
+        },
+        requirement: {
+          status: {
+            not: RequirementStatus.ACCEPTED,
+          },
         },
       },
       include: {

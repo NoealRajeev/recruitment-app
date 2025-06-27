@@ -61,6 +61,8 @@ export async function GET(request: Request) {
                 { status: LabourProfileStatus.DEPLOYED },
                 { status: LabourProfileStatus.REJECTED },
                 { status: LabourProfileStatus.SHORTLISTED },
+                { verificationStatus: DocumentVerificationStatus.PENDING },
+                { verificationStatus: DocumentVerificationStatus.REJECTED },
               ],
             }),
         ...(verificationStatus ? { verificationStatus } : {}),

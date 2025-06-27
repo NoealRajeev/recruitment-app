@@ -13,6 +13,7 @@ interface ClientRequirement {
   id: string;
   status: RequirementStatus;
   companyName: string;
+  pendingAssignmentsCount: number;
   jobRoles: Array<{
     id: string;
     title: string;
@@ -26,10 +27,14 @@ interface ClientRequirement {
       id: string;
       labourId: string;
       labour: LabourProfile;
+      agencyStatus: RequirementStatus;
       adminStatus: RequirementStatus;
       clientStatus: RequirementStatus;
       adminFeedback?: string;
       clientFeedback?: string;
+      agency: {
+        agencyName: string;
+      };
     }>;
   }>;
 }
@@ -107,47 +112,64 @@ export default function ClientLabourReview() {
     }
   };
 
+  // Determine job role status
+  const getJobRoleStatus = (jobRole: ClientRequirement["jobRoles"][0]) => {
+    if (!jobRole.LabourAssignment?.length) return "NO_SUBMISSIONS";
+
+    const acceptedCount = jobRole.LabourAssignment.filter(
+      (a) => a.clientStatus === "ACCEPTED"
+    ).length;
+    const rejectedCount = jobRole.LabourAssignment.filter(
+      (a) => a.clientStatus === "REJECTED"
+    ).length;
+
+    const proceeded = jobRole.LabourAssignment.filter(
+      (a) => a.clientStatus === "ACCEPTED"
+    );
+
+    if (rejectedCount > 0) return "NEEDS_REVISION";
+    if (acceptedCount === 0) return "NO_SUBMISSIONS";
+    if (acceptedCount < jobRole.quantity) return "PARTIAL_SUBMISSIONS";
+    if (proceeded.length >= jobRole.quantity) return "FULLY_ACCEPTED";
+    return "UNDER_REVIEW";
+  };
+
   // Handle labor status updates
   const handleUpdateLabourStatus = async (
-    assignmentId: string,
+    assignmentId: string | string[],
     status: "ACCEPTED" | "REJECTED",
     feedback?: string
   ) => {
     try {
-      setUpdatingStatus(assignmentId);
-      const response = await fetch(
-        `/api/clients/${assignmentId}/assignments/status`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status, feedback }),
-        }
+      setUpdatingStatus(
+        Array.isArray(assignmentId) ? "bulk-update" : assignmentId
       );
 
+      const isBulk = Array.isArray(assignmentId);
+      const endpoint = isBulk
+        ? "/api/clients/assignments/bulk-status"
+        : `/api/clients/assignments/${assignmentId}/status`;
+
+      const response = await fetch(endpoint, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          assignmentIds: isBulk ? assignmentId : undefined,
+          status,
+          feedback,
+        }),
+      });
+
       if (!response.ok) throw new Error("Failed to update assignment status");
-
-      // If rejected, check for backup candidates
-      if (status === "REJECTED") {
-        const jobRoleResponse = await fetch(
-          `/api/clients/job-role/${currentJobRole?.id}/replace-rejected`,
-          { method: "POST" }
-        );
-
-        if (jobRoleResponse.ok) {
-          toast({
-            type: "success",
-            message:
-              "A backup candidate has been submitted to replace the rejected one",
-          });
-        }
-      }
 
       // Refresh the requirements
       await fetchRequirements();
 
       toast({
         type: "success",
-        message: `Labour profile ${status.toLowerCase()} successfully`,
+        message: isBulk
+          ? `${assignmentId.length} profiles ${status.toLowerCase()} successfully`
+          : `Labour profile ${status.toLowerCase()} successfully`,
       });
     } catch (error) {
       console.error("Error updating assignment:", error);
@@ -184,6 +206,7 @@ export default function ClientLabourReview() {
       clientStatus: RequirementStatus;
       adminFeedback?: string;
       clientFeedback?: string;
+      agency: { agencyName: string };
     };
     onStatusUpdate: (
       assignmentId: string,
@@ -206,6 +229,7 @@ export default function ClientLabourReview() {
       VERIFIED: "bg-green-100 text-green-800",
       REJECTED: "bg-red-100 text-red-800",
     };
+
     const [feedback, setFeedback] = useState("");
     const [isUpdating, setIsUpdating] = useState(false);
 
@@ -257,11 +281,9 @@ export default function ClientLabourReview() {
               {profile.nationality} • {profile.age} years •{" "}
               {profile.gender.toLowerCase()}
             </p>
-            {profile.jobRole && (
-              <p className="text-xs text-gray-500 mt-1">
-                Job Role: {profile.jobRole}
-              </p>
-            )}
+            <p className="text-xs text-gray-500 mt-1">
+              Agency: {assignment.agency.agencyName}
+            </p>
           </div>
           <div className="flex flex-col items-end">
             <span
@@ -425,9 +447,11 @@ export default function ClientLabourReview() {
                   <span className="text-xs text-gray-500">
                     {requirement.jobRoles.length} job roles
                   </span>
-                  <span className="text-xs">
-                    {requirement.status.replace("_", " ").toLowerCase()}
-                  </span>
+                  {requirement.pendingAssignmentsCount > 0 && (
+                    <Badge className="bg-blue-500">
+                      {requirement.pendingAssignmentsCount}
+                    </Badge>
+                  )}
                 </div>
               </div>
             ))}
@@ -471,8 +495,6 @@ export default function ClientLabourReview() {
                       ).length ?? 0}{" "}
                       /{currentJobRole?.quantity ?? 0} Accepted
                     </span>
-
-                    {/* Add Accept/Reject All buttons */}
                     <div className="flex gap-2">
                       <Button
                         variant="outline"
@@ -492,20 +514,10 @@ export default function ClientLabourReview() {
                             ) {
                               try {
                                 setUpdatingStatus("accept-all");
-                                await Promise.all(
-                                  unaccepted.map((a) =>
-                                    handleUpdateLabourStatus(a.id, "ACCEPTED")
-                                  )
+                                await handleUpdateLabourStatus(
+                                  unaccepted.map((a) => a.id),
+                                  "ACCEPTED"
                                 );
-                                toast({
-                                  type: "success",
-                                  message: `All ${unaccepted.length} profiles accepted successfully`,
-                                });
-                              } catch (error) {
-                                toast({
-                                  type: "error",
-                                  message: "Failed to accept all profiles",
-                                });
                               } finally {
                                 setUpdatingStatus(null);
                               }
@@ -535,24 +547,11 @@ export default function ClientLabourReview() {
                             if (feedback) {
                               try {
                                 setUpdatingStatus("reject-all");
-                                await Promise.all(
-                                  unrejected.map((a) =>
-                                    handleUpdateLabourStatus(
-                                      a.id,
-                                      "REJECTED",
-                                      feedback
-                                    )
-                                  )
+                                await handleUpdateLabourStatus(
+                                  unrejected.map((a) => a.id),
+                                  "REJECTED",
+                                  feedback
                                 );
-                                toast({
-                                  type: "success",
-                                  message: `All ${unrejected.length} profiles rejected successfully`,
-                                });
-                              } catch (error) {
-                                toast({
-                                  type: "error",
-                                  message: "Failed to reject all profiles",
-                                });
                               } finally {
                                 setUpdatingStatus(null);
                               }
@@ -598,6 +597,7 @@ export default function ClientLabourReview() {
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {currentRequirement?.jobRoles.map((jobRole) => {
+                      const status = getJobRoleStatus(jobRole);
                       const acceptedCount =
                         jobRole.LabourAssignment?.filter(
                           (a) => a.clientStatus === "ACCEPTED"
@@ -615,18 +615,22 @@ export default function ClientLabourReview() {
                               </div>
                               <Badge
                                 variant={
-                                  acceptedCount === jobRole.quantity
+                                  status === "FULLY_ACCEPTED"
                                     ? "success"
-                                    : acceptedCount > 0
+                                    : status === "NEEDS_REVISION"
                                       ? "warning"
-                                      : "default"
+                                      : status === "PARTIAL_SUBMISSIONS"
+                                        ? "warning"
+                                        : "default"
                                 }
                               >
-                                {acceptedCount === jobRole.quantity
-                                  ? "Fully Accepted"
-                                  : acceptedCount > 0
-                                    ? "Partially Accepted"
-                                    : "Pending Review"}
+                                {status === "FULLY_ACCEPTED"
+                                  ? "Ready for Deployment"
+                                  : status === "NEEDS_REVISION"
+                                    ? "Needs Revision"
+                                    : status === "PARTIAL_SUBMISSIONS"
+                                      ? "Partial Submissions"
+                                      : "Under Review"}
                               </Badge>
                             </div>
                           </CardHeader>

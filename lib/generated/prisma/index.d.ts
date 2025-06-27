@@ -194,26 +194,29 @@ export const AuditAction: {
 export type AuditAction = (typeof AuditAction)[keyof typeof AuditAction]
 
 
+export const StageStatus: {
+  PENDING: 'PENDING',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  FAILED: 'FAILED',
+  REJECTED: 'REJECTED'
+};
+
+export type StageStatus = (typeof StageStatus)[keyof typeof StageStatus]
+
+
 export const LabourStage: {
-  DOCUMENTS_PENDING: 'DOCUMENTS_PENDING',
-  DOCUMENTS_COMPLETED: 'DOCUMENTS_COMPLETED',
-  MEDICAL_PENDING: 'MEDICAL_PENDING',
-  MEDICAL_COMPLETED: 'MEDICAL_COMPLETED',
-  MEDICAL_FAILED: 'MEDICAL_FAILED',
-  QVC_PENDING: 'QVC_PENDING',
-  QVC_COMPLETED: 'QVC_COMPLETED',
-  POLICE_CLEARANCE_PENDING: 'POLICE_CLEARANCE_PENDING',
-  POLICE_CLEARANCE_COMPLETED: 'POLICE_CLEARANCE_COMPLETED',
-  VISA_APPLIED: 'VISA_APPLIED',
-  VISA_APPROVED: 'VISA_APPROVED',
-  VISA_REJECTED: 'VISA_REJECTED',
-  FLIGHT_BOOKED: 'FLIGHT_BOOKED',
-  DEPARTED: 'DEPARTED',
-  ARRIVED: 'ARRIVED',
-  WORK_PERMIT_PENDING: 'WORK_PERMIT_PENDING',
-  WORK_PERMIT_APPROVED: 'WORK_PERMIT_APPROVED',
-  CONTRACT_SIGNED: 'CONTRACT_SIGNED',
-  DEPLOYED: 'DEPLOYED'
+  INITIALIZED: 'INITIALIZED',
+  DOCUMENTS: 'DOCUMENTS',
+  MEDICAL: 'MEDICAL',
+  QVC: 'QVC',
+  POLICE_CLEARANCE: 'POLICE_CLEARANCE',
+  VISA: 'VISA',
+  FLIGHT: 'FLIGHT',
+  ARRIVAL: 'ARRIVAL',
+  WORK_PERMIT: 'WORK_PERMIT',
+  CONTRACT: 'CONTRACT',
+  DEPLOYMENT: 'DEPLOYMENT'
 };
 
 export type LabourStage = (typeof LabourStage)[keyof typeof LabourStage]
@@ -317,6 +320,10 @@ export const CompanySize: typeof $Enums.CompanySize
 export type AuditAction = $Enums.AuditAction
 
 export const AuditAction: typeof $Enums.AuditAction
+
+export type StageStatus = $Enums.StageStatus
+
+export const StageStatus: typeof $Enums.StageStatus
 
 export type LabourStage = $Enums.LabourStage
 
@@ -15078,7 +15085,7 @@ export namespace Prisma {
     id: string | null
     labourId: string | null
     stage: $Enums.LabourStage | null
-    status: string | null
+    status: $Enums.StageStatus | null
     notes: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -15089,7 +15096,7 @@ export namespace Prisma {
     id: string | null
     labourId: string | null
     stage: $Enums.LabourStage | null
-    status: string | null
+    status: $Enums.StageStatus | null
     notes: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -15221,7 +15228,7 @@ export namespace Prisma {
     id: string
     labourId: string
     stage: $Enums.LabourStage
-    status: string
+    status: $Enums.StageStatus
     notes: string | null
     documents: string[]
     createdAt: Date
@@ -15317,7 +15324,7 @@ export namespace Prisma {
       id: string
       labourId: string
       stage: $Enums.LabourStage
-      status: string
+      status: $Enums.StageStatus
       notes: string | null
       documents: string[]
       createdAt: Date
@@ -15750,7 +15757,7 @@ export namespace Prisma {
     readonly id: FieldRef<"LabourStageHistory", 'String'>
     readonly labourId: FieldRef<"LabourStageHistory", 'String'>
     readonly stage: FieldRef<"LabourStageHistory", 'LabourStage'>
-    readonly status: FieldRef<"LabourStageHistory", 'String'>
+    readonly status: FieldRef<"LabourStageHistory", 'StageStatus'>
     readonly notes: FieldRef<"LabourStageHistory", 'String'>
     readonly documents: FieldRef<"LabourStageHistory", 'String[]'>
     readonly createdAt: FieldRef<"LabourStageHistory", 'DateTime'>
@@ -17939,6 +17946,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'StageStatus'
+   */
+  export type EnumStageStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StageStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'StageStatus[]'
+   */
+  export type ListEnumStageStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StageStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'AuditAction'
    */
   export type EnumAuditActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AuditAction'>
@@ -19075,7 +19096,7 @@ export namespace Prisma {
     id?: StringFilter<"LabourStageHistory"> | string
     labourId?: StringFilter<"LabourStageHistory"> | string
     stage?: EnumLabourStageFilter<"LabourStageHistory"> | $Enums.LabourStage
-    status?: StringFilter<"LabourStageHistory"> | string
+    status?: EnumStageStatusFilter<"LabourStageHistory"> | $Enums.StageStatus
     notes?: StringNullableFilter<"LabourStageHistory"> | string | null
     documents?: StringNullableListFilter<"LabourStageHistory">
     createdAt?: DateTimeFilter<"LabourStageHistory"> | Date | string
@@ -19104,7 +19125,7 @@ export namespace Prisma {
     NOT?: LabourStageHistoryWhereInput | LabourStageHistoryWhereInput[]
     labourId?: StringFilter<"LabourStageHistory"> | string
     stage?: EnumLabourStageFilter<"LabourStageHistory"> | $Enums.LabourStage
-    status?: StringFilter<"LabourStageHistory"> | string
+    status?: EnumStageStatusFilter<"LabourStageHistory"> | $Enums.StageStatus
     notes?: StringNullableFilter<"LabourStageHistory"> | string | null
     documents?: StringNullableListFilter<"LabourStageHistory">
     createdAt?: DateTimeFilter<"LabourStageHistory"> | Date | string
@@ -19135,7 +19156,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"LabourStageHistory"> | string
     labourId?: StringWithAggregatesFilter<"LabourStageHistory"> | string
     stage?: EnumLabourStageWithAggregatesFilter<"LabourStageHistory"> | $Enums.LabourStage
-    status?: StringWithAggregatesFilter<"LabourStageHistory"> | string
+    status?: EnumStageStatusWithAggregatesFilter<"LabourStageHistory"> | $Enums.StageStatus
     notes?: StringNullableWithAggregatesFilter<"LabourStageHistory"> | string | null
     documents?: StringNullableListFilter<"LabourStageHistory">
     createdAt?: DateTimeWithAggregatesFilter<"LabourStageHistory"> | Date | string
@@ -20547,7 +20568,7 @@ export namespace Prisma {
   export type LabourStageHistoryCreateInput = {
     id?: string
     stage: $Enums.LabourStage
-    status: string
+    status: $Enums.StageStatus
     notes?: string | null
     documents?: LabourStageHistoryCreatedocumentsInput | string[]
     createdAt?: Date | string
@@ -20560,7 +20581,7 @@ export namespace Prisma {
     id?: string
     labourId: string
     stage: $Enums.LabourStage
-    status: string
+    status: $Enums.StageStatus
     notes?: string | null
     documents?: LabourStageHistoryCreatedocumentsInput | string[]
     createdAt?: Date | string
@@ -20571,7 +20592,7 @@ export namespace Prisma {
   export type LabourStageHistoryUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     stage?: EnumLabourStageFieldUpdateOperationsInput | $Enums.LabourStage
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStageStatusFieldUpdateOperationsInput | $Enums.StageStatus
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     documents?: LabourStageHistoryUpdatedocumentsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -20584,7 +20605,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     labourId?: StringFieldUpdateOperationsInput | string
     stage?: EnumLabourStageFieldUpdateOperationsInput | $Enums.LabourStage
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStageStatusFieldUpdateOperationsInput | $Enums.StageStatus
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     documents?: LabourStageHistoryUpdatedocumentsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -20596,7 +20617,7 @@ export namespace Prisma {
     id?: string
     labourId: string
     stage: $Enums.LabourStage
-    status: string
+    status: $Enums.StageStatus
     notes?: string | null
     documents?: LabourStageHistoryCreatedocumentsInput | string[]
     createdAt?: Date | string
@@ -20607,7 +20628,7 @@ export namespace Prisma {
   export type LabourStageHistoryUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     stage?: EnumLabourStageFieldUpdateOperationsInput | $Enums.LabourStage
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStageStatusFieldUpdateOperationsInput | $Enums.StageStatus
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     documents?: LabourStageHistoryUpdatedocumentsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -20619,7 +20640,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     labourId?: StringFieldUpdateOperationsInput | string
     stage?: EnumLabourStageFieldUpdateOperationsInput | $Enums.LabourStage
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStageStatusFieldUpdateOperationsInput | $Enums.StageStatus
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     documents?: LabourStageHistoryUpdatedocumentsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -21972,6 +21993,13 @@ export namespace Prisma {
     updatedAt?: SortOrder
   }
 
+  export type EnumStageStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.StageStatus | EnumStageStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.StageStatus[] | ListEnumStageStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StageStatus[] | ListEnumStageStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumStageStatusFilter<$PrismaModel> | $Enums.StageStatus
+  }
+
   export type LabourStageHistoryCountOrderByAggregateInput = {
     id?: SortOrder
     labourId?: SortOrder
@@ -22004,6 +22032,16 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     completedAt?: SortOrder
+  }
+
+  export type EnumStageStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StageStatus | EnumStageStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.StageStatus[] | ListEnumStageStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StageStatus[] | ListEnumStageStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumStageStatusWithAggregatesFilter<$PrismaModel> | $Enums.StageStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStageStatusFilter<$PrismaModel>
+    _max?: NestedEnumStageStatusFilter<$PrismaModel>
   }
 
   export type EnumAuditActionFilter<$PrismaModel = never> = {
@@ -23213,6 +23251,10 @@ export namespace Prisma {
     connect?: LabourProfileWhereUniqueInput
   }
 
+  export type EnumStageStatusFieldUpdateOperationsInput = {
+    set?: $Enums.StageStatus
+  }
+
   export type LabourStageHistoryUpdatedocumentsInput = {
     set?: string[]
     push?: string | string[]
@@ -23804,6 +23846,23 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumLabourStageFilter<$PrismaModel>
     _max?: NestedEnumLabourStageFilter<$PrismaModel>
+  }
+
+  export type NestedEnumStageStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.StageStatus | EnumStageStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.StageStatus[] | ListEnumStageStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StageStatus[] | ListEnumStageStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumStageStatusFilter<$PrismaModel> | $Enums.StageStatus
+  }
+
+  export type NestedEnumStageStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.StageStatus | EnumStageStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.StageStatus[] | ListEnumStageStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.StageStatus[] | ListEnumStageStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumStageStatusWithAggregatesFilter<$PrismaModel> | $Enums.StageStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumStageStatusFilter<$PrismaModel>
+    _max?: NestedEnumStageStatusFilter<$PrismaModel>
   }
 
   export type NestedEnumAuditActionFilter<$PrismaModel = never> = {
@@ -26184,7 +26243,7 @@ export namespace Prisma {
   export type LabourStageHistoryCreateWithoutLabourInput = {
     id?: string
     stage: $Enums.LabourStage
-    status: string
+    status: $Enums.StageStatus
     notes?: string | null
     documents?: LabourStageHistoryCreatedocumentsInput | string[]
     createdAt?: Date | string
@@ -26195,7 +26254,7 @@ export namespace Prisma {
   export type LabourStageHistoryUncheckedCreateWithoutLabourInput = {
     id?: string
     stage: $Enums.LabourStage
-    status: string
+    status: $Enums.StageStatus
     notes?: string | null
     documents?: LabourStageHistoryCreatedocumentsInput | string[]
     createdAt?: Date | string
@@ -26423,7 +26482,7 @@ export namespace Prisma {
     id?: StringFilter<"LabourStageHistory"> | string
     labourId?: StringFilter<"LabourStageHistory"> | string
     stage?: EnumLabourStageFilter<"LabourStageHistory"> | $Enums.LabourStage
-    status?: StringFilter<"LabourStageHistory"> | string
+    status?: EnumStageStatusFilter<"LabourStageHistory"> | $Enums.StageStatus
     notes?: StringNullableFilter<"LabourStageHistory"> | string | null
     documents?: StringNullableListFilter<"LabourStageHistory">
     createdAt?: DateTimeFilter<"LabourStageHistory"> | Date | string
@@ -28326,7 +28385,7 @@ export namespace Prisma {
   export type LabourStageHistoryCreateManyLabourInput = {
     id?: string
     stage: $Enums.LabourStage
-    status: string
+    status: $Enums.StageStatus
     notes?: string | null
     documents?: LabourStageHistoryCreatedocumentsInput | string[]
     createdAt?: Date | string
@@ -28362,7 +28421,7 @@ export namespace Prisma {
   export type LabourStageHistoryUpdateWithoutLabourInput = {
     id?: StringFieldUpdateOperationsInput | string
     stage?: EnumLabourStageFieldUpdateOperationsInput | $Enums.LabourStage
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStageStatusFieldUpdateOperationsInput | $Enums.StageStatus
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     documents?: LabourStageHistoryUpdatedocumentsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -28373,7 +28432,7 @@ export namespace Prisma {
   export type LabourStageHistoryUncheckedUpdateWithoutLabourInput = {
     id?: StringFieldUpdateOperationsInput | string
     stage?: EnumLabourStageFieldUpdateOperationsInput | $Enums.LabourStage
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStageStatusFieldUpdateOperationsInput | $Enums.StageStatus
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     documents?: LabourStageHistoryUpdatedocumentsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -28384,7 +28443,7 @@ export namespace Prisma {
   export type LabourStageHistoryUncheckedUpdateManyWithoutLabourInput = {
     id?: StringFieldUpdateOperationsInput | string
     stage?: EnumLabourStageFieldUpdateOperationsInput | $Enums.LabourStage
-    status?: StringFieldUpdateOperationsInput | string
+    status?: EnumStageStatusFieldUpdateOperationsInput | $Enums.StageStatus
     notes?: NullableStringFieldUpdateOperationsInput | string | null
     documents?: LabourStageHistoryUpdatedocumentsInput | string[]
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string

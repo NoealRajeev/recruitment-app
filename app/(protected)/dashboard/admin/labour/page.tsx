@@ -222,7 +222,7 @@ export default function LabourAssignmentReview() {
       }) =>
         a.adminStatus === "ACCEPTED" &&
         a.agencyStatus === "ACCEPTED" &&
-        a.clientStatus === "ACCEPTED"
+        a.clientStatus === "SUBMITTED"
     );
 
     // If any assignments are rejected, status should be NEEDS_REVISION

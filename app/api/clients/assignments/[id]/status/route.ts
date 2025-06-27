@@ -1,4 +1,3 @@
-// app/api/clients/[id]/assignments/status/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
@@ -46,21 +45,46 @@ export async function PUT(
 
     // Update the assignment within a transaction
     const result = await prisma.$transaction(async (tx) => {
-      // First update the assignment
-      const updatedAssignment = await tx.labourAssignment.update({
-        where: {
-          id: params.id,
+      // First get the current assignment with related data
+      const currentAssignment = await tx.labourAssignment.findUnique({
+        where: { id: params.id },
+        include: {
           jobRole: {
-            requirement: {
-              clientId: client.id,
+            select: {
+              id: true,
+              requirementId: true,
+              quantity: true,
+              LabourAssignment: {
+                select: {
+                  id: true,
+                  clientStatus: true,
+                  labourId: true,
+                },
+              },
             },
           },
-          adminStatus: "ACCEPTED",
+          labour: {
+            select: {
+              id: true,
+              currentStage: true,
+            },
+          },
         },
+      });
+
+      if (!currentAssignment) {
+        throw new Error("Assignment not found");
+      }
+
+      // Update the assignment
+      const updatedAssignment = await tx.labourAssignment.update({
+        where: { id: params.id },
         data: {
           clientStatus: status,
-          agencyStatus: status,
-          adminStatus: status,
+          ...(status === "ACCEPTED" && {
+            agencyStatus: "ACCEPTED",
+            adminStatus: "ACCEPTED",
+          }),
           clientFeedback: status === "ACCEPTED" ? null : feedback,
           updatedAt: new Date(),
         },
@@ -79,8 +103,22 @@ export async function PUT(
               },
             },
           },
+          labour: true,
         },
       });
+
+      // If accepted, create a stage history record
+      if (status === "ACCEPTED") {
+        await tx.labourStageHistory.create({
+          data: {
+            labourId: currentAssignment.labourId,
+            stage: "INITIALIZED",
+            status: "COMPLETED",
+            notes: "Client accepted the labour profile",
+            documents: [], // Add any relevant documents if needed
+          },
+        });
+      }
 
       // Check if all assignments in this job role are accepted
       const jobRole = updatedAssignment.jobRole;
@@ -118,8 +156,8 @@ export async function PUT(
             },
           },
           data: {
-            status: "APPROVED", // Or whatever status makes sense for your workflow
-            verificationStatus: "VERIFIED", // Optional
+            status: "APPROVED",
+            verificationStatus: "VERIFIED",
           },
         });
 
@@ -134,6 +172,44 @@ export async function PUT(
             clientFeedback: "Backup candidate - requirement fulfilled",
           },
         });
+
+        // 4. Check if all job roles in the requirement are fulfilled
+        const requirement = await tx.requirement.findUnique({
+          where: { id: jobRole.requirementId },
+          include: {
+            jobRoles: {
+              select: {
+                id: true,
+                quantity: true,
+                LabourAssignment: {
+                  select: {
+                    id: true,
+                    clientStatus: true,
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        if (requirement) {
+          const allRolesFulfilled = requirement.jobRoles.every((jr) => {
+            const accepted = jr.LabourAssignment.filter(
+              (a) => a.clientStatus === "ACCEPTED"
+            ).length;
+            return accepted >= jr.quantity;
+          });
+
+          if (allRolesFulfilled) {
+            // Update requirement status to COMPLETED
+            await tx.requirement.update({
+              where: { id: jobRole.requirementId },
+              data: {
+                status: "ACCEPTED",
+              },
+            });
+          }
+        }
       }
 
       return updatedAssignment;

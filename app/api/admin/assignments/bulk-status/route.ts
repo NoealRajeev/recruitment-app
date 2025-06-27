@@ -36,6 +36,14 @@ export async function PUT(request: Request) {
             id: true,
             title: true,
             adminStatus: true,
+            quantity: true,
+            requirementId: true,
+            requirement: {
+              select: {
+                id: true,
+                status: true,
+              },
+            },
           },
         },
         labour: {
@@ -73,24 +81,16 @@ export async function PUT(request: Request) {
           },
           include: {
             labour: true,
-            jobRole: true,
+            jobRole: {
+              include: {
+                requirement: true,
+              },
+            },
           },
         })
       );
 
       const results = await Promise.all(updates);
-
-      // Update labour profiles
-      await tx.labourProfile.updateMany({
-        where: {
-          id: {
-            in: results.map((a) => a.labourId),
-          },
-        },
-        data: {
-          status: status === "ACCEPTED" ? "APPROVED" : "UNDER_REVIEW",
-        },
-      });
 
       // Group assignments by job role for status updates
       const assignmentsByJobRole = results.reduce(
@@ -104,13 +104,39 @@ export async function PUT(request: Request) {
         {} as Record<string, typeof results>
       );
 
-      // Update each job role's status
+      // Track if we need to update any requirement status
+      const requirementsToCheck = new Set<string>();
+
+      // Update each job role's status and handle quantity checks
       for (const [jobRoleId, assignments] of Object.entries(
         assignmentsByJobRole
       )) {
+        const jobRole = assignments[0].jobRole;
+        requirementsToCheck.add(jobRole.requirementId);
+
         const jobRoleAssignments = await tx.labourAssignment.findMany({
           where: { jobRoleId },
         });
+
+        // Count accepted assignments for this job role
+        const acceptedAssignments = jobRoleAssignments.filter(
+          (a) => a.adminStatus === "ACCEPTED"
+        );
+
+        // If we have more accepted assignments than needed, mark extras as backup
+        if (acceptedAssignments.length > jobRole.quantity) {
+          const extras = acceptedAssignments.slice(jobRole.quantity);
+          await Promise.all(
+            extras.map((assignment) =>
+              tx.labourAssignment.update({
+                where: { id: assignment.id },
+                data: {
+                  isBackup: true,
+                },
+              })
+            )
+          );
+        }
 
         const allAccepted = jobRoleAssignments.every(
           (a) => a.adminStatus === "ACCEPTED"
@@ -119,18 +145,64 @@ export async function PUT(request: Request) {
           (a) => a.adminStatus === "REJECTED"
         );
 
-        let newAdminStatus = assignments[0].jobRole.adminStatus;
+        let newAdminStatus = jobRole.adminStatus;
         if (allAccepted) {
           newAdminStatus = "ACCEPTED";
         } else if (anyRejected) {
           newAdminStatus = "NEEDS_REVISION";
         }
 
-        if (newAdminStatus !== assignments[0].jobRole.adminStatus) {
+        if (newAdminStatus !== jobRole.adminStatus) {
           await tx.jobRole.update({
             where: { id: jobRoleId },
             data: {
               adminStatus: newAdminStatus,
+            },
+          });
+        }
+      }
+
+      // Check each requirement to see if all job roles are fulfilled
+      for (const requirementId of requirementsToCheck) {
+        const requirement = await tx.requirement.findUnique({
+          where: { id: requirementId },
+          include: {
+            jobRoles: {
+              select: {
+                id: true,
+                quantity: true,
+              },
+            },
+          },
+        });
+
+        if (!requirement) continue;
+
+        // Check if all job roles have enough accepted assignments
+        let allRolesFulfilled = true;
+        for (const jobRole of requirement.jobRoles) {
+          const acceptedCount = await tx.labourAssignment.count({
+            where: {
+              jobRoleId: jobRole.id,
+              adminStatus: "ACCEPTED",
+              agencyStatus: "ACCEPTED",
+              clientStatus: "SUBMITTED",
+              isBackup: false, // Don't count backups
+            },
+          });
+
+          if (acceptedCount < jobRole.quantity) {
+            allRolesFulfilled = false;
+            break;
+          }
+        }
+
+        // If all job roles are fulfilled, update requirement status
+        if (allRolesFulfilled) {
+          await tx.requirement.update({
+            where: { id: requirementId },
+            data: {
+              status: "CLIENT_REVIEW",
             },
           });
         }

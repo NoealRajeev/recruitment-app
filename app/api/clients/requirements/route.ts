@@ -1,3 +1,4 @@
+// app/api/clients/requirements/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
@@ -14,7 +15,7 @@ export async function GET() {
     // Get client profile
     const client = await prisma.client.findUnique({
       where: { userId: session.user.id },
-      select: { id: true },
+      select: { id: true, companyName: true },
     });
 
     if (!client) {
@@ -26,15 +27,27 @@ export async function GET() {
 
     // Get requirements with job roles and assignments
     const requirements = await prisma.requirement.findMany({
-      where: { clientId: client.id, status: RequirementStatus.CLIENT_REVIEW },
+      where: {
+        clientId: client.id,
+        status: {
+          in: [
+            RequirementStatus.CLIENT_REVIEW,
+            RequirementStatus.UNDER_REVIEW,
+            RequirementStatus.PARTIALLY_SUBMITTED,
+          ],
+        },
+      },
       include: {
         jobRoles: {
           include: {
             LabourAssignment: {
               where: {
-                agencyStatus: "SUBMITTED",
                 adminStatus: "ACCEPTED",
-                clientStatus: "SUBMITTED",
+                agencyStatus: "ACCEPTED",
+                OR: [
+                  { clientStatus: "SUBMITTED" },
+                  { clientStatus: "PENDING" },
+                ],
               },
               include: {
                 labour: true,
@@ -51,9 +64,22 @@ export async function GET() {
           },
         },
       },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
-    return NextResponse.json(requirements);
+    // Format the response to include company name and count of pending assignments
+    const formattedRequirements = requirements.map((req) => ({
+      ...req,
+      companyName: client.companyName,
+      pendingAssignmentsCount: req.jobRoles.reduce(
+        (count, jobRole) => count + jobRole.LabourAssignment.length,
+        0
+      ),
+    }));
+
+    return NextResponse.json(formattedRequirements);
   } catch (error) {
     console.error("Error fetching requirements:", error);
     return NextResponse.json(

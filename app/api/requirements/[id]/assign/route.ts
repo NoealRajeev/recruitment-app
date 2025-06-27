@@ -55,7 +55,8 @@ export async function POST(
       where: {
         id: { in: profileIds },
         agencyId: agency.id,
-        status: { in: ["APPROVED", "SHORTLISTED"] }, // Only approved or shortlisted profiles
+        status: { in: ["APPROVED"] },
+        verificationStatus: { in: ["PARTIALLY_VERIFIED", "VERIFIED"] }, // Only approved or shortlisted profiles
       },
     });
 
@@ -106,7 +107,7 @@ export async function POST(
               jobRoleId,
               agencyId: agency.id,
               labourId: profileId,
-              agencyStatus: "SUBMITTED", // Initial status when agency submits
+              agencyStatus: "ACCEPTED", // Initial status when agency submits
               adminStatus: "PENDING", // Waiting for admin review
               clientStatus: "PENDING", // Waiting for client review
             },

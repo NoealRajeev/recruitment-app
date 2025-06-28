@@ -46,9 +46,9 @@ interface JobRole {
   natureOfWorkAllowance: number | null;
   otherAllowance: number | null;
   healthInsurance: string;
-  ticketFrequency: string[];
-  workLocations: string[];
-  previousExperience: string[];
+  ticketFrequency: string;
+  workLocations: string;
+  previousExperience: string;
   totalExperienceYears: number | null;
   preferredAge: number | null;
   languageRequirements: string[];
@@ -91,11 +91,11 @@ interface RequirementSection {
   natureOfWorkAllowance: number | null;
   otherAllowance: number | null;
   salaryCurrency: string;
-  workLocations: string[];
-  previousExperience: string[];
+  workLocations: string;
+  previousExperience: string;
   languageRequirements: string[];
   healthInsurance: string;
-  ticketFrequency: string[];
+  ticketFrequency: string;
   totalExperienceYears: number | null;
   preferredAge: number | null;
   specialRequirements: string | null;
@@ -940,7 +940,7 @@ export default function Requirements() {
         <div className="flex flex-col">
           <p className="text-sm text-[#150B3D]/70">Ticket Frequency:</p>
           <p className="text-[#150B3D] font-medium">
-            {section.ticketFrequency?.join(", ") || "Not specified"}
+            {section.ticketFrequency || "Not specified"}
           </p>
         </div>
         <div className="flex flex-col">
@@ -1015,19 +1015,19 @@ export default function Requirements() {
           <div className="flex flex-col">
             <p className="text-sm text-[#150B3D]/70">Work Locations:</p>
             <p className="text-[#150B3D] font-medium">
-              {section.workLocations?.join(", ") || "Not specified"}
+              {section.workLocations || "Not specified"}
             </p>
           </div>
           <div className="flex flex-col">
             <p className="text-sm text-[#150B3D]/70">Previous Experience:</p>
             <p className="text-[#150B3D] font-medium">
-              {section.previousExperience?.join(", ") || "Not specified"}
+              {section.previousExperience || "Not specified"}
             </p>
           </div>
           <div className="flex flex-col">
             <p className="text-sm text-[#150B3D]/70">Language Requirements:</p>
             <p className="text-[#150B3D] font-medium">
-              {section.languageRequirements?.join(", ") || "Not specified"}
+              {section.languageRequirements || "Not specified"}
             </p>
           </div>
           <div className="flex flex-col">

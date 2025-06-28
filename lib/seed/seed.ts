@@ -92,7 +92,7 @@ async function seedBaseData() {
       password: "Client@123",
       role: UserRole.CLIENT_ADMIN,
       name: "Demo Client",
-      status: AccountStatus.NOT_VERIFIED,
+      status: AccountStatus.VERIFIED,
       profilePicture: faker.image.avatar(),
       profile: {
         client: {

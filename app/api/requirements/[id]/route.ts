@@ -118,9 +118,9 @@ export async function PATCH(
         natureOfWorkAllowance?: number;
         otherAllowance?: number;
         healthInsurance?: string;
-        ticketFrequency?: string[];
-        workLocations?: string[];
-        previousExperience?: string[];
+        ticketFrequency: string;
+        workLocations: string;
+        previousExperience: string;
         totalExperienceYears?: number;
         preferredAge?: number;
         languageRequirements?: string[];
@@ -287,9 +287,9 @@ export async function PATCH(
                   natureOfWorkAllowance: role.natureOfWorkAllowance,
                   otherAllowance: role.otherAllowance,
                   healthInsurance: role.healthInsurance || "asPerLaw",
-                  ticketFrequency: role.ticketFrequency || [],
-                  workLocations: role.workLocations || [],
-                  previousExperience: role.previousExperience || [],
+                  ticketFrequency: role.ticketFrequency || "",
+                  workLocations: role.workLocations || "",
+                  previousExperience: role.previousExperience || "",
                   totalExperienceYears: role.totalExperienceYears,
                   preferredAge: role.preferredAge,
                   languageRequirements: role.languageRequirements || [],

@@ -10876,6 +10876,9 @@ export namespace Prisma {
     mobileProvidedByCompany: boolean | null
     natureOfWorkAllowance: number | null
     otherAllowance: number | null
+    ticketFrequency: string | null
+    workLocations: string | null
+    previousExperience: string | null
     totalExperienceYears: number | null
     preferredAge: number | null
     specialRequirements: string | null
@@ -10905,6 +10908,9 @@ export namespace Prisma {
     mobileProvidedByCompany: boolean | null
     natureOfWorkAllowance: number | null
     otherAllowance: number | null
+    ticketFrequency: string | null
+    workLocations: string | null
+    previousExperience: string | null
     totalExperienceYears: number | null
     preferredAge: number | null
     specialRequirements: string | null
@@ -10995,6 +11001,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: true
     natureOfWorkAllowance?: true
     otherAllowance?: true
+    ticketFrequency?: true
+    workLocations?: true
+    previousExperience?: true
     totalExperienceYears?: true
     preferredAge?: true
     specialRequirements?: true
@@ -11024,6 +11033,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: true
     natureOfWorkAllowance?: true
     otherAllowance?: true
+    ticketFrequency?: true
+    workLocations?: true
+    previousExperience?: true
     totalExperienceYears?: true
     preferredAge?: true
     specialRequirements?: true
@@ -11173,9 +11185,9 @@ export namespace Prisma {
     mobileProvidedByCompany: boolean
     natureOfWorkAllowance: number | null
     otherAllowance: number | null
-    ticketFrequency: string[]
-    workLocations: string[]
-    previousExperience: string[]
+    ticketFrequency: string
+    workLocations: string
+    previousExperience: string
     totalExperienceYears: number | null
     preferredAge: number | null
     languageRequirements: string[]
@@ -11388,9 +11400,9 @@ export namespace Prisma {
       mobileProvidedByCompany: boolean
       natureOfWorkAllowance: number | null
       otherAllowance: number | null
-      ticketFrequency: string[]
-      workLocations: string[]
-      previousExperience: string[]
+      ticketFrequency: string
+      workLocations: string
+      previousExperience: string
       totalExperienceYears: number | null
       preferredAge: number | null
       languageRequirements: string[]
@@ -11850,9 +11862,9 @@ export namespace Prisma {
     readonly mobileProvidedByCompany: FieldRef<"JobRole", 'Boolean'>
     readonly natureOfWorkAllowance: FieldRef<"JobRole", 'Float'>
     readonly otherAllowance: FieldRef<"JobRole", 'Float'>
-    readonly ticketFrequency: FieldRef<"JobRole", 'String[]'>
-    readonly workLocations: FieldRef<"JobRole", 'String[]'>
-    readonly previousExperience: FieldRef<"JobRole", 'String[]'>
+    readonly ticketFrequency: FieldRef<"JobRole", 'String'>
+    readonly workLocations: FieldRef<"JobRole", 'String'>
+    readonly previousExperience: FieldRef<"JobRole", 'String'>
     readonly totalExperienceYears: FieldRef<"JobRole", 'Int'>
     readonly preferredAge: FieldRef<"JobRole", 'Int'>
     readonly languageRequirements: FieldRef<"JobRole", 'String[]'>
@@ -18616,9 +18628,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: BoolFilter<"JobRole"> | boolean
     natureOfWorkAllowance?: FloatNullableFilter<"JobRole"> | number | null
     otherAllowance?: FloatNullableFilter<"JobRole"> | number | null
-    ticketFrequency?: StringNullableListFilter<"JobRole">
-    workLocations?: StringNullableListFilter<"JobRole">
-    previousExperience?: StringNullableListFilter<"JobRole">
+    ticketFrequency?: StringFilter<"JobRole"> | string
+    workLocations?: StringFilter<"JobRole"> | string
+    previousExperience?: StringFilter<"JobRole"> | string
     totalExperienceYears?: IntNullableFilter<"JobRole"> | number | null
     preferredAge?: IntNullableFilter<"JobRole"> | number | null
     languageRequirements?: StringNullableListFilter<"JobRole">
@@ -18691,9 +18703,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: BoolFilter<"JobRole"> | boolean
     natureOfWorkAllowance?: FloatNullableFilter<"JobRole"> | number | null
     otherAllowance?: FloatNullableFilter<"JobRole"> | number | null
-    ticketFrequency?: StringNullableListFilter<"JobRole">
-    workLocations?: StringNullableListFilter<"JobRole">
-    previousExperience?: StringNullableListFilter<"JobRole">
+    ticketFrequency?: StringFilter<"JobRole"> | string
+    workLocations?: StringFilter<"JobRole"> | string
+    previousExperience?: StringFilter<"JobRole"> | string
     totalExperienceYears?: IntNullableFilter<"JobRole"> | number | null
     preferredAge?: IntNullableFilter<"JobRole"> | number | null
     languageRequirements?: StringNullableListFilter<"JobRole">
@@ -18768,9 +18780,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: BoolWithAggregatesFilter<"JobRole"> | boolean
     natureOfWorkAllowance?: FloatNullableWithAggregatesFilter<"JobRole"> | number | null
     otherAllowance?: FloatNullableWithAggregatesFilter<"JobRole"> | number | null
-    ticketFrequency?: StringNullableListFilter<"JobRole">
-    workLocations?: StringNullableListFilter<"JobRole">
-    previousExperience?: StringNullableListFilter<"JobRole">
+    ticketFrequency?: StringWithAggregatesFilter<"JobRole"> | string
+    workLocations?: StringWithAggregatesFilter<"JobRole"> | string
+    previousExperience?: StringWithAggregatesFilter<"JobRole"> | string
     totalExperienceYears?: IntNullableWithAggregatesFilter<"JobRole"> | number | null
     preferredAge?: IntNullableWithAggregatesFilter<"JobRole"> | number | null
     languageRequirements?: StringNullableListFilter<"JobRole">
@@ -19984,9 +19996,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: boolean
     natureOfWorkAllowance?: number | null
     otherAllowance?: number | null
-    ticketFrequency?: JobRoleCreateticketFrequencyInput | string[]
-    workLocations?: JobRoleCreateworkLocationsInput | string[]
-    previousExperience?: JobRoleCreatepreviousExperienceInput | string[]
+    ticketFrequency: string
+    workLocations: string
+    previousExperience: string
     totalExperienceYears?: number | null
     preferredAge?: number | null
     languageRequirements?: JobRoleCreatelanguageRequirementsInput | string[]
@@ -20019,9 +20031,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: boolean
     natureOfWorkAllowance?: number | null
     otherAllowance?: number | null
-    ticketFrequency?: JobRoleCreateticketFrequencyInput | string[]
-    workLocations?: JobRoleCreateworkLocationsInput | string[]
-    previousExperience?: JobRoleCreatepreviousExperienceInput | string[]
+    ticketFrequency: string
+    workLocations: string
+    previousExperience: string
     totalExperienceYears?: number | null
     preferredAge?: number | null
     languageRequirements?: JobRoleCreatelanguageRequirementsInput | string[]
@@ -20052,9 +20064,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
     natureOfWorkAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
     otherAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
-    ticketFrequency?: JobRoleUpdateticketFrequencyInput | string[]
-    workLocations?: JobRoleUpdateworkLocationsInput | string[]
-    previousExperience?: JobRoleUpdatepreviousExperienceInput | string[]
+    ticketFrequency?: StringFieldUpdateOperationsInput | string
+    workLocations?: StringFieldUpdateOperationsInput | string
+    previousExperience?: StringFieldUpdateOperationsInput | string
     totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
     preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     languageRequirements?: JobRoleUpdatelanguageRequirementsInput | string[]
@@ -20087,9 +20099,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
     natureOfWorkAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
     otherAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
-    ticketFrequency?: JobRoleUpdateticketFrequencyInput | string[]
-    workLocations?: JobRoleUpdateworkLocationsInput | string[]
-    previousExperience?: JobRoleUpdatepreviousExperienceInput | string[]
+    ticketFrequency?: StringFieldUpdateOperationsInput | string
+    workLocations?: StringFieldUpdateOperationsInput | string
+    previousExperience?: StringFieldUpdateOperationsInput | string
     totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
     preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     languageRequirements?: JobRoleUpdatelanguageRequirementsInput | string[]
@@ -20121,9 +20133,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: boolean
     natureOfWorkAllowance?: number | null
     otherAllowance?: number | null
-    ticketFrequency?: JobRoleCreateticketFrequencyInput | string[]
-    workLocations?: JobRoleCreateworkLocationsInput | string[]
-    previousExperience?: JobRoleCreatepreviousExperienceInput | string[]
+    ticketFrequency: string
+    workLocations: string
+    previousExperience: string
     totalExperienceYears?: number | null
     preferredAge?: number | null
     languageRequirements?: JobRoleCreatelanguageRequirementsInput | string[]
@@ -20153,9 +20165,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
     natureOfWorkAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
     otherAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
-    ticketFrequency?: JobRoleUpdateticketFrequencyInput | string[]
-    workLocations?: JobRoleUpdateworkLocationsInput | string[]
-    previousExperience?: JobRoleUpdatepreviousExperienceInput | string[]
+    ticketFrequency?: StringFieldUpdateOperationsInput | string
+    workLocations?: StringFieldUpdateOperationsInput | string
+    previousExperience?: StringFieldUpdateOperationsInput | string
     totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
     preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     languageRequirements?: JobRoleUpdatelanguageRequirementsInput | string[]
@@ -20185,9 +20197,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
     natureOfWorkAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
     otherAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
-    ticketFrequency?: JobRoleUpdateticketFrequencyInput | string[]
-    workLocations?: JobRoleUpdateworkLocationsInput | string[]
-    previousExperience?: JobRoleUpdatepreviousExperienceInput | string[]
+    ticketFrequency?: StringFieldUpdateOperationsInput | string
+    workLocations?: StringFieldUpdateOperationsInput | string
+    previousExperience?: StringFieldUpdateOperationsInput | string
     totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
     preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     languageRequirements?: JobRoleUpdatelanguageRequirementsInput | string[]
@@ -21518,14 +21530,6 @@ export namespace Prisma {
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
   }
 
-  export type StringNullableListFilter<$PrismaModel = never> = {
-    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
-    has?: string | StringFieldRefInput<$PrismaModel> | null
-    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
-    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
-    isEmpty?: boolean
-  }
-
   export type IntNullableFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
     in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
@@ -21535,6 +21539,14 @@ export namespace Prisma {
     gt?: number | IntFieldRefInput<$PrismaModel>
     gte?: number | IntFieldRefInput<$PrismaModel>
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type StringNullableListFilter<$PrismaModel = never> = {
+    equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    has?: string | StringFieldRefInput<$PrismaModel> | null
+    hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
+    hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
+    isEmpty?: boolean
   }
 
   export type RequirementScalarRelationFilter = {
@@ -21609,6 +21621,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: SortOrder
     natureOfWorkAllowance?: SortOrder
     otherAllowance?: SortOrder
+    ticketFrequency?: SortOrder
+    workLocations?: SortOrder
+    previousExperience?: SortOrder
     totalExperienceYears?: SortOrder
     preferredAge?: SortOrder
     specialRequirements?: SortOrder
@@ -21638,6 +21653,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: SortOrder
     natureOfWorkAllowance?: SortOrder
     otherAllowance?: SortOrder
+    ticketFrequency?: SortOrder
+    workLocations?: SortOrder
+    previousExperience?: SortOrder
     totalExperienceYears?: SortOrder
     preferredAge?: SortOrder
     specialRequirements?: SortOrder
@@ -22827,18 +22845,6 @@ export namespace Prisma {
     deleteMany?: LabourProfileScalarWhereInput | LabourProfileScalarWhereInput[]
   }
 
-  export type JobRoleCreateticketFrequencyInput = {
-    set: string[]
-  }
-
-  export type JobRoleCreateworkLocationsInput = {
-    set: string[]
-  }
-
-  export type JobRoleCreatepreviousExperienceInput = {
-    set: string[]
-  }
-
   export type JobRoleCreatelanguageRequirementsInput = {
     set: string[]
   }
@@ -22895,21 +22901,6 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
-  }
-
-  export type JobRoleUpdateticketFrequencyInput = {
-    set?: string[]
-    push?: string | string[]
-  }
-
-  export type JobRoleUpdateworkLocationsInput = {
-    set?: string[]
-    push?: string | string[]
-  }
-
-  export type JobRoleUpdatepreviousExperienceInput = {
-    set?: string[]
-    push?: string | string[]
   }
 
   export type NullableIntFieldUpdateOperationsInput = {
@@ -24737,9 +24728,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: boolean
     natureOfWorkAllowance?: number | null
     otherAllowance?: number | null
-    ticketFrequency?: JobRoleCreateticketFrequencyInput | string[]
-    workLocations?: JobRoleCreateworkLocationsInput | string[]
-    previousExperience?: JobRoleCreatepreviousExperienceInput | string[]
+    ticketFrequency: string
+    workLocations: string
+    previousExperience: string
     totalExperienceYears?: number | null
     preferredAge?: number | null
     languageRequirements?: JobRoleCreatelanguageRequirementsInput | string[]
@@ -24771,9 +24762,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: boolean
     natureOfWorkAllowance?: number | null
     otherAllowance?: number | null
-    ticketFrequency?: JobRoleCreateticketFrequencyInput | string[]
-    workLocations?: JobRoleCreateworkLocationsInput | string[]
-    previousExperience?: JobRoleCreatepreviousExperienceInput | string[]
+    ticketFrequency: string
+    workLocations: string
+    previousExperience: string
     totalExperienceYears?: number | null
     preferredAge?: number | null
     languageRequirements?: JobRoleCreatelanguageRequirementsInput | string[]
@@ -25024,9 +25015,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: BoolFilter<"JobRole"> | boolean
     natureOfWorkAllowance?: FloatNullableFilter<"JobRole"> | number | null
     otherAllowance?: FloatNullableFilter<"JobRole"> | number | null
-    ticketFrequency?: StringNullableListFilter<"JobRole">
-    workLocations?: StringNullableListFilter<"JobRole">
-    previousExperience?: StringNullableListFilter<"JobRole">
+    ticketFrequency?: StringFilter<"JobRole"> | string
+    workLocations?: StringFilter<"JobRole"> | string
+    previousExperience?: StringFilter<"JobRole"> | string
     totalExperienceYears?: IntNullableFilter<"JobRole"> | number | null
     preferredAge?: IntNullableFilter<"JobRole"> | number | null
     languageRequirements?: StringNullableListFilter<"JobRole">
@@ -25700,9 +25691,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: boolean
     natureOfWorkAllowance?: number | null
     otherAllowance?: number | null
-    ticketFrequency?: JobRoleCreateticketFrequencyInput | string[]
-    workLocations?: JobRoleCreateworkLocationsInput | string[]
-    previousExperience?: JobRoleCreatepreviousExperienceInput | string[]
+    ticketFrequency: string
+    workLocations: string
+    previousExperience: string
     totalExperienceYears?: number | null
     preferredAge?: number | null
     languageRequirements?: JobRoleCreatelanguageRequirementsInput | string[]
@@ -25733,9 +25724,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: boolean
     natureOfWorkAllowance?: number | null
     otherAllowance?: number | null
-    ticketFrequency?: JobRoleCreateticketFrequencyInput | string[]
-    workLocations?: JobRoleCreateworkLocationsInput | string[]
-    previousExperience?: JobRoleCreatepreviousExperienceInput | string[]
+    ticketFrequency: string
+    workLocations: string
+    previousExperience: string
     totalExperienceYears?: number | null
     preferredAge?: number | null
     languageRequirements?: JobRoleCreatelanguageRequirementsInput | string[]
@@ -26558,9 +26549,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: boolean
     natureOfWorkAllowance?: number | null
     otherAllowance?: number | null
-    ticketFrequency?: JobRoleCreateticketFrequencyInput | string[]
-    workLocations?: JobRoleCreateworkLocationsInput | string[]
-    previousExperience?: JobRoleCreatepreviousExperienceInput | string[]
+    ticketFrequency: string
+    workLocations: string
+    previousExperience: string
     totalExperienceYears?: number | null
     preferredAge?: number | null
     languageRequirements?: JobRoleCreatelanguageRequirementsInput | string[]
@@ -26592,9 +26583,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: boolean
     natureOfWorkAllowance?: number | null
     otherAllowance?: number | null
-    ticketFrequency?: JobRoleCreateticketFrequencyInput | string[]
-    workLocations?: JobRoleCreateworkLocationsInput | string[]
-    previousExperience?: JobRoleCreatepreviousExperienceInput | string[]
+    ticketFrequency: string
+    workLocations: string
+    previousExperience: string
     totalExperienceYears?: number | null
     preferredAge?: number | null
     languageRequirements?: JobRoleCreatelanguageRequirementsInput | string[]
@@ -26764,9 +26755,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
     natureOfWorkAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
     otherAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
-    ticketFrequency?: JobRoleUpdateticketFrequencyInput | string[]
-    workLocations?: JobRoleUpdateworkLocationsInput | string[]
-    previousExperience?: JobRoleUpdatepreviousExperienceInput | string[]
+    ticketFrequency?: StringFieldUpdateOperationsInput | string
+    workLocations?: StringFieldUpdateOperationsInput | string
+    previousExperience?: StringFieldUpdateOperationsInput | string
     totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
     preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     languageRequirements?: JobRoleUpdatelanguageRequirementsInput | string[]
@@ -26798,9 +26789,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
     natureOfWorkAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
     otherAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
-    ticketFrequency?: JobRoleUpdateticketFrequencyInput | string[]
-    workLocations?: JobRoleUpdateworkLocationsInput | string[]
-    previousExperience?: JobRoleUpdatepreviousExperienceInput | string[]
+    ticketFrequency?: StringFieldUpdateOperationsInput | string
+    workLocations?: StringFieldUpdateOperationsInput | string
+    previousExperience?: StringFieldUpdateOperationsInput | string
     totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
     preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     languageRequirements?: JobRoleUpdatelanguageRequirementsInput | string[]
@@ -27641,9 +27632,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: boolean
     natureOfWorkAllowance?: number | null
     otherAllowance?: number | null
-    ticketFrequency?: JobRoleCreateticketFrequencyInput | string[]
-    workLocations?: JobRoleCreateworkLocationsInput | string[]
-    previousExperience?: JobRoleCreatepreviousExperienceInput | string[]
+    ticketFrequency: string
+    workLocations: string
+    previousExperience: string
     totalExperienceYears?: number | null
     preferredAge?: number | null
     languageRequirements?: JobRoleCreatelanguageRequirementsInput | string[]
@@ -27721,9 +27712,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
     natureOfWorkAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
     otherAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
-    ticketFrequency?: JobRoleUpdateticketFrequencyInput | string[]
-    workLocations?: JobRoleUpdateworkLocationsInput | string[]
-    previousExperience?: JobRoleUpdatepreviousExperienceInput | string[]
+    ticketFrequency?: StringFieldUpdateOperationsInput | string
+    workLocations?: StringFieldUpdateOperationsInput | string
+    previousExperience?: StringFieldUpdateOperationsInput | string
     totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
     preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     languageRequirements?: JobRoleUpdatelanguageRequirementsInput | string[]
@@ -27755,9 +27746,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
     natureOfWorkAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
     otherAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
-    ticketFrequency?: JobRoleUpdateticketFrequencyInput | string[]
-    workLocations?: JobRoleUpdateworkLocationsInput | string[]
-    previousExperience?: JobRoleUpdatepreviousExperienceInput | string[]
+    ticketFrequency?: StringFieldUpdateOperationsInput | string
+    workLocations?: StringFieldUpdateOperationsInput | string
+    previousExperience?: StringFieldUpdateOperationsInput | string
     totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
     preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     languageRequirements?: JobRoleUpdatelanguageRequirementsInput | string[]
@@ -27788,9 +27779,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
     natureOfWorkAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
     otherAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
-    ticketFrequency?: JobRoleUpdateticketFrequencyInput | string[]
-    workLocations?: JobRoleUpdateworkLocationsInput | string[]
-    previousExperience?: JobRoleUpdatepreviousExperienceInput | string[]
+    ticketFrequency?: StringFieldUpdateOperationsInput | string
+    workLocations?: StringFieldUpdateOperationsInput | string
+    previousExperience?: StringFieldUpdateOperationsInput | string
     totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
     preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     languageRequirements?: JobRoleUpdatelanguageRequirementsInput | string[]
@@ -28018,9 +28009,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: boolean
     natureOfWorkAllowance?: number | null
     otherAllowance?: number | null
-    ticketFrequency?: JobRoleCreateticketFrequencyInput | string[]
-    workLocations?: JobRoleCreateworkLocationsInput | string[]
-    previousExperience?: JobRoleCreatepreviousExperienceInput | string[]
+    ticketFrequency: string
+    workLocations: string
+    previousExperience: string
     totalExperienceYears?: number | null
     preferredAge?: number | null
     languageRequirements?: JobRoleCreatelanguageRequirementsInput | string[]
@@ -28085,9 +28076,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
     natureOfWorkAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
     otherAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
-    ticketFrequency?: JobRoleUpdateticketFrequencyInput | string[]
-    workLocations?: JobRoleUpdateworkLocationsInput | string[]
-    previousExperience?: JobRoleUpdatepreviousExperienceInput | string[]
+    ticketFrequency?: StringFieldUpdateOperationsInput | string
+    workLocations?: StringFieldUpdateOperationsInput | string
+    previousExperience?: StringFieldUpdateOperationsInput | string
     totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
     preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     languageRequirements?: JobRoleUpdatelanguageRequirementsInput | string[]
@@ -28118,9 +28109,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
     natureOfWorkAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
     otherAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
-    ticketFrequency?: JobRoleUpdateticketFrequencyInput | string[]
-    workLocations?: JobRoleUpdateworkLocationsInput | string[]
-    previousExperience?: JobRoleUpdatepreviousExperienceInput | string[]
+    ticketFrequency?: StringFieldUpdateOperationsInput | string
+    workLocations?: StringFieldUpdateOperationsInput | string
+    previousExperience?: StringFieldUpdateOperationsInput | string
     totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
     preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     languageRequirements?: JobRoleUpdatelanguageRequirementsInput | string[]
@@ -28151,9 +28142,9 @@ export namespace Prisma {
     mobileProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
     natureOfWorkAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
     otherAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
-    ticketFrequency?: JobRoleUpdateticketFrequencyInput | string[]
-    workLocations?: JobRoleUpdateworkLocationsInput | string[]
-    previousExperience?: JobRoleUpdatepreviousExperienceInput | string[]
+    ticketFrequency?: StringFieldUpdateOperationsInput | string
+    workLocations?: StringFieldUpdateOperationsInput | string
+    previousExperience?: StringFieldUpdateOperationsInput | string
     totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
     preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
     languageRequirements?: JobRoleUpdatelanguageRequirementsInput | string[]

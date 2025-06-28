@@ -20,7 +20,10 @@ CREATE TYPE "CompanySize" AS ENUM ('SMALL', 'MEDIUM', 'LARGE', 'ENTERPRISE');
 CREATE TYPE "AuditAction" AS ENUM ('USER_CREATE', 'USER_READ', 'USER_UPDATE', 'USER_DELETE', 'CLIENT_CREATE', 'CLIENT_READ', 'CLIENT_UPDATE', 'CLIENT_DELETE', 'AGENCY_CREATE', 'AGENCY_READ', 'AGENCY_UPDATE', 'AGENCY_DELETE', 'REQUIREMENT_CREATE', 'REQUIREMENT_READ', 'REQUIREMENT_UPDATE', 'REQUIREMENT_DELETE', 'LABOUR_PROFILE_CREATE', 'LABOUR_PROFILE_READ', 'LABOUR_PROFILE_UPDATE', 'LABOUR_PROFILE_DELETE', 'LABOUR_PROFILE_DOCUMENT_UPLOAD', 'LABOUR_PROFILE_STATUS_CHANGE', 'LABOUR_PROFILE_VERIFICATION_CHANGE', 'DOCUMENT_CREATE', 'DOCUMENT_READ', 'DOCUMENT_UPDATE', 'DOCUMENT_DELETE', 'OTP_CREATE', 'OTP_READ', 'OTP_UPDATE', 'OTP_DELETE', 'NOTIFICATION_CREATE', 'NOTIFICATION_READ', 'NOTIFICATION_UPDATE', 'NOTIFICATION_DELETE', 'LOGIN', 'LOGOUT', 'PASSWORD_CHANGE', 'ACCOUNT_RECOVERY');
 
 -- CreateEnum
-CREATE TYPE "LabourStage" AS ENUM ('DOCUMENTS_PENDING', 'DOCUMENTS_COMPLETED', 'MEDICAL_PENDING', 'MEDICAL_COMPLETED', 'MEDICAL_FAILED', 'QVC_PENDING', 'QVC_COMPLETED', 'POLICE_CLEARANCE_PENDING', 'POLICE_CLEARANCE_COMPLETED', 'VISA_APPLIED', 'VISA_APPROVED', 'VISA_REJECTED', 'FLIGHT_BOOKED', 'DEPARTED', 'ARRIVED', 'WORK_PERMIT_PENDING', 'WORK_PERMIT_APPROVED', 'CONTRACT_SIGNED', 'DEPLOYED');
+CREATE TYPE "StageStatus" AS ENUM ('PENDING', 'IN_PROGRESS', 'COMPLETED', 'FAILED', 'REJECTED');
+
+-- CreateEnum
+CREATE TYPE "LabourStage" AS ENUM ('INITIALIZED', 'DOCUMENTS', 'MEDICAL', 'QVC', 'POLICE_CLEARANCE', 'VISA', 'FLIGHT', 'ARRIVAL', 'WORK_PERMIT', 'CONTRACT', 'DEPLOYMENT');
 
 -- CreateEnum
 CREATE TYPE "DeletionType" AS ENUM ('SCHEDULED', 'IMMEDIATE');
@@ -46,6 +49,7 @@ CREATE TABLE "User" (
     "name" TEXT NOT NULL,
     "email" VARCHAR(255) NOT NULL,
     "password" TEXT NOT NULL,
+    "tempPassword" VARCHAR(255),
     "phone" VARCHAR(20),
     "altContact" VARCHAR(20),
     "profilePicture" TEXT,
@@ -175,9 +179,9 @@ CREATE TABLE "JobRole" (
     "mobileProvidedByCompany" BOOLEAN NOT NULL DEFAULT false,
     "natureOfWorkAllowance" DOUBLE PRECISION,
     "otherAllowance" DOUBLE PRECISION,
-    "ticketFrequency" TEXT[],
-    "workLocations" TEXT[],
-    "previousExperience" TEXT[],
+    "ticketFrequency" TEXT NOT NULL,
+    "workLocations" TEXT NOT NULL,
+    "previousExperience" TEXT NOT NULL,
     "totalExperienceYears" INTEGER,
     "preferredAge" INTEGER,
     "languageRequirements" TEXT[],
@@ -223,7 +227,7 @@ CREATE TABLE "LabourProfile" (
     "languages" TEXT[],
     "requirementId" TEXT,
     "agencyId" TEXT NOT NULL,
-    "currentStage" "LabourStage" NOT NULL DEFAULT 'DOCUMENTS_PENDING',
+    "currentStage" "LabourStage" NOT NULL DEFAULT 'INITIALIZED',
 
     CONSTRAINT "LabourProfile_pkey" PRIMARY KEY ("id")
 );
@@ -234,6 +238,7 @@ CREATE TABLE "LabourAssignment" (
     "jobRoleId" TEXT NOT NULL,
     "agencyId" TEXT NOT NULL,
     "labourId" TEXT NOT NULL,
+    "isBackup" BOOLEAN NOT NULL DEFAULT false,
     "agencyStatus" "RequirementStatus" NOT NULL DEFAULT 'SUBMITTED',
     "adminStatus" "RequirementStatus" NOT NULL DEFAULT 'PENDING',
     "clientStatus" "RequirementStatus" NOT NULL DEFAULT 'PENDING',
@@ -250,7 +255,7 @@ CREATE TABLE "LabourStageHistory" (
     "id" TEXT NOT NULL,
     "labourId" TEXT NOT NULL,
     "stage" "LabourStage" NOT NULL,
-    "status" TEXT NOT NULL,
+    "status" "StageStatus" NOT NULL,
     "notes" TEXT,
     "documents" TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -408,6 +413,15 @@ CREATE INDEX "LabourAssignment_jobRoleId_idx" ON "LabourAssignment"("jobRoleId")
 
 -- CreateIndex
 CREATE INDEX "LabourAssignment_labourId_idx" ON "LabourAssignment"("labourId");
+
+-- CreateIndex
+CREATE INDEX "LabourAssignment_isBackup_idx" ON "LabourAssignment"("isBackup");
+
+-- CreateIndex
+CREATE INDEX "LabourAssignment_clientStatus_idx" ON "LabourAssignment"("clientStatus");
+
+-- CreateIndex
+CREATE INDEX "LabourAssignment_adminStatus_clientStatus_idx" ON "LabourAssignment"("adminStatus", "clientStatus");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "LabourAssignment_jobRoleId_labourId_key" ON "LabourAssignment"("jobRoleId", "labourId");

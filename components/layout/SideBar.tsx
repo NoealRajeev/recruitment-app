@@ -24,7 +24,7 @@ const navItems = {
     { href: "/dashboard/admin", label: "Dashboard", icon: Home, exact: true },
     {
       href: "/dashboard/admin/company",
-      label: "Company",
+      label: "Client",
       icon: Building2,
       exact: false,
     },

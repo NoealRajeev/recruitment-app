@@ -370,9 +370,9 @@ model JobRole {
   natureOfWorkAllowance           Float?
   otherAllowance                  Float?
 
-  ticketFrequency      String[] // e.g. ["EVERY_YEAR"]
-  workLocations        String[] // e.g. ["QATAR","DUBAI"]
-  previousExperience   String[] // e.g. ["GCC_EXPERIENCE"]
+  ticketFrequency      String
+  workLocations        String
+  previousExperience   String
   totalExperienceYears Int?
   preferredAge         Int?
 

@@ -372,8 +372,8 @@ enum RequirementStatus {
     otherAllowance         Float?
 
     ticketFrequency        String          
-    workLocations          String        
-    previousExperience     String         
+    workLocations          String          
+    previousExperience     String       
     totalExperienceYears   Int?
     preferredAge           Int?
 

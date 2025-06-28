@@ -176,9 +176,9 @@ export async function POST(request: Request) {
         natureOfWorkAllowance?: number;
         otherAllowance?: number;
         healthInsurance: string;
-        ticketFrequency: string[];
-        workLocations: string[];
-        previousExperience: string[];
+        ticketFrequency: string;
+        workLocations: string;
+        previousExperience: string;
         totalExperienceYears?: number;
         preferredAge?: number;
         languageRequirements: string[];

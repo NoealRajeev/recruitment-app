@@ -4,7 +4,6 @@
 import { signOut } from "next-auth/react";
 import { UserRole } from "@prisma/client";
 import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Bell,
@@ -42,14 +41,13 @@ export default function DashboardHeader({
     const currentPath = pathSegments[2]; // Get the section after /dashboard/[role]
 
     const pageTitles: Record<string, string> = {
-      company: "Company",
+      company: "Client",
       agencies: "Agencies",
       requirements: "Requirements",
       labour: "Labour Profiles",
       recruitment: "Recruitment Tracker",
       audit: "Audit Logs",
       documents: "Documents",
-      // Add more mappings as needed
     };
 
     // Default to capitalized path if no mapping exists

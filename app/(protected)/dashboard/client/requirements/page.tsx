@@ -318,6 +318,7 @@ export default function Requirements() {
       { value: "GCC", label: "GCC Experience" },
       { value: "QATAR", label: "Qatar Experience" },
       { value: "OVERSEAS", label: "Overseas Experience" },
+      { value: "FRESHER", label: "Fresher" },
     ],
     []
   );
@@ -429,8 +430,8 @@ export default function Requirements() {
     [formData]
   );
 
-  const handleCloseModal = async () => {
-    if (!isViewMode && hasValidData) {
+  const handleCloseModal = async (skipSaveCheck = false) => {
+    if (!skipSaveCheck && !isViewMode && hasValidData) {
       const confirmClose = window.confirm(
         "You have unsaved changes. Do you want to save as draft before closing?"
       );
@@ -531,9 +532,12 @@ export default function Requirements() {
           newErrors[`jobRoles[${index}].previousExperience`] =
             "Previous experience is required";
         }
-        if (!role.totalExperienceYears || role.totalExperienceYears <= 0) {
-          newErrors[`jobRoles[${index}].totalExperienceYears`] =
-            "Total experience years is required";
+        // Only validate totalExperienceYears if not a fresher
+        if (role.previousExperience !== "FRESHER") {
+          if (!role.totalExperienceYears || role.totalExperienceYears <= 0) {
+            newErrors[`jobRoles[${index}].totalExperienceYears`] =
+              "Total experience years is required";
+          }
         }
         if (!role.preferredAge || role.preferredAge <= 0) {
           newErrors[`jobRoles[${index}].preferredAge`] =
@@ -564,6 +568,24 @@ export default function Requirements() {
       return;
     }
 
+    if (
+      name === `jobRoles[${index}].previousExperience` &&
+      value === "FRESHER"
+    ) {
+      setFormData((prev) => {
+        const updatedJobRoles = [...prev.jobRoles];
+        updatedJobRoles[index] = {
+          ...updatedJobRoles[index],
+          previousExperience: value,
+          totalExperienceYears: 0,
+        };
+        return {
+          ...prev,
+          jobRoles: updatedJobRoles,
+        };
+      });
+      return;
+    }
     setFormData((prev) => {
       const updatedJobRoles = [...prev.jobRoles];
       const key = name.replace(
@@ -771,7 +793,6 @@ export default function Requirements() {
           languageRequirements: role.languageRequirements,
         })),
       };
-
       if (editingRequirement) {
         await updateRequirement(editingRequirement.id, {
           jobRoles: submissionData.jobRoles,
@@ -788,15 +809,42 @@ export default function Requirements() {
         type: "success",
       });
 
-      toast({
-        message: editingRequirement
-          ? "Requirement updated successfully"
-          : "Requirement submitted successfully",
-        type: "success",
-      });
-
       await fetchRequirements();
-      handleCloseModal();
+
+      // Clear the form and close modal without triggering save as draft
+      setFormData({
+        jobRoles: [
+          {
+            title: "",
+            quantity: 1,
+            nationality: "",
+            startDate: new Date().toISOString().split("T")[0],
+            contractDuration: undefined,
+            basicSalary: 0,
+            salaryCurrency: "QAR",
+            foodAllowance: undefined,
+            foodProvidedByCompany: false,
+            housingAllowance: undefined,
+            housingProvidedByCompany: false,
+            transportationAllowance: undefined,
+            transportationProvidedByCompany: false,
+            mobileAllowance: undefined,
+            mobileProvidedByCompany: false,
+            natureOfWorkAllowance: undefined,
+            otherAllowance: undefined,
+            healthInsurance: "asPerLaw",
+            ticketFrequency: "",
+            workLocations: "",
+            previousExperience: "",
+            totalExperienceYears: undefined,
+            preferredAge: undefined,
+            languageRequirements: [],
+            specialRequirements: "",
+          },
+        ],
+      });
+      setIsModalOpen(false);
+      setEditingRequirement(null);
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to submit requirement";
@@ -1594,10 +1642,17 @@ export default function Requirements() {
                                           onChange={(e) =>
                                             handleJobRoleChange(index, e)
                                           }
-                                          required
+                                          required={
+                                            role.previousExperience !==
+                                            "FRESHER"
+                                          }
                                           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
                                           placeholder="e.g., 5"
-                                          disabled={isViewMode}
+                                          disabled={
+                                            isViewMode ||
+                                            role.previousExperience ===
+                                              "FRESHER"
+                                          }
                                           aria-label="Total experience years"
                                         />
                                       </div>
@@ -1992,7 +2047,11 @@ export default function Requirements() {
 
       <Modal
         isOpen={isModalOpen}
-        onClose={isSubmitting ? () => {} : handleCloseModal}
+        onClose={
+          isSubmitting
+            ? () => {}
+            : () => handleCloseModal(currentStep === steps.length)
+        }
         title={modalTitle}
         size="7xl"
         showFooter={!isViewMode}

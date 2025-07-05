@@ -42,6 +42,9 @@ export async function GET() {
             LabourAssignment: {
               where: {
                 agencyStatus: "ACCEPTED",
+                labour: {
+                  status: "SHORTLISTED",
+                },
               },
               include: {
                 labour: {

@@ -150,17 +150,19 @@ enum DeletionType {
 
 enum RequirementStatus {
   DRAFT
-  SUBMITTED // created by client, awaiting admin review
+  SUBMITTED
   PARTIALLY_SUBMITTED
   PENDING
-  UNDER_REVIEW // admin is reviewing/edits in progress
-  FORWARDED // admin has forwarded to agency
-  ACCEPTED // agency accepted the role
-  REJECTED // agency or admin rejected
-  COMPLETED // filled/deployed
-  CLIENT_REVIEW // added for client review stage
-  SUBMITTED_TO_CLIENT // added for tracking submission to client
+  UNDER_REVIEW
+  FORWARDED
+  ACCEPTED
+  PARTIALLY_ACCEPTED
+  REJECTED
+  COMPLETED
+  CLIENT_REVIEW
+  SUBMITTED_TO_CLIENT
   NEEDS_REVISION
+  AGENCY_REJECTED
 }
 
 enum ContractDuration {
@@ -256,23 +258,24 @@ model Client {
 }
 
 model Agency {
-  id               String             @id @default(uuid())
-  userId           String             @unique
-  user             User               @relation(fields: [userId], references: [id])
-  agencyName       String             @db.VarChar(255)
-  registrationNo   String?            @unique @db.VarChar(50)
-  licenseNumber    String             @db.VarChar(50)
-  licenseExpiry    DateTime
-  country          String             @db.VarChar(100)
-  website          String?            @db.VarChar(255)
-  address          String
-  city             String             @db.VarChar(100)
-  postalCode       String?            @db.VarChar(20)
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  JobRole          JobRole[]
-  LabourProfile    LabourProfile[]
-  LabourAssignment LabourAssignment[]
+  id                 String              @id @default(uuid())
+  userId             String              @unique
+  user               User                @relation(fields: [userId], references: [id])
+  agencyName         String              @db.VarChar(255)
+  registrationNo     String?             @unique @db.VarChar(50)
+  licenseNumber      String              @db.VarChar(50)
+  licenseExpiry      DateTime
+  country            String              @db.VarChar(100)
+  website            String?             @db.VarChar(255)
+  address            String
+  city               String              @db.VarChar(100)
+  postalCode         String?             @db.VarChar(20)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  JobRole            JobRole[]
+  LabourProfile      LabourProfile[]
+  LabourAssignment   LabourAssignment[]
+  jobRoleForwardings JobRoleForwarding[]
 
   @@index([agencyName])
   @@index([licenseNumber])
@@ -344,7 +347,7 @@ model Requirement {
   LabourProfile LabourProfile[]
 }
 
-/// A single row in the “table” of roles for one requirement
+/// A single row in the "table" of roles for one requirement
 model JobRole {
   id            String      @id @default(uuid())
   requirementId String
@@ -382,11 +385,13 @@ model JobRole {
   /// Which agency (if any) this role has been forwarded to
   assignedAgencyId String?
   assignedAgency   Agency?           @relation(fields: [assignedAgencyId], references: [id])
-  /// If forwarded, track agency’s response status
+  /// If forwarded, track agency's response status
   agencyStatus     RequirementStatus @default(UNDER_REVIEW)
   adminStatus      RequirementStatus @default(PENDING)
 
   LabourAssignment LabourAssignment[]
+  needsMoreLabour  Boolean             @default(false)
+  forwardings      JobRoleForwarding[]
 }
 
 model LabourProfile {
@@ -515,4 +520,16 @@ model AuditLog {
   @@index([createdAt])
   @@index([entityType, action])
   @@map("audit_logs")
+}
+
+model JobRoleForwarding {
+  id        String   @id @default(uuid())
+  jobRoleId String
+  agencyId  String
+  quantity  Int
+  jobRole   JobRole  @relation(fields: [jobRoleId], references: [id])
+  agency    Agency   @relation(fields: [agencyId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([jobRoleId, agencyId])
 }

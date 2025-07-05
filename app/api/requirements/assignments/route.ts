@@ -1,4 +1,3 @@
-// app/api/agencies/requirements/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
@@ -42,6 +41,10 @@ export async function GET(request: Request) {
             updatedAt: true,
           },
         },
+        forwardings: {
+          where: { agencyId: agency.id },
+          select: { quantity: true },
+        },
       },
       orderBy: {
         requirement: {
@@ -50,7 +53,15 @@ export async function GET(request: Request) {
       },
     });
 
-    return NextResponse.json({ assignments });
+    // Add forwardedQuantity and needsMoreLabour to each assignment
+    const assignmentsWithForwarded = assignments.map((assignment) => ({
+      ...assignment,
+      forwardedQuantity:
+        assignment.forwardings?.[0]?.quantity ?? assignment.quantity,
+      needsMoreLabour: assignment.needsMoreLabour ?? false,
+    }));
+
+    return NextResponse.json({ assignments: assignmentsWithForwarded });
   } catch (error) {
     console.error("Error fetching agency assignments:", error);
     return NextResponse.json(

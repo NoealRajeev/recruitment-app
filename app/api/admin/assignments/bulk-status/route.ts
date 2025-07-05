@@ -27,6 +27,13 @@ export async function PUT(request: Request) {
       );
     }
 
+    if (status === "REJECTED" && (!feedback || feedback.trim() === "")) {
+      return NextResponse.json(
+        { error: "Feedback is required for rejection" },
+        { status: 400 }
+      );
+    }
+
     // Get current assignments for audit log
     const currentAssignments = await prisma.labourAssignment.findMany({
       where: { id: { in: assignmentIds } },
@@ -73,6 +80,7 @@ export async function PUT(request: Request) {
             adminFeedback: status === "ACCEPTED" ? null : feedback, // Clear feedback if accepted
             ...(status === "ACCEPTED" && {
               clientStatus: "SUBMITTED", // Set to SUBMITTED for client review
+              agencyStatus: "ACCEPTED", // Set agency status to ACCEPTED
             }),
             ...(status === "REJECTED" && {
               clientStatus: "PENDING", // Keep client status as PENDING
@@ -91,6 +99,34 @@ export async function PUT(request: Request) {
       );
 
       const results = await Promise.all(updates);
+
+      // Update labour profiles status based on admin decision
+      if (status === "REJECTED") {
+        await Promise.all(
+          results.map((assignment) =>
+            tx.labourProfile.update({
+              where: { id: assignment.labourId },
+              data: {
+                requirementId: null,
+                status: "REJECTED",
+              },
+            })
+          )
+        );
+      } else if (status === "ACCEPTED") {
+        // Ensure accepted labour profiles are SHORTLISTED
+        await Promise.all(
+          results.map((assignment) =>
+            tx.labourProfile.update({
+              where: { id: assignment.labourId },
+              data: {
+                status: "SHORTLISTED",
+                requirementId: assignment.jobRole.requirementId,
+              },
+            })
+          )
+        );
+      }
 
       // Group assignments by job role for status updates
       const assignmentsByJobRole = results.reduce(
@@ -123,20 +159,49 @@ export async function PUT(request: Request) {
           (a) => a.adminStatus === "ACCEPTED"
         );
 
-        // If we have more accepted assignments than needed, mark extras as backup
-        if (acceptedAssignments.length > jobRole.quantity) {
-          const extras = acceptedAssignments.slice(jobRole.quantity);
-          await Promise.all(
-            extras.map((assignment) =>
-              tx.labourAssignment.update({
-                where: { id: assignment.id },
-                data: {
-                  isBackup: true,
-                },
-              })
-            )
-          );
-        }
+        // Sort accepted assignments by createdAt (oldest first)
+        acceptedAssignments.sort(
+          (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+        );
+
+        // Mark the first N as not backup, rest as backup
+        console.log(
+          `Job role ${jobRoleId}: Marking assignments as primary/backup`,
+          {
+            totalAccepted: acceptedAssignments.length,
+            quantity: jobRole.quantity,
+            primaries: acceptedAssignments
+              .slice(0, jobRole.quantity)
+              .map((a) => ({ id: a.id, labourId: a.labourId })),
+            backups: acceptedAssignments
+              .slice(jobRole.quantity)
+              .map((a) => ({ id: a.id, labourId: a.labourId })),
+          }
+        );
+
+        await Promise.all(
+          acceptedAssignments.map((assignment, idx) =>
+            tx.labourAssignment.update({
+              where: { id: assignment.id },
+              data: {
+                isBackup: idx >= jobRole.quantity,
+              },
+            })
+          )
+        );
+
+        // For any non-accepted assignments, ensure isBackup is false
+        const nonAcceptedAssignments = jobRoleAssignments.filter(
+          (a) => a.adminStatus !== "ACCEPTED" && a.isBackup
+        );
+        await Promise.all(
+          nonAcceptedAssignments.map((assignment) =>
+            tx.labourAssignment.update({
+              where: { id: assignment.id },
+              data: { isBackup: false },
+            })
+          )
+        );
 
         const allAccepted = jobRoleAssignments.every(
           (a) => a.adminStatus === "ACCEPTED"
@@ -160,6 +225,15 @@ export async function PUT(request: Request) {
             },
           });
         }
+
+        // If after rejection, accepted assignments < jobRole.quantity, set needsMoreLabour
+        const acceptedPrimaries = jobRoleAssignments.filter(
+          (a) => a.adminStatus === "ACCEPTED" && !a.isBackup
+        ).length;
+        await tx.jobRole.update({
+          where: { id: jobRoleId },
+          data: { needsMoreLabour: acceptedPrimaries < jobRole.quantity },
+        });
       }
 
       // Check each requirement to see if all job roles are fulfilled
@@ -199,12 +273,19 @@ export async function PUT(request: Request) {
 
         // If all job roles are fulfilled, update requirement status
         if (allRolesFulfilled) {
+          console.log(
+            `Updating requirement ${requirementId} status to CLIENT_REVIEW`
+          );
           await tx.requirement.update({
             where: { id: requirementId },
             data: {
               status: "CLIENT_REVIEW",
             },
           });
+        } else {
+          console.log(
+            `Requirement ${requirementId} not fulfilled yet. All roles fulfilled: ${allRolesFulfilled}`
+          );
         }
       }
 

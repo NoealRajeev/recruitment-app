@@ -331,7 +331,7 @@ export default function Requirements() {
   const getMinStartDate = () => {
     const today = new Date();
     const minDate = new Date(today);
-    minDate.setDate(minDate.getDate() + 14); // Add 2 weeks (14 days)
+    minDate.setDate(minDate.getDate() + 15); // Add 2 weeks (15 days)
     return minDate.toISOString().split("T")[0]; // Format as YYYY-MM-DD
   };
 

@@ -3,7 +3,6 @@
 "use client";
 
 import { Card, CardContent, CardHeader } from "@/components/shared/Card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/Button";
 import {
   Clock,
@@ -24,11 +23,13 @@ import { useToast } from "@/context/toast-provider";
 import { useState, useEffect } from "react";
 import { RequirementStatus, ContractDuration } from "@/lib/generated/prisma";
 import { Modal } from "@/components/ui/Modal";
+import { Badge } from "@/components/ui/badge";
 
 interface JobRoleAssignment {
   id: string;
   title: string;
   quantity: number;
+  forwardedQuantity?: number;
   nationality: string;
   basicSalary: number;
   salaryCurrency: string;
@@ -45,9 +46,9 @@ interface JobRoleAssignment {
   natureOfWorkAllowance: number | null;
   otherAllowance: number | null;
   healthInsurance: string;
-  ticketFrequency: string[];
-  workLocations: string[];
-  previousExperience: string[];
+  ticketFrequency: string;
+  workLocations: string;
+  previousExperience: string;
   totalExperienceYears: number | null;
   preferredAge: number | null;
   languageRequirements: string[];
@@ -55,6 +56,7 @@ interface JobRoleAssignment {
   agencyStatus: RequirementStatus;
   createdAt: Date;
   updatedAt: Date;
+  needsMoreLabour: boolean;
 }
 
 interface LabourProfile {
@@ -66,6 +68,16 @@ interface LabourProfile {
   nationality: string;
   jobRole: string;
   status: string;
+}
+
+// Add a type for LabourAssignment
+interface LabourAssignment {
+  id: string;
+  labour: LabourProfile;
+  adminStatus: string;
+  clientStatus: string;
+  adminFeedback?: string;
+  clientFeedback?: string;
 }
 
 export default function AssignedRequirements() {
@@ -82,6 +94,8 @@ export default function AssignedRequirements() {
   const [filteredProfiles, setFilteredProfiles] = useState<LabourProfile[]>([]);
   const [selectedProfiles, setSelectedProfiles] = useState<string[]>([]);
   const [assigningProfiles, setAssigningProfiles] = useState(false);
+  const [rejectedAssignmentsByJobRole, setRejectedAssignmentsByJobRole] =
+    useState<Record<string, LabourAssignment[]>>({});
 
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -89,71 +103,70 @@ export default function AssignedRequirements() {
   const [statusFilter, setStatusFilter] = useState("");
   const [ageFilter, setAgeFilter] = useState("");
 
+  // Add new filter states
+  const [verificationStatusFilter, setVerificationStatusFilter] =
+    useState("VERIFIED");
+  const [experienceFilter, setExperienceFilter] = useState("");
+  const [languagesFilter, setLanguagesFilter] = useState<string[]>([]);
+
+  // Track all assignments for the current job role in the modal
+  const [allAssignmentsForCurrent, setAllAssignmentsForCurrent] = useState<
+    LabourAssignment[]
+  >([]);
+
   useEffect(() => {
     const fetchAssignments = async () => {
       try {
         setLoading(true);
         const response = await fetch("/api/requirements/assignments");
         if (response.ok) {
-          const data = await response.json();
-
-          // Filter out rejected assignments older than 1 hour
-          const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-          const filteredAssignments = data.assignments.filter(
-            (assignment: any) => {
-              if (assignment.agencyStatus === "REJECTED") {
-                return new Date(assignment.updatedAt) > oneHourAgo;
-              }
-              return true;
-            }
-          );
-
-          // Sort with APPROVED first, then others, then REJECTED
-          filteredAssignments.sort((a: any, b: any) => {
-            if (a.agencyStatus === "ACCEPTED" && b.agencyStatus !== "ACCEPTED")
-              return -1;
-            if (a.agencyStatus !== "ACCEPTED" && b.agencyStatus === "ACCEPTED")
-              return 1;
-            if (a.agencyStatus === "REJECTED" && b.agencyStatus !== "REJECTED")
-              return 1;
-            if (a.agencyStatus !== "REJECTED" && b.agencyStatus === "REJECTED")
-              return -1;
-            return (
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-            );
-          });
-
-          setAssignments(filteredAssignments);
-        } else {
-          throw new Error("Failed to fetch assignments");
+          const data: { assignments: JobRoleAssignment[] } =
+            await response.json();
+          setAssignments(data.assignments);
         }
       } catch (error) {
         console.error("Error fetching assignments:", error);
         toast({
           type: "error",
-          message: "Failed to load assigned requirements",
+          message: "Failed to load assignments",
         });
       } finally {
         setLoading(false);
       }
     };
-
     fetchAssignments();
-
     // Refresh every hour to clean up old rejected requests
     const interval = setInterval(fetchAssignments, 60 * 60 * 1000);
     return () => clearInterval(interval);
   }, [toast]);
 
-  const fetchLabourProfiles = async (jobRole: string, nationality: string) => {
+  const fetchLabourProfiles = async (
+    jobRole: string,
+    nationality: string,
+    age?: number,
+    status?: string,
+    verificationStatus?: string,
+    experience?: string,
+    languages?: string[]
+  ) => {
+    const params = new URLSearchParams();
+    params.append("jobRole", jobRole);
+    params.append("nationality", nationality);
+    if (age) params.append("age", age.toString());
+    if (status) params.append("status", status);
+    if (verificationStatus)
+      params.append("verificationStatus", verificationStatus);
+    if (experience) params.append("experience", experience);
+    if (languages && languages.length > 0)
+      params.append("languages", languages.join(","));
     try {
       const response = await fetch(
-        `/api/agencies/labour-profiles?jobRole=${encodeURIComponent(jobRole)}&nationality=${encodeURIComponent(nationality)}`
+        `/api/agencies/labour-profiles?${params.toString()}`
       );
       if (response.ok) {
         const data = await response.json();
         setLabourProfiles(data.labourProfiles);
-        setFilteredProfiles(data.labourProfiles); // Initialize filtered profiles
+        setFilteredProfiles(data.labourProfiles);
       } else {
         throw new Error("Failed to fetch labour profiles");
       }
@@ -171,6 +184,26 @@ export default function AssignedRequirements() {
     if (labourProfiles.length === 0) return;
 
     let result = [...labourProfiles];
+
+    // Filter out rejected labour profiles if assign is enabled due to labour rejection
+    if (currentAssignment) {
+      // Calculate exactly like admin rejection logic
+      const currentRejectedAssignments =
+        rejectedAssignmentsByJobRole[currentAssignment.id] || [];
+      const acceptedPrimaries =
+        currentRejectedAssignments.filter(
+          (a) => a.adminStatus === "ACCEPTED" && a.clientStatus === "ACCEPTED"
+        ).length || 0;
+      const needsMoreLabour = acceptedPrimaries < currentAssignment.quantity;
+
+      // If assign is enabled due to labour rejection, exclude rejected labour profiles
+      if (needsMoreLabour) {
+        const rejectedLabourIds = new Set(
+          currentRejectedAssignments.map((a) => a.labour?.id).filter(Boolean)
+        );
+        result = result.filter((profile) => !rejectedLabourIds.has(profile.id));
+      }
+    }
 
     // Apply search term filter
     if (searchTerm) {
@@ -209,11 +242,84 @@ export default function AssignedRequirements() {
     }
 
     setFilteredProfiles(result);
-  }, [searchTerm, nationalityFilter, statusFilter, ageFilter, labourProfiles]);
+  }, [
+    searchTerm,
+    nationalityFilter,
+    statusFilter,
+    ageFilter,
+    labourProfiles,
+    currentAssignment,
+    rejectedAssignmentsByJobRole,
+  ]);
+
+  // Fetch rejected assignments for a job role
+  const fetchRejectedAssignments = async (jobRoleId: string) => {
+    try {
+      const response = await fetch(`/api/requirements/${jobRoleId}/assign`);
+      if (response.ok) {
+        const data = await response.json();
+        const rejected = (data.assignments || []).filter(
+          (a: LabourAssignment) =>
+            a.adminStatus === "REJECTED" || a.clientStatus === "REJECTED"
+        );
+        setRejectedAssignmentsByJobRole((prev) => ({
+          ...prev,
+          [jobRoleId]: rejected,
+        }));
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  // Fetch rejected assignments for all assignments on mount
+  useEffect(() => {
+    assignments.forEach((assignment) => {
+      fetchRejectedAssignments(assignment.id);
+    });
+  }, [assignments]);
+
+  // Fetch all assignments for the current job role when opening the modal
+  const fetchAllAssignmentsForCurrent = async (jobRoleId: string) => {
+    try {
+      const response = await fetch(`/api/requirements/${jobRoleId}/assign`);
+      if (response.ok) {
+        const data = await response.json();
+        setAllAssignmentsForCurrent(data.assignments || []);
+      }
+    } catch {
+      setAllAssignmentsForCurrent([]);
+    }
+  };
+
+  const getNonRejectedAssignmentsCount = () => {
+    return allAssignmentsForCurrent.filter(
+      (a) => a.adminStatus !== "REJECTED" && a.clientStatus !== "REJECTED"
+    ).length;
+  };
+
+  const getRemainingSlots = () => {
+    return (
+      (currentAssignment?.forwardedQuantity || 0) -
+      getNonRejectedAssignmentsCount()
+    );
+  };
 
   const handleOpenAssignModal = async (assignment: JobRoleAssignment) => {
     setCurrentAssignment(assignment);
-    await fetchLabourProfiles(assignment.title, assignment.nationality);
+    await fetchLabourProfiles(
+      assignment.title,
+      assignment.nationality,
+      assignment.preferredAge || undefined,
+      "APPROVED",
+      verificationStatusFilter,
+      experienceFilter,
+      languagesFilter
+    );
+    // Fetch rejected assignments for this job role
+    fetchRejectedAssignments(assignment.id);
+    // Fetch all assignments for this job role
+    await fetchAllAssignmentsForCurrent(assignment.id);
     setIsAssignModalOpen(true);
   };
 
@@ -233,7 +339,7 @@ export default function AssignedRequirements() {
       if (prev.includes(profileId)) {
         return prev.filter((id) => id !== profileId);
       }
-      if (prev.length < (currentAssignment?.quantity || 0)) {
+      if (prev.length < getRemainingSlots()) {
         return [...prev, profileId];
       }
       return prev;
@@ -335,16 +441,38 @@ export default function AssignedRequirements() {
     }
   };
 
+  // In both admin and agency components
+
   const getStatusBadge = (status: RequirementStatus) => {
     switch (status) {
       case "ACCEPTED":
         return (
           <Badge className="bg-green-500 hover:bg-green-600">Accepted</Badge>
         );
+      case "PARTIALLY_ACCEPTED":
+        return (
+          <Badge className="bg-teal-500 hover:bg-teal-600">
+            Partially Accepted
+          </Badge>
+        );
       case "REJECTED":
         return <Badge className="bg-red-500 hover:bg-red-600">Rejected</Badge>;
+      case "AGENCY_REJECTED":
+        return (
+          <Badge className="bg-orange-500 hover:bg-orange-600">
+            Agency Rejected
+          </Badge>
+        );
       case "FORWARDED":
-        return <Badge className="bg-blue-500 hover:bg-blue-600">New</Badge>;
+        return (
+          <Badge className="bg-blue-500 hover:bg-blue-600">Forwarded</Badge>
+        );
+      case "UNDER_REVIEW":
+        return (
+          <Badge className="bg-yellow-500 hover:bg-yellow-600">
+            Needs Review
+          </Badge>
+        );
       case "COMPLETED":
         return (
           <Badge className="bg-purple-500 hover:bg-purple-600">Completed</Badge>
@@ -430,6 +558,23 @@ export default function AssignedRequirements() {
               <div className="flex justify-between items-start">
                 <div>
                   <h3 className="font-medium">{assignment.title}</h3>
+                  {(() => {
+                    const rejectionThreshold =
+                      (assignment.forwardedQuantity ?? assignment.quantity) -
+                      assignment.quantity;
+                    const adminRejectedCount =
+                      rejectedAssignmentsByJobRole[assignment.id]?.filter(
+                        (a) => a.adminStatus === "REJECTED"
+                      ).length || 0;
+                    if (adminRejectedCount > rejectionThreshold) {
+                      return (
+                        <span className="px-2 py-1 text-xs bg-red-600 text-white rounded-full animate-pulse ml-2 font-bold">
+                          PRIORITY: More labour profiles needed!
+                        </span>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
                 {getStatusBadge(assignment.agencyStatus)}
               </div>
@@ -444,7 +589,8 @@ export default function AssignedRequirements() {
                         {assignment.nationality}
                       </div>
                       <div className="text-sm font-medium">
-                        Quantity: {assignment.quantity}
+                        Quantity:{" "}
+                        {assignment.forwardedQuantity ?? assignment.quantity}
                       </div>
                     </div>
 
@@ -476,9 +622,7 @@ export default function AssignedRequirements() {
 
                     <div className="flex items-center text-sm">
                       <Plane className="h-4 w-4 mr-2 text-gray-500" />
-                      <span>
-                        Tickets: {assignment.ticketFrequency.join(", ")}
-                      </span>
+                      <span>Tickets: {assignment.ticketFrequency}</span>
                     </div>
 
                     {/* Allowances Section */}
@@ -520,7 +664,7 @@ export default function AssignedRequirements() {
                       <div className="text-sm space-y-1">
                         <div>
                           <span className="font-medium">Work Locations: </span>
-                          {assignment.workLocations.join(", ")}
+                          {assignment.workLocations}
                         </div>
                         <div>
                           <span className="font-medium">Experience: </span>
@@ -544,32 +688,102 @@ export default function AssignedRequirements() {
                         )}
                       </div>
                     </div>
+
+                    {(() => {
+                      const rejectionThreshold =
+                        (assignment.forwardedQuantity ?? assignment.quantity) -
+                        assignment.quantity;
+                      const adminRejectedCount =
+                        rejectedAssignmentsByJobRole[assignment.id]?.filter(
+                          (a) => a.adminStatus === "REJECTED"
+                        ).length || 0;
+                      if (adminRejectedCount > rejectionThreshold) {
+                        return (
+                          <div className="mt-2">
+                            <h4 className="text-sm font-semibold text-red-600">
+                              Rejected Labourers:
+                            </h4>
+                            <ul className="text-xs text-gray-700 space-y-1">
+                              {rejectedAssignmentsByJobRole[assignment.id].map(
+                                (a) => (
+                                  <li
+                                    key={a.id}
+                                    className="flex items-center gap-2"
+                                  >
+                                    <User className="h-4 w-4 text-red-400" />
+                                    <span>{a.labour?.name || "Unknown"}</span>
+                                    <span className="italic">
+                                      (
+                                      {a.adminStatus === "REJECTED"
+                                        ? "Admin"
+                                        : "Client"}{" "}
+                                      Rejected)
+                                    </span>
+                                    {a.adminFeedback && (
+                                      <span className="ml-2 text-gray-400">
+                                        {a.adminFeedback}
+                                      </span>
+                                    )}
+                                    {a.clientFeedback && (
+                                      <span className="ml-2 text-gray-400">
+                                        {a.clientFeedback}
+                                      </span>
+                                    )}
+                                  </li>
+                                )
+                              )}
+                            </ul>
+                            <div className="text-xs text-red-500 mt-1">
+                              Please assign replacements for these rejected
+                              profiles.
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
                   </div>
                 </div>
 
-                {assignment.agencyStatus === "FORWARDED" && (
-                  <div className="flex justify-between pt-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        handleUpdateAssignmentStatus(assignment.id, "REJECTED")
-                      }
-                      disabled={updatingAssignment === assignment.id}
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      Reject
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => handleOpenAssignModal(assignment)}
-                      disabled={updatingAssignment === assignment.id}
-                    >
-                      <User className="h-4 w-4 mr-2" />
-                      Assign
-                    </Button>
-                  </div>
-                )}
+                {(() => {
+                  const rejectionThreshold =
+                    (assignment.forwardedQuantity ?? assignment.quantity) -
+                    assignment.quantity;
+                  const adminRejectedCount =
+                    rejectedAssignmentsByJobRole[assignment.id]?.filter(
+                      (a) => a.adminStatus === "REJECTED"
+                    ).length || 0;
+                  const shouldShowButtons =
+                    assignment.agencyStatus === "FORWARDED" ||
+                    adminRejectedCount > rejectionThreshold;
+
+                  return shouldShowButtons ? (
+                    <div className="flex justify-between pt-4">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handleUpdateAssignmentStatus(
+                            assignment.id,
+                            "REJECTED"
+                          )
+                        }
+                        disabled={updatingAssignment === assignment.id}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Reject
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handleOpenAssignModal(assignment)}
+                        disabled={updatingAssignment === assignment.id}
+                      >
+                        <User className="h-4 w-4 mr-2" />
+                        Assign
+                      </Button>
+                    </div>
+                  ) : null;
+                })()}
               </div>
             </CardContent>
           </Card>
@@ -586,10 +800,9 @@ export default function AssignedRequirements() {
         footerContent={
           <div className="flex justify-between w-full">
             <div className="text-sm text-gray-600">
-              Selected: {selectedProfiles.length} /{" "}
-              {currentAssignment?.quantity || 0}
+              Selected: {selectedProfiles.length} / {getRemainingSlots()}
               {selectedProfiles.length >=
-                (currentAssignment?.quantity || 0) && (
+                (currentAssignment?.forwardedQuantity || 0) && (
                 <span className="ml-2 text-green-600">(Limit reached)</span>
               )}
             </div>
@@ -600,9 +813,9 @@ export default function AssignedRequirements() {
                   if (selectedProfiles.length > 0) {
                     setSelectedProfiles([]);
                   } else {
-                    const quantity = currentAssignment?.quantity || 0;
+                    const slots = getRemainingSlots();
                     const profilesToSelect = filteredProfiles
-                      .slice(0, quantity)
+                      .slice(0, slots)
                       .map((profile) => profile.id);
                     setSelectedProfiles(profilesToSelect);
                   }
@@ -611,7 +824,7 @@ export default function AssignedRequirements() {
               >
                 {selectedProfiles.length > 0
                   ? "Deselect All"
-                  : `Select ${currentAssignment?.quantity || 0}`}
+                  : `Select ${getRemainingSlots()}`}
               </Button>
               <Button variant="outline" onClick={handleCloseAssignModal}>
                 Cancel
@@ -619,8 +832,8 @@ export default function AssignedRequirements() {
               <Button
                 onClick={handleAssignProfiles}
                 disabled={
-                  selectedProfiles.length !==
-                    (currentAssignment?.quantity || 0) || assigningProfiles
+                  selectedProfiles.length !== getRemainingSlots() ||
+                  assigningProfiles
                 }
               >
                 {assigningProfiles ? "Assigning..." : "Assign Selected"}
@@ -654,9 +867,9 @@ export default function AssignedRequirements() {
                   setSelectedProfiles([]);
                 } else {
                   // If none are selected, select up to the required quantity
-                  const quantity = currentAssignment?.quantity || 0;
+                  const slots = getRemainingSlots();
                   const profilesToSelect = filteredProfiles
-                    .slice(0, quantity)
+                    .slice(0, slots)
                     .map((profile) => profile.id);
                   setSelectedProfiles(profilesToSelect);
                 }
@@ -665,13 +878,13 @@ export default function AssignedRequirements() {
             >
               {selectedProfiles.length > 0
                 ? "Deselect All"
-                : `Select ${currentAssignment?.quantity || 0}`}
+                : `Select ${getRemainingSlots()}`}
             </Button>
 
             {/* Filter Dropdowns */}
             <div className="flex gap-2">
               <select
-                className="pl-10 pr-8 py-2 border border-gray-300 rounded-md text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
                 value={nationalityFilter}
                 onChange={(e) => setNationalityFilter(e.target.value)}
               >
@@ -707,13 +920,49 @@ export default function AssignedRequirements() {
                 <option value="46-100">46+</option>
               </select>
             </div>
+
+            {/* Add new filter controls */}
+            <div className="flex gap-2">
+              <select
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                value={verificationStatusFilter}
+                onChange={(e) => setVerificationStatusFilter(e.target.value)}
+              >
+                <option value="VERIFIED">Verified</option>
+                <option value="PARTIALLY_VERIFIED">Partially Verified</option>
+                <option value="PENDING">Pending</option>
+              </select>
+              <input
+                type="number"
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                placeholder="Min Experience (years)"
+                value={experienceFilter}
+                onChange={(e) => setExperienceFilter(e.target.value)}
+                min={0}
+              />
+              <input
+                type="text"
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+                placeholder="Languages (comma separated)"
+                value={languagesFilter.join(",")}
+                onChange={(e) =>
+                  setLanguagesFilter(
+                    e.target.value
+                      .split(",")
+                      .map((l) => l.trim())
+                      .filter(Boolean)
+                  )
+                }
+              />
+            </div>
           </div>
 
-          {selectedProfiles.length >= (currentAssignment?.quantity || 0) && (
+          {selectedProfiles.length >=
+            (currentAssignment?.forwardedQuantity || 0) && (
             <div className="text-sm text-green-600">
               You&apos;ve reached the required quantity (
-              {currentAssignment?.quantity} profiles). You can deselect some if
-              needed.
+              {currentAssignment?.forwardedQuantity} profiles). You can deselect
+              some if needed.
             </div>
           )}
 
@@ -722,6 +971,33 @@ export default function AssignedRequirements() {
               <p className="text-gray-500">
                 No labour profiles match your search and filters.
               </p>
+              {currentAssignment &&
+                (() => {
+                  // Calculate exactly like admin rejection logic
+                  const currentRejectedAssignments =
+                    rejectedAssignmentsByJobRole[currentAssignment.id] || [];
+                  const acceptedPrimaries =
+                    currentRejectedAssignments.filter(
+                      (a) =>
+                        a.adminStatus === "ACCEPTED" &&
+                        a.clientStatus === "ACCEPTED"
+                    ).length || 0;
+                  const needsMoreLabour =
+                    acceptedPrimaries < currentAssignment.quantity;
+
+                  if (
+                    needsMoreLabour &&
+                    currentAssignment.agencyStatus === "SUBMITTED"
+                  ) {
+                    return (
+                      <div className="mt-2 text-sm text-red-600">
+                        Note: Previously rejected labour profiles have been
+                        excluded from the available options.
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               <Button
                 variant="outline"
                 className="mt-2"
@@ -737,13 +1013,41 @@ export default function AssignedRequirements() {
             </div>
           ) : (
             <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+              {currentAssignment &&
+                (() => {
+                  // Calculate exactly like admin rejection logic
+                  const currentRejectedAssignments =
+                    rejectedAssignmentsByJobRole[currentAssignment.id] || [];
+                  const acceptedPrimaries =
+                    currentRejectedAssignments.filter(
+                      (a) =>
+                        a.adminStatus === "ACCEPTED" &&
+                        a.clientStatus === "ACCEPTED"
+                    ).length || 0;
+                  const needsMoreLabour =
+                    acceptedPrimaries < currentAssignment.quantity;
+
+                  if (
+                    needsMoreLabour &&
+                    currentAssignment.agencyStatus === "SUBMITTED"
+                  ) {
+                    return (
+                      <div className="text-sm text-amber-600 bg-amber-50 p-2 rounded border">
+                        <strong>Note:</strong> Previously rejected labour
+                        profiles have been excluded from the available options
+                        to prevent re-assignment.
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredProfiles.map((profile) => (
                   <div
                     key={profile.id}
                     className={`flex items-start p-3 border rounded-lg ${
                       selectedProfiles.length >=
-                        (currentAssignment?.quantity || 0) &&
+                        (currentAssignment?.forwardedQuantity || 0) &&
                       !selectedProfiles.includes(profile.id)
                         ? "cursor-not-allowed opacity-70"
                         : "cursor-pointer"
@@ -755,7 +1059,7 @@ export default function AssignedRequirements() {
                     onClick={() => {
                       if (
                         selectedProfiles.length <
-                          (currentAssignment?.quantity || 0) ||
+                          (currentAssignment?.forwardedQuantity || 0) ||
                         selectedProfiles.includes(profile.id)
                       ) {
                         handleProfileSelection(profile.id);
@@ -808,7 +1112,7 @@ export default function AssignedRequirements() {
                         disabled={
                           !selectedProfiles.includes(profile.id) &&
                           selectedProfiles.length >=
-                            (currentAssignment?.quantity || 0)
+                            (currentAssignment?.forwardedQuantity || 0)
                         }
                       />
                     </div>
@@ -817,6 +1121,67 @@ export default function AssignedRequirements() {
               </div>
             </div>
           )}
+
+          {/* Add a button to re-fetch with filters */}
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (currentAssignment) {
+                fetchLabourProfiles(
+                  currentAssignment.title,
+                  currentAssignment.nationality,
+                  currentAssignment.preferredAge || undefined,
+                  "APPROVED",
+                  verificationStatusFilter,
+                  experienceFilter,
+                  languagesFilter
+                );
+              }
+            }}
+          >
+            Apply Filters
+          </Button>
+
+          {currentAssignment &&
+            (() => {
+              const currentRejectedAssignments =
+                rejectedAssignmentsByJobRole[currentAssignment.id] || [];
+              if (currentRejectedAssignments.length > 0) {
+                return (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-semibold text-red-600">
+                      Rejected Labourers for this Requirement:
+                    </h4>
+                    <ul className="text-xs text-gray-700 space-y-1">
+                      {currentRejectedAssignments.map((a) => (
+                        <li key={a.id} className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-red-400" />
+                          <span>{a.labour?.name || "Unknown"}</span>
+                          <span className="italic">
+                            ({a.adminStatus === "REJECTED" ? "Admin" : "Client"}{" "}
+                            Rejected)
+                          </span>
+                          {a.adminFeedback && (
+                            <span className="ml-2 text-gray-400">
+                              {a.adminFeedback}
+                            </span>
+                          )}
+                          {a.clientFeedback && (
+                            <span className="ml-2 text-gray-400">
+                              {a.clientFeedback}
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="text-xs text-red-500 mt-1">
+                      Please assign replacements for these rejected profiles.
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
         </div>
       </Modal>
     </div>

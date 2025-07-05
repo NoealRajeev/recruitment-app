@@ -6,7 +6,7 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
-import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2, User } from "lucide-react";
 import { RequirementStatus, ContractDuration } from "@/lib/generated/prisma";
 
 interface Client {
@@ -24,6 +24,26 @@ interface Agency {
   user: {
     status: "PENDING_REVIEW" | "REJECTED" | "NOT_VERIFIED" | "VERIFIED";
   };
+}
+
+interface LabourProfile {
+  id: string;
+  name: string;
+  profileImage?: string;
+  age: number;
+  gender: string;
+  nationality: string;
+  jobRole: string;
+  status: string;
+}
+
+interface LabourAssignment {
+  id: string;
+  labour: LabourProfile;
+  adminStatus: string;
+  clientStatus: string;
+  adminFeedback?: string;
+  clientFeedback?: string;
 }
 
 interface JobRole {
@@ -58,6 +78,8 @@ interface JobRole {
   assignedAgency?: {
     agencyName: string;
   } | null;
+  forwardedQuantity?: number;
+  needsMoreLabour?: boolean;
 }
 
 interface Requirement {
@@ -117,7 +139,6 @@ interface ForwardRequirementModalProps {
   requirement: Requirement | undefined;
   agencies: Agency[];
   onForward: (assignments: ForwardingJobRole[]) => Promise<void>;
-  jobRoleId?: string;
 }
 
 const contractDurationMap: Record<ContractDuration, string> = {
@@ -136,7 +157,6 @@ const ForwardRequirementModal = ({
   requirement,
   agencies,
   onForward,
-  jobRoleId,
 }: ForwardRequirementModalProps) => {
   const [mode, setMode] = useState<"SINGLE" | "SPLIT">("SINGLE");
   const [selectedAgency, setSelectedAgency] = useState<string>("");
@@ -146,8 +166,9 @@ const ForwardRequirementModal = ({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
-
-  const isSingleRoleForward = !!jobRoleId;
+  const [rejectedAgencies, setRejectedAgencies] = useState<Set<string>>(
+    new Set()
+  );
 
   const allRolesAssigned = useMemo(() => {
     if (mode !== "SPLIT") return true;
@@ -159,9 +180,7 @@ const ForwardRequirementModal = ({
 
   useEffect(() => {
     if (requirement) {
-      const rolesToForward = isSingleRoleForward
-        ? requirement.jobRoles.filter((role) => role.id === jobRoleId)
-        : requirement.jobRoles;
+      const rolesToForward = requirement.jobRoles;
 
       const initialJobRoles: ForwardingJobRole[] = rolesToForward.map(
         (role) => ({
@@ -178,8 +197,28 @@ const ForwardRequirementModal = ({
         expandedState[role.id] = false;
       });
       setExpandedRoles(expandedState);
+
+      const rejected = new Set<string>();
+      requirement.jobRoles.forEach((role) => {
+        if (role.agencyStatus === "REJECTED" && role.assignedAgencyId) {
+          rejected.add(role.assignedAgencyId);
+        }
+      });
+      setRejectedAgencies(rejected);
     }
-  }, [requirement, jobRoleId, isSingleRoleForward]);
+  }, [requirement]);
+
+  useEffect(() => {
+    if (requirement) {
+      const rejected = new Set<string>();
+      requirement.jobRoles.forEach((role) => {
+        if (role.agencyStatus === "REJECTED" && role.assignedAgencyId) {
+          rejected.add(role.assignedAgencyId);
+        }
+      });
+      setRejectedAgencies(rejected);
+    }
+  }, [requirement]);
 
   useEffect(() => {
     if (agencies.length > 0 && mode === "SINGLE") {
@@ -366,9 +405,12 @@ const ForwardRequirementModal = ({
     const currentRole = jobRoles.find((r) => r.id === jobRoleId);
     const assignedAgencyIds =
       currentRole?.forwarded.map((a) => a.agencyId) || [];
+
     return agencies.filter(
       (agency) =>
-        agency.id === currentAgencyId || !assignedAgencyIds.includes(agency.id)
+        (agency.id === currentAgencyId ||
+          !assignedAgencyIds.includes(agency.id)) &&
+        !rejectedAgencies.has(agency.id)
     );
   };
 
@@ -386,7 +428,7 @@ const ForwardRequirementModal = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Forward ${isSingleRoleForward ? "Job Role" : "Requirement"}`}
+      title={`Forward Requirement`}
       size="3xl"
       showFooter
       onConfirm={handleSubmit}
@@ -583,6 +625,40 @@ const ForwardRequirementModal = ({
   );
 };
 
+function getStatusColor(
+  status: "PENDING_REVIEW" | "REJECTED" | "NOT_VERIFIED" | "VERIFIED"
+) {
+  switch (status) {
+    case "VERIFIED":
+      return "text-green-600";
+    case "PENDING_REVIEW":
+      return "text-yellow-600";
+    case "REJECTED":
+      return "text-red-600";
+    case "NOT_VERIFIED":
+      return "text-gray-500";
+    default:
+      return "text-gray-500";
+  }
+}
+
+function getStatusText(
+  status: "PENDING_REVIEW" | "REJECTED" | "NOT_VERIFIED" | "VERIFIED"
+) {
+  switch (status) {
+    case "VERIFIED":
+      return "Verified";
+    case "PENDING_REVIEW":
+      return "Pending Review";
+    case "REJECTED":
+      return "Rejected";
+    case "NOT_VERIFIED":
+      return "Not Verified";
+    default:
+      return status;
+  }
+}
+
 export default function Requirements() {
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
   const [companies, setCompanies] = useState<Client[]>([]);
@@ -592,10 +668,9 @@ export default function Requirements() {
   const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [loadingRequirements, setLoadingRequirements] = useState(true);
   const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
-  const [forwardingJobRoleId, setForwardingJobRoleId] = useState<string | null>(
-    null
-  );
   const { toast } = useToast();
+  const [rejectedAssignmentsByJobRole, setRejectedAssignmentsByJobRole] =
+    useState<Record<string, LabourAssignment[]>>({});
 
   const currentRequirement = requirements[currentRequirementIndex];
 
@@ -641,7 +716,7 @@ export default function Requirements() {
       try {
         setLoadingRequirements(true);
         const response = await fetch(
-          `/api/requirements?clientId=${companyId}&status=SUBMITTED`,
+          `/api/requirements?clientId=${companyId}&status=SUBMITTED,UNDER_REVIEW`,
           {
             credentials: "include",
           }
@@ -726,8 +801,6 @@ export default function Requirements() {
           }))
         );
 
-        const isForwardingAll = !forwardingJobRoleId;
-
         const response = await fetch(`/api/requirements/forward`, {
           method: "POST",
           headers: {
@@ -736,7 +809,6 @@ export default function Requirements() {
           body: JSON.stringify({
             requirementId: currentRequirement.id,
             forwardedRoles,
-            forwardAll: isForwardingAll,
           }),
         });
 
@@ -747,10 +819,9 @@ export default function Requirements() {
 
         toast({
           type: "success",
-          message: `Requirement ${isForwardingAll ? "" : "job role "}forwarded successfully`,
+          message: `Requirement forwarded successfully`,
         });
         setIsForwardModalOpen(false);
-        setForwardingJobRoleId(null);
         if (selectedCompany) {
           fetchRequirements(selectedCompany);
         }
@@ -766,14 +837,35 @@ export default function Requirements() {
         throw error;
       }
     },
-    [
-      currentRequirement,
-      toast,
-      selectedCompany,
-      fetchRequirements,
-      forwardingJobRoleId,
-    ]
+    [currentRequirement, toast, selectedCompany, fetchRequirements]
   );
+
+  const fetchRejectedAssignments = async (jobRoleId: string) => {
+    try {
+      const response = await fetch(`/api/requirements/${jobRoleId}/assign`);
+      if (response.ok) {
+        const data = await response.json();
+        const rejected = (data.assignments || []).filter(
+          (a: LabourAssignment) =>
+            a.adminStatus === "REJECTED" || a.clientStatus === "REJECTED"
+        );
+        setRejectedAssignmentsByJobRole((prev) => ({
+          ...prev,
+          [jobRoleId]: rejected,
+        }));
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  useEffect(() => {
+    if (currentRequirement) {
+      currentRequirement.jobRoles.forEach((role) => {
+        fetchRejectedAssignments(role.id);
+      });
+    }
+  }, [currentRequirement]);
 
   useEffect(() => {
     fetchCompanies();
@@ -785,36 +877,6 @@ export default function Requirements() {
       fetchRequirements(selectedCompany);
     }
   }, [selectedCompany, fetchRequirements]);
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "PENDING_REVIEW":
-        return "text-[#C86300]";
-      case "REJECTED":
-        return "text-[#ED1C24]";
-      case "NOT_VERIFIED":
-        return "text-[#150B3D]/70";
-      case "VERIFIED":
-        return "text-[#00C853]";
-      default:
-        return "text-[#150B3D]/70";
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "PENDING_REVIEW":
-        return "review pending";
-      case "REJECTED":
-        return "rejected";
-      case "NOT_VERIFIED":
-        return "not verified";
-      case "VERIFIED":
-        return "verified";
-      default:
-        return status.toLowerCase();
-    }
-  };
 
   const formatTimeAgo = (date: Date) => {
     const now = new Date();
@@ -842,15 +904,14 @@ export default function Requirements() {
     );
   };
 
-  const handleReject = async (requirementId: string, jobRoleId?: string) => {
+  const handleReject = async (requirementId: string) => {
     if (confirm("Are you sure you want to reject this requirement?")) {
       await updateRequirementStatus(requirementId, "REJECTED");
     }
   };
 
-  const handleForwardClick = (jobRoleId?: string) => {
+  const handleForwardClick = () => {
     if (currentRequirement) {
-      setForwardingJobRoleId(jobRoleId || null);
       setIsForwardModalOpen(true);
     }
   };
@@ -899,147 +960,212 @@ export default function Requirements() {
       specialRequirements: role.specialRequirements,
     })) || [];
 
-  const RequirementSection = ({ section }: { section: RequirementSection }) => (
-    <div className="p-6 rounded-lg shadow-sm mb-4">
-      <div className="flex justify-between items-start mb-4">
-        <h2 className="text-xl font-semibold text-[#150B3D]">
-          {section.title}
-        </h2>
-        <div className="flex space-x-2">
-          <Button onClick={() => handleForwardClick(section.id)} size="sm">
-            Forward
-          </Button>
-          <Button
-            onClick={() => handleReject(currentRequirement.id, section.id)}
-            variant="outline"
-            size="sm"
-          >
-            Reject
-          </Button>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {section.fields.map((field, index) => (
-          <div key={index} className="flex flex-col">
-            <p className="text-sm text-[#150B3D]/70">{field.label}:</p>
-            <p className="text-[#150B3D] font-medium">{field.value}</p>
-          </div>
-        ))}
-        <div className="flex flex-col">
-          <p className="text-sm text-[#150B3D]/70">Total Experience:</p>
-          <p className="text-[#150B3D] font-medium">
-            {section.totalExperienceYears || "Not specified"} years
-          </p>
-        </div>
-        <div className="flex flex-col">
-          <p className="text-sm text-[#150B3D]/70">Preferred Age:</p>
-          <p className="text-[#150B3D] font-medium">
-            {section.preferredAge || "Not specified"}
-          </p>
-        </div>
-        <div className="flex flex-col">
-          <p className="text-sm text-[#150B3D]/70">Ticket Frequency:</p>
-          <p className="text-[#150B3D] font-medium">
-            {section.ticketFrequency || "Not specified"}
-          </p>
-        </div>
-        <div className="flex flex-col">
-          <p className="text-sm text-[#150B3D]/70">Special Requirements:</p>
-          <p className="text-[#150B3D] font-medium">
-            {section.specialRequirements || "None"}
-          </p>
-        </div>
-      </div>
+  const RequirementSection = ({ section }: { section: RequirementSection }) => {
+    const jobRole = currentRequirement.jobRoles.find(
+      (r) => r.id === section.id
+    );
+    const rejectedList = rejectedAssignmentsByJobRole[section.id] || [];
+    const forwardedQuantity =
+      jobRole?.forwardedQuantity ?? jobRole?.quantity ?? 0;
+    const rejectionThreshold = forwardedQuantity - (jobRole?.quantity ?? 0);
+    const adminRejectedCount = rejectedList.filter(
+      (a) => a.adminStatus === "REJECTED"
+    ).length;
+    const needsMoreLabour = jobRole?.needsMoreLabour;
+    const acceptedCount = rejectedList.filter(
+      (a) => a.adminStatus === "ACCEPTED" && a.clientStatus === "ACCEPTED"
+    ).length;
+    const totalNeeded = forwardedQuantity - acceptedCount;
 
-      <div className="mt-4 pt-4 border-t">
-        <h3 className="font-medium text-[#150B3D] mb-2">
-          Allowances & Benefits
-        </h3>
+    return (
+      <div className="p-6 rounded-lg shadow-sm mb-4 border border-[#EDDDF3] bg-white">
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-semibold text-[#150B3D]">
+              {section.title}
+            </h2>
+            {(adminRejectedCount > rejectionThreshold || needsMoreLabour) && (
+              <span className="px-2 py-1 text-xs bg-red-600 text-white rounded-full animate-pulse font-bold">
+                PRIORITY: More labour profiles needed!
+              </span>
+            )}
+          </div>
+          <div className="flex space-x-2">
+            <Button onClick={handleForwardClick} size="sm">
+              Forward
+            </Button>
+            <Button
+              onClick={() => handleReject(currentRequirement.id)}
+              variant="outline"
+              size="sm"
+            >
+              Reject
+            </Button>
+          </div>
+        </div>
+        {needsMoreLabour && (
+          <div className="text-sm text-red-700 font-semibold mb-2">
+            {`You need to assign ${totalNeeded} more labourer${totalNeeded !== 1 ? "s" : ""} to fulfill this requirement.`}
+          </div>
+        )}
+        {(adminRejectedCount > rejectionThreshold || needsMoreLabour) &&
+          rejectedList.length > 0 && (
+            <div className="mb-4">
+              <h4 className="text-sm font-semibold text-red-600">
+                Rejected Labourers:
+              </h4>
+              <ul className="text-xs text-gray-700 space-y-1">
+                {rejectedList.map((a) => (
+                  <li key={a.id} className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-red-400" />
+                    <span>{a.labour?.name || "Unknown"}</span>
+                    <span className="italic">
+                      ({a.adminStatus === "REJECTED" ? "Admin" : "Client"}{" "}
+                      Rejected)
+                    </span>
+                    {a.adminFeedback && (
+                      <span className="ml-2 text-gray-400">
+                        {a.adminFeedback}
+                      </span>
+                    )}
+                    {a.clientFeedback && (
+                      <span className="ml-2 text-gray-400">
+                        {a.clientFeedback}
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              <div className="text-xs text-red-500 mt-1">
+                Please assign replacements for these rejected profiles.
+              </div>
+            </div>
+          )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {section.fields.map((field, index) => (
+            <div key={index} className="flex flex-col">
+              <p className="text-sm text-[#150B3D]/70">{field.label}:</p>
+              <p className="text-[#150B3D] font-medium">{field.value}</p>
+            </div>
+          ))}
           <div className="flex flex-col">
-            <p className="text-sm text-[#150B3D]/70">Food:</p>
+            <p className="text-sm text-[#150B3D]/70">Total Experience:</p>
             <p className="text-[#150B3D] font-medium">
-              {section.foodProvidedByCompany
-                ? "Provided by company"
-                : `${section.foodAllowance} ${section.salaryCurrency}`}
+              {section.totalExperienceYears || "Not specified"} years
             </p>
           </div>
           <div className="flex flex-col">
-            <p className="text-sm text-[#150B3D]/70">Housing:</p>
+            <p className="text-sm text-[#150B3D]/70">Preferred Age:</p>
             <p className="text-[#150B3D] font-medium">
-              {section.housingProvidedByCompany
-                ? "Provided by company"
-                : `${section.housingAllowance} ${section.salaryCurrency}`}
+              {section.preferredAge || "Not specified"}
             </p>
           </div>
           <div className="flex flex-col">
-            <p className="text-sm text-[#150B3D]/70">Transportation:</p>
+            <p className="text-sm text-[#150B3D]/70">Ticket Frequency:</p>
             <p className="text-[#150B3D] font-medium">
-              {section.transportationProvidedByCompany
-                ? "Provided by company"
-                : `${section.transportationAllowance} ${section.salaryCurrency}`}
+              {section.ticketFrequency || "Not specified"}
             </p>
           </div>
           <div className="flex flex-col">
-            <p className="text-sm text-[#150B3D]/70">Mobile:</p>
+            <p className="text-sm text-[#150B3D]/70">Special Requirements:</p>
             <p className="text-[#150B3D] font-medium">
-              {section.mobileProvidedByCompany
-                ? "Provided by company"
-                : `${section.mobileAllowance} ${section.salaryCurrency}`}
-            </p>
-          </div>
-          <div className="flex flex-col">
-            <p className="text-sm text-[#150B3D]/70">
-              Nature of Work Allowance:
-            </p>
-            <p className="text-[#150B3D] font-medium">
-              {section.natureOfWorkAllowance
-                ? `${section.natureOfWorkAllowance} ${section.salaryCurrency}`
-                : "None"}
-            </p>
-          </div>
-          <div className="flex flex-col">
-            <p className="text-sm text-[#150B3D]/70">Other Allowance:</p>
-            <p className="text-[#150B3D] font-medium">
-              {section.otherAllowance
-                ? `${section.otherAllowance} ${section.salaryCurrency}`
-                : "None"}
+              {section.specialRequirements || "None"}
             </p>
           </div>
         </div>
-      </div>
 
-      <div className="mt-4 pt-4 border-t">
-        <h3 className="font-medium text-[#150B3D] mb-2">Requirements</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex flex-col">
-            <p className="text-sm text-[#150B3D]/70">Work Locations:</p>
-            <p className="text-[#150B3D] font-medium">
-              {section.workLocations || "Not specified"}
-            </p>
+        <div className="mt-4 pt-4 border-t">
+          <h3 className="font-medium text-[#150B3D] mb-2">
+            Allowances & Benefits
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col">
+              <p className="text-sm text-[#150B3D]/70">Food:</p>
+              <p className="text-[#150B3D] font-medium">
+                {section.foodProvidedByCompany
+                  ? "Provided by company"
+                  : `${section.foodAllowance} ${section.salaryCurrency}`}
+              </p>
+            </div>
+            <div className="flex flex-col">
+              <p className="text-sm text-[#150B3D]/70">Housing:</p>
+              <p className="text-[#150B3D] font-medium">
+                {section.housingProvidedByCompany
+                  ? "Provided by company"
+                  : `${section.housingAllowance} ${section.salaryCurrency}`}
+              </p>
+            </div>
+            <div className="flex flex-col">
+              <p className="text-sm text-[#150B3D]/70">Transportation:</p>
+              <p className="text-[#150B3D] font-medium">
+                {section.transportationProvidedByCompany
+                  ? "Provided by company"
+                  : `${section.transportationAllowance} ${section.salaryCurrency}`}
+              </p>
+            </div>
+            <div className="flex flex-col">
+              <p className="text-sm text-[#150B3D]/70">Mobile:</p>
+              <p className="text-[#150B3D] font-medium">
+                {section.mobileProvidedByCompany
+                  ? "Provided by company"
+                  : `${section.mobileAllowance} ${section.salaryCurrency}`}
+              </p>
+            </div>
+            <div className="flex flex-col">
+              <p className="text-sm text-[#150B3D]/70">
+                Nature of Work Allowance:
+              </p>
+              <p className="text-[#150B3D] font-medium">
+                {section.natureOfWorkAllowance
+                  ? `${section.natureOfWorkAllowance} ${section.salaryCurrency}`
+                  : "None"}
+              </p>
+            </div>
+            <div className="flex flex-col">
+              <p className="text-sm text-[#150B3D]/70">Other Allowance:</p>
+              <p className="text-[#150B3D] font-medium">
+                {section.otherAllowance
+                  ? `${section.otherAllowance} ${section.salaryCurrency}`
+                  : "None"}
+              </p>
+            </div>
           </div>
-          <div className="flex flex-col">
-            <p className="text-sm text-[#150B3D]/70">Previous Experience:</p>
-            <p className="text-[#150B3D] font-medium">
-              {section.previousExperience || "Not specified"}
-            </p>
-          </div>
-          <div className="flex flex-col">
-            <p className="text-sm text-[#150B3D]/70">Language Requirements:</p>
-            <p className="text-[#150B3D] font-medium">
-              {section.languageRequirements || "Not specified"}
-            </p>
-          </div>
-          <div className="flex flex-col">
-            <p className="text-sm text-[#150B3D]/70">Health Insurance:</p>
-            <p className="text-[#150B3D] font-medium">
-              {section.healthInsurance || "Not specified"}
-            </p>
+        </div>
+
+        <div className="mt-4 pt-4 border-t">
+          <h3 className="font-medium text-[#150B3D] mb-2">Requirements</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col">
+              <p className="text-sm text-[#150B3D]/70">Work Locations:</p>
+              <p className="text-[#150B3D] font-medium">
+                {section.workLocations || "Not specified"}
+              </p>
+            </div>
+            <div className="flex flex-col">
+              <p className="text-sm text-[#150B3D]/70">Previous Experience:</p>
+              <p className="text-[#150B3D] font-medium">
+                {section.previousExperience || "Not specified"}
+              </p>
+            </div>
+            <div className="flex flex-col">
+              <p className="text-sm text-[#150B3D]/70">
+                Language Requirements:
+              </p>
+              <p className="text-[#150B3D] font-medium">
+                {section.languageRequirements || "Not specified"}
+              </p>
+            </div>
+            <div className="flex flex-col">
+              <p className="text-sm text-[#150B3D]/70">Health Insurance:</p>
+              <p className="text-[#150B3D] font-medium">
+                {section.healthInsurance || "Not specified"}
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="flex">
@@ -1067,7 +1193,7 @@ export default function Requirements() {
               >
                 <div className="flex justify-between items-start">
                   <h3 className="font-medium text-[#150B3D]">
-                    {company.companyName}
+                    {company.id.slice(0, 8).toUpperCase()}
                   </h3>
                 </div>
                 <div className="flex justify-between items-center mt-1">
@@ -1095,7 +1221,7 @@ export default function Requirements() {
               <div className="flex justify-between items-center mb-6">
                 <div>
                   <h1 className="text-2xl font-bold text-[#150B3D]">
-                    {currentRequirement.client.companyName}
+                    {currentRequirement.id.slice(0, 8).toUpperCase()}
                   </h1>
                   <p className="text-[#150B3D]/80">
                     Submitted:{" "}
@@ -1164,12 +1290,10 @@ export default function Requirements() {
         isOpen={isForwardModalOpen}
         onClose={() => {
           setIsForwardModalOpen(false);
-          setForwardingJobRoleId(null);
         }}
         requirement={currentRequirement}
         agencies={agencies}
         onForward={forwardRequirementToAgencies}
-        jobRoleId={forwardingJobRoleId || undefined}
       />
     </div>
   );

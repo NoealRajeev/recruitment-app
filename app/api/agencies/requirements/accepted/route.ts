@@ -55,6 +55,10 @@ export async function GET() {
                 },
               },
             },
+            forwardings: {
+              where: { agencyId: agency.id },
+              select: { quantity: true },
+            },
           },
         },
       },
@@ -63,7 +67,16 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(requirements);
+    // Map jobRoles to include forwardedQuantity
+    const requirementsWithForwardedQuantity = requirements.map((req) => ({
+      ...req,
+      jobRoles: req.jobRoles.map((role) => ({
+        ...role,
+        forwardedQuantity: role.forwardings?.[0]?.quantity ?? role.quantity,
+      })),
+    }));
+
+    return NextResponse.json(requirementsWithForwardedQuantity);
   } catch (error) {
     console.error("Error fetching agency requirements:", error);
     return NextResponse.json(

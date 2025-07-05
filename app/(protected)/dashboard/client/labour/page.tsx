@@ -57,6 +57,7 @@ export default function ClientLabourReview() {
       if (!response.ok) throw new Error("Failed to fetch requirements");
 
       const data = await response.json();
+      console.log("Client labour page received data:", data);
       setRequirements(data);
 
       // Select first requirement by default if none selected
@@ -362,6 +363,18 @@ export default function ClientLabourReview() {
                 </p>
               </div>
             )}
+
+          {assignment.clientStatus === "REJECTED" &&
+            assignment.clientFeedback && (
+              <div className="mt-2 p-2 bg-red-50 rounded">
+                <p className="text-xs font-medium text-red-700">
+                  Client Rejection Reason:
+                </p>
+                <p className="text-xs text-red-600">
+                  {assignment.clientFeedback}
+                </p>
+              </div>
+            )}
         </div>
 
         <div className="p-4 border-t border-gray-200">
@@ -441,7 +454,7 @@ export default function ClientLabourReview() {
                 }`}
               >
                 <h3 className="font-medium text-[#150B3D]">
-                  {requirement.companyName}
+                  {requirement.id.slice(0, 8).toUpperCase()}
                 </h3>
                 <div className="flex justify-between items-center mt-1">
                   <span className="text-xs text-gray-500">
@@ -584,7 +597,8 @@ export default function ClientLabourReview() {
               <>
                 <div className="flex justify-between items-center mb-6 bg-[#EDDDF3]/50 p-4 rounded-2xl">
                   <h2 className="text-xl font-semibold text-[#150B3D]">
-                    Job Roles for {currentRequirement?.companyName}
+                    Job Roles for{" "}
+                    {currentRequirement?.id.slice(0, 8).toUpperCase()}
                   </h2>
                 </div>
 

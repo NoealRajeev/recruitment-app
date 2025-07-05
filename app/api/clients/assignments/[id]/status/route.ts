@@ -85,6 +85,9 @@ export async function PUT(
             agencyStatus: "ACCEPTED",
             adminStatus: "ACCEPTED",
           }),
+          ...(status === "REJECTED" && {
+            adminStatus: "REJECTED",
+          }),
           clientFeedback: status === "ACCEPTED" ? null : feedback,
           updatedAt: new Date(),
         },
@@ -120,13 +123,62 @@ export async function PUT(
         });
       }
 
+      // If client REJECTED, update labour profile status
+      if (status === "REJECTED") {
+        await tx.labourProfile.update({
+          where: { id: currentAssignment.labourId },
+          data: {
+            requirementId: null,
+            status: "REJECTED",
+          },
+        });
+      }
+
+      // If client REJECTED a primary (not backup), promote oldest backup if available
+      if (status === "REJECTED" && currentAssignment.isBackup === false) {
+        // Find the oldest backup for this job role
+        const backups = await tx.labourAssignment.findMany({
+          where: {
+            jobRoleId: currentAssignment.jobRole.id,
+            isBackup: true,
+          },
+          orderBy: { createdAt: "asc" },
+        });
+        const oldestBackup = backups[0];
+        if (oldestBackup) {
+          await tx.labourAssignment.update({
+            where: { id: oldestBackup.id },
+            data: {
+              isBackup: false,
+              clientStatus: "SUBMITTED",
+            },
+          });
+        }
+      }
+
+      // Get all assignments for this job role, sorted by createdAt
+      const jobRoleAssignments = await tx.labourAssignment.findMany({
+        where: { jobRoleId: currentAssignment.jobRole.id },
+        orderBy: { createdAt: "asc" },
+      });
+
+      // Calculate needsMoreLabour exactly like admin rejection logic
+      const acceptedPrimaries = jobRoleAssignments.filter(
+        (a) => a.clientStatus === "ACCEPTED" && !a.isBackup
+      ).length;
+      await tx.jobRole.update({
+        where: { id: currentAssignment.jobRole.id },
+        data: {
+          needsMoreLabour:
+            acceptedPrimaries < currentAssignment.jobRole.quantity,
+        },
+      });
+
       // Check if all assignments in this job role are accepted
       const jobRole = updatedAssignment.jobRole;
-      const acceptedCount = jobRole.LabourAssignment.filter(
+      const acceptedCount = jobRoleAssignments.filter(
         (a) => a.clientStatus === "ACCEPTED"
       ).length;
-
-      // If requirement is fully completed (all needed assignments accepted)
       if (status === "ACCEPTED" && acceptedCount >= jobRole.quantity) {
         // 1. First reject all unselected assignments for this job role
         const unselectedAssignments = jobRole.LabourAssignment.filter(
@@ -144,6 +196,19 @@ export async function PUT(
             })
           )
         );
+
+        // 1.5. Update unselected labour profiles back to APPROVED
+        await tx.labourProfile.updateMany({
+          where: {
+            id: {
+              in: unselectedAssignments.map((a) => a.labourId),
+            },
+          },
+          data: {
+            status: "APPROVED",
+            requirementId: null,
+          },
+        });
 
         // 2. Update all backup labour profiles for this job role
         await tx.labourProfile.updateMany({

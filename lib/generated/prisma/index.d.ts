@@ -50,7 +50,7 @@ export type DocumentRequirement = $Result.DefaultSelection<Prisma.$DocumentRequi
 export type Requirement = $Result.DefaultSelection<Prisma.$RequirementPayload>
 /**
  * Model JobRole
- * A single row in the “table” of roles for one requirement
+ * A single row in the "table" of roles for one requirement
  */
 export type JobRole = $Result.DefaultSelection<Prisma.$JobRolePayload>
 /**
@@ -73,6 +73,11 @@ export type LabourStageHistory = $Result.DefaultSelection<Prisma.$LabourStageHis
  * 
  */
 export type AuditLog = $Result.DefaultSelection<Prisma.$AuditLogPayload>
+/**
+ * Model JobRoleForwarding
+ * 
+ */
+export type JobRoleForwarding = $Result.DefaultSelection<Prisma.$JobRoleForwardingPayload>
 
 /**
  * Enums
@@ -238,11 +243,13 @@ export const RequirementStatus: {
   UNDER_REVIEW: 'UNDER_REVIEW',
   FORWARDED: 'FORWARDED',
   ACCEPTED: 'ACCEPTED',
+  PARTIALLY_ACCEPTED: 'PARTIALLY_ACCEPTED',
   REJECTED: 'REJECTED',
   COMPLETED: 'COMPLETED',
   CLIENT_REVIEW: 'CLIENT_REVIEW',
   SUBMITTED_TO_CLIENT: 'SUBMITTED_TO_CLIENT',
-  NEEDS_REVISION: 'NEEDS_REVISION'
+  NEEDS_REVISION: 'NEEDS_REVISION',
+  AGENCY_REJECTED: 'AGENCY_REJECTED'
 };
 
 export type RequirementStatus = (typeof RequirementStatus)[keyof typeof RequirementStatus]
@@ -597,6 +604,16 @@ export class PrismaClient<
     * ```
     */
   get auditLog(): Prisma.AuditLogDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.jobRoleForwarding`: Exposes CRUD operations for the **JobRoleForwarding** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more JobRoleForwardings
+    * const jobRoleForwardings = await prisma.jobRoleForwarding.findMany()
+    * ```
+    */
+  get jobRoleForwarding(): Prisma.JobRoleForwardingDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -1048,7 +1065,8 @@ export namespace Prisma {
     LabourProfile: 'LabourProfile',
     LabourAssignment: 'LabourAssignment',
     LabourStageHistory: 'LabourStageHistory',
-    AuditLog: 'AuditLog'
+    AuditLog: 'AuditLog',
+    JobRoleForwarding: 'JobRoleForwarding'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -1067,7 +1085,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "client" | "agency" | "admin" | "document" | "documentRequirement" | "requirement" | "jobRole" | "labourProfile" | "labourAssignment" | "labourStageHistory" | "auditLog"
+      modelProps: "user" | "client" | "agency" | "admin" | "document" | "documentRequirement" | "requirement" | "jobRole" | "labourProfile" | "labourAssignment" | "labourStageHistory" | "auditLog" | "jobRoleForwarding"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1959,6 +1977,80 @@ export namespace Prisma {
           }
         }
       }
+      JobRoleForwarding: {
+        payload: Prisma.$JobRoleForwardingPayload<ExtArgs>
+        fields: Prisma.JobRoleForwardingFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.JobRoleForwardingFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRoleForwardingPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.JobRoleForwardingFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRoleForwardingPayload>
+          }
+          findFirst: {
+            args: Prisma.JobRoleForwardingFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRoleForwardingPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.JobRoleForwardingFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRoleForwardingPayload>
+          }
+          findMany: {
+            args: Prisma.JobRoleForwardingFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRoleForwardingPayload>[]
+          }
+          create: {
+            args: Prisma.JobRoleForwardingCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRoleForwardingPayload>
+          }
+          createMany: {
+            args: Prisma.JobRoleForwardingCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.JobRoleForwardingCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRoleForwardingPayload>[]
+          }
+          delete: {
+            args: Prisma.JobRoleForwardingDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRoleForwardingPayload>
+          }
+          update: {
+            args: Prisma.JobRoleForwardingUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRoleForwardingPayload>
+          }
+          deleteMany: {
+            args: Prisma.JobRoleForwardingDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.JobRoleForwardingUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.JobRoleForwardingUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRoleForwardingPayload>[]
+          }
+          upsert: {
+            args: Prisma.JobRoleForwardingUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$JobRoleForwardingPayload>
+          }
+          aggregate: {
+            args: Prisma.JobRoleForwardingAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateJobRoleForwarding>
+          }
+          groupBy: {
+            args: Prisma.JobRoleForwardingGroupByArgs<ExtArgs>
+            result: $Utils.Optional<JobRoleForwardingGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.JobRoleForwardingCountArgs<ExtArgs>
+            result: $Utils.Optional<JobRoleForwardingCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -2055,6 +2147,7 @@ export namespace Prisma {
     labourAssignment?: LabourAssignmentOmit
     labourStageHistory?: LabourStageHistoryOmit
     auditLog?: AuditLogOmit
+    jobRoleForwarding?: JobRoleForwardingOmit
   }
 
   /* Types for Logging */
@@ -2232,12 +2325,14 @@ export namespace Prisma {
     JobRole: number
     LabourProfile: number
     LabourAssignment: number
+    jobRoleForwardings: number
   }
 
   export type AgencyCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     JobRole?: boolean | AgencyCountOutputTypeCountJobRoleArgs
     LabourProfile?: boolean | AgencyCountOutputTypeCountLabourProfileArgs
     LabourAssignment?: boolean | AgencyCountOutputTypeCountLabourAssignmentArgs
+    jobRoleForwardings?: boolean | AgencyCountOutputTypeCountJobRoleForwardingsArgs
   }
 
   // Custom InputTypes
@@ -2270,6 +2365,13 @@ export namespace Prisma {
    */
   export type AgencyCountOutputTypeCountLabourAssignmentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: LabourAssignmentWhereInput
+  }
+
+  /**
+   * AgencyCountOutputType without action
+   */
+  export type AgencyCountOutputTypeCountJobRoleForwardingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: JobRoleForwardingWhereInput
   }
 
 
@@ -2359,10 +2461,12 @@ export namespace Prisma {
 
   export type JobRoleCountOutputType = {
     LabourAssignment: number
+    forwardings: number
   }
 
   export type JobRoleCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     LabourAssignment?: boolean | JobRoleCountOutputTypeCountLabourAssignmentArgs
+    forwardings?: boolean | JobRoleCountOutputTypeCountForwardingsArgs
   }
 
   // Custom InputTypes
@@ -2381,6 +2485,13 @@ export namespace Prisma {
    */
   export type JobRoleCountOutputTypeCountLabourAssignmentArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: LabourAssignmentWhereInput
+  }
+
+  /**
+   * JobRoleCountOutputType without action
+   */
+  export type JobRoleCountOutputTypeCountForwardingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: JobRoleForwardingWhereInput
   }
 
 
@@ -5337,6 +5448,7 @@ export namespace Prisma {
     JobRole?: boolean | Agency$JobRoleArgs<ExtArgs>
     LabourProfile?: boolean | Agency$LabourProfileArgs<ExtArgs>
     LabourAssignment?: boolean | Agency$LabourAssignmentArgs<ExtArgs>
+    jobRoleForwardings?: boolean | Agency$jobRoleForwardingsArgs<ExtArgs>
     _count?: boolean | AgencyCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["agency"]>
 
@@ -5396,6 +5508,7 @@ export namespace Prisma {
     JobRole?: boolean | Agency$JobRoleArgs<ExtArgs>
     LabourProfile?: boolean | Agency$LabourProfileArgs<ExtArgs>
     LabourAssignment?: boolean | Agency$LabourAssignmentArgs<ExtArgs>
+    jobRoleForwardings?: boolean | Agency$jobRoleForwardingsArgs<ExtArgs>
     _count?: boolean | AgencyCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type AgencyIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5412,6 +5525,7 @@ export namespace Prisma {
       JobRole: Prisma.$JobRolePayload<ExtArgs>[]
       LabourProfile: Prisma.$LabourProfilePayload<ExtArgs>[]
       LabourAssignment: Prisma.$LabourAssignmentPayload<ExtArgs>[]
+      jobRoleForwardings: Prisma.$JobRoleForwardingPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -5825,6 +5939,7 @@ export namespace Prisma {
     JobRole<T extends Agency$JobRoleArgs<ExtArgs> = {}>(args?: Subset<T, Agency$JobRoleArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobRolePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     LabourProfile<T extends Agency$LabourProfileArgs<ExtArgs> = {}>(args?: Subset<T, Agency$LabourProfileArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LabourProfilePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     LabourAssignment<T extends Agency$LabourAssignmentArgs<ExtArgs> = {}>(args?: Subset<T, Agency$LabourAssignmentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LabourAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    jobRoleForwardings<T extends Agency$jobRoleForwardingsArgs<ExtArgs> = {}>(args?: Subset<T, Agency$jobRoleForwardingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobRoleForwardingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -6332,6 +6447,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: LabourAssignmentScalarFieldEnum | LabourAssignmentScalarFieldEnum[]
+  }
+
+  /**
+   * Agency.jobRoleForwardings
+   */
+  export type Agency$jobRoleForwardingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobRoleForwarding
+     */
+    select?: JobRoleForwardingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the JobRoleForwarding
+     */
+    omit?: JobRoleForwardingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobRoleForwardingInclude<ExtArgs> | null
+    where?: JobRoleForwardingWhereInput
+    orderBy?: JobRoleForwardingOrderByWithRelationInput | JobRoleForwardingOrderByWithRelationInput[]
+    cursor?: JobRoleForwardingWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: JobRoleForwardingScalarFieldEnum | JobRoleForwardingScalarFieldEnum[]
   }
 
   /**
@@ -10885,6 +11024,7 @@ export namespace Prisma {
     assignedAgencyId: string | null
     agencyStatus: $Enums.RequirementStatus | null
     adminStatus: $Enums.RequirementStatus | null
+    needsMoreLabour: boolean | null
   }
 
   export type JobRoleMaxAggregateOutputType = {
@@ -10917,6 +11057,7 @@ export namespace Prisma {
     assignedAgencyId: string | null
     agencyStatus: $Enums.RequirementStatus | null
     adminStatus: $Enums.RequirementStatus | null
+    needsMoreLabour: boolean | null
   }
 
   export type JobRoleCountAggregateOutputType = {
@@ -10950,6 +11091,7 @@ export namespace Prisma {
     assignedAgencyId: number
     agencyStatus: number
     adminStatus: number
+    needsMoreLabour: number
     _all: number
   }
 
@@ -11010,6 +11152,7 @@ export namespace Prisma {
     assignedAgencyId?: true
     agencyStatus?: true
     adminStatus?: true
+    needsMoreLabour?: true
   }
 
   export type JobRoleMaxAggregateInputType = {
@@ -11042,6 +11185,7 @@ export namespace Prisma {
     assignedAgencyId?: true
     agencyStatus?: true
     adminStatus?: true
+    needsMoreLabour?: true
   }
 
   export type JobRoleCountAggregateInputType = {
@@ -11075,6 +11219,7 @@ export namespace Prisma {
     assignedAgencyId?: true
     agencyStatus?: true
     adminStatus?: true
+    needsMoreLabour?: true
     _all?: true
   }
 
@@ -11195,6 +11340,7 @@ export namespace Prisma {
     assignedAgencyId: string | null
     agencyStatus: $Enums.RequirementStatus
     adminStatus: $Enums.RequirementStatus
+    needsMoreLabour: boolean
     _count: JobRoleCountAggregateOutputType | null
     _avg: JobRoleAvgAggregateOutputType | null
     _sum: JobRoleSumAggregateOutputType | null
@@ -11247,9 +11393,11 @@ export namespace Prisma {
     assignedAgencyId?: boolean
     agencyStatus?: boolean
     adminStatus?: boolean
+    needsMoreLabour?: boolean
     requirement?: boolean | RequirementDefaultArgs<ExtArgs>
     assignedAgency?: boolean | JobRole$assignedAgencyArgs<ExtArgs>
     LabourAssignment?: boolean | JobRole$LabourAssignmentArgs<ExtArgs>
+    forwardings?: boolean | JobRole$forwardingsArgs<ExtArgs>
     _count?: boolean | JobRoleCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["jobRole"]>
 
@@ -11284,6 +11432,7 @@ export namespace Prisma {
     assignedAgencyId?: boolean
     agencyStatus?: boolean
     adminStatus?: boolean
+    needsMoreLabour?: boolean
     requirement?: boolean | RequirementDefaultArgs<ExtArgs>
     assignedAgency?: boolean | JobRole$assignedAgencyArgs<ExtArgs>
   }, ExtArgs["result"]["jobRole"]>
@@ -11319,6 +11468,7 @@ export namespace Prisma {
     assignedAgencyId?: boolean
     agencyStatus?: boolean
     adminStatus?: boolean
+    needsMoreLabour?: boolean
     requirement?: boolean | RequirementDefaultArgs<ExtArgs>
     assignedAgency?: boolean | JobRole$assignedAgencyArgs<ExtArgs>
   }, ExtArgs["result"]["jobRole"]>
@@ -11354,13 +11504,15 @@ export namespace Prisma {
     assignedAgencyId?: boolean
     agencyStatus?: boolean
     adminStatus?: boolean
+    needsMoreLabour?: boolean
   }
 
-  export type JobRoleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "requirementId" | "title" | "quantity" | "nationality" | "startDate" | "contractDuration" | "salaryCurrency" | "basicSalary" | "foodAllowance" | "foodProvidedByCompany" | "housingAllowance" | "housingProvidedByCompany" | "transportationAllowance" | "transportationProvidedByCompany" | "healthInsurance" | "mobileAllowance" | "mobileProvidedByCompany" | "natureOfWorkAllowance" | "otherAllowance" | "ticketFrequency" | "workLocations" | "previousExperience" | "totalExperienceYears" | "preferredAge" | "languageRequirements" | "specialRequirements" | "assignedAgencyId" | "agencyStatus" | "adminStatus", ExtArgs["result"]["jobRole"]>
+  export type JobRoleOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "requirementId" | "title" | "quantity" | "nationality" | "startDate" | "contractDuration" | "salaryCurrency" | "basicSalary" | "foodAllowance" | "foodProvidedByCompany" | "housingAllowance" | "housingProvidedByCompany" | "transportationAllowance" | "transportationProvidedByCompany" | "healthInsurance" | "mobileAllowance" | "mobileProvidedByCompany" | "natureOfWorkAllowance" | "otherAllowance" | "ticketFrequency" | "workLocations" | "previousExperience" | "totalExperienceYears" | "preferredAge" | "languageRequirements" | "specialRequirements" | "assignedAgencyId" | "agencyStatus" | "adminStatus" | "needsMoreLabour", ExtArgs["result"]["jobRole"]>
   export type JobRoleInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     requirement?: boolean | RequirementDefaultArgs<ExtArgs>
     assignedAgency?: boolean | JobRole$assignedAgencyArgs<ExtArgs>
     LabourAssignment?: boolean | JobRole$LabourAssignmentArgs<ExtArgs>
+    forwardings?: boolean | JobRole$forwardingsArgs<ExtArgs>
     _count?: boolean | JobRoleCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type JobRoleIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -11378,6 +11530,7 @@ export namespace Prisma {
       requirement: Prisma.$RequirementPayload<ExtArgs>
       assignedAgency: Prisma.$AgencyPayload<ExtArgs> | null
       LabourAssignment: Prisma.$LabourAssignmentPayload<ExtArgs>[]
+      forwardings: Prisma.$JobRoleForwardingPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -11412,10 +11565,11 @@ export namespace Prisma {
        */
       assignedAgencyId: string | null
       /**
-       * If forwarded, track agency’s response status
+       * If forwarded, track agency's response status
        */
       agencyStatus: $Enums.RequirementStatus
       adminStatus: $Enums.RequirementStatus
+      needsMoreLabour: boolean
     }, ExtArgs["result"]["jobRole"]>
     composites: {}
   }
@@ -11813,6 +11967,7 @@ export namespace Prisma {
     requirement<T extends RequirementDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RequirementDefaultArgs<ExtArgs>>): Prisma__RequirementClient<$Result.GetResult<Prisma.$RequirementPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     assignedAgency<T extends JobRole$assignedAgencyArgs<ExtArgs> = {}>(args?: Subset<T, JobRole$assignedAgencyArgs<ExtArgs>>): Prisma__AgencyClient<$Result.GetResult<Prisma.$AgencyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     LabourAssignment<T extends JobRole$LabourAssignmentArgs<ExtArgs> = {}>(args?: Subset<T, JobRole$LabourAssignmentArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$LabourAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    forwardings<T extends JobRole$forwardingsArgs<ExtArgs> = {}>(args?: Subset<T, JobRole$forwardingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobRoleForwardingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -11872,6 +12027,7 @@ export namespace Prisma {
     readonly assignedAgencyId: FieldRef<"JobRole", 'String'>
     readonly agencyStatus: FieldRef<"JobRole", 'RequirementStatus'>
     readonly adminStatus: FieldRef<"JobRole", 'RequirementStatus'>
+    readonly needsMoreLabour: FieldRef<"JobRole", 'Boolean'>
   }
     
 
@@ -12308,6 +12464,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: LabourAssignmentScalarFieldEnum | LabourAssignmentScalarFieldEnum[]
+  }
+
+  /**
+   * JobRole.forwardings
+   */
+  export type JobRole$forwardingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobRoleForwarding
+     */
+    select?: JobRoleForwardingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the JobRoleForwarding
+     */
+    omit?: JobRoleForwardingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobRoleForwardingInclude<ExtArgs> | null
+    where?: JobRoleForwardingWhereInput
+    orderBy?: JobRoleForwardingOrderByWithRelationInput | JobRoleForwardingOrderByWithRelationInput[]
+    cursor?: JobRoleForwardingWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: JobRoleForwardingScalarFieldEnum | JobRoleForwardingScalarFieldEnum[]
   }
 
   /**
@@ -17398,6 +17578,1106 @@ export namespace Prisma {
 
 
   /**
+   * Model JobRoleForwarding
+   */
+
+  export type AggregateJobRoleForwarding = {
+    _count: JobRoleForwardingCountAggregateOutputType | null
+    _avg: JobRoleForwardingAvgAggregateOutputType | null
+    _sum: JobRoleForwardingSumAggregateOutputType | null
+    _min: JobRoleForwardingMinAggregateOutputType | null
+    _max: JobRoleForwardingMaxAggregateOutputType | null
+  }
+
+  export type JobRoleForwardingAvgAggregateOutputType = {
+    quantity: number | null
+  }
+
+  export type JobRoleForwardingSumAggregateOutputType = {
+    quantity: number | null
+  }
+
+  export type JobRoleForwardingMinAggregateOutputType = {
+    id: string | null
+    jobRoleId: string | null
+    agencyId: string | null
+    quantity: number | null
+    createdAt: Date | null
+  }
+
+  export type JobRoleForwardingMaxAggregateOutputType = {
+    id: string | null
+    jobRoleId: string | null
+    agencyId: string | null
+    quantity: number | null
+    createdAt: Date | null
+  }
+
+  export type JobRoleForwardingCountAggregateOutputType = {
+    id: number
+    jobRoleId: number
+    agencyId: number
+    quantity: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type JobRoleForwardingAvgAggregateInputType = {
+    quantity?: true
+  }
+
+  export type JobRoleForwardingSumAggregateInputType = {
+    quantity?: true
+  }
+
+  export type JobRoleForwardingMinAggregateInputType = {
+    id?: true
+    jobRoleId?: true
+    agencyId?: true
+    quantity?: true
+    createdAt?: true
+  }
+
+  export type JobRoleForwardingMaxAggregateInputType = {
+    id?: true
+    jobRoleId?: true
+    agencyId?: true
+    quantity?: true
+    createdAt?: true
+  }
+
+  export type JobRoleForwardingCountAggregateInputType = {
+    id?: true
+    jobRoleId?: true
+    agencyId?: true
+    quantity?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type JobRoleForwardingAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which JobRoleForwarding to aggregate.
+     */
+    where?: JobRoleForwardingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of JobRoleForwardings to fetch.
+     */
+    orderBy?: JobRoleForwardingOrderByWithRelationInput | JobRoleForwardingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: JobRoleForwardingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` JobRoleForwardings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` JobRoleForwardings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned JobRoleForwardings
+    **/
+    _count?: true | JobRoleForwardingCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: JobRoleForwardingAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: JobRoleForwardingSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: JobRoleForwardingMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: JobRoleForwardingMaxAggregateInputType
+  }
+
+  export type GetJobRoleForwardingAggregateType<T extends JobRoleForwardingAggregateArgs> = {
+        [P in keyof T & keyof AggregateJobRoleForwarding]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateJobRoleForwarding[P]>
+      : GetScalarType<T[P], AggregateJobRoleForwarding[P]>
+  }
+
+
+
+
+  export type JobRoleForwardingGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: JobRoleForwardingWhereInput
+    orderBy?: JobRoleForwardingOrderByWithAggregationInput | JobRoleForwardingOrderByWithAggregationInput[]
+    by: JobRoleForwardingScalarFieldEnum[] | JobRoleForwardingScalarFieldEnum
+    having?: JobRoleForwardingScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: JobRoleForwardingCountAggregateInputType | true
+    _avg?: JobRoleForwardingAvgAggregateInputType
+    _sum?: JobRoleForwardingSumAggregateInputType
+    _min?: JobRoleForwardingMinAggregateInputType
+    _max?: JobRoleForwardingMaxAggregateInputType
+  }
+
+  export type JobRoleForwardingGroupByOutputType = {
+    id: string
+    jobRoleId: string
+    agencyId: string
+    quantity: number
+    createdAt: Date
+    _count: JobRoleForwardingCountAggregateOutputType | null
+    _avg: JobRoleForwardingAvgAggregateOutputType | null
+    _sum: JobRoleForwardingSumAggregateOutputType | null
+    _min: JobRoleForwardingMinAggregateOutputType | null
+    _max: JobRoleForwardingMaxAggregateOutputType | null
+  }
+
+  type GetJobRoleForwardingGroupByPayload<T extends JobRoleForwardingGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<JobRoleForwardingGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof JobRoleForwardingGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], JobRoleForwardingGroupByOutputType[P]>
+            : GetScalarType<T[P], JobRoleForwardingGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type JobRoleForwardingSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    jobRoleId?: boolean
+    agencyId?: boolean
+    quantity?: boolean
+    createdAt?: boolean
+    jobRole?: boolean | JobRoleDefaultArgs<ExtArgs>
+    agency?: boolean | AgencyDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["jobRoleForwarding"]>
+
+  export type JobRoleForwardingSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    jobRoleId?: boolean
+    agencyId?: boolean
+    quantity?: boolean
+    createdAt?: boolean
+    jobRole?: boolean | JobRoleDefaultArgs<ExtArgs>
+    agency?: boolean | AgencyDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["jobRoleForwarding"]>
+
+  export type JobRoleForwardingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    jobRoleId?: boolean
+    agencyId?: boolean
+    quantity?: boolean
+    createdAt?: boolean
+    jobRole?: boolean | JobRoleDefaultArgs<ExtArgs>
+    agency?: boolean | AgencyDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["jobRoleForwarding"]>
+
+  export type JobRoleForwardingSelectScalar = {
+    id?: boolean
+    jobRoleId?: boolean
+    agencyId?: boolean
+    quantity?: boolean
+    createdAt?: boolean
+  }
+
+  export type JobRoleForwardingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "jobRoleId" | "agencyId" | "quantity" | "createdAt", ExtArgs["result"]["jobRoleForwarding"]>
+  export type JobRoleForwardingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    jobRole?: boolean | JobRoleDefaultArgs<ExtArgs>
+    agency?: boolean | AgencyDefaultArgs<ExtArgs>
+  }
+  export type JobRoleForwardingIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    jobRole?: boolean | JobRoleDefaultArgs<ExtArgs>
+    agency?: boolean | AgencyDefaultArgs<ExtArgs>
+  }
+  export type JobRoleForwardingIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    jobRole?: boolean | JobRoleDefaultArgs<ExtArgs>
+    agency?: boolean | AgencyDefaultArgs<ExtArgs>
+  }
+
+  export type $JobRoleForwardingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "JobRoleForwarding"
+    objects: {
+      jobRole: Prisma.$JobRolePayload<ExtArgs>
+      agency: Prisma.$AgencyPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      jobRoleId: string
+      agencyId: string
+      quantity: number
+      createdAt: Date
+    }, ExtArgs["result"]["jobRoleForwarding"]>
+    composites: {}
+  }
+
+  type JobRoleForwardingGetPayload<S extends boolean | null | undefined | JobRoleForwardingDefaultArgs> = $Result.GetResult<Prisma.$JobRoleForwardingPayload, S>
+
+  type JobRoleForwardingCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<JobRoleForwardingFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: JobRoleForwardingCountAggregateInputType | true
+    }
+
+  export interface JobRoleForwardingDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['JobRoleForwarding'], meta: { name: 'JobRoleForwarding' } }
+    /**
+     * Find zero or one JobRoleForwarding that matches the filter.
+     * @param {JobRoleForwardingFindUniqueArgs} args - Arguments to find a JobRoleForwarding
+     * @example
+     * // Get one JobRoleForwarding
+     * const jobRoleForwarding = await prisma.jobRoleForwarding.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends JobRoleForwardingFindUniqueArgs>(args: SelectSubset<T, JobRoleForwardingFindUniqueArgs<ExtArgs>>): Prisma__JobRoleForwardingClient<$Result.GetResult<Prisma.$JobRoleForwardingPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one JobRoleForwarding that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {JobRoleForwardingFindUniqueOrThrowArgs} args - Arguments to find a JobRoleForwarding
+     * @example
+     * // Get one JobRoleForwarding
+     * const jobRoleForwarding = await prisma.jobRoleForwarding.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends JobRoleForwardingFindUniqueOrThrowArgs>(args: SelectSubset<T, JobRoleForwardingFindUniqueOrThrowArgs<ExtArgs>>): Prisma__JobRoleForwardingClient<$Result.GetResult<Prisma.$JobRoleForwardingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first JobRoleForwarding that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JobRoleForwardingFindFirstArgs} args - Arguments to find a JobRoleForwarding
+     * @example
+     * // Get one JobRoleForwarding
+     * const jobRoleForwarding = await prisma.jobRoleForwarding.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends JobRoleForwardingFindFirstArgs>(args?: SelectSubset<T, JobRoleForwardingFindFirstArgs<ExtArgs>>): Prisma__JobRoleForwardingClient<$Result.GetResult<Prisma.$JobRoleForwardingPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first JobRoleForwarding that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JobRoleForwardingFindFirstOrThrowArgs} args - Arguments to find a JobRoleForwarding
+     * @example
+     * // Get one JobRoleForwarding
+     * const jobRoleForwarding = await prisma.jobRoleForwarding.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends JobRoleForwardingFindFirstOrThrowArgs>(args?: SelectSubset<T, JobRoleForwardingFindFirstOrThrowArgs<ExtArgs>>): Prisma__JobRoleForwardingClient<$Result.GetResult<Prisma.$JobRoleForwardingPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more JobRoleForwardings that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JobRoleForwardingFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all JobRoleForwardings
+     * const jobRoleForwardings = await prisma.jobRoleForwarding.findMany()
+     * 
+     * // Get first 10 JobRoleForwardings
+     * const jobRoleForwardings = await prisma.jobRoleForwarding.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const jobRoleForwardingWithIdOnly = await prisma.jobRoleForwarding.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends JobRoleForwardingFindManyArgs>(args?: SelectSubset<T, JobRoleForwardingFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobRoleForwardingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a JobRoleForwarding.
+     * @param {JobRoleForwardingCreateArgs} args - Arguments to create a JobRoleForwarding.
+     * @example
+     * // Create one JobRoleForwarding
+     * const JobRoleForwarding = await prisma.jobRoleForwarding.create({
+     *   data: {
+     *     // ... data to create a JobRoleForwarding
+     *   }
+     * })
+     * 
+     */
+    create<T extends JobRoleForwardingCreateArgs>(args: SelectSubset<T, JobRoleForwardingCreateArgs<ExtArgs>>): Prisma__JobRoleForwardingClient<$Result.GetResult<Prisma.$JobRoleForwardingPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many JobRoleForwardings.
+     * @param {JobRoleForwardingCreateManyArgs} args - Arguments to create many JobRoleForwardings.
+     * @example
+     * // Create many JobRoleForwardings
+     * const jobRoleForwarding = await prisma.jobRoleForwarding.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends JobRoleForwardingCreateManyArgs>(args?: SelectSubset<T, JobRoleForwardingCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many JobRoleForwardings and returns the data saved in the database.
+     * @param {JobRoleForwardingCreateManyAndReturnArgs} args - Arguments to create many JobRoleForwardings.
+     * @example
+     * // Create many JobRoleForwardings
+     * const jobRoleForwarding = await prisma.jobRoleForwarding.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many JobRoleForwardings and only return the `id`
+     * const jobRoleForwardingWithIdOnly = await prisma.jobRoleForwarding.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends JobRoleForwardingCreateManyAndReturnArgs>(args?: SelectSubset<T, JobRoleForwardingCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobRoleForwardingPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a JobRoleForwarding.
+     * @param {JobRoleForwardingDeleteArgs} args - Arguments to delete one JobRoleForwarding.
+     * @example
+     * // Delete one JobRoleForwarding
+     * const JobRoleForwarding = await prisma.jobRoleForwarding.delete({
+     *   where: {
+     *     // ... filter to delete one JobRoleForwarding
+     *   }
+     * })
+     * 
+     */
+    delete<T extends JobRoleForwardingDeleteArgs>(args: SelectSubset<T, JobRoleForwardingDeleteArgs<ExtArgs>>): Prisma__JobRoleForwardingClient<$Result.GetResult<Prisma.$JobRoleForwardingPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one JobRoleForwarding.
+     * @param {JobRoleForwardingUpdateArgs} args - Arguments to update one JobRoleForwarding.
+     * @example
+     * // Update one JobRoleForwarding
+     * const jobRoleForwarding = await prisma.jobRoleForwarding.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends JobRoleForwardingUpdateArgs>(args: SelectSubset<T, JobRoleForwardingUpdateArgs<ExtArgs>>): Prisma__JobRoleForwardingClient<$Result.GetResult<Prisma.$JobRoleForwardingPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more JobRoleForwardings.
+     * @param {JobRoleForwardingDeleteManyArgs} args - Arguments to filter JobRoleForwardings to delete.
+     * @example
+     * // Delete a few JobRoleForwardings
+     * const { count } = await prisma.jobRoleForwarding.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends JobRoleForwardingDeleteManyArgs>(args?: SelectSubset<T, JobRoleForwardingDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more JobRoleForwardings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JobRoleForwardingUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many JobRoleForwardings
+     * const jobRoleForwarding = await prisma.jobRoleForwarding.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends JobRoleForwardingUpdateManyArgs>(args: SelectSubset<T, JobRoleForwardingUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more JobRoleForwardings and returns the data updated in the database.
+     * @param {JobRoleForwardingUpdateManyAndReturnArgs} args - Arguments to update many JobRoleForwardings.
+     * @example
+     * // Update many JobRoleForwardings
+     * const jobRoleForwarding = await prisma.jobRoleForwarding.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more JobRoleForwardings and only return the `id`
+     * const jobRoleForwardingWithIdOnly = await prisma.jobRoleForwarding.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends JobRoleForwardingUpdateManyAndReturnArgs>(args: SelectSubset<T, JobRoleForwardingUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$JobRoleForwardingPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one JobRoleForwarding.
+     * @param {JobRoleForwardingUpsertArgs} args - Arguments to update or create a JobRoleForwarding.
+     * @example
+     * // Update or create a JobRoleForwarding
+     * const jobRoleForwarding = await prisma.jobRoleForwarding.upsert({
+     *   create: {
+     *     // ... data to create a JobRoleForwarding
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the JobRoleForwarding we want to update
+     *   }
+     * })
+     */
+    upsert<T extends JobRoleForwardingUpsertArgs>(args: SelectSubset<T, JobRoleForwardingUpsertArgs<ExtArgs>>): Prisma__JobRoleForwardingClient<$Result.GetResult<Prisma.$JobRoleForwardingPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of JobRoleForwardings.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JobRoleForwardingCountArgs} args - Arguments to filter JobRoleForwardings to count.
+     * @example
+     * // Count the number of JobRoleForwardings
+     * const count = await prisma.jobRoleForwarding.count({
+     *   where: {
+     *     // ... the filter for the JobRoleForwardings we want to count
+     *   }
+     * })
+    **/
+    count<T extends JobRoleForwardingCountArgs>(
+      args?: Subset<T, JobRoleForwardingCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], JobRoleForwardingCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a JobRoleForwarding.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JobRoleForwardingAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends JobRoleForwardingAggregateArgs>(args: Subset<T, JobRoleForwardingAggregateArgs>): Prisma.PrismaPromise<GetJobRoleForwardingAggregateType<T>>
+
+    /**
+     * Group by JobRoleForwarding.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {JobRoleForwardingGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends JobRoleForwardingGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: JobRoleForwardingGroupByArgs['orderBy'] }
+        : { orderBy?: JobRoleForwardingGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, JobRoleForwardingGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetJobRoleForwardingGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the JobRoleForwarding model
+   */
+  readonly fields: JobRoleForwardingFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for JobRoleForwarding.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__JobRoleForwardingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    jobRole<T extends JobRoleDefaultArgs<ExtArgs> = {}>(args?: Subset<T, JobRoleDefaultArgs<ExtArgs>>): Prisma__JobRoleClient<$Result.GetResult<Prisma.$JobRolePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    agency<T extends AgencyDefaultArgs<ExtArgs> = {}>(args?: Subset<T, AgencyDefaultArgs<ExtArgs>>): Prisma__AgencyClient<$Result.GetResult<Prisma.$AgencyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the JobRoleForwarding model
+   */
+  interface JobRoleForwardingFieldRefs {
+    readonly id: FieldRef<"JobRoleForwarding", 'String'>
+    readonly jobRoleId: FieldRef<"JobRoleForwarding", 'String'>
+    readonly agencyId: FieldRef<"JobRoleForwarding", 'String'>
+    readonly quantity: FieldRef<"JobRoleForwarding", 'Int'>
+    readonly createdAt: FieldRef<"JobRoleForwarding", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * JobRoleForwarding findUnique
+   */
+  export type JobRoleForwardingFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobRoleForwarding
+     */
+    select?: JobRoleForwardingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the JobRoleForwarding
+     */
+    omit?: JobRoleForwardingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobRoleForwardingInclude<ExtArgs> | null
+    /**
+     * Filter, which JobRoleForwarding to fetch.
+     */
+    where: JobRoleForwardingWhereUniqueInput
+  }
+
+  /**
+   * JobRoleForwarding findUniqueOrThrow
+   */
+  export type JobRoleForwardingFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobRoleForwarding
+     */
+    select?: JobRoleForwardingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the JobRoleForwarding
+     */
+    omit?: JobRoleForwardingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobRoleForwardingInclude<ExtArgs> | null
+    /**
+     * Filter, which JobRoleForwarding to fetch.
+     */
+    where: JobRoleForwardingWhereUniqueInput
+  }
+
+  /**
+   * JobRoleForwarding findFirst
+   */
+  export type JobRoleForwardingFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobRoleForwarding
+     */
+    select?: JobRoleForwardingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the JobRoleForwarding
+     */
+    omit?: JobRoleForwardingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobRoleForwardingInclude<ExtArgs> | null
+    /**
+     * Filter, which JobRoleForwarding to fetch.
+     */
+    where?: JobRoleForwardingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of JobRoleForwardings to fetch.
+     */
+    orderBy?: JobRoleForwardingOrderByWithRelationInput | JobRoleForwardingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for JobRoleForwardings.
+     */
+    cursor?: JobRoleForwardingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` JobRoleForwardings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` JobRoleForwardings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of JobRoleForwardings.
+     */
+    distinct?: JobRoleForwardingScalarFieldEnum | JobRoleForwardingScalarFieldEnum[]
+  }
+
+  /**
+   * JobRoleForwarding findFirstOrThrow
+   */
+  export type JobRoleForwardingFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobRoleForwarding
+     */
+    select?: JobRoleForwardingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the JobRoleForwarding
+     */
+    omit?: JobRoleForwardingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobRoleForwardingInclude<ExtArgs> | null
+    /**
+     * Filter, which JobRoleForwarding to fetch.
+     */
+    where?: JobRoleForwardingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of JobRoleForwardings to fetch.
+     */
+    orderBy?: JobRoleForwardingOrderByWithRelationInput | JobRoleForwardingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for JobRoleForwardings.
+     */
+    cursor?: JobRoleForwardingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` JobRoleForwardings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` JobRoleForwardings.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of JobRoleForwardings.
+     */
+    distinct?: JobRoleForwardingScalarFieldEnum | JobRoleForwardingScalarFieldEnum[]
+  }
+
+  /**
+   * JobRoleForwarding findMany
+   */
+  export type JobRoleForwardingFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobRoleForwarding
+     */
+    select?: JobRoleForwardingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the JobRoleForwarding
+     */
+    omit?: JobRoleForwardingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobRoleForwardingInclude<ExtArgs> | null
+    /**
+     * Filter, which JobRoleForwardings to fetch.
+     */
+    where?: JobRoleForwardingWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of JobRoleForwardings to fetch.
+     */
+    orderBy?: JobRoleForwardingOrderByWithRelationInput | JobRoleForwardingOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing JobRoleForwardings.
+     */
+    cursor?: JobRoleForwardingWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` JobRoleForwardings from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` JobRoleForwardings.
+     */
+    skip?: number
+    distinct?: JobRoleForwardingScalarFieldEnum | JobRoleForwardingScalarFieldEnum[]
+  }
+
+  /**
+   * JobRoleForwarding create
+   */
+  export type JobRoleForwardingCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobRoleForwarding
+     */
+    select?: JobRoleForwardingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the JobRoleForwarding
+     */
+    omit?: JobRoleForwardingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobRoleForwardingInclude<ExtArgs> | null
+    /**
+     * The data needed to create a JobRoleForwarding.
+     */
+    data: XOR<JobRoleForwardingCreateInput, JobRoleForwardingUncheckedCreateInput>
+  }
+
+  /**
+   * JobRoleForwarding createMany
+   */
+  export type JobRoleForwardingCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many JobRoleForwardings.
+     */
+    data: JobRoleForwardingCreateManyInput | JobRoleForwardingCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * JobRoleForwarding createManyAndReturn
+   */
+  export type JobRoleForwardingCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobRoleForwarding
+     */
+    select?: JobRoleForwardingSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the JobRoleForwarding
+     */
+    omit?: JobRoleForwardingOmit<ExtArgs> | null
+    /**
+     * The data used to create many JobRoleForwardings.
+     */
+    data: JobRoleForwardingCreateManyInput | JobRoleForwardingCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobRoleForwardingIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * JobRoleForwarding update
+   */
+  export type JobRoleForwardingUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobRoleForwarding
+     */
+    select?: JobRoleForwardingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the JobRoleForwarding
+     */
+    omit?: JobRoleForwardingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobRoleForwardingInclude<ExtArgs> | null
+    /**
+     * The data needed to update a JobRoleForwarding.
+     */
+    data: XOR<JobRoleForwardingUpdateInput, JobRoleForwardingUncheckedUpdateInput>
+    /**
+     * Choose, which JobRoleForwarding to update.
+     */
+    where: JobRoleForwardingWhereUniqueInput
+  }
+
+  /**
+   * JobRoleForwarding updateMany
+   */
+  export type JobRoleForwardingUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update JobRoleForwardings.
+     */
+    data: XOR<JobRoleForwardingUpdateManyMutationInput, JobRoleForwardingUncheckedUpdateManyInput>
+    /**
+     * Filter which JobRoleForwardings to update
+     */
+    where?: JobRoleForwardingWhereInput
+    /**
+     * Limit how many JobRoleForwardings to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * JobRoleForwarding updateManyAndReturn
+   */
+  export type JobRoleForwardingUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobRoleForwarding
+     */
+    select?: JobRoleForwardingSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the JobRoleForwarding
+     */
+    omit?: JobRoleForwardingOmit<ExtArgs> | null
+    /**
+     * The data used to update JobRoleForwardings.
+     */
+    data: XOR<JobRoleForwardingUpdateManyMutationInput, JobRoleForwardingUncheckedUpdateManyInput>
+    /**
+     * Filter which JobRoleForwardings to update
+     */
+    where?: JobRoleForwardingWhereInput
+    /**
+     * Limit how many JobRoleForwardings to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobRoleForwardingIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * JobRoleForwarding upsert
+   */
+  export type JobRoleForwardingUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobRoleForwarding
+     */
+    select?: JobRoleForwardingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the JobRoleForwarding
+     */
+    omit?: JobRoleForwardingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobRoleForwardingInclude<ExtArgs> | null
+    /**
+     * The filter to search for the JobRoleForwarding to update in case it exists.
+     */
+    where: JobRoleForwardingWhereUniqueInput
+    /**
+     * In case the JobRoleForwarding found by the `where` argument doesn't exist, create a new JobRoleForwarding with this data.
+     */
+    create: XOR<JobRoleForwardingCreateInput, JobRoleForwardingUncheckedCreateInput>
+    /**
+     * In case the JobRoleForwarding was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<JobRoleForwardingUpdateInput, JobRoleForwardingUncheckedUpdateInput>
+  }
+
+  /**
+   * JobRoleForwarding delete
+   */
+  export type JobRoleForwardingDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobRoleForwarding
+     */
+    select?: JobRoleForwardingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the JobRoleForwarding
+     */
+    omit?: JobRoleForwardingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobRoleForwardingInclude<ExtArgs> | null
+    /**
+     * Filter which JobRoleForwarding to delete.
+     */
+    where: JobRoleForwardingWhereUniqueInput
+  }
+
+  /**
+   * JobRoleForwarding deleteMany
+   */
+  export type JobRoleForwardingDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which JobRoleForwardings to delete
+     */
+    where?: JobRoleForwardingWhereInput
+    /**
+     * Limit how many JobRoleForwardings to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * JobRoleForwarding without action
+   */
+  export type JobRoleForwardingDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the JobRoleForwarding
+     */
+    select?: JobRoleForwardingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the JobRoleForwarding
+     */
+    omit?: JobRoleForwardingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: JobRoleForwardingInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -17555,7 +18835,8 @@ export namespace Prisma {
     specialRequirements: 'specialRequirements',
     assignedAgencyId: 'assignedAgencyId',
     agencyStatus: 'agencyStatus',
-    adminStatus: 'adminStatus'
+    adminStatus: 'adminStatus',
+    needsMoreLabour: 'needsMoreLabour'
   };
 
   export type JobRoleScalarFieldEnum = (typeof JobRoleScalarFieldEnum)[keyof typeof JobRoleScalarFieldEnum]
@@ -17650,6 +18931,17 @@ export namespace Prisma {
   };
 
   export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
+
+
+  export const JobRoleForwardingScalarFieldEnum: {
+    id: 'id',
+    jobRoleId: 'jobRoleId',
+    agencyId: 'agencyId',
+    quantity: 'quantity',
+    createdAt: 'createdAt'
+  };
+
+  export type JobRoleForwardingScalarFieldEnum = (typeof JobRoleForwardingScalarFieldEnum)[keyof typeof JobRoleForwardingScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -18255,6 +19547,7 @@ export namespace Prisma {
     JobRole?: JobRoleListRelationFilter
     LabourProfile?: LabourProfileListRelationFilter
     LabourAssignment?: LabourAssignmentListRelationFilter
+    jobRoleForwardings?: JobRoleForwardingListRelationFilter
   }
 
   export type AgencyOrderByWithRelationInput = {
@@ -18275,6 +19568,7 @@ export namespace Prisma {
     JobRole?: JobRoleOrderByRelationAggregateInput
     LabourProfile?: LabourProfileOrderByRelationAggregateInput
     LabourAssignment?: LabourAssignmentOrderByRelationAggregateInput
+    jobRoleForwardings?: JobRoleForwardingOrderByRelationAggregateInput
   }
 
   export type AgencyWhereUniqueInput = Prisma.AtLeast<{
@@ -18298,6 +19592,7 @@ export namespace Prisma {
     JobRole?: JobRoleListRelationFilter
     LabourProfile?: LabourProfileListRelationFilter
     LabourAssignment?: LabourAssignmentListRelationFilter
+    jobRoleForwardings?: JobRoleForwardingListRelationFilter
   }, "id" | "userId" | "registrationNo">
 
   export type AgencyOrderByWithAggregationInput = {
@@ -18638,9 +19933,11 @@ export namespace Prisma {
     assignedAgencyId?: StringNullableFilter<"JobRole"> | string | null
     agencyStatus?: EnumRequirementStatusFilter<"JobRole"> | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusFilter<"JobRole"> | $Enums.RequirementStatus
+    needsMoreLabour?: BoolFilter<"JobRole"> | boolean
     requirement?: XOR<RequirementScalarRelationFilter, RequirementWhereInput>
     assignedAgency?: XOR<AgencyNullableScalarRelationFilter, AgencyWhereInput> | null
     LabourAssignment?: LabourAssignmentListRelationFilter
+    forwardings?: JobRoleForwardingListRelationFilter
   }
 
   export type JobRoleOrderByWithRelationInput = {
@@ -18674,9 +19971,11 @@ export namespace Prisma {
     assignedAgencyId?: SortOrderInput | SortOrder
     agencyStatus?: SortOrder
     adminStatus?: SortOrder
+    needsMoreLabour?: SortOrder
     requirement?: RequirementOrderByWithRelationInput
     assignedAgency?: AgencyOrderByWithRelationInput
     LabourAssignment?: LabourAssignmentOrderByRelationAggregateInput
+    forwardings?: JobRoleForwardingOrderByRelationAggregateInput
   }
 
   export type JobRoleWhereUniqueInput = Prisma.AtLeast<{
@@ -18713,9 +20012,11 @@ export namespace Prisma {
     assignedAgencyId?: StringNullableFilter<"JobRole"> | string | null
     agencyStatus?: EnumRequirementStatusFilter<"JobRole"> | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusFilter<"JobRole"> | $Enums.RequirementStatus
+    needsMoreLabour?: BoolFilter<"JobRole"> | boolean
     requirement?: XOR<RequirementScalarRelationFilter, RequirementWhereInput>
     assignedAgency?: XOR<AgencyNullableScalarRelationFilter, AgencyWhereInput> | null
     LabourAssignment?: LabourAssignmentListRelationFilter
+    forwardings?: JobRoleForwardingListRelationFilter
   }, "id">
 
   export type JobRoleOrderByWithAggregationInput = {
@@ -18749,6 +20050,7 @@ export namespace Prisma {
     assignedAgencyId?: SortOrderInput | SortOrder
     agencyStatus?: SortOrder
     adminStatus?: SortOrder
+    needsMoreLabour?: SortOrder
     _count?: JobRoleCountOrderByAggregateInput
     _avg?: JobRoleAvgOrderByAggregateInput
     _max?: JobRoleMaxOrderByAggregateInput
@@ -18790,6 +20092,7 @@ export namespace Prisma {
     assignedAgencyId?: StringNullableWithAggregatesFilter<"JobRole"> | string | null
     agencyStatus?: EnumRequirementStatusWithAggregatesFilter<"JobRole"> | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusWithAggregatesFilter<"JobRole"> | $Enums.RequirementStatus
+    needsMoreLabour?: BoolWithAggregatesFilter<"JobRole"> | boolean
   }
 
   export type LabourProfileWhereInput = {
@@ -19277,6 +20580,67 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"AuditLog"> | Date | string
   }
 
+  export type JobRoleForwardingWhereInput = {
+    AND?: JobRoleForwardingWhereInput | JobRoleForwardingWhereInput[]
+    OR?: JobRoleForwardingWhereInput[]
+    NOT?: JobRoleForwardingWhereInput | JobRoleForwardingWhereInput[]
+    id?: StringFilter<"JobRoleForwarding"> | string
+    jobRoleId?: StringFilter<"JobRoleForwarding"> | string
+    agencyId?: StringFilter<"JobRoleForwarding"> | string
+    quantity?: IntFilter<"JobRoleForwarding"> | number
+    createdAt?: DateTimeFilter<"JobRoleForwarding"> | Date | string
+    jobRole?: XOR<JobRoleScalarRelationFilter, JobRoleWhereInput>
+    agency?: XOR<AgencyScalarRelationFilter, AgencyWhereInput>
+  }
+
+  export type JobRoleForwardingOrderByWithRelationInput = {
+    id?: SortOrder
+    jobRoleId?: SortOrder
+    agencyId?: SortOrder
+    quantity?: SortOrder
+    createdAt?: SortOrder
+    jobRole?: JobRoleOrderByWithRelationInput
+    agency?: AgencyOrderByWithRelationInput
+  }
+
+  export type JobRoleForwardingWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    jobRoleId_agencyId?: JobRoleForwardingJobRoleIdAgencyIdCompoundUniqueInput
+    AND?: JobRoleForwardingWhereInput | JobRoleForwardingWhereInput[]
+    OR?: JobRoleForwardingWhereInput[]
+    NOT?: JobRoleForwardingWhereInput | JobRoleForwardingWhereInput[]
+    jobRoleId?: StringFilter<"JobRoleForwarding"> | string
+    agencyId?: StringFilter<"JobRoleForwarding"> | string
+    quantity?: IntFilter<"JobRoleForwarding"> | number
+    createdAt?: DateTimeFilter<"JobRoleForwarding"> | Date | string
+    jobRole?: XOR<JobRoleScalarRelationFilter, JobRoleWhereInput>
+    agency?: XOR<AgencyScalarRelationFilter, AgencyWhereInput>
+  }, "id" | "jobRoleId_agencyId">
+
+  export type JobRoleForwardingOrderByWithAggregationInput = {
+    id?: SortOrder
+    jobRoleId?: SortOrder
+    agencyId?: SortOrder
+    quantity?: SortOrder
+    createdAt?: SortOrder
+    _count?: JobRoleForwardingCountOrderByAggregateInput
+    _avg?: JobRoleForwardingAvgOrderByAggregateInput
+    _max?: JobRoleForwardingMaxOrderByAggregateInput
+    _min?: JobRoleForwardingMinOrderByAggregateInput
+    _sum?: JobRoleForwardingSumOrderByAggregateInput
+  }
+
+  export type JobRoleForwardingScalarWhereWithAggregatesInput = {
+    AND?: JobRoleForwardingScalarWhereWithAggregatesInput | JobRoleForwardingScalarWhereWithAggregatesInput[]
+    OR?: JobRoleForwardingScalarWhereWithAggregatesInput[]
+    NOT?: JobRoleForwardingScalarWhereWithAggregatesInput | JobRoleForwardingScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"JobRoleForwarding"> | string
+    jobRoleId?: StringWithAggregatesFilter<"JobRoleForwarding"> | string
+    agencyId?: StringWithAggregatesFilter<"JobRoleForwarding"> | string
+    quantity?: IntWithAggregatesFilter<"JobRoleForwarding"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"JobRoleForwarding"> | Date | string
+  }
+
   export type UserCreateInput = {
     id?: string
     name: string
@@ -19593,6 +20957,7 @@ export namespace Prisma {
     JobRole?: JobRoleCreateNestedManyWithoutAssignedAgencyInput
     LabourProfile?: LabourProfileCreateNestedManyWithoutAgencyInput
     LabourAssignment?: LabourAssignmentCreateNestedManyWithoutAgencyInput
+    jobRoleForwardings?: JobRoleForwardingCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyUncheckedCreateInput = {
@@ -19612,6 +20977,7 @@ export namespace Prisma {
     JobRole?: JobRoleUncheckedCreateNestedManyWithoutAssignedAgencyInput
     LabourProfile?: LabourProfileUncheckedCreateNestedManyWithoutAgencyInput
     LabourAssignment?: LabourAssignmentUncheckedCreateNestedManyWithoutAgencyInput
+    jobRoleForwardings?: JobRoleForwardingUncheckedCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyUpdateInput = {
@@ -19631,6 +20997,7 @@ export namespace Prisma {
     JobRole?: JobRoleUpdateManyWithoutAssignedAgencyNestedInput
     LabourProfile?: LabourProfileUpdateManyWithoutAgencyNestedInput
     LabourAssignment?: LabourAssignmentUpdateManyWithoutAgencyNestedInput
+    jobRoleForwardings?: JobRoleForwardingUpdateManyWithoutAgencyNestedInput
   }
 
   export type AgencyUncheckedUpdateInput = {
@@ -19650,6 +21017,7 @@ export namespace Prisma {
     JobRole?: JobRoleUncheckedUpdateManyWithoutAssignedAgencyNestedInput
     LabourProfile?: LabourProfileUncheckedUpdateManyWithoutAgencyNestedInput
     LabourAssignment?: LabourAssignmentUncheckedUpdateManyWithoutAgencyNestedInput
+    jobRoleForwardings?: JobRoleForwardingUncheckedUpdateManyWithoutAgencyNestedInput
   }
 
   export type AgencyCreateManyInput = {
@@ -20005,9 +21373,11 @@ export namespace Prisma {
     specialRequirements?: string | null
     agencyStatus?: $Enums.RequirementStatus
     adminStatus?: $Enums.RequirementStatus
+    needsMoreLabour?: boolean
     requirement: RequirementCreateNestedOneWithoutJobRolesInput
     assignedAgency?: AgencyCreateNestedOneWithoutJobRoleInput
     LabourAssignment?: LabourAssignmentCreateNestedManyWithoutJobRoleInput
+    forwardings?: JobRoleForwardingCreateNestedManyWithoutJobRoleInput
   }
 
   export type JobRoleUncheckedCreateInput = {
@@ -20041,7 +21411,9 @@ export namespace Prisma {
     assignedAgencyId?: string | null
     agencyStatus?: $Enums.RequirementStatus
     adminStatus?: $Enums.RequirementStatus
+    needsMoreLabour?: boolean
     LabourAssignment?: LabourAssignmentUncheckedCreateNestedManyWithoutJobRoleInput
+    forwardings?: JobRoleForwardingUncheckedCreateNestedManyWithoutJobRoleInput
   }
 
   export type JobRoleUpdateInput = {
@@ -20073,9 +21445,11 @@ export namespace Prisma {
     specialRequirements?: NullableStringFieldUpdateOperationsInput | string | null
     agencyStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    needsMoreLabour?: BoolFieldUpdateOperationsInput | boolean
     requirement?: RequirementUpdateOneRequiredWithoutJobRolesNestedInput
     assignedAgency?: AgencyUpdateOneWithoutJobRoleNestedInput
     LabourAssignment?: LabourAssignmentUpdateManyWithoutJobRoleNestedInput
+    forwardings?: JobRoleForwardingUpdateManyWithoutJobRoleNestedInput
   }
 
   export type JobRoleUncheckedUpdateInput = {
@@ -20109,7 +21483,9 @@ export namespace Prisma {
     assignedAgencyId?: NullableStringFieldUpdateOperationsInput | string | null
     agencyStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    needsMoreLabour?: BoolFieldUpdateOperationsInput | boolean
     LabourAssignment?: LabourAssignmentUncheckedUpdateManyWithoutJobRoleNestedInput
+    forwardings?: JobRoleForwardingUncheckedUpdateManyWithoutJobRoleNestedInput
   }
 
   export type JobRoleCreateManyInput = {
@@ -20143,6 +21519,7 @@ export namespace Prisma {
     assignedAgencyId?: string | null
     agencyStatus?: $Enums.RequirementStatus
     adminStatus?: $Enums.RequirementStatus
+    needsMoreLabour?: boolean
   }
 
   export type JobRoleUpdateManyMutationInput = {
@@ -20174,6 +21551,7 @@ export namespace Prisma {
     specialRequirements?: NullableStringFieldUpdateOperationsInput | string | null
     agencyStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    needsMoreLabour?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type JobRoleUncheckedUpdateManyInput = {
@@ -20207,6 +21585,7 @@ export namespace Prisma {
     assignedAgencyId?: NullableStringFieldUpdateOperationsInput | string | null
     agencyStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    needsMoreLabour?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type LabourProfileCreateInput = {
@@ -20779,6 +22158,60 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type JobRoleForwardingCreateInput = {
+    id?: string
+    quantity: number
+    createdAt?: Date | string
+    jobRole: JobRoleCreateNestedOneWithoutForwardingsInput
+    agency: AgencyCreateNestedOneWithoutJobRoleForwardingsInput
+  }
+
+  export type JobRoleForwardingUncheckedCreateInput = {
+    id?: string
+    jobRoleId: string
+    agencyId: string
+    quantity: number
+    createdAt?: Date | string
+  }
+
+  export type JobRoleForwardingUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    jobRole?: JobRoleUpdateOneRequiredWithoutForwardingsNestedInput
+    agency?: AgencyUpdateOneRequiredWithoutJobRoleForwardingsNestedInput
+  }
+
+  export type JobRoleForwardingUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobRoleId?: StringFieldUpdateOperationsInput | string
+    agencyId?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type JobRoleForwardingCreateManyInput = {
+    id?: string
+    jobRoleId: string
+    agencyId: string
+    quantity: number
+    createdAt?: Date | string
+  }
+
+  export type JobRoleForwardingUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type JobRoleForwardingUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobRoleId?: StringFieldUpdateOperationsInput | string
+    agencyId?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -21198,6 +22631,12 @@ export namespace Prisma {
     none?: LabourAssignmentWhereInput
   }
 
+  export type JobRoleForwardingListRelationFilter = {
+    every?: JobRoleForwardingWhereInput
+    some?: JobRoleForwardingWhereInput
+    none?: JobRoleForwardingWhereInput
+  }
+
   export type JobRoleOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -21207,6 +22646,10 @@ export namespace Prisma {
   }
 
   export type LabourAssignmentOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type JobRoleForwardingOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -21585,6 +23028,7 @@ export namespace Prisma {
     assignedAgencyId?: SortOrder
     agencyStatus?: SortOrder
     adminStatus?: SortOrder
+    needsMoreLabour?: SortOrder
   }
 
   export type JobRoleAvgOrderByAggregateInput = {
@@ -21630,6 +23074,7 @@ export namespace Prisma {
     assignedAgencyId?: SortOrder
     agencyStatus?: SortOrder
     adminStatus?: SortOrder
+    needsMoreLabour?: SortOrder
   }
 
   export type JobRoleMinOrderByAggregateInput = {
@@ -21662,6 +23107,7 @@ export namespace Prisma {
     assignedAgencyId?: SortOrder
     agencyStatus?: SortOrder
     adminStatus?: SortOrder
+    needsMoreLabour?: SortOrder
   }
 
   export type JobRoleSumOrderByAggregateInput = {
@@ -22121,6 +23567,43 @@ export namespace Prisma {
     _max?: NestedEnumAuditActionFilter<$PrismaModel>
   }
 
+  export type JobRoleForwardingJobRoleIdAgencyIdCompoundUniqueInput = {
+    jobRoleId: string
+    agencyId: string
+  }
+
+  export type JobRoleForwardingCountOrderByAggregateInput = {
+    id?: SortOrder
+    jobRoleId?: SortOrder
+    agencyId?: SortOrder
+    quantity?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type JobRoleForwardingAvgOrderByAggregateInput = {
+    quantity?: SortOrder
+  }
+
+  export type JobRoleForwardingMaxOrderByAggregateInput = {
+    id?: SortOrder
+    jobRoleId?: SortOrder
+    agencyId?: SortOrder
+    quantity?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type JobRoleForwardingMinOrderByAggregateInput = {
+    id?: SortOrder
+    jobRoleId?: SortOrder
+    agencyId?: SortOrder
+    quantity?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type JobRoleForwardingSumOrderByAggregateInput = {
+    quantity?: SortOrder
+  }
+
   export type ClientCreateNestedOneWithoutUserInput = {
     create?: XOR<ClientCreateWithoutUserInput, ClientUncheckedCreateWithoutUserInput>
     connectOrCreate?: ClientCreateOrConnectWithoutUserInput
@@ -22482,6 +23965,13 @@ export namespace Prisma {
     connect?: LabourAssignmentWhereUniqueInput | LabourAssignmentWhereUniqueInput[]
   }
 
+  export type JobRoleForwardingCreateNestedManyWithoutAgencyInput = {
+    create?: XOR<JobRoleForwardingCreateWithoutAgencyInput, JobRoleForwardingUncheckedCreateWithoutAgencyInput> | JobRoleForwardingCreateWithoutAgencyInput[] | JobRoleForwardingUncheckedCreateWithoutAgencyInput[]
+    connectOrCreate?: JobRoleForwardingCreateOrConnectWithoutAgencyInput | JobRoleForwardingCreateOrConnectWithoutAgencyInput[]
+    createMany?: JobRoleForwardingCreateManyAgencyInputEnvelope
+    connect?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+  }
+
   export type JobRoleUncheckedCreateNestedManyWithoutAssignedAgencyInput = {
     create?: XOR<JobRoleCreateWithoutAssignedAgencyInput, JobRoleUncheckedCreateWithoutAssignedAgencyInput> | JobRoleCreateWithoutAssignedAgencyInput[] | JobRoleUncheckedCreateWithoutAssignedAgencyInput[]
     connectOrCreate?: JobRoleCreateOrConnectWithoutAssignedAgencyInput | JobRoleCreateOrConnectWithoutAssignedAgencyInput[]
@@ -22501,6 +23991,13 @@ export namespace Prisma {
     connectOrCreate?: LabourAssignmentCreateOrConnectWithoutAgencyInput | LabourAssignmentCreateOrConnectWithoutAgencyInput[]
     createMany?: LabourAssignmentCreateManyAgencyInputEnvelope
     connect?: LabourAssignmentWhereUniqueInput | LabourAssignmentWhereUniqueInput[]
+  }
+
+  export type JobRoleForwardingUncheckedCreateNestedManyWithoutAgencyInput = {
+    create?: XOR<JobRoleForwardingCreateWithoutAgencyInput, JobRoleForwardingUncheckedCreateWithoutAgencyInput> | JobRoleForwardingCreateWithoutAgencyInput[] | JobRoleForwardingUncheckedCreateWithoutAgencyInput[]
+    connectOrCreate?: JobRoleForwardingCreateOrConnectWithoutAgencyInput | JobRoleForwardingCreateOrConnectWithoutAgencyInput[]
+    createMany?: JobRoleForwardingCreateManyAgencyInputEnvelope
+    connect?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
   }
 
   export type UserUpdateOneRequiredWithoutAgencyProfileNestedInput = {
@@ -22553,6 +24050,20 @@ export namespace Prisma {
     deleteMany?: LabourAssignmentScalarWhereInput | LabourAssignmentScalarWhereInput[]
   }
 
+  export type JobRoleForwardingUpdateManyWithoutAgencyNestedInput = {
+    create?: XOR<JobRoleForwardingCreateWithoutAgencyInput, JobRoleForwardingUncheckedCreateWithoutAgencyInput> | JobRoleForwardingCreateWithoutAgencyInput[] | JobRoleForwardingUncheckedCreateWithoutAgencyInput[]
+    connectOrCreate?: JobRoleForwardingCreateOrConnectWithoutAgencyInput | JobRoleForwardingCreateOrConnectWithoutAgencyInput[]
+    upsert?: JobRoleForwardingUpsertWithWhereUniqueWithoutAgencyInput | JobRoleForwardingUpsertWithWhereUniqueWithoutAgencyInput[]
+    createMany?: JobRoleForwardingCreateManyAgencyInputEnvelope
+    set?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+    disconnect?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+    delete?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+    connect?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+    update?: JobRoleForwardingUpdateWithWhereUniqueWithoutAgencyInput | JobRoleForwardingUpdateWithWhereUniqueWithoutAgencyInput[]
+    updateMany?: JobRoleForwardingUpdateManyWithWhereWithoutAgencyInput | JobRoleForwardingUpdateManyWithWhereWithoutAgencyInput[]
+    deleteMany?: JobRoleForwardingScalarWhereInput | JobRoleForwardingScalarWhereInput[]
+  }
+
   export type JobRoleUncheckedUpdateManyWithoutAssignedAgencyNestedInput = {
     create?: XOR<JobRoleCreateWithoutAssignedAgencyInput, JobRoleUncheckedCreateWithoutAssignedAgencyInput> | JobRoleCreateWithoutAssignedAgencyInput[] | JobRoleUncheckedCreateWithoutAssignedAgencyInput[]
     connectOrCreate?: JobRoleCreateOrConnectWithoutAssignedAgencyInput | JobRoleCreateOrConnectWithoutAssignedAgencyInput[]
@@ -22593,6 +24104,20 @@ export namespace Prisma {
     update?: LabourAssignmentUpdateWithWhereUniqueWithoutAgencyInput | LabourAssignmentUpdateWithWhereUniqueWithoutAgencyInput[]
     updateMany?: LabourAssignmentUpdateManyWithWhereWithoutAgencyInput | LabourAssignmentUpdateManyWithWhereWithoutAgencyInput[]
     deleteMany?: LabourAssignmentScalarWhereInput | LabourAssignmentScalarWhereInput[]
+  }
+
+  export type JobRoleForwardingUncheckedUpdateManyWithoutAgencyNestedInput = {
+    create?: XOR<JobRoleForwardingCreateWithoutAgencyInput, JobRoleForwardingUncheckedCreateWithoutAgencyInput> | JobRoleForwardingCreateWithoutAgencyInput[] | JobRoleForwardingUncheckedCreateWithoutAgencyInput[]
+    connectOrCreate?: JobRoleForwardingCreateOrConnectWithoutAgencyInput | JobRoleForwardingCreateOrConnectWithoutAgencyInput[]
+    upsert?: JobRoleForwardingUpsertWithWhereUniqueWithoutAgencyInput | JobRoleForwardingUpsertWithWhereUniqueWithoutAgencyInput[]
+    createMany?: JobRoleForwardingCreateManyAgencyInputEnvelope
+    set?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+    disconnect?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+    delete?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+    connect?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+    update?: JobRoleForwardingUpdateWithWhereUniqueWithoutAgencyInput | JobRoleForwardingUpdateWithWhereUniqueWithoutAgencyInput[]
+    updateMany?: JobRoleForwardingUpdateManyWithWhereWithoutAgencyInput | JobRoleForwardingUpdateManyWithWhereWithoutAgencyInput[]
+    deleteMany?: JobRoleForwardingScalarWhereInput | JobRoleForwardingScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutAdminProfileInput = {
@@ -22868,11 +24393,25 @@ export namespace Prisma {
     connect?: LabourAssignmentWhereUniqueInput | LabourAssignmentWhereUniqueInput[]
   }
 
+  export type JobRoleForwardingCreateNestedManyWithoutJobRoleInput = {
+    create?: XOR<JobRoleForwardingCreateWithoutJobRoleInput, JobRoleForwardingUncheckedCreateWithoutJobRoleInput> | JobRoleForwardingCreateWithoutJobRoleInput[] | JobRoleForwardingUncheckedCreateWithoutJobRoleInput[]
+    connectOrCreate?: JobRoleForwardingCreateOrConnectWithoutJobRoleInput | JobRoleForwardingCreateOrConnectWithoutJobRoleInput[]
+    createMany?: JobRoleForwardingCreateManyJobRoleInputEnvelope
+    connect?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+  }
+
   export type LabourAssignmentUncheckedCreateNestedManyWithoutJobRoleInput = {
     create?: XOR<LabourAssignmentCreateWithoutJobRoleInput, LabourAssignmentUncheckedCreateWithoutJobRoleInput> | LabourAssignmentCreateWithoutJobRoleInput[] | LabourAssignmentUncheckedCreateWithoutJobRoleInput[]
     connectOrCreate?: LabourAssignmentCreateOrConnectWithoutJobRoleInput | LabourAssignmentCreateOrConnectWithoutJobRoleInput[]
     createMany?: LabourAssignmentCreateManyJobRoleInputEnvelope
     connect?: LabourAssignmentWhereUniqueInput | LabourAssignmentWhereUniqueInput[]
+  }
+
+  export type JobRoleForwardingUncheckedCreateNestedManyWithoutJobRoleInput = {
+    create?: XOR<JobRoleForwardingCreateWithoutJobRoleInput, JobRoleForwardingUncheckedCreateWithoutJobRoleInput> | JobRoleForwardingCreateWithoutJobRoleInput[] | JobRoleForwardingUncheckedCreateWithoutJobRoleInput[]
+    connectOrCreate?: JobRoleForwardingCreateOrConnectWithoutJobRoleInput | JobRoleForwardingCreateOrConnectWithoutJobRoleInput[]
+    createMany?: JobRoleForwardingCreateManyJobRoleInputEnvelope
+    connect?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
   }
 
   export type IntFieldUpdateOperationsInput = {
@@ -22948,6 +24487,20 @@ export namespace Prisma {
     deleteMany?: LabourAssignmentScalarWhereInput | LabourAssignmentScalarWhereInput[]
   }
 
+  export type JobRoleForwardingUpdateManyWithoutJobRoleNestedInput = {
+    create?: XOR<JobRoleForwardingCreateWithoutJobRoleInput, JobRoleForwardingUncheckedCreateWithoutJobRoleInput> | JobRoleForwardingCreateWithoutJobRoleInput[] | JobRoleForwardingUncheckedCreateWithoutJobRoleInput[]
+    connectOrCreate?: JobRoleForwardingCreateOrConnectWithoutJobRoleInput | JobRoleForwardingCreateOrConnectWithoutJobRoleInput[]
+    upsert?: JobRoleForwardingUpsertWithWhereUniqueWithoutJobRoleInput | JobRoleForwardingUpsertWithWhereUniqueWithoutJobRoleInput[]
+    createMany?: JobRoleForwardingCreateManyJobRoleInputEnvelope
+    set?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+    disconnect?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+    delete?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+    connect?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+    update?: JobRoleForwardingUpdateWithWhereUniqueWithoutJobRoleInput | JobRoleForwardingUpdateWithWhereUniqueWithoutJobRoleInput[]
+    updateMany?: JobRoleForwardingUpdateManyWithWhereWithoutJobRoleInput | JobRoleForwardingUpdateManyWithWhereWithoutJobRoleInput[]
+    deleteMany?: JobRoleForwardingScalarWhereInput | JobRoleForwardingScalarWhereInput[]
+  }
+
   export type LabourAssignmentUncheckedUpdateManyWithoutJobRoleNestedInput = {
     create?: XOR<LabourAssignmentCreateWithoutJobRoleInput, LabourAssignmentUncheckedCreateWithoutJobRoleInput> | LabourAssignmentCreateWithoutJobRoleInput[] | LabourAssignmentUncheckedCreateWithoutJobRoleInput[]
     connectOrCreate?: LabourAssignmentCreateOrConnectWithoutJobRoleInput | LabourAssignmentCreateOrConnectWithoutJobRoleInput[]
@@ -22960,6 +24513,20 @@ export namespace Prisma {
     update?: LabourAssignmentUpdateWithWhereUniqueWithoutJobRoleInput | LabourAssignmentUpdateWithWhereUniqueWithoutJobRoleInput[]
     updateMany?: LabourAssignmentUpdateManyWithWhereWithoutJobRoleInput | LabourAssignmentUpdateManyWithWhereWithoutJobRoleInput[]
     deleteMany?: LabourAssignmentScalarWhereInput | LabourAssignmentScalarWhereInput[]
+  }
+
+  export type JobRoleForwardingUncheckedUpdateManyWithoutJobRoleNestedInput = {
+    create?: XOR<JobRoleForwardingCreateWithoutJobRoleInput, JobRoleForwardingUncheckedCreateWithoutJobRoleInput> | JobRoleForwardingCreateWithoutJobRoleInput[] | JobRoleForwardingUncheckedCreateWithoutJobRoleInput[]
+    connectOrCreate?: JobRoleForwardingCreateOrConnectWithoutJobRoleInput | JobRoleForwardingCreateOrConnectWithoutJobRoleInput[]
+    upsert?: JobRoleForwardingUpsertWithWhereUniqueWithoutJobRoleInput | JobRoleForwardingUpsertWithWhereUniqueWithoutJobRoleInput[]
+    createMany?: JobRoleForwardingCreateManyJobRoleInputEnvelope
+    set?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+    disconnect?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+    delete?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+    connect?: JobRoleForwardingWhereUniqueInput | JobRoleForwardingWhereUniqueInput[]
+    update?: JobRoleForwardingUpdateWithWhereUniqueWithoutJobRoleInput | JobRoleForwardingUpdateWithWhereUniqueWithoutJobRoleInput[]
+    updateMany?: JobRoleForwardingUpdateManyWithWhereWithoutJobRoleInput | JobRoleForwardingUpdateManyWithWhereWithoutJobRoleInput[]
+    deleteMany?: JobRoleForwardingScalarWhereInput | JobRoleForwardingScalarWhereInput[]
   }
 
   export type LabourProfileCreateskillsInput = {
@@ -23360,6 +24927,34 @@ export namespace Prisma {
     update?: LabourProfileUpdateWithWhereUniqueWithoutAuditLogsInput | LabourProfileUpdateWithWhereUniqueWithoutAuditLogsInput[]
     updateMany?: LabourProfileUpdateManyWithWhereWithoutAuditLogsInput | LabourProfileUpdateManyWithWhereWithoutAuditLogsInput[]
     deleteMany?: LabourProfileScalarWhereInput | LabourProfileScalarWhereInput[]
+  }
+
+  export type JobRoleCreateNestedOneWithoutForwardingsInput = {
+    create?: XOR<JobRoleCreateWithoutForwardingsInput, JobRoleUncheckedCreateWithoutForwardingsInput>
+    connectOrCreate?: JobRoleCreateOrConnectWithoutForwardingsInput
+    connect?: JobRoleWhereUniqueInput
+  }
+
+  export type AgencyCreateNestedOneWithoutJobRoleForwardingsInput = {
+    create?: XOR<AgencyCreateWithoutJobRoleForwardingsInput, AgencyUncheckedCreateWithoutJobRoleForwardingsInput>
+    connectOrCreate?: AgencyCreateOrConnectWithoutJobRoleForwardingsInput
+    connect?: AgencyWhereUniqueInput
+  }
+
+  export type JobRoleUpdateOneRequiredWithoutForwardingsNestedInput = {
+    create?: XOR<JobRoleCreateWithoutForwardingsInput, JobRoleUncheckedCreateWithoutForwardingsInput>
+    connectOrCreate?: JobRoleCreateOrConnectWithoutForwardingsInput
+    upsert?: JobRoleUpsertWithoutForwardingsInput
+    connect?: JobRoleWhereUniqueInput
+    update?: XOR<XOR<JobRoleUpdateToOneWithWhereWithoutForwardingsInput, JobRoleUpdateWithoutForwardingsInput>, JobRoleUncheckedUpdateWithoutForwardingsInput>
+  }
+
+  export type AgencyUpdateOneRequiredWithoutJobRoleForwardingsNestedInput = {
+    create?: XOR<AgencyCreateWithoutJobRoleForwardingsInput, AgencyUncheckedCreateWithoutJobRoleForwardingsInput>
+    connectOrCreate?: AgencyCreateOrConnectWithoutJobRoleForwardingsInput
+    upsert?: AgencyUpsertWithoutJobRoleForwardingsInput
+    connect?: AgencyWhereUniqueInput
+    update?: XOR<XOR<AgencyUpdateToOneWithWhereWithoutJobRoleForwardingsInput, AgencyUpdateWithoutJobRoleForwardingsInput>, AgencyUncheckedUpdateWithoutJobRoleForwardingsInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -23928,6 +25523,7 @@ export namespace Prisma {
     JobRole?: JobRoleCreateNestedManyWithoutAssignedAgencyInput
     LabourProfile?: LabourProfileCreateNestedManyWithoutAgencyInput
     LabourAssignment?: LabourAssignmentCreateNestedManyWithoutAgencyInput
+    jobRoleForwardings?: JobRoleForwardingCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyUncheckedCreateWithoutUserInput = {
@@ -23946,6 +25542,7 @@ export namespace Prisma {
     JobRole?: JobRoleUncheckedCreateNestedManyWithoutAssignedAgencyInput
     LabourProfile?: LabourProfileUncheckedCreateNestedManyWithoutAgencyInput
     LabourAssignment?: LabourAssignmentUncheckedCreateNestedManyWithoutAgencyInput
+    jobRoleForwardings?: JobRoleForwardingUncheckedCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyCreateOrConnectWithoutUserInput = {
@@ -24247,6 +25844,7 @@ export namespace Prisma {
     JobRole?: JobRoleUpdateManyWithoutAssignedAgencyNestedInput
     LabourProfile?: LabourProfileUpdateManyWithoutAgencyNestedInput
     LabourAssignment?: LabourAssignmentUpdateManyWithoutAgencyNestedInput
+    jobRoleForwardings?: JobRoleForwardingUpdateManyWithoutAgencyNestedInput
   }
 
   export type AgencyUncheckedUpdateWithoutUserInput = {
@@ -24265,6 +25863,7 @@ export namespace Prisma {
     JobRole?: JobRoleUncheckedUpdateManyWithoutAssignedAgencyNestedInput
     LabourProfile?: LabourProfileUncheckedUpdateManyWithoutAgencyNestedInput
     LabourAssignment?: LabourAssignmentUncheckedUpdateManyWithoutAgencyNestedInput
+    jobRoleForwardings?: JobRoleForwardingUncheckedUpdateManyWithoutAgencyNestedInput
   }
 
   export type AdminUpsertWithoutUserInput = {
@@ -24737,8 +26336,10 @@ export namespace Prisma {
     specialRequirements?: string | null
     agencyStatus?: $Enums.RequirementStatus
     adminStatus?: $Enums.RequirementStatus
+    needsMoreLabour?: boolean
     requirement: RequirementCreateNestedOneWithoutJobRolesInput
     LabourAssignment?: LabourAssignmentCreateNestedManyWithoutJobRoleInput
+    forwardings?: JobRoleForwardingCreateNestedManyWithoutJobRoleInput
   }
 
   export type JobRoleUncheckedCreateWithoutAssignedAgencyInput = {
@@ -24771,7 +26372,9 @@ export namespace Prisma {
     specialRequirements?: string | null
     agencyStatus?: $Enums.RequirementStatus
     adminStatus?: $Enums.RequirementStatus
+    needsMoreLabour?: boolean
     LabourAssignment?: LabourAssignmentUncheckedCreateNestedManyWithoutJobRoleInput
+    forwardings?: JobRoleForwardingUncheckedCreateNestedManyWithoutJobRoleInput
   }
 
   export type JobRoleCreateOrConnectWithoutAssignedAgencyInput = {
@@ -24910,6 +26513,30 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type JobRoleForwardingCreateWithoutAgencyInput = {
+    id?: string
+    quantity: number
+    createdAt?: Date | string
+    jobRole: JobRoleCreateNestedOneWithoutForwardingsInput
+  }
+
+  export type JobRoleForwardingUncheckedCreateWithoutAgencyInput = {
+    id?: string
+    jobRoleId: string
+    quantity: number
+    createdAt?: Date | string
+  }
+
+  export type JobRoleForwardingCreateOrConnectWithoutAgencyInput = {
+    where: JobRoleForwardingWhereUniqueInput
+    create: XOR<JobRoleForwardingCreateWithoutAgencyInput, JobRoleForwardingUncheckedCreateWithoutAgencyInput>
+  }
+
+  export type JobRoleForwardingCreateManyAgencyInputEnvelope = {
+    data: JobRoleForwardingCreateManyAgencyInput | JobRoleForwardingCreateManyAgencyInput[]
+    skipDuplicates?: boolean
+  }
+
   export type UserUpsertWithoutAgencyProfileInput = {
     update: XOR<UserUpdateWithoutAgencyProfileInput, UserUncheckedUpdateWithoutAgencyProfileInput>
     create: XOR<UserCreateWithoutAgencyProfileInput, UserUncheckedCreateWithoutAgencyProfileInput>
@@ -25025,6 +26652,7 @@ export namespace Prisma {
     assignedAgencyId?: StringNullableFilter<"JobRole"> | string | null
     agencyStatus?: EnumRequirementStatusFilter<"JobRole"> | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusFilter<"JobRole"> | $Enums.RequirementStatus
+    needsMoreLabour?: BoolFilter<"JobRole"> | boolean
   }
 
   export type LabourProfileUpsertWithWhereUniqueWithoutAgencyInput = {
@@ -25114,6 +26742,33 @@ export namespace Prisma {
     clientFeedback?: StringNullableFilter<"LabourAssignment"> | string | null
     createdAt?: DateTimeFilter<"LabourAssignment"> | Date | string
     updatedAt?: DateTimeFilter<"LabourAssignment"> | Date | string
+  }
+
+  export type JobRoleForwardingUpsertWithWhereUniqueWithoutAgencyInput = {
+    where: JobRoleForwardingWhereUniqueInput
+    update: XOR<JobRoleForwardingUpdateWithoutAgencyInput, JobRoleForwardingUncheckedUpdateWithoutAgencyInput>
+    create: XOR<JobRoleForwardingCreateWithoutAgencyInput, JobRoleForwardingUncheckedCreateWithoutAgencyInput>
+  }
+
+  export type JobRoleForwardingUpdateWithWhereUniqueWithoutAgencyInput = {
+    where: JobRoleForwardingWhereUniqueInput
+    data: XOR<JobRoleForwardingUpdateWithoutAgencyInput, JobRoleForwardingUncheckedUpdateWithoutAgencyInput>
+  }
+
+  export type JobRoleForwardingUpdateManyWithWhereWithoutAgencyInput = {
+    where: JobRoleForwardingScalarWhereInput
+    data: XOR<JobRoleForwardingUpdateManyMutationInput, JobRoleForwardingUncheckedUpdateManyWithoutAgencyInput>
+  }
+
+  export type JobRoleForwardingScalarWhereInput = {
+    AND?: JobRoleForwardingScalarWhereInput | JobRoleForwardingScalarWhereInput[]
+    OR?: JobRoleForwardingScalarWhereInput[]
+    NOT?: JobRoleForwardingScalarWhereInput | JobRoleForwardingScalarWhereInput[]
+    id?: StringFilter<"JobRoleForwarding"> | string
+    jobRoleId?: StringFilter<"JobRoleForwarding"> | string
+    agencyId?: StringFilter<"JobRoleForwarding"> | string
+    quantity?: IntFilter<"JobRoleForwarding"> | number
+    createdAt?: DateTimeFilter<"JobRoleForwarding"> | Date | string
   }
 
   export type UserCreateWithoutAdminProfileInput = {
@@ -25700,8 +27355,10 @@ export namespace Prisma {
     specialRequirements?: string | null
     agencyStatus?: $Enums.RequirementStatus
     adminStatus?: $Enums.RequirementStatus
+    needsMoreLabour?: boolean
     assignedAgency?: AgencyCreateNestedOneWithoutJobRoleInput
     LabourAssignment?: LabourAssignmentCreateNestedManyWithoutJobRoleInput
+    forwardings?: JobRoleForwardingCreateNestedManyWithoutJobRoleInput
   }
 
   export type JobRoleUncheckedCreateWithoutRequirementInput = {
@@ -25734,7 +27391,9 @@ export namespace Prisma {
     assignedAgencyId?: string | null
     agencyStatus?: $Enums.RequirementStatus
     adminStatus?: $Enums.RequirementStatus
+    needsMoreLabour?: boolean
     LabourAssignment?: LabourAssignmentUncheckedCreateNestedManyWithoutJobRoleInput
+    forwardings?: JobRoleForwardingUncheckedCreateNestedManyWithoutJobRoleInput
   }
 
   export type JobRoleCreateOrConnectWithoutRequirementInput = {
@@ -26008,6 +27667,7 @@ export namespace Prisma {
     user: UserCreateNestedOneWithoutAgencyProfileInput
     LabourProfile?: LabourProfileCreateNestedManyWithoutAgencyInput
     LabourAssignment?: LabourAssignmentCreateNestedManyWithoutAgencyInput
+    jobRoleForwardings?: JobRoleForwardingCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyUncheckedCreateWithoutJobRoleInput = {
@@ -26026,6 +27686,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     LabourProfile?: LabourProfileUncheckedCreateNestedManyWithoutAgencyInput
     LabourAssignment?: LabourAssignmentUncheckedCreateNestedManyWithoutAgencyInput
+    jobRoleForwardings?: JobRoleForwardingUncheckedCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyCreateOrConnectWithoutJobRoleInput = {
@@ -26068,6 +27729,30 @@ export namespace Prisma {
 
   export type LabourAssignmentCreateManyJobRoleInputEnvelope = {
     data: LabourAssignmentCreateManyJobRoleInput | LabourAssignmentCreateManyJobRoleInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type JobRoleForwardingCreateWithoutJobRoleInput = {
+    id?: string
+    quantity: number
+    createdAt?: Date | string
+    agency: AgencyCreateNestedOneWithoutJobRoleForwardingsInput
+  }
+
+  export type JobRoleForwardingUncheckedCreateWithoutJobRoleInput = {
+    id?: string
+    agencyId: string
+    quantity: number
+    createdAt?: Date | string
+  }
+
+  export type JobRoleForwardingCreateOrConnectWithoutJobRoleInput = {
+    where: JobRoleForwardingWhereUniqueInput
+    create: XOR<JobRoleForwardingCreateWithoutJobRoleInput, JobRoleForwardingUncheckedCreateWithoutJobRoleInput>
+  }
+
+  export type JobRoleForwardingCreateManyJobRoleInputEnvelope = {
+    data: JobRoleForwardingCreateManyJobRoleInput | JobRoleForwardingCreateManyJobRoleInput[]
     skipDuplicates?: boolean
   }
 
@@ -26129,6 +27814,7 @@ export namespace Prisma {
     user?: UserUpdateOneRequiredWithoutAgencyProfileNestedInput
     LabourProfile?: LabourProfileUpdateManyWithoutAgencyNestedInput
     LabourAssignment?: LabourAssignmentUpdateManyWithoutAgencyNestedInput
+    jobRoleForwardings?: JobRoleForwardingUpdateManyWithoutAgencyNestedInput
   }
 
   export type AgencyUncheckedUpdateWithoutJobRoleInput = {
@@ -26147,6 +27833,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     LabourProfile?: LabourProfileUncheckedUpdateManyWithoutAgencyNestedInput
     LabourAssignment?: LabourAssignmentUncheckedUpdateManyWithoutAgencyNestedInput
+    jobRoleForwardings?: JobRoleForwardingUncheckedUpdateManyWithoutAgencyNestedInput
   }
 
   export type LabourAssignmentUpsertWithWhereUniqueWithoutJobRoleInput = {
@@ -26163,6 +27850,22 @@ export namespace Prisma {
   export type LabourAssignmentUpdateManyWithWhereWithoutJobRoleInput = {
     where: LabourAssignmentScalarWhereInput
     data: XOR<LabourAssignmentUpdateManyMutationInput, LabourAssignmentUncheckedUpdateManyWithoutJobRoleInput>
+  }
+
+  export type JobRoleForwardingUpsertWithWhereUniqueWithoutJobRoleInput = {
+    where: JobRoleForwardingWhereUniqueInput
+    update: XOR<JobRoleForwardingUpdateWithoutJobRoleInput, JobRoleForwardingUncheckedUpdateWithoutJobRoleInput>
+    create: XOR<JobRoleForwardingCreateWithoutJobRoleInput, JobRoleForwardingUncheckedCreateWithoutJobRoleInput>
+  }
+
+  export type JobRoleForwardingUpdateWithWhereUniqueWithoutJobRoleInput = {
+    where: JobRoleForwardingWhereUniqueInput
+    data: XOR<JobRoleForwardingUpdateWithoutJobRoleInput, JobRoleForwardingUncheckedUpdateWithoutJobRoleInput>
+  }
+
+  export type JobRoleForwardingUpdateManyWithWhereWithoutJobRoleInput = {
+    where: JobRoleForwardingScalarWhereInput
+    data: XOR<JobRoleForwardingUpdateManyMutationInput, JobRoleForwardingUncheckedUpdateManyWithoutJobRoleInput>
   }
 
   export type RequirementCreateWithoutLabourProfileInput = {
@@ -26206,6 +27909,7 @@ export namespace Prisma {
     user: UserCreateNestedOneWithoutAgencyProfileInput
     JobRole?: JobRoleCreateNestedManyWithoutAssignedAgencyInput
     LabourAssignment?: LabourAssignmentCreateNestedManyWithoutAgencyInput
+    jobRoleForwardings?: JobRoleForwardingCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyUncheckedCreateWithoutLabourProfileInput = {
@@ -26224,6 +27928,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     JobRole?: JobRoleUncheckedCreateNestedManyWithoutAssignedAgencyInput
     LabourAssignment?: LabourAssignmentUncheckedCreateNestedManyWithoutAgencyInput
+    jobRoleForwardings?: JobRoleForwardingUncheckedCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyCreateOrConnectWithoutLabourProfileInput = {
@@ -26430,6 +28135,7 @@ export namespace Prisma {
     user?: UserUpdateOneRequiredWithoutAgencyProfileNestedInput
     JobRole?: JobRoleUpdateManyWithoutAssignedAgencyNestedInput
     LabourAssignment?: LabourAssignmentUpdateManyWithoutAgencyNestedInput
+    jobRoleForwardings?: JobRoleForwardingUpdateManyWithoutAgencyNestedInput
   }
 
   export type AgencyUncheckedUpdateWithoutLabourProfileInput = {
@@ -26448,6 +28154,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     JobRole?: JobRoleUncheckedUpdateManyWithoutAssignedAgencyNestedInput
     LabourAssignment?: LabourAssignmentUncheckedUpdateManyWithoutAgencyNestedInput
+    jobRoleForwardings?: JobRoleForwardingUncheckedUpdateManyWithoutAgencyNestedInput
   }
 
   export type LabourStageHistoryUpsertWithWhereUniqueWithoutLabourInput = {
@@ -26558,8 +28265,10 @@ export namespace Prisma {
     specialRequirements?: string | null
     agencyStatus?: $Enums.RequirementStatus
     adminStatus?: $Enums.RequirementStatus
+    needsMoreLabour?: boolean
     requirement: RequirementCreateNestedOneWithoutJobRolesInput
     assignedAgency?: AgencyCreateNestedOneWithoutJobRoleInput
+    forwardings?: JobRoleForwardingCreateNestedManyWithoutJobRoleInput
   }
 
   export type JobRoleUncheckedCreateWithoutLabourAssignmentInput = {
@@ -26593,6 +28302,8 @@ export namespace Prisma {
     assignedAgencyId?: string | null
     agencyStatus?: $Enums.RequirementStatus
     adminStatus?: $Enums.RequirementStatus
+    needsMoreLabour?: boolean
+    forwardings?: JobRoleForwardingUncheckedCreateNestedManyWithoutJobRoleInput
   }
 
   export type JobRoleCreateOrConnectWithoutLabourAssignmentInput = {
@@ -26616,6 +28327,7 @@ export namespace Prisma {
     user: UserCreateNestedOneWithoutAgencyProfileInput
     JobRole?: JobRoleCreateNestedManyWithoutAssignedAgencyInput
     LabourProfile?: LabourProfileCreateNestedManyWithoutAgencyInput
+    jobRoleForwardings?: JobRoleForwardingCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyUncheckedCreateWithoutLabourAssignmentInput = {
@@ -26634,6 +28346,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     JobRole?: JobRoleUncheckedCreateNestedManyWithoutAssignedAgencyInput
     LabourProfile?: LabourProfileUncheckedCreateNestedManyWithoutAgencyInput
+    jobRoleForwardings?: JobRoleForwardingUncheckedCreateNestedManyWithoutAgencyInput
   }
 
   export type AgencyCreateOrConnectWithoutLabourAssignmentInput = {
@@ -26764,8 +28477,10 @@ export namespace Prisma {
     specialRequirements?: NullableStringFieldUpdateOperationsInput | string | null
     agencyStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    needsMoreLabour?: BoolFieldUpdateOperationsInput | boolean
     requirement?: RequirementUpdateOneRequiredWithoutJobRolesNestedInput
     assignedAgency?: AgencyUpdateOneWithoutJobRoleNestedInput
+    forwardings?: JobRoleForwardingUpdateManyWithoutJobRoleNestedInput
   }
 
   export type JobRoleUncheckedUpdateWithoutLabourAssignmentInput = {
@@ -26799,6 +28514,8 @@ export namespace Prisma {
     assignedAgencyId?: NullableStringFieldUpdateOperationsInput | string | null
     agencyStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    needsMoreLabour?: BoolFieldUpdateOperationsInput | boolean
+    forwardings?: JobRoleForwardingUncheckedUpdateManyWithoutJobRoleNestedInput
   }
 
   export type AgencyUpsertWithoutLabourAssignmentInput = {
@@ -26828,6 +28545,7 @@ export namespace Prisma {
     user?: UserUpdateOneRequiredWithoutAgencyProfileNestedInput
     JobRole?: JobRoleUpdateManyWithoutAssignedAgencyNestedInput
     LabourProfile?: LabourProfileUpdateManyWithoutAgencyNestedInput
+    jobRoleForwardings?: JobRoleForwardingUpdateManyWithoutAgencyNestedInput
   }
 
   export type AgencyUncheckedUpdateWithoutLabourAssignmentInput = {
@@ -26846,6 +28564,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     JobRole?: JobRoleUncheckedUpdateManyWithoutAssignedAgencyNestedInput
     LabourProfile?: LabourProfileUncheckedUpdateManyWithoutAgencyNestedInput
+    jobRoleForwardings?: JobRoleForwardingUncheckedUpdateManyWithoutAgencyNestedInput
   }
 
   export type LabourProfileUpsertWithoutLabourAssignmentInput = {
@@ -27373,6 +29092,254 @@ export namespace Prisma {
     data: XOR<LabourProfileUpdateManyMutationInput, LabourProfileUncheckedUpdateManyWithoutAuditLogsInput>
   }
 
+  export type JobRoleCreateWithoutForwardingsInput = {
+    id?: string
+    title: string
+    quantity: number
+    nationality: string
+    startDate: Date | string
+    contractDuration?: $Enums.ContractDuration | null
+    salaryCurrency?: string | null
+    basicSalary: number
+    foodAllowance?: number | null
+    foodProvidedByCompany?: boolean
+    housingAllowance?: number | null
+    housingProvidedByCompany?: boolean
+    transportationAllowance?: number | null
+    transportationProvidedByCompany?: boolean
+    healthInsurance: string
+    mobileAllowance?: number | null
+    mobileProvidedByCompany?: boolean
+    natureOfWorkAllowance?: number | null
+    otherAllowance?: number | null
+    ticketFrequency: string
+    workLocations: string
+    previousExperience: string
+    totalExperienceYears?: number | null
+    preferredAge?: number | null
+    languageRequirements?: JobRoleCreatelanguageRequirementsInput | string[]
+    specialRequirements?: string | null
+    agencyStatus?: $Enums.RequirementStatus
+    adminStatus?: $Enums.RequirementStatus
+    needsMoreLabour?: boolean
+    requirement: RequirementCreateNestedOneWithoutJobRolesInput
+    assignedAgency?: AgencyCreateNestedOneWithoutJobRoleInput
+    LabourAssignment?: LabourAssignmentCreateNestedManyWithoutJobRoleInput
+  }
+
+  export type JobRoleUncheckedCreateWithoutForwardingsInput = {
+    id?: string
+    requirementId: string
+    title: string
+    quantity: number
+    nationality: string
+    startDate: Date | string
+    contractDuration?: $Enums.ContractDuration | null
+    salaryCurrency?: string | null
+    basicSalary: number
+    foodAllowance?: number | null
+    foodProvidedByCompany?: boolean
+    housingAllowance?: number | null
+    housingProvidedByCompany?: boolean
+    transportationAllowance?: number | null
+    transportationProvidedByCompany?: boolean
+    healthInsurance: string
+    mobileAllowance?: number | null
+    mobileProvidedByCompany?: boolean
+    natureOfWorkAllowance?: number | null
+    otherAllowance?: number | null
+    ticketFrequency: string
+    workLocations: string
+    previousExperience: string
+    totalExperienceYears?: number | null
+    preferredAge?: number | null
+    languageRequirements?: JobRoleCreatelanguageRequirementsInput | string[]
+    specialRequirements?: string | null
+    assignedAgencyId?: string | null
+    agencyStatus?: $Enums.RequirementStatus
+    adminStatus?: $Enums.RequirementStatus
+    needsMoreLabour?: boolean
+    LabourAssignment?: LabourAssignmentUncheckedCreateNestedManyWithoutJobRoleInput
+  }
+
+  export type JobRoleCreateOrConnectWithoutForwardingsInput = {
+    where: JobRoleWhereUniqueInput
+    create: XOR<JobRoleCreateWithoutForwardingsInput, JobRoleUncheckedCreateWithoutForwardingsInput>
+  }
+
+  export type AgencyCreateWithoutJobRoleForwardingsInput = {
+    id?: string
+    agencyName: string
+    registrationNo?: string | null
+    licenseNumber: string
+    licenseExpiry: Date | string
+    country: string
+    website?: string | null
+    address: string
+    city: string
+    postalCode?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutAgencyProfileInput
+    JobRole?: JobRoleCreateNestedManyWithoutAssignedAgencyInput
+    LabourProfile?: LabourProfileCreateNestedManyWithoutAgencyInput
+    LabourAssignment?: LabourAssignmentCreateNestedManyWithoutAgencyInput
+  }
+
+  export type AgencyUncheckedCreateWithoutJobRoleForwardingsInput = {
+    id?: string
+    userId: string
+    agencyName: string
+    registrationNo?: string | null
+    licenseNumber: string
+    licenseExpiry: Date | string
+    country: string
+    website?: string | null
+    address: string
+    city: string
+    postalCode?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    JobRole?: JobRoleUncheckedCreateNestedManyWithoutAssignedAgencyInput
+    LabourProfile?: LabourProfileUncheckedCreateNestedManyWithoutAgencyInput
+    LabourAssignment?: LabourAssignmentUncheckedCreateNestedManyWithoutAgencyInput
+  }
+
+  export type AgencyCreateOrConnectWithoutJobRoleForwardingsInput = {
+    where: AgencyWhereUniqueInput
+    create: XOR<AgencyCreateWithoutJobRoleForwardingsInput, AgencyUncheckedCreateWithoutJobRoleForwardingsInput>
+  }
+
+  export type JobRoleUpsertWithoutForwardingsInput = {
+    update: XOR<JobRoleUpdateWithoutForwardingsInput, JobRoleUncheckedUpdateWithoutForwardingsInput>
+    create: XOR<JobRoleCreateWithoutForwardingsInput, JobRoleUncheckedCreateWithoutForwardingsInput>
+    where?: JobRoleWhereInput
+  }
+
+  export type JobRoleUpdateToOneWithWhereWithoutForwardingsInput = {
+    where?: JobRoleWhereInput
+    data: XOR<JobRoleUpdateWithoutForwardingsInput, JobRoleUncheckedUpdateWithoutForwardingsInput>
+  }
+
+  export type JobRoleUpdateWithoutForwardingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    nationality?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
+    salaryCurrency?: NullableStringFieldUpdateOperationsInput | string | null
+    basicSalary?: FloatFieldUpdateOperationsInput | number
+    foodAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
+    foodProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
+    housingAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
+    housingProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
+    transportationAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
+    transportationProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
+    healthInsurance?: StringFieldUpdateOperationsInput | string
+    mobileAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
+    mobileProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
+    natureOfWorkAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
+    otherAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
+    ticketFrequency?: StringFieldUpdateOperationsInput | string
+    workLocations?: StringFieldUpdateOperationsInput | string
+    previousExperience?: StringFieldUpdateOperationsInput | string
+    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
+    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
+    languageRequirements?: JobRoleUpdatelanguageRequirementsInput | string[]
+    specialRequirements?: NullableStringFieldUpdateOperationsInput | string | null
+    agencyStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    adminStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    needsMoreLabour?: BoolFieldUpdateOperationsInput | boolean
+    requirement?: RequirementUpdateOneRequiredWithoutJobRolesNestedInput
+    assignedAgency?: AgencyUpdateOneWithoutJobRoleNestedInput
+    LabourAssignment?: LabourAssignmentUpdateManyWithoutJobRoleNestedInput
+  }
+
+  export type JobRoleUncheckedUpdateWithoutForwardingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    requirementId?: StringFieldUpdateOperationsInput | string
+    title?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    nationality?: StringFieldUpdateOperationsInput | string
+    startDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    contractDuration?: NullableEnumContractDurationFieldUpdateOperationsInput | $Enums.ContractDuration | null
+    salaryCurrency?: NullableStringFieldUpdateOperationsInput | string | null
+    basicSalary?: FloatFieldUpdateOperationsInput | number
+    foodAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
+    foodProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
+    housingAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
+    housingProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
+    transportationAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
+    transportationProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
+    healthInsurance?: StringFieldUpdateOperationsInput | string
+    mobileAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
+    mobileProvidedByCompany?: BoolFieldUpdateOperationsInput | boolean
+    natureOfWorkAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
+    otherAllowance?: NullableFloatFieldUpdateOperationsInput | number | null
+    ticketFrequency?: StringFieldUpdateOperationsInput | string
+    workLocations?: StringFieldUpdateOperationsInput | string
+    previousExperience?: StringFieldUpdateOperationsInput | string
+    totalExperienceYears?: NullableIntFieldUpdateOperationsInput | number | null
+    preferredAge?: NullableIntFieldUpdateOperationsInput | number | null
+    languageRequirements?: JobRoleUpdatelanguageRequirementsInput | string[]
+    specialRequirements?: NullableStringFieldUpdateOperationsInput | string | null
+    assignedAgencyId?: NullableStringFieldUpdateOperationsInput | string | null
+    agencyStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    adminStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    needsMoreLabour?: BoolFieldUpdateOperationsInput | boolean
+    LabourAssignment?: LabourAssignmentUncheckedUpdateManyWithoutJobRoleNestedInput
+  }
+
+  export type AgencyUpsertWithoutJobRoleForwardingsInput = {
+    update: XOR<AgencyUpdateWithoutJobRoleForwardingsInput, AgencyUncheckedUpdateWithoutJobRoleForwardingsInput>
+    create: XOR<AgencyCreateWithoutJobRoleForwardingsInput, AgencyUncheckedCreateWithoutJobRoleForwardingsInput>
+    where?: AgencyWhereInput
+  }
+
+  export type AgencyUpdateToOneWithWhereWithoutJobRoleForwardingsInput = {
+    where?: AgencyWhereInput
+    data: XOR<AgencyUpdateWithoutJobRoleForwardingsInput, AgencyUncheckedUpdateWithoutJobRoleForwardingsInput>
+  }
+
+  export type AgencyUpdateWithoutJobRoleForwardingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    agencyName?: StringFieldUpdateOperationsInput | string
+    registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
+    licenseNumber?: StringFieldUpdateOperationsInput | string
+    licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
+    country?: StringFieldUpdateOperationsInput | string
+    website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutAgencyProfileNestedInput
+    JobRole?: JobRoleUpdateManyWithoutAssignedAgencyNestedInput
+    LabourProfile?: LabourProfileUpdateManyWithoutAgencyNestedInput
+    LabourAssignment?: LabourAssignmentUpdateManyWithoutAgencyNestedInput
+  }
+
+  export type AgencyUncheckedUpdateWithoutJobRoleForwardingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
+    agencyName?: StringFieldUpdateOperationsInput | string
+    registrationNo?: NullableStringFieldUpdateOperationsInput | string | null
+    licenseNumber?: StringFieldUpdateOperationsInput | string
+    licenseExpiry?: DateTimeFieldUpdateOperationsInput | Date | string
+    country?: StringFieldUpdateOperationsInput | string
+    website?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: StringFieldUpdateOperationsInput | string
+    city?: StringFieldUpdateOperationsInput | string
+    postalCode?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    JobRole?: JobRoleUncheckedUpdateManyWithoutAssignedAgencyNestedInput
+    LabourProfile?: LabourProfileUncheckedUpdateManyWithoutAgencyNestedInput
+    LabourAssignment?: LabourAssignmentUncheckedUpdateManyWithoutAgencyNestedInput
+  }
+
   export type UserCreateManyCreatedByInput = {
     id?: string
     name: string
@@ -27641,6 +29608,7 @@ export namespace Prisma {
     specialRequirements?: string | null
     agencyStatus?: $Enums.RequirementStatus
     adminStatus?: $Enums.RequirementStatus
+    needsMoreLabour?: boolean
   }
 
   export type LabourProfileCreateManyAgencyInput = {
@@ -27692,6 +29660,13 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type JobRoleForwardingCreateManyAgencyInput = {
+    id?: string
+    jobRoleId: string
+    quantity: number
+    createdAt?: Date | string
+  }
+
   export type JobRoleUpdateWithoutAssignedAgencyInput = {
     id?: StringFieldUpdateOperationsInput | string
     title?: StringFieldUpdateOperationsInput | string
@@ -27721,8 +29696,10 @@ export namespace Prisma {
     specialRequirements?: NullableStringFieldUpdateOperationsInput | string | null
     agencyStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    needsMoreLabour?: BoolFieldUpdateOperationsInput | boolean
     requirement?: RequirementUpdateOneRequiredWithoutJobRolesNestedInput
     LabourAssignment?: LabourAssignmentUpdateManyWithoutJobRoleNestedInput
+    forwardings?: JobRoleForwardingUpdateManyWithoutJobRoleNestedInput
   }
 
   export type JobRoleUncheckedUpdateWithoutAssignedAgencyInput = {
@@ -27755,7 +29732,9 @@ export namespace Prisma {
     specialRequirements?: NullableStringFieldUpdateOperationsInput | string | null
     agencyStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    needsMoreLabour?: BoolFieldUpdateOperationsInput | boolean
     LabourAssignment?: LabourAssignmentUncheckedUpdateManyWithoutJobRoleNestedInput
+    forwardings?: JobRoleForwardingUncheckedUpdateManyWithoutJobRoleNestedInput
   }
 
   export type JobRoleUncheckedUpdateManyWithoutAssignedAgencyInput = {
@@ -27788,6 +29767,7 @@ export namespace Prisma {
     specialRequirements?: NullableStringFieldUpdateOperationsInput | string | null
     agencyStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    needsMoreLabour?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type LabourProfileUpdateWithoutAgencyInput = {
@@ -27945,6 +29925,27 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type JobRoleForwardingUpdateWithoutAgencyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    jobRole?: JobRoleUpdateOneRequiredWithoutForwardingsNestedInput
+  }
+
+  export type JobRoleForwardingUncheckedUpdateWithoutAgencyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobRoleId?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type JobRoleForwardingUncheckedUpdateManyWithoutAgencyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    jobRoleId?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type DocumentCreateManyRequirementInput = {
     id?: string
     ownerId: string
@@ -28019,6 +30020,7 @@ export namespace Prisma {
     assignedAgencyId?: string | null
     agencyStatus?: $Enums.RequirementStatus
     adminStatus?: $Enums.RequirementStatus
+    needsMoreLabour?: boolean
   }
 
   export type LabourProfileCreateManyRequirementInput = {
@@ -28085,8 +30087,10 @@ export namespace Prisma {
     specialRequirements?: NullableStringFieldUpdateOperationsInput | string | null
     agencyStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    needsMoreLabour?: BoolFieldUpdateOperationsInput | boolean
     assignedAgency?: AgencyUpdateOneWithoutJobRoleNestedInput
     LabourAssignment?: LabourAssignmentUpdateManyWithoutJobRoleNestedInput
+    forwardings?: JobRoleForwardingUpdateManyWithoutJobRoleNestedInput
   }
 
   export type JobRoleUncheckedUpdateWithoutRequirementInput = {
@@ -28119,7 +30123,9 @@ export namespace Prisma {
     assignedAgencyId?: NullableStringFieldUpdateOperationsInput | string | null
     agencyStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    needsMoreLabour?: BoolFieldUpdateOperationsInput | boolean
     LabourAssignment?: LabourAssignmentUncheckedUpdateManyWithoutJobRoleNestedInput
+    forwardings?: JobRoleForwardingUncheckedUpdateManyWithoutJobRoleNestedInput
   }
 
   export type JobRoleUncheckedUpdateManyWithoutRequirementInput = {
@@ -28152,6 +30158,7 @@ export namespace Prisma {
     assignedAgencyId?: NullableStringFieldUpdateOperationsInput | string | null
     agencyStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
+    needsMoreLabour?: BoolFieldUpdateOperationsInput | boolean
   }
 
   export type AuditLogUpdateWithoutRequirementInput = {
@@ -28331,6 +30338,13 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type JobRoleForwardingCreateManyJobRoleInput = {
+    id?: string
+    agencyId: string
+    quantity: number
+    createdAt?: Date | string
+  }
+
   export type LabourAssignmentUpdateWithoutJobRoleInput = {
     id?: StringFieldUpdateOperationsInput | string
     isBackup?: BoolFieldUpdateOperationsInput | boolean
@@ -28371,6 +30385,27 @@ export namespace Prisma {
     clientFeedback?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type JobRoleForwardingUpdateWithoutJobRoleInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    agency?: AgencyUpdateOneRequiredWithoutJobRoleForwardingsNestedInput
+  }
+
+  export type JobRoleForwardingUncheckedUpdateWithoutJobRoleInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    agencyId?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type JobRoleForwardingUncheckedUpdateManyWithoutJobRoleInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    agencyId?: StringFieldUpdateOperationsInput | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type LabourStageHistoryCreateManyLabourInput = {

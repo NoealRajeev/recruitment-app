@@ -48,6 +48,7 @@ export async function GET() {
                   { clientStatus: "SUBMITTED" },
                   { clientStatus: "PENDING" },
                 ],
+                isBackup: false,
               },
               include: {
                 labour: true,
@@ -67,6 +68,29 @@ export async function GET() {
       orderBy: {
         createdAt: "desc",
       },
+    });
+
+    // Debug logging
+    console.log("Client requirements query result:", {
+      clientId: client.id,
+      requirementsCount: requirements.length,
+      requirements: requirements.map((req) => ({
+        id: req.id,
+        status: req.status,
+        jobRolesCount: req.jobRoles.length,
+        jobRoles: req.jobRoles.map((jr) => ({
+          id: jr.id,
+          title: jr.title,
+          assignmentsCount: jr.LabourAssignment.length,
+          assignments: jr.LabourAssignment.map((a) => ({
+            id: a.id,
+            adminStatus: a.adminStatus,
+            clientStatus: a.clientStatus,
+            isBackup: a.isBackup,
+            labourName: a.labour.name,
+          })),
+        })),
+      })),
     });
 
     // Format the response to include company name and count of pending assignments

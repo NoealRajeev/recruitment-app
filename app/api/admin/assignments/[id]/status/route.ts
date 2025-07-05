@@ -27,6 +27,13 @@ export async function PUT(
       );
     }
 
+    if (status === "REJECTED" && (!feedback || feedback.trim() === "")) {
+      return NextResponse.json(
+        { error: "Feedback is required for rejection" },
+        { status: 400 }
+      );
+    }
+
     // 3. Get current assignment data for audit log
     const currentAssignment = await prisma.labourAssignment.findUnique({
       where: { id: params.id },
@@ -63,6 +70,7 @@ export async function PUT(
           adminFeedback: status === "ACCEPTED" ? null : feedback,
           ...(status === "ACCEPTED" && {
             clientStatus: RequirementStatus.CLIENT_REVIEW,
+            agencyStatus: "ACCEPTED", // Set agency status to ACCEPTED
           }),
           ...(status === "REJECTED" && {
             clientStatus: "PENDING",
@@ -78,60 +86,78 @@ export async function PUT(
         },
       });
 
-      // Get all assignments for this job role
-      const jobRoleAssignments = await tx.labourAssignment.findMany({
+      // Get all assignments for this job role, sorted by createdAt
+      let jobRoleAssignments = await tx.labourAssignment.findMany({
+        where: { jobRoleId: assignment.jobRoleId },
+        orderBy: { createdAt: "asc" },
+      });
+
+      // Count how many should be primary (client requested quantity)
+      const primaryCount = assignment.jobRole.quantity;
+      // Get all accepted assignments
+      const acceptedAssignments = jobRoleAssignments.filter(
+        (a) => a.adminStatus === "ACCEPTED"
+      );
+      // Get all backup assignments (accepted but not primary)
+      const backupAssignments = acceptedAssignments.slice(primaryCount);
+
+      // Update all accepted assignments: first N as primary, rest as backup
+      for (let i = 0; i < acceptedAssignments.length; i++) {
+        const isPrimary = i < primaryCount;
+        await tx.labourAssignment.update({
+          where: { id: acceptedAssignments[i].id },
+          data: {
+            isBackup: !isPrimary,
+            clientStatus: isPrimary ? "SUBMITTED" : "PENDING",
+          },
+        });
+      }
+
+      // Handle labour profile status updates based on admin decision
+      if (status === "REJECTED") {
+        // Update labour profile status to rejected
+        await tx.labourProfile.update({
+          where: { id: assignment.labourId },
+          data: {
+            requirementId: null,
+            status: "REJECTED",
+          },
+        });
+
+        // If the rejected assignment was primary, promote a backup
+        if (!assignment.isBackup) {
+          // Find the oldest backup (if any)
+          const oldestBackup = backupAssignments[0];
+          if (oldestBackup) {
+            await tx.labourAssignment.update({
+              where: { id: oldestBackup.id },
+              data: {
+                isBackup: false,
+                clientStatus: "SUBMITTED",
+              },
+            });
+          }
+        }
+      } else if (status === "ACCEPTED") {
+        // Ensure accepted labour profile is SHORTLISTED
+        await tx.labourProfile.update({
+          where: { id: assignment.labourId },
+          data: {
+            status: "SHORTLISTED",
+            requirementId: assignment.jobRole.requirement.id,
+          },
+        });
+      }
+
+      // Refresh assignments after possible promotion
+      jobRoleAssignments = await tx.labourAssignment.findMany({
         where: { jobRoleId: assignment.jobRoleId },
       });
 
-      // Count accepted assignments
-      const acceptedCount = jobRoleAssignments.filter(
-        (a) => a.adminStatus === "ACCEPTED"
-      ).length;
-
-      // If we have more accepted assignments than needed, mark extras as backup
-      if (acceptedCount > assignment.jobRole.quantity) {
-        // Sort assignments by creation date (oldest first)
-        const sortedAssignments = [...jobRoleAssignments]
-          .filter((a) => a.adminStatus === "ACCEPTED")
-          .sort(
-            (a, b) =>
-              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
-
-        // Mark extras as backup (not submitted to client)
-        for (
-          let i = assignment.jobRole.quantity;
-          i < sortedAssignments.length;
-          i++
-        ) {
-          await tx.labourAssignment.update({
-            where: { id: sortedAssignments[i].id },
-            data: {
-              clientStatus: "PENDING", // Not submitted to client
-              isBackup: true, // Add this field to your Prisma model
-            },
-          });
-        }
-
-        // Ensure exactly the required quantity is submitted to client
-        for (
-          let i = 0;
-          i < Math.min(assignment.jobRole.quantity, sortedAssignments.length);
-          i++
-        ) {
-          await tx.labourAssignment.update({
-            where: { id: sortedAssignments[i].id },
-            data: {
-              clientStatus: "SUBMITTED",
-              isBackup: false,
-            },
-          });
-        }
-      }
-
-      const allAccepted = jobRoleAssignments.every(
-        (a) => a.adminStatus === "ACCEPTED"
-      );
+      const allAccepted =
+        jobRoleAssignments.filter(
+          (a) => a.adminStatus === "ACCEPTED" && !a.isBackup
+        ).length === primaryCount;
       const anyRejected = jobRoleAssignments.some(
         (a) => a.adminStatus === "REJECTED"
       );
@@ -153,15 +179,33 @@ export async function PUT(
         });
       }
 
-      // Update requirement status to CLIENT_REVIEW if all assignments are accepted
+      // Update requirement status to CLIENT_REVIEW if all primary slots are filled
       if (status === "ACCEPTED" && allAccepted) {
+        console.log(
+          `Updating requirement ${assignment.jobRole.requirement.id} status to CLIENT_REVIEW`
+        );
         await tx.requirement.update({
           where: { id: assignment.jobRole.requirement.id },
           data: {
             status: "CLIENT_REVIEW",
           },
         });
+      } else {
+        console.log(
+          `Requirement ${assignment.jobRole.requirement.id} not ready for CLIENT_REVIEW. Status: ${status}, allAccepted: ${allAccepted}`
+        );
       }
+
+      // Always recalculate needsMoreLabour after assignment update
+      const acceptedPrimaries = jobRoleAssignments.filter(
+        (a) => a.adminStatus === "ACCEPTED" && !a.isBackup
+      ).length;
+      await tx.jobRole.update({
+        where: { id: assignment.jobRoleId },
+        data: {
+          needsMoreLabour: acceptedPrimaries < assignment.jobRole.quantity,
+        },
+      });
 
       // Create audit log
       await tx.auditLog.create({

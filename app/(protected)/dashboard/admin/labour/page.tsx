@@ -48,6 +48,7 @@ interface JobRoleWithAssignments {
     adminFeedback?: string;
     clientFeedback?: string;
   }>;
+  needsMoreLabour: boolean;
 }
 
 interface AgencyWithAssignments extends Agency {
@@ -108,8 +109,8 @@ export default function LabourAssignmentReview() {
         setAssignments(data);
 
         // Update the agencies state to include the assignments
-        setAgencies((prev) =>
-          prev.map((agency) =>
+        setAgencies((prev: AgencyWithAssignments[]) =>
+          prev.map((agency: AgencyWithAssignments) =>
             agency.id === agencyId ? { ...agency, JobRole: data } : agency
           )
         );
@@ -470,6 +471,18 @@ export default function LabourAssignmentReview() {
                 </p>
               </div>
             )}
+
+          {assignment.clientStatus === "REJECTED" &&
+            assignment.clientFeedback && (
+              <div className="mt-2 p-2 bg-red-50 rounded">
+                <p className="text-xs font-medium text-red-700">
+                  Client Rejection Reason:
+                </p>
+                <p className="text-xs text-red-600">
+                  {assignment.clientFeedback}
+                </p>
+              </div>
+            )}
         </div>
 
         <div className="p-4 border-t border-gray-200">
@@ -716,7 +729,10 @@ export default function LabourAssignmentReview() {
                               <div>
                                 <h3 className="font-medium">{jobRole.title}</h3>
                                 <p className="text-sm text-gray-500 mt-1">
-                                  For: {jobRole.requirement.client.companyName}
+                                  For:{" "}
+                                  {jobRole.requirement.id
+                                    .slice(0, 8)
+                                    .toUpperCase()}
                                 </p>
                               </div>
                               <Badge

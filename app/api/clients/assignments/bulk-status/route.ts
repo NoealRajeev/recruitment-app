@@ -91,6 +91,9 @@ export async function PUT(request: Request) {
               agencyStatus: "ACCEPTED",
               adminStatus: "ACCEPTED",
             }),
+            ...(status === "REJECTED" && {
+              adminStatus: "REJECTED",
+            }),
             clientFeedback: status === "ACCEPTED" ? null : feedback,
             updatedAt: new Date(),
           },
@@ -102,6 +105,21 @@ export async function PUT(request: Request) {
       );
 
       const updatedAssignments = await Promise.all(updatePromises);
+
+      // Update rejected labour profiles status
+      if (status === "REJECTED") {
+        await Promise.all(
+          updatedAssignments.map((assignment) =>
+            tx.labourProfile.update({
+              where: { id: assignment.labourId },
+              data: {
+                requirementId: null,
+                status: "REJECTED",
+              },
+            })
+          )
+        );
+      }
 
       // 3. Group assignments by job role for processing
       const assignmentsByJobRole = updatedAssignments.reduce(
@@ -138,13 +156,56 @@ export async function PUT(request: Request) {
           );
         }
 
-        // Get current counts for the job role
+        // If client REJECTED primaries, promote backups if available
+        if (status === "REJECTED") {
+          // Find all rejected primaries for this job role
+          const rejectedPrimaries = assignments.filter(
+            (a) => a.isBackup === false
+          );
+
+          // For each rejected primary, try to promote a backup
+          for (let i = 0; i < rejectedPrimaries.length; i++) {
+            // Find the oldest backup for this job role
+            const backups = await tx.labourAssignment.findMany({
+              where: {
+                jobRoleId: jobRoleId,
+                isBackup: true,
+              },
+              orderBy: { createdAt: "asc" },
+            });
+
+            const oldestBackup = backups[0];
+            if (oldestBackup) {
+              await tx.labourAssignment.update({
+                where: { id: oldestBackup.id },
+                data: {
+                  isBackup: false,
+                  clientStatus: "SUBMITTED",
+                },
+              });
+            }
+          }
+        }
+
+        // Get current counts for the job role after backup promotion
         const jobRoleAssignments = await tx.labourAssignment.findMany({
           where: { jobRoleId },
         });
 
+        // Calculate needsMoreLabour exactly like admin rejection logic
+        const acceptedPrimaries = jobRoleAssignments.filter(
+          (a) => a.clientStatus === "ACCEPTED" && !a.isBackup
+        ).length;
+        await tx.jobRole.update({
+          where: { id: jobRoleId },
+          data: {
+            needsMoreLabour: acceptedPrimaries < jobRole.quantity,
+          },
+        });
+
+        // Calculate accepted count for requirement completion check
         const acceptedCount = jobRoleAssignments.filter(
-          (a) => a.clientStatus === "ACCEPTED"
+          (a) => a.clientStatus === "ACCEPTED" && !a.isBackup
         ).length;
 
         // If requirement is fully completed (all needed assignments accepted)
@@ -166,6 +227,19 @@ export async function PUT(request: Request) {
               })
             )
           );
+
+          // Update unselected labour profiles back to APPROVED
+          await tx.labourProfile.updateMany({
+            where: {
+              id: {
+                in: unselectedAssignments.map((a) => a.labourId),
+              },
+            },
+            data: {
+              status: "APPROVED",
+              requirementId: null,
+            },
+          });
 
           // Update all backup labour profiles for this job role
           await tx.labourProfile.updateMany({

@@ -50,32 +50,46 @@ export async function GET(request: Request) {
     const skill = searchParams.get("skill");
     const jobRole = searchParams.get("jobRole");
     const requirementId = searchParams.get("requirementId");
+    const age = searchParams.get("age");
+    const experience = searchParams.get("experience");
+    const languages = searchParams.get("languages"); // comma-separated
+
+    // Age tolerance filter
+    let ageFilter: { gte?: number; lte?: number } = {};
+    if (age) {
+      const ageNum = parseInt(age);
+      if (!isNaN(ageNum)) {
+        ageFilter = { gte: ageNum - 5, lte: ageNum + 5 };
+      }
+    }
+
+    // Languages filter (must include all specified)
+    let languagesArray: string[] = [];
+    if (languages) {
+      languagesArray = languages
+        .split(",")
+        .map((l) => l.trim())
+        .filter(Boolean);
+    }
 
     const labourProfiles = await prisma.labourProfile.findMany({
       where: {
         agencyId: agency.id,
-        ...(status
-          ? { status }
-          : {
-              NOT: [
-                { status: LabourProfileStatus.DEPLOYED },
-                { status: LabourProfileStatus.REJECTED },
-                { status: LabourProfileStatus.SHORTLISTED },
-                { verificationStatus: DocumentVerificationStatus.PENDING },
-                { verificationStatus: DocumentVerificationStatus.REJECTED },
-              ],
-            }),
-        ...(verificationStatus ? { verificationStatus } : {}),
+        status: status || LabourProfileStatus.APPROVED,
+        verificationStatus:
+          verificationStatus || DocumentVerificationStatus.VERIFIED,
         ...(nationality ? { nationality } : {}),
         ...(skill ? { skills: { has: skill } } : {}),
         ...(jobRole ? { jobRole } : {}),
         ...(requirementId
           ? {
-              OR: [
-                { requirementId: null }, // Not assigned to any requirement
-                { requirementId: requirementId }, // Or already assigned to this requirement
-              ],
+              OR: [{ requirementId: null }, { requirementId: requirementId }],
             }
+          : {}),
+        ...(age ? { age: ageFilter } : {}),
+        ...(experience ? { experience: { contains: experience } } : {}),
+        ...(languagesArray.length > 0
+          ? { languages: { hasEvery: languagesArray } }
           : {}),
       },
       include: {

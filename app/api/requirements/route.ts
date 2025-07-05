@@ -17,15 +17,19 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get("status") as RequirementStatus | null;
+    const statusParam = searchParams.get("status");
     const ADclientId = searchParams.get("clientId");
     const showAssigned = searchParams.get("showAssigned") === "true";
+
+    // Handle multiple status values
+    const statuses = statusParam
+      ? (statusParam.split(",").map((s) => s.trim()) as RequirementStatus[])
+      : null;
 
     let requirements;
     let client = null;
 
     if (session.user.role === "CLIENT_ADMIN") {
-      // First, get the client record for this user
       client = await prisma.client.findUnique({
         where: { userId: session.user.id },
       });
@@ -38,23 +42,25 @@ export async function GET(request: Request) {
       }
     }
 
-    // Validate status if provided
-    if (status && !Object.values(RequirementStatus).includes(status)) {
-      return NextResponse.json(
-        { error: "Invalid status parameter" },
-        { status: 400 }
-      );
-    }
-
     if (session.user.role === "CLIENT_ADMIN") {
-      // Client admin can see their own requirements
       requirements = await prisma.requirement.findMany({
         where: {
           clientId: client!.id,
-          ...(status ? { status } : {}),
+          ...(statuses ? { status: { in: statuses } } : {}),
+          jobRoles: {
+            none: {
+              agencyStatus: "AGENCY_REJECTED",
+            },
+          },
         },
         include: {
-          jobRoles: true,
+          jobRoles: {
+            where: {
+              agencyStatus: {
+                not: "AGENCY_REJECTED",
+              },
+            },
+          },
           client: {
             select: {
               companyName: true,
@@ -66,11 +72,19 @@ export async function GET(request: Request) {
         },
       });
     } else if (session.user.role === "RECRUITMENT_ADMIN") {
-      // Admin can see all requirements
       requirements = await prisma.requirement.findMany({
         where: {
           ...(ADclientId ? { clientId: ADclientId } : {}),
-          ...(status ? { status } : {}),
+          ...(statuses ? { status: { in: statuses } } : {}),
+          jobRoles: {
+            some: {
+              OR: [
+                { assignedAgencyId: null },
+                { agencyStatus: "REJECTED" },
+                { agencyStatus: "AGENCY_REJECTED" },
+              ],
+            },
+          },
         },
         include: {
           jobRoles: {
@@ -94,13 +108,12 @@ export async function GET(request: Request) {
         },
       });
     } else if (session.user.role === "RECRUITMENT_AGENCY") {
-      // Agency can see requirements assigned to them
       requirements = await prisma.requirement.findMany({
         where: {
           jobRoles: {
             some: {
               assignedAgencyId: session.user.id,
-              ...(status ? { agencyStatus: status } : {}),
+              ...(statuses ? { agencyStatus: { in: statuses } } : {}),
             },
           },
         },

@@ -81,6 +81,24 @@ export async function POST(request: Request) {
             throw new Error(`Agency ${role.agencyId} not found`);
           }
 
+          // Upsert JobRoleForwarding record
+          await tx.jobRoleForwarding.upsert({
+            where: {
+              jobRoleId_agencyId: {
+                jobRoleId: role.jobRoleId,
+                agencyId: role.agencyId,
+              },
+            },
+            update: {
+              quantity: role.quantity,
+            },
+            create: {
+              jobRoleId: role.jobRoleId,
+              agencyId: role.agencyId,
+              quantity: role.quantity,
+            },
+          });
+
           return tx.jobRole.update({
             where: { id: role.jobRoleId },
             data: {

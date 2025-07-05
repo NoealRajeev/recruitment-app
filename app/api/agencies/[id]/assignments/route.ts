@@ -48,7 +48,13 @@ export async function GET(
       },
     });
 
-    return NextResponse.json(jobRoles);
+    // Add needsMoreLabour to each jobRole if not already present
+    const jobRolesWithNeedsMore = jobRoles.map((role) => ({
+      ...role,
+      needsMoreLabour: role.needsMoreLabour ?? false,
+    }));
+
+    return NextResponse.json(jobRolesWithNeedsMore);
   } catch (error) {
     console.error("Error fetching agency assignments:", error);
     return NextResponse.json(

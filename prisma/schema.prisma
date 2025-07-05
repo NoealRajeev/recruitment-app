@@ -151,17 +151,19 @@ enum LabourStage {
 
 enum RequirementStatus {
   DRAFT
-  SUBMITTED       // created by client, awaiting admin review
+  SUBMITTED
   PARTIALLY_SUBMITTED
   PENDING
-  UNDER_REVIEW    // admin is reviewing/edits in progress
-  FORWARDED       // admin has forwarded to agency
-  ACCEPTED        // agency accepted the role
-  REJECTED        // agency or admin rejected
-  COMPLETED       // filled/deployed
-  CLIENT_REVIEW   // added for client review stage
-  SUBMITTED_TO_CLIENT // added for tracking submission to client
+  UNDER_REVIEW
+  FORWARDED
+  ACCEPTED
+  PARTIALLY_ACCEPTED
+  REJECTED
+  COMPLETED
+  CLIENT_REVIEW
+  SUBMITTED_TO_CLIENT
   NEEDS_REVISION
+  AGENCY_REJECTED
 }
 
   enum ContractDuration {
@@ -278,6 +280,7 @@ enum RequirementStatus {
     JobRole JobRole[]
     LabourProfile LabourProfile[]
       LabourAssignment LabourAssignment[]
+    jobRoleForwardings JobRoleForwarding[]
 }
 
   model Admin {
@@ -345,7 +348,7 @@ enum RequirementStatus {
     LabourProfile LabourProfile[]
   }
 
-  /// A single row in the “table” of roles for one requirement
+  /// A single row in the "table" of roles for one requirement
   model JobRole {
     id                     String            @id @default(uuid())
     requirementId          String
@@ -383,11 +386,13 @@ enum RequirementStatus {
     /// Which agency (if any) this role has been forwarded to
     assignedAgencyId       String?           
     assignedAgency         Agency?           @relation(fields: [assignedAgencyId], references: [id])
-    /// If forwarded, track agency’s response status
+    /// If forwarded, track agency's response status
     agencyStatus           RequirementStatus @default(UNDER_REVIEW)
     adminStatus            RequirementStatus @default(PENDING)
   
     LabourAssignment LabourAssignment[]
+    needsMoreLabour        Boolean           @default(false)
+    forwardings JobRoleForwarding[]
 }
 
 model LabourProfile {
@@ -517,4 +522,16 @@ model LabourStageHistory {
     @@map("audit_logs")
     Requirement Requirement[] @relation("RequirementAudit")
     LabourProfile LabourProfile[]
+  }
+
+model JobRoleForwarding {
+  id        String   @id @default(uuid())
+  jobRoleId String
+  agencyId  String
+  quantity  Int
+  jobRole   JobRole  @relation(fields: [jobRoleId], references: [id])
+  agency    Agency   @relation(fields: [agencyId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@unique([jobRoleId, agencyId])
   }

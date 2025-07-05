@@ -7,7 +7,7 @@ import { AuditAction, LabourProfileStatus } from "@/lib/generated/prisma";
 export async function POST(
   request: Request,
   { params }: { params: { id: string } }
-) {
+): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== "RECRUITMENT_AGENCY") {
@@ -35,7 +35,6 @@ export async function POST(
       where: {
         id: jobRoleId,
         assignedAgencyId: agency.id,
-        agencyStatus: "FORWARDED", // Only allow assignments for forwarded roles
       },
       include: {
         requirement: true,
@@ -78,19 +77,44 @@ export async function POST(
       );
     }
 
-    // Check if we're exceeding the required quantity
-    const existingAssignmentsCount = jobRole.LabourAssignment.length;
-    const remainingSlots = jobRole.quantity - existingAssignmentsCount;
+    // Fetch the JobRoleForwarding record for this agency/jobRole
+    const forwarding = await prisma.jobRoleForwarding.findUnique({
+      where: {
+        jobRoleId_agencyId: {
+          jobRoleId,
+          agencyId: agency.id,
+        },
+      },
+    });
+    if (!forwarding) {
+      return NextResponse.json(
+        { error: "No forwarding record found for this agency and job role" },
+        { status: 400 }
+      );
+    }
 
-    if (profileIds.length > remainingSlots) {
+    // Only count assignments that are not rejected by admin or client
+    const nonRejectedAssignments = jobRole.LabourAssignment.filter(
+      (a) => a.adminStatus !== "REJECTED" && a.clientStatus !== "REJECTED"
+    );
+    const rejectedAssignments = jobRole.LabourAssignment.filter(
+      (a) => a.adminStatus === "REJECTED" || a.clientStatus === "REJECTED"
+    );
+    const existingAssignmentsCount = nonRejectedAssignments.length;
+    const remainingSlots = forwarding.quantity - existingAssignmentsCount;
+
+    if (
+      profileIds.length > remainingSlots ||
+      existingAssignmentsCount + profileIds.length > forwarding.quantity
+    ) {
       return NextResponse.json(
         {
-          error: "Exceeds available slots",
+          error: "Exceeds available slots for this agency",
           details: {
             current: existingAssignmentsCount,
             adding: profileIds.length,
             remaining: remainingSlots,
-            max: jobRole.quantity,
+            max: forwarding.quantity,
           },
         },
         { status: 400 }
@@ -131,18 +155,41 @@ export async function POST(
         )
       );
 
+      // Reset rejected labour profiles so they can be assigned elsewhere
+      await Promise.all(
+        rejectedAssignments.map((assignment) =>
+          tx.labourProfile.update({
+            where: { id: assignment.labourId },
+            data: {
+              status: "APPROVED",
+              requirementId: null,
+            },
+          })
+        )
+      );
+
+      // Delete rejected LabourAssignment records for this job role
+      await Promise.all(
+        rejectedAssignments.map((assignment) =>
+          tx.labourAssignment.delete({
+            where: { id: assignment.id },
+          })
+        )
+      );
+
       // Calculate new assignment status
       const totalAssignments = existingAssignmentsCount + profileIds.length;
-      const isFullyAssigned = totalAssignments >= jobRole.quantity;
+      const isFullyAssigned = totalAssignments >= forwarding.quantity;
       const newAgencyStatus = isFullyAssigned
         ? "SUBMITTED"
         : "PARTIALLY_SUBMITTED";
 
-      // Update job role status
+      // Update job role status and needsMoreLabour
       const updatedJobRole = await tx.jobRole.update({
         where: { id: jobRoleId },
         data: {
           agencyStatus: newAgencyStatus,
+          needsMoreLabour: totalAssignments < forwarding.quantity,
         },
         include: {
           requirement: true,
@@ -199,6 +246,7 @@ export async function POST(
       return {
         jobRole: updatedJobRole,
         assignments: newAssignments,
+        rejectedAssignments,
       };
     });
 
@@ -207,6 +255,55 @@ export async function POST(
     console.error("Error assigning profiles:", error);
     return NextResponse.json(
       { error: "Failed to assign profiles" },
+      { status: 500 }
+    );
+  }
+}
+
+// GET /api/requirements/[id]/assign - Get all assignments for a job role (including rejected)
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user || session.user.role !== "RECRUITMENT_AGENCY") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { id: jobRoleId } = params;
+
+    // Verify the agency exists
+    const agency = await prisma.agency.findUnique({
+      where: { userId: session.user.id },
+      select: { id: true },
+    });
+    if (!agency) {
+      return NextResponse.json(
+        { error: "Agency profile not found" },
+        { status: 404 }
+      );
+    }
+
+    // Fetch all assignments for this job role and agency
+    const assignments = await prisma.labourAssignment.findMany({
+      where: {
+        jobRoleId,
+        agencyId: agency.id,
+      },
+      include: {
+        labour: true,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+    });
+
+    return NextResponse.json({ assignments });
+  } catch (error) {
+    console.error("Error fetching assignments for job role:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch assignments" },
       { status: 500 }
     );
   }

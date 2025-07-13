@@ -71,10 +71,25 @@ export async function PUT(request: Request) {
     }
 
     const updatedAssignments = await prisma.$transaction(async (tx) => {
-      // Update all assignments
-      const updates = assignmentIds.map((id) =>
+      // Filter out assignments that already have the opposite status
+      const assignmentsToUpdate = currentAssignments.filter((assignment) => {
+        if (status === "ACCEPTED") {
+          // For bulk accept, exclude assignments that are already rejected
+          return assignment.adminStatus !== "REJECTED";
+        } else {
+          // For bulk reject, exclude assignments that are already accepted
+          return assignment.adminStatus !== "ACCEPTED";
+        }
+      });
+
+      if (assignmentsToUpdate.length === 0) {
+        return [];
+      }
+
+      // Update only the filtered assignments
+      const updates = assignmentsToUpdate.map((assignment) =>
         tx.labourAssignment.update({
-          where: { id },
+          where: { id: assignment.id },
           data: {
             adminStatus: status as RequirementStatus,
             adminFeedback: status === "ACCEPTED" ? null : feedback, // Clear feedback if accepted

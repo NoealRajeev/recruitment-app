@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -75,8 +76,10 @@ export default function LabourAssignmentReview() {
       const data = await response.json();
       setAgencies(data);
 
-      // Preserve selected agency if it exists in the new data
-      if (selectedAgency && data.some((a) => a.id === selectedAgency)) {
+      if (
+        selectedAgency &&
+        data.some((a: AgencyWithAssignments) => a.id === selectedAgency)
+      ) {
         return;
       }
 

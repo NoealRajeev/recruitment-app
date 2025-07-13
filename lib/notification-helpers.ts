@@ -185,6 +185,67 @@ export async function notifyArrivalConfirmed(
   });
 }
 
+export async function notifyContractRefused(
+  labourName: string,
+  jobTitle: string,
+  agencyName: string,
+  agencyId: string,
+  clientId?: string
+) {
+  const config = NotificationTemplates.CONTRACT_REFUSED(
+    labourName,
+    jobTitle,
+    agencyName
+  );
+
+  // Notify agency
+  await NotificationService.createNotification({
+    ...config,
+    recipientId: agencyId,
+  });
+
+  // Notify client if provided
+  if (clientId) {
+    await NotificationService.createNotification({
+      ...config,
+      recipientId: clientId,
+    });
+  }
+
+  // Notify admins about contract refusal
+  await NotificationService.createNotificationsForRole(
+    UserRole.RECRUITMENT_ADMIN,
+    config,
+    agencyId
+  );
+}
+
+export async function notifyLabourShortage(
+  labourName: string,
+  jobTitle: string,
+  agencyName: string,
+  jobRoleId: string,
+  requirementId: string,
+  neededQuantity: number
+) {
+  const config = {
+    type: "ASSIGNMENT_STATUS_CHANGED" as const,
+    title: "Labour Shortage - Additional Labour Needed",
+    message: `Labourer ${labourName} refused contract for ${jobTitle}. ${neededQuantity} additional labourer${neededQuantity !== 1 ? "s" : ""} needed.`,
+    entityType: "JobRole",
+    entityId: jobRoleId,
+    actionUrl: `/dashboard/admin/requirements?requirementId=${requirementId}`,
+    actionText: "View Requirement",
+    priority: "HIGH" as const,
+  };
+
+  // Notify admins about labour shortage
+  await NotificationService.createNotificationsForRole(
+    UserRole.RECRUITMENT_ADMIN,
+    config
+  );
+}
+
 // Document Management Notifications
 export async function notifyDocumentUploaded(
   documentType: string,

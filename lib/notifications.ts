@@ -389,6 +389,19 @@ export const NotificationTemplates = {
     priority: NotificationPriority.HIGH,
   }),
 
+  CONTRACT_REFUSED: (
+    labourName: string,
+    jobTitle: string,
+    agencyName: string
+  ): NotificationConfig => ({
+    type: NotificationType.STAGE_FAILED,
+    title: "Contract Refused",
+    message: `${labourName} refused to sign contract for ${jobTitle} position at ${agencyName}`,
+    priority: NotificationPriority.HIGH,
+    actionUrl: `/dashboard/agency/recruitment`,
+    actionText: "View Recruitment",
+  }),
+
   // Assignment Management
   ASSIGNMENT_CREATED: (
     labourName: string,

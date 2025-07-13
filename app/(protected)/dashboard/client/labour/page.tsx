@@ -509,74 +509,87 @@ export default function ClientLabourReview() {
                       /{currentJobRole?.quantity ?? 0} Accepted
                     </span>
                     <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={async () => {
-                          const unaccepted =
-                            currentJobRole?.LabourAssignment?.filter(
-                              (a) =>
-                                a.clientStatus !== "ACCEPTED" &&
-                                a.adminStatus === "ACCEPTED"
-                            );
-                          if (unaccepted && unaccepted.length > 0) {
-                            if (
-                              confirm(
-                                `Accept all ${unaccepted.length} unaccepted profiles?`
-                              )
-                            ) {
-                              try {
-                                setUpdatingStatus("accept-all");
-                                await handleUpdateLabourStatus(
-                                  unaccepted.map((a) => a.id),
-                                  "ACCEPTED"
-                                );
-                              } finally {
-                                setUpdatingStatus(null);
+                      {(() => {
+                        const unaccepted =
+                          currentJobRole?.LabourAssignment?.filter(
+                            (a) =>
+                              a.clientStatus !== "ACCEPTED" &&
+                              a.adminStatus === "ACCEPTED"
+                          ) || [];
+                        const unrejected =
+                          currentJobRole?.LabourAssignment?.filter(
+                            (a) =>
+                              a.clientStatus !== "REJECTED" &&
+                              a.adminStatus === "ACCEPTED"
+                          ) || [];
+
+                        return (
+                          <>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={async () => {
+                                if (unaccepted.length > 0) {
+                                  if (
+                                    confirm(
+                                      `Accept all ${unaccepted.length} unaccepted profiles?`
+                                    )
+                                  ) {
+                                    try {
+                                      setUpdatingStatus("bulk-update");
+                                      await handleUpdateLabourStatus(
+                                        unaccepted.map((a) => a.id),
+                                        "ACCEPTED"
+                                      );
+                                    } finally {
+                                      setUpdatingStatus(null);
+                                    }
+                                  }
+                                }
+                              }}
+                              disabled={
+                                updatingStatus === "bulk-update" ||
+                                unaccepted.length === 0
                               }
-                            }
-                          }
-                        }}
-                        disabled={updatingStatus === "accept-all"}
-                      >
-                        {updatingStatus === "accept-all"
-                          ? "Processing..."
-                          : "Accept All"}
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={async () => {
-                          const unrejected =
-                            currentJobRole?.LabourAssignment?.filter(
-                              (a) =>
-                                a.clientStatus !== "REJECTED" &&
-                                a.adminStatus === "ACCEPTED"
-                            );
-                          if (unrejected && unrejected.length > 0) {
-                            const feedback = prompt(
-                              `Enter rejection reason for all ${unrejected.length} profiles:`
-                            );
-                            if (feedback) {
-                              try {
-                                setUpdatingStatus("reject-all");
-                                await handleUpdateLabourStatus(
-                                  unrejected.map((a) => a.id),
-                                  "REJECTED",
-                                  feedback
-                                );
-                              } finally {
-                                setUpdatingStatus(null);
+                            >
+                              {updatingStatus === "bulk-update"
+                                ? "Processing..."
+                                : "Accept All"}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={async () => {
+                                if (unrejected.length > 0) {
+                                  const feedback = prompt(
+                                    `Enter rejection reason for all ${unrejected.length} profiles:`
+                                  );
+                                  if (feedback) {
+                                    try {
+                                      setUpdatingStatus("bulk-update");
+                                      await handleUpdateLabourStatus(
+                                        unrejected.map((a) => a.id),
+                                        "REJECTED",
+                                        feedback
+                                      );
+                                    } finally {
+                                      setUpdatingStatus(null);
+                                    }
+                                  }
+                                }
+                              }}
+                              disabled={
+                                updatingStatus === "bulk-update" ||
+                                unrejected.length === 0
                               }
-                            }
-                          }
-                        }}
-                        disabled={updatingStatus === "reject-all"}
-                      >
-                        {updatingStatus === "reject-all"
-                          ? "Processing..."
-                          : "Reject All"}
-                      </Button>
+                            >
+                              {updatingStatus === "bulk-update"
+                                ? "Processing..."
+                                : "Reject All"}
+                            </Button>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>

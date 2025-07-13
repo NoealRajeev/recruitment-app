@@ -81,10 +81,25 @@ export async function PUT(request: Request) {
         throw new Error("Some assignments not found");
       }
 
-      // 2. Update all assignments
-      const updatePromises = assignmentIds.map((id) =>
+      // 2. Filter out assignments that already have the opposite status
+      const assignmentsToUpdate = currentAssignments.filter((assignment) => {
+        if (status === "ACCEPTED") {
+          // For bulk accept, exclude assignments that are already rejected
+          return assignment.clientStatus !== "REJECTED";
+        } else {
+          // For bulk reject, exclude assignments that are already accepted
+          return assignment.clientStatus !== "ACCEPTED";
+        }
+      });
+
+      if (assignmentsToUpdate.length === 0) {
+        return [];
+      }
+
+      // Update only the filtered assignments
+      const updatePromises = assignmentsToUpdate.map((assignment) =>
         tx.labourAssignment.update({
-          where: { id },
+          where: { id: assignment.id },
           data: {
             clientStatus: status,
             ...(status === "ACCEPTED" && {
@@ -203,107 +218,110 @@ export async function PUT(request: Request) {
           },
         });
 
-        // Calculate accepted count for requirement completion check
-        const acceptedCount = jobRoleAssignments.filter(
-          (a) => a.clientStatus === "ACCEPTED" && !a.isBackup
-        ).length;
+        // Only auto-reject unselected assignments when accepting (not when rejecting)
+        if (status === "ACCEPTED") {
+          // Calculate accepted count for requirement completion check
+          const acceptedCount = jobRoleAssignments.filter(
+            (a) => a.clientStatus === "ACCEPTED" && !a.isBackup
+          ).length;
 
-        // If requirement is fully completed (all needed assignments accepted)
-        if (status === "ACCEPTED" && acceptedCount >= jobRole.quantity) {
-          // Reject all unselected assignments for this job role
-          const unselectedAssignments = jobRoleAssignments.filter(
-            (a) =>
-              a.clientStatus !== "ACCEPTED" && !assignmentIds.includes(a.id)
-          );
+          // If requirement is fully completed (all needed assignments accepted)
+          if (acceptedCount >= jobRole.quantity) {
+            // Reject all unselected assignments for this job role
+            const unselectedAssignments = jobRoleAssignments.filter(
+              (a) =>
+                a.clientStatus !== "ACCEPTED" && !assignmentIds.includes(a.id)
+            );
 
-          await Promise.all(
-            unselectedAssignments.map((assignment) =>
-              tx.labourAssignment.update({
-                where: { id: assignment.id },
-                data: {
-                  clientStatus: "REJECTED",
-                  clientFeedback: "Not selected - requirement fulfilled",
-                },
-              })
-            )
-          );
+            await Promise.all(
+              unselectedAssignments.map((assignment) =>
+                tx.labourAssignment.update({
+                  where: { id: assignment.id },
+                  data: {
+                    clientStatus: "REJECTED",
+                    clientFeedback: "Not selected - requirement fulfilled",
+                  },
+                })
+              )
+            );
 
-          // Update unselected labour profiles back to APPROVED
-          await tx.labourProfile.updateMany({
-            where: {
-              id: {
-                in: unselectedAssignments.map((a) => a.labourId),
-              },
-            },
-            data: {
-              status: "APPROVED",
-              requirementId: null,
-            },
-          });
-
-          // Update all backup labour profiles for this job role
-          await tx.labourProfile.updateMany({
-            where: {
-              LabourAssignment: {
-                some: {
-                  jobRoleId: jobRole.id,
-                  isBackup: true,
+            // Update unselected labour profiles back to APPROVED
+            await tx.labourProfile.updateMany({
+              where: {
+                id: {
+                  in: unselectedAssignments.map((a) => a.labourId),
                 },
               },
-            },
-            data: {
-              status: "APPROVED",
-              verificationStatus: "VERIFIED",
-            },
-          });
+              data: {
+                status: "APPROVED",
+                requirementId: null,
+              },
+            });
 
-          // Mark all backup assignments as rejected
-          await tx.labourAssignment.updateMany({
-            where: {
-              jobRoleId: jobRole.id,
-              isBackup: true,
-            },
-            data: {
-              clientStatus: "REJECTED",
-              clientFeedback: "Backup candidate - requirement fulfilled",
-            },
-          });
+            // Update all backup labour profiles for this job role
+            await tx.labourProfile.updateMany({
+              where: {
+                LabourAssignment: {
+                  some: {
+                    jobRoleId: jobRole.id,
+                    isBackup: true,
+                  },
+                },
+              },
+              data: {
+                status: "APPROVED",
+                verificationStatus: "VERIFIED",
+              },
+            });
 
-          // Check if all job roles in the requirement are fulfilled
-          const requirement = await tx.requirement.findUnique({
-            where: { id: jobRole.requirementId },
-            include: {
-              jobRoles: {
-                select: {
-                  id: true,
-                  quantity: true,
-                  LabourAssignment: {
-                    select: {
-                      id: true,
-                      clientStatus: true,
+            // Mark all backup assignments as rejected
+            await tx.labourAssignment.updateMany({
+              where: {
+                jobRoleId: jobRole.id,
+                isBackup: true,
+              },
+              data: {
+                clientStatus: "REJECTED",
+                clientFeedback: "Backup candidate - requirement fulfilled",
+              },
+            });
+
+            // Check if all job roles in the requirement are fulfilled
+            const requirement = await tx.requirement.findUnique({
+              where: { id: jobRole.requirementId },
+              include: {
+                jobRoles: {
+                  select: {
+                    id: true,
+                    quantity: true,
+                    LabourAssignment: {
+                      select: {
+                        id: true,
+                        clientStatus: true,
+                      },
                     },
                   },
                 },
               },
-            },
-          });
-
-          if (requirement) {
-            const allRolesFulfilled = requirement.jobRoles.every((jr) => {
-              const accepted = jr.LabourAssignment.filter(
-                (a) => a.clientStatus === "ACCEPTED"
-              ).length;
-              return accepted >= jr.quantity;
             });
 
-            if (allRolesFulfilled) {
-              // Update requirement status to ACCEPTED
-              await tx.requirement.update({
-                where: { id: jobRole.requirementId },
-                data: {
-                  status: "ACCEPTED",
-                },
+            if (requirement) {
+              const allRolesFulfilled = requirement.jobRoles.every((jr) => {
+                const accepted = jr.LabourAssignment.filter(
+                  (a) => a.clientStatus === "ACCEPTED"
+                ).length;
+                return accepted >= jr.quantity;
               });
+
+              if (allRolesFulfilled) {
+                // Update requirement status to ACCEPTED
+                await tx.requirement.update({
+                  where: { id: jobRole.requirementId },
+                  data: {
+                    status: "ACCEPTED",
+                  },
+                });
+              }
             }
           }
         }

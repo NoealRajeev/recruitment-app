@@ -205,7 +205,7 @@ export async function PUT(
           )
         );
 
-        // 1.5. Update unselected labour profiles back to APPROVED
+        // 1.5. Update unselected labour profiles back to APPROVED and remove requirement details
         await tx.labourProfile.updateMany({
           where: {
             id: {
@@ -218,7 +218,7 @@ export async function PUT(
           },
         });
 
-        // 2. Update all backup labour profiles for this job role
+        // 2. Update all backup labour profiles for this job role to APPROVED and remove requirement details
         await tx.labourProfile.updateMany({
           where: {
             LabourAssignment: {
@@ -231,10 +231,11 @@ export async function PUT(
           data: {
             status: "APPROVED",
             verificationStatus: "VERIFIED",
+            requirementId: null,
           },
         });
 
-        // 3. Mark all backup assignments as rejected
+        // 3. Mark all backup assignments as rejected and remove backup details
         await tx.labourAssignment.updateMany({
           where: {
             jobRoleId: jobRole.id,
@@ -243,6 +244,23 @@ export async function PUT(
           data: {
             clientStatus: "REJECTED",
             clientFeedback: "Backup candidate - requirement fulfilled",
+            isBackup: false, // Remove backup details
+          },
+        });
+
+        // 4. Also update rejected labour profiles to APPROVED and remove requirement details
+        await tx.labourProfile.updateMany({
+          where: {
+            LabourAssignment: {
+              some: {
+                jobRoleId: jobRole.id,
+                clientStatus: "REJECTED",
+              },
+            },
+          },
+          data: {
+            status: "APPROVED",
+            requirementId: null,
           },
         });
 

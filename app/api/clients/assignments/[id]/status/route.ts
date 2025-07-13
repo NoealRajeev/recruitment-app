@@ -110,15 +110,23 @@ export async function PUT(
         },
       });
 
-      // If accepted, create a stage history record
+      // If accepted, create a stage history record for offer letter sign pending
       if (status === "ACCEPTED") {
         await tx.labourStageHistory.create({
           data: {
             labourId: currentAssignment.labourId,
-            stage: "INITIALIZED",
-            status: "COMPLETED",
-            notes: "Client accepted the labour profile",
-            documents: [], // Add any relevant documents if needed
+            stage: "OFFER_LETTER_SIGN",
+            status: "PENDING",
+            notes: "Awaiting offer letter signature",
+            documents: [],
+          },
+        });
+
+        // Update the current stage to OFFER_LETTER_SIGN
+        await tx.labourProfile.update({
+          where: { id: currentAssignment.labourId },
+          data: {
+            currentStage: "OFFER_LETTER_SIGN",
           },
         });
       }

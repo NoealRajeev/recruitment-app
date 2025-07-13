@@ -43,13 +43,44 @@ export async function GET() {
               where: {
                 agencyStatus: "ACCEPTED",
                 labour: {
-                  status: "SHORTLISTED",
+                  status: { in: ["SHORTLISTED", "DEPLOYED"] },
                 },
               },
-              include: {
+              select: {
+                id: true,
+                agencyStatus: true,
+                adminStatus: true,
+                clientStatus: true,
+                adminFeedback: true,
+                clientFeedback: true,
+                signedOfferLetterUrl: true,
+                visaUrl: true,
+                travelDate: true,
+                flightTicketUrl: true,
+                medicalCertificateUrl: true,
+                policeClearanceUrl: true,
+                employmentContractUrl: true,
+                additionalDocumentsUrls: true,
                 labour: {
-                  include: {
+                  select: {
+                    id: true,
+                    name: true,
+                    nationality: true,
+                    age: true,
+                    gender: true,
+                    status: true,
+                    verificationStatus: true,
+                    profileImage: true,
+                    currentStage: true,
                     stages: {
+                      select: {
+                        id: true,
+                        stage: true,
+                        status: true,
+                        notes: true,
+                        createdAt: true,
+                        completedAt: true,
+                      },
                       orderBy: {
                         createdAt: "asc",
                       },

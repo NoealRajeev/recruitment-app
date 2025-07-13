@@ -406,3 +406,130 @@ The Findly Team`,
 </div>
 `,
 });
+
+export const getVisaNotificationEmail = (
+  labourName: string,
+  companyName: string,
+  jobTitle: string,
+  visaDownloadUrl: string
+): EmailTemplate => ({
+  subject: `Your Visa is Ready - ${companyName}`,
+  text: `Dear ${labourName},
+
+Great news! Your visa has been printed and is ready. You have been approved for the position of ${jobTitle} at ${companyName}.
+
+Your visa document is attached to this email. Please download and save it securely.
+
+Important Next Steps:
+1. Download and save your visa document
+2. Review all visa details carefully
+3. Contact your recruitment agency for travel arrangements
+4. Ensure all travel documents are in order
+
+If you have any questions, please contact your recruitment agency or ${companyName}.
+
+Best regards,
+The ${companyName} Team`,
+
+  html: `
+<div style="${Object.entries(baseEmailStyles)
+    .map(([key, value]) => `${key}: ${value};`)
+    .join("")}">
+  ${headerTemplate("Your Visa is Ready!")}
+  
+  <p>Dear ${labourName},</p>
+  <p>Great news! Your visa has been printed and is ready. You have been approved for the position of <strong>${jobTitle}</strong> at <strong>${companyName}</strong>.</p>
+  
+  <div style="background: ${lightBackground}; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${primaryColor};">
+    <h3 style="margin-top: 0; color: ${primaryColor};">Visa Document</h3>
+    <p>Your visa document is attached to this email. Please download and save it securely.</p>
+    ${actionButton("Download Visa", visaDownloadUrl)}
+  </div>
+
+  <h3 style="color: ${primaryColor};">Important Next Steps</h3>
+  <ol style="padding-left: 20px; line-height: 1.6;">
+    <li><strong>Download and save</strong> your visa document securely</li>
+    <li><strong>Review all visa details</strong> carefully for accuracy</li>
+    <li><strong>Contact your recruitment agency</strong> for travel arrangements</li>
+    <li><strong>Ensure all travel documents</strong> are in order</li>
+  </ol>
+
+  <div style="background: ${warningBackground}; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+    <h3 style="margin-top: 0; color: #d32f2f;">Important Reminders</h3>
+    <ul style="padding-left: 20px;">
+      <li>Keep your visa document safe and accessible</li>
+      <li>Make copies of all important documents</li>
+      <li>Follow all travel guidelines provided by your agency</li>
+    </ul>
+  </div>
+
+  <p>If you have any questions, please contact your recruitment agency or 
+    <a href="mailto:hr@${companyName.toLowerCase().replace(/\s+/g, "")}.com" style="color: ${primaryColor}; font-weight: bold;">${companyName}</a>.
+  </p>
+
+  ${footerTemplate}
+</div>
+`,
+});
+
+export const travelDocumentsUploadedTemplate = ({
+  labourName,
+  clientName,
+  travelDate,
+  documentsCount,
+}: {
+  labourName: string;
+  clientName: string;
+  travelDate: string;
+  documentsCount: number;
+}): string => `
+<div style="${Object.entries(baseEmailStyles)
+  .map(([key, value]) => `${key}: ${value};`)
+  .join("")}">
+  ${headerTemplate("Travel Documents Uploaded")}
+  
+  <p>Dear ${clientName},</p>
+  <p>Great news! Travel documents have been uploaded for <strong>${labourName}</strong> and they are ready for travel to Qatar.</p>
+  
+  <div style="background: ${lightBackground}; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${primaryColor};">
+    <h3 style="margin-top: 0; color: ${primaryColor};">Travel Information</h3>
+    <p><strong>Labour Name:</strong> ${labourName}</p>
+    <p><strong>Travel Date:</strong> ${travelDate}</p>
+    <p><strong>Documents Uploaded:</strong> ${documentsCount} documents</p>
+  </div>
+
+  <h3 style="color: ${primaryColor};">Documents Included</h3>
+  <ul style="padding-left: 20px; line-height: 1.6;">
+    <li>Flight Ticket</li>
+    <li>Passport</li>
+    <li>Medical Certificate</li>
+    <li>Police Clearance</li>
+    <li>Employment Contract</li>
+    <li>Visa Document</li>
+    <li>Additional Travel Documents</li>
+  </ul>
+
+  <div style="background: ${infoBackground}; padding: 16px; border-radius: 8px; margin: 20px 0;">
+    <h3 style="margin-top: 0; color: ${primaryColor};">Next Steps</h3>
+    <ol style="padding-left: 20px; line-height: 1.6;">
+      <li>Review all uploaded documents</li>
+      <li>Confirm travel arrangements</li>
+      <li>Prepare for arrival and onboarding</li>
+      <li>Contact the recruitment agency for any questions</li>
+    </ol>
+  </div>
+
+  <div style="background: ${warningBackground}; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+    <h3 style="margin-top: 0; color: #d32f2f;">Important Reminders</h3>
+    <ul style="padding-left: 20px;">
+      <li>Ensure all documents are valid and up-to-date</li>
+      <li>Keep copies of all travel documents</li>
+      <li>Follow all travel guidelines and requirements</li>
+    </ul>
+  </div>
+
+  <p>If you have any questions about the travel arrangements or documents, please contact your recruitment agency.</p>
+
+  ${footerTemplate}
+</div>
+`;

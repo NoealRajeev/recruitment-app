@@ -24,8 +24,13 @@ export default function DashboardLayoutClient({
   const { isExpanded } = useSidebar();
   const pathname = usePathname();
   const routes = getRoutes(role);
-  // Verify current route exists
-  const isValidRoute = routes.some((route) => pathname.startsWith(route.path));
+
+  // Check if it's a valid route or a global page (profile, settings, test-notifications)
+  const isValidRoute =
+    routes.some((route) => pathname.startsWith(route.path)) ||
+    pathname.startsWith("/dashboard/profile") ||
+    pathname.startsWith("/dashboard/settings") ||
+    pathname.startsWith("/dashboard/test-notifications");
 
   return (
     <div className="flex h-screen bg-gray-50 relative">

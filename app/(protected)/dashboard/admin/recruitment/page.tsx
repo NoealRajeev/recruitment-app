@@ -3,21 +3,16 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  User,
-  Building,
-  BarChart2,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, User, Building } from "lucide-react";
 import { useToast } from "@/context/toast-provider";
-import GanttChart from "@/components/ui/GanttChart";
 import {
   RequirementStatus,
   LabourStage,
   LabourProfileStatus,
+  StageStatus,
 } from "@/lib/generated/prisma";
 import { Modal } from "@/components/ui/Modal";
+import ProgressTracker from "@/components/ui/ProgressTracker";
 
 interface Requirement {
   id: string;
@@ -60,6 +55,14 @@ interface LabourProfile {
   verificationStatus: string;
   profileImage?: string;
   currentStage: LabourStage;
+  stages?: {
+    id: string;
+    stage: LabourStage;
+    status: string;
+    notes?: string | null;
+    createdAt: Date;
+    completedAt?: Date | null;
+  }[];
 }
 
 export default function Recruitment() {
@@ -83,6 +86,15 @@ export default function Recruitment() {
   } | null>(null);
   const itemsPerPage = 10;
   const { toast } = useToast();
+  const [actionLoading, setActionLoading] = useState<{
+    [labourId: string]: boolean;
+  }>({});
+  const [uploadLoading, setUploadLoading] = useState<{
+    [labourId: string]: boolean;
+  }>({});
+  const [timelineLabour, setTimelineLabour] = useState<LabourProfile | null>(
+    null
+  );
 
   // Fetch accepted requirements with their job roles and labour assignments
   useEffect(() => {
@@ -173,20 +185,7 @@ export default function Recruitment() {
     return id.slice(0, 8).toUpperCase();
   };
 
-  const LabourCard = ({
-    labour,
-    stages,
-  }: {
-    labour: LabourProfile;
-    stages: {
-      id: string;
-      stage: LabourStage;
-      status: string;
-      notes?: string | null;
-      createdAt: Date;
-      completedAt?: Date | null;
-    }[];
-  }) => {
+  const LabourCard = ({ labour }: { labour: LabourProfile }) => {
     return (
       <div className="bg-[#EDDDF3] rounded-lg p-4 relative">
         <div className="flex items-center gap-3 mb-3">
@@ -201,7 +200,6 @@ export default function Recruitment() {
               <User className="w-6 h-6 text-[#150B3D]/50" />
             </div>
           )}
-
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-[#150B3D] truncate">
               {labour.name}
@@ -218,8 +216,6 @@ export default function Recruitment() {
             </div>
           </div>
         </div>
-
-        {/* Quick info */}
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div>
             <span className="text-[#150B3D]/70">Nationality:</span>
@@ -230,8 +226,6 @@ export default function Recruitment() {
             <span className="block">{labour.age}</span>
           </div>
         </div>
-
-        {/* Current stage */}
         <div className="mt-3 pt-3 border-t border-[#150B3D]/10">
           <div className="flex items-center justify-between">
             <span className="text-sm text-[#150B3D]/70">Current Stage:</span>
@@ -240,17 +234,72 @@ export default function Recruitment() {
             </span>
           </div>
         </div>
-
-        {/* View timeline button */}
         <button
-          onClick={() => setSelectedLabour({ profile: labour, stages })}
           className="mt-3 w-full py-1.5 px-3 bg-[#3D1673] hover:bg-[#2b0e54] text-white text-xs rounded flex items-center justify-center gap-1"
+          onClick={() => {
+            setTimelineLabour(labour);
+          }}
         >
-          <BarChart2 className="w-3 h-3" />
           View Timeline
         </button>
       </div>
     );
+  };
+
+  // Handler for ProgressTracker actions
+  const handleTrackerAction = async (labourId: string, stageKey: string) => {
+    setActionLoading((prev) => ({ ...prev, [labourId]: true }));
+    try {
+      await fetch(`/api/admin/labour-profiles/${labourId}/stages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          stage: stageKey,
+          status: "COMPLETED",
+          notes: "",
+        }),
+      });
+      toast({
+        type: "success",
+        message: `Stage ${stageKey} marked as completed.`,
+      });
+      const response = await fetch("/api/admin/requirements/accepted");
+      setRequirements(await response.json());
+    } catch {
+      toast({ type: "error", message: `Failed to update stage: ${stageKey}` });
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [labourId]: false }));
+    }
+  };
+
+  // Handler for ProgressTracker uploads
+  const handleTrackerUpload = async (
+    labourId: string,
+    stageKey: string,
+    file: File
+  ) => {
+    setUploadLoading((prev) => ({ ...prev, [labourId]: true }));
+    try {
+      const formData = new FormData();
+      formData.append("stage", stageKey);
+      formData.append("status", "COMPLETED");
+      formData.append("notes", "");
+      formData.append("document", file);
+      await fetch(`/api/admin/labour-profiles/${labourId}/stages`, {
+        method: "POST",
+        body: formData,
+      });
+      toast({ type: "success", message: `Document uploaded for ${stageKey}.` });
+      const response = await fetch("/api/admin/requirements/accepted");
+      setRequirements(await response.json());
+    } catch {
+      toast({
+        type: "error",
+        message: `Failed to upload document for: ${stageKey}`,
+      });
+    } finally {
+      setUploadLoading((prev) => ({ ...prev, [labourId]: false }));
+    }
   };
 
   return (
@@ -416,11 +465,7 @@ export default function Recruitment() {
             {/* Labour Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {currentJobRole.LabourAssignment.map((assignment) => (
-                <LabourCard
-                  key={assignment.id}
-                  labour={assignment.labour}
-                  stages={assignment.labour.stages}
-                />
+                <LabourCard key={assignment.id} labour={assignment.labour} />
               ))}
             </div>
           </>
@@ -433,85 +478,26 @@ export default function Recruitment() {
             </p>
           </div>
         )}
-      </div>
-
-      {/* Gantt Chart Modal */}
-      <Modal
-        isOpen={!!selectedLabour}
-        onClose={() => setSelectedLabour(null)}
-        title={`${selectedLabour?.profile.name}'s Recruitment Timeline`}
-        size="2xl"
-      >
-        {selectedLabour && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              {selectedLabour.profile.profileImage ? (
-                <img
-                  src={selectedLabour.profile.profileImage}
-                  alt={selectedLabour.profile.name}
-                  className="w-16 h-16 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-16 h-16 rounded-full bg-[#150B3D]/10 flex items-center justify-center">
-                  <User className="w-8 h-8 text-[#150B3D]/50" />
-                </div>
+        {/* Timeline Modal */}
+        <Modal
+          isOpen={!!timelineLabour}
+          onClose={() => setTimelineLabour(null)}
+          title={
+            timelineLabour ? `${timelineLabour.name}'s Onboarding Timeline` : ""
+          }
+          size="2xl"
+        >
+          {timelineLabour && (
+            <ProgressTracker
+              currentStage={timelineLabour.currentStage}
+              statuses={Object.fromEntries(
+                (timelineLabour.stages || []).map((s) => [s.stage, s.status])
               )}
-              <div>
-                <h3 className="font-semibold text-lg text-[#150B3D]">
-                  {selectedLabour.profile.name}
-                </h3>
-                <div className="flex gap-2">
-                  <span
-                    className={`text-xs ${getStatusColor(
-                      selectedLabour.profile.status
-                    )}`}
-                  >
-                    {selectedLabour.profile.status
-                      .replace("_", " ")
-                      .toLowerCase()}
-                  </span>
-                  <span
-                    className={`text-xs ${getStatusColor(
-                      selectedLabour.profile.verificationStatus
-                    )}`}
-                  >
-                    {selectedLabour.profile.verificationStatus
-                      .replace("_", " ")
-                      .toLowerCase()}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-[#150B3D]/70 font-medium">
-                  Nationality:
-                </span>
-                <span className="text-[#150B3D]">
-                  {selectedLabour.profile.nationality}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#150B3D]/70 font-medium">Age:</span>
-                <span className="text-[#150B3D]">
-                  {selectedLabour.profile.age}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#150B3D]/70 font-medium">
-                  Current Stage:
-                </span>
-                <span className="text-[#150B3D]">
-                  {selectedLabour.profile.currentStage.replace(/_/g, " ")}
-                </span>
-              </div>
-            </div>
-
-            <GanttChart stages={selectedLabour.stages} />
-          </div>
-        )}
-      </Modal>
+              userRole="RECRUITMENT_ADMIN"
+            />
+          )}
+        </Modal>
+      </div>
     </div>
   );
 }

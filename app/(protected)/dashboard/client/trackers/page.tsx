@@ -3,21 +3,18 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  User,
-  Building,
-  BarChart2,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, User, Building } from "lucide-react";
 import { useToast } from "@/context/toast-provider";
-import GanttChart from "@/components/ui/GanttChart";
 import {
   RequirementStatus,
   LabourStage,
   LabourProfileStatus,
 } from "@/lib/generated/prisma";
 import { Modal } from "@/components/ui/Modal";
+import ProgressTracker from "@/components/ui/ProgressTracker";
+import { Button } from "@/components/ui/Button";
+import TravelDocumentsViewerModal from "@/components/shared/TravelDocumentsViewerModal";
+import ArrivalConfirmationModal from "@/components/ui/ArrivalConfirmationModal";
 
 interface Requirement {
   id: string;
@@ -35,6 +32,14 @@ interface JobRole {
 
 interface LabourAssignment {
   id: string;
+  signedOfferLetterUrl?: string | null;
+  visaUrl?: string | null;
+  travelDate?: Date | string | null;
+  flightTicketUrl?: string | null;
+  medicalCertificateUrl?: string | null;
+  policeClearanceUrl?: string | null;
+  employmentContractUrl?: string | null;
+  additionalDocumentsUrls?: string[];
   labour: LabourProfile & {
     stages: {
       id: string;
@@ -57,9 +62,27 @@ interface LabourProfile {
   verificationStatus: string;
   profileImage?: string;
   currentStage: LabourStage;
+  stages?: {
+    id: string;
+    stage: LabourStage;
+    status: string;
+    notes?: string | null;
+    createdAt: Date;
+    completedAt?: Date | null;
+  }[];
+}
+
+interface OfferLetterDetails {
+  workingHours: string;
+  workingDays: string;
+  leaveSalary: string;
+  endOfService: string;
+  probationPeriod: string;
 }
 
 export default function ClientRecruitment() {
+  const itemsPerPage = 10;
+  const { toast } = useToast();
   const [selectedRequirement, setSelectedRequirement] = useState<string | null>(
     null
   );
@@ -67,19 +90,77 @@ export default function ClientRecruitment() {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [selectedLabour, setSelectedLabour] = useState<{
-    profile: LabourProfile;
-    stages: {
-      id: string;
-      stage: LabourStage;
-      status: string;
-      notes?: string | null;
-      createdAt: Date;
-      completedAt?: Date | null;
-    }[];
-  } | null>(null);
-  const itemsPerPage = 10;
-  const { toast } = useToast();
+  const [timelineLabour, setTimelineLabour] = useState<LabourProfile | null>(
+    null
+  );
+  const [timelineAssignment, setTimelineAssignment] =
+    useState<LabourAssignment | null>(null);
+  const [documentsLabour, setDocumentsLabour] = useState<LabourProfile | null>(
+    null
+  );
+  const [documentsAssignment, setDocumentsAssignment] =
+    useState<LabourAssignment | null>(null);
+  const [offerLetterDetails, setOfferLetterDetails] =
+    useState<OfferLetterDetails | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showDocumentViewer, setShowDocumentViewer] = useState(false);
+  const [showArrivalConfirmation, setShowArrivalConfirmation] = useState(false);
+  const [arrivalConfirmationLabour, setArrivalConfirmationLabour] =
+    useState<LabourProfile | null>(null);
+  const [detailsForm, setDetailsForm] = useState({
+    workingHours: "",
+    workingDays: "",
+    leaveSalary: "",
+    endOfService: "",
+    probationPeriod: "",
+  });
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+
+  // Function to refresh requirements data
+  const refreshRequirements = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch("/api/clients/requirements/accepted");
+      if (!response.ok) throw new Error("Failed to fetch requirements");
+
+      const data = await response.json();
+      setRequirements(data);
+
+      // Update timeline labour if it exists
+      if (timelineLabour) {
+        const updatedAssignment = data
+          .flatMap((req: Requirement) => req.jobRoles)
+          .flatMap((role: JobRole) => role.LabourAssignment)
+          .find(
+            (assignment: LabourAssignment) =>
+              assignment.labour.id === timelineLabour.id
+          );
+
+        if (updatedAssignment) {
+          console.log(
+            "Updated labour current stage:",
+            updatedAssignment.labour.currentStage
+          );
+          setTimelineLabour(updatedAssignment.labour);
+          setTimelineAssignment(updatedAssignment);
+        }
+      }
+
+      // Force a re-render by updating the selected requirement
+      if (selectedRequirement) {
+        setSelectedRequirement(selectedRequirement);
+      }
+    } catch (error) {
+      console.error("Error refreshing requirements:", error);
+      toast({
+        type: "error",
+        message: "Failed to refresh data",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Fetch client requirements with their job roles and labour assignments
   useEffect(() => {
@@ -130,6 +211,101 @@ export default function ClientRecruitment() {
     [selectedRequirementData, currentJobRoleIndex]
   );
 
+  // Fetch offer letter details for the selected requirement
+  useEffect(() => {
+    const fetchDetails = async () => {
+      if (!selectedRequirement) return setOfferLetterDetails(null);
+      try {
+        setDetailsLoading(true);
+        const res = await fetch(
+          `/api/requirements/${selectedRequirement}/offer-letter-details`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setOfferLetterDetails(data);
+        } else if (res.status === 404) {
+          setShowDetailsModal(true);
+          setOfferLetterDetails(null);
+        } else {
+          setShowDetailsModal(true);
+          setOfferLetterDetails(null);
+        }
+      } finally {
+        setDetailsLoading(false);
+      }
+    };
+    fetchDetails();
+  }, [selectedRequirement]);
+
+  // Handler to open modal for editing
+  const handleEditDetails = () => {
+    setDetailsForm({
+      workingHours: offerLetterDetails?.workingHours
+        ? offerLetterDetails.workingHours.replace(/\D/g, "")
+        : "",
+      workingDays: offerLetterDetails?.workingDays
+        ? offerLetterDetails.workingDays.replace(/\D/g, "")
+        : "",
+      leaveSalary: offerLetterDetails?.leaveSalary || "",
+      endOfService: offerLetterDetails?.endOfService || "",
+      probationPeriod: offerLetterDetails?.probationPeriod || "",
+    });
+    setShowDetailsModal(true);
+  };
+
+  const handleDetailsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    let newValue = value;
+    // Only allow numbers for workingHours and workingDays
+    if (name === "workingHours" || name === "workingDays") {
+      newValue = value.replace(/[^\d]/g, "");
+    }
+    setDetailsForm({ ...detailsForm, [name]: newValue });
+  };
+
+  const handleDetailsSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormError(null);
+    // Validate workingHours and workingDays
+    const hours = Number(detailsForm.workingHours);
+    const days = Number(detailsForm.workingDays);
+    if (
+      isNaN(hours) ||
+      hours < 1 ||
+      hours > 24 ||
+      isNaN(days) ||
+      days < 1 ||
+      days > 7
+    ) {
+      setFormError("Working hours must be 1-24 and working days must be 1-7.");
+      return;
+    }
+    setDetailsLoading(true);
+    try {
+      const res = await fetch(
+        `/api/requirements/${selectedRequirement}/offer-letter-details`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(detailsForm),
+        }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setOfferLetterDetails(data);
+        setShowDetailsModal(false);
+        toast({ type: "success", message: "Offer letter details saved." });
+      } else {
+        toast({
+          type: "error",
+          message: "Failed to save details",
+        });
+      }
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "PENDING":
@@ -170,20 +346,301 @@ export default function ClientRecruitment() {
     return id.slice(0, 8).toUpperCase();
   };
 
+  const handleViewTimeline = (
+    labour: LabourProfile,
+    assignment: LabourAssignment
+  ) => {
+    setTimelineLabour(labour);
+    setTimelineAssignment(assignment);
+  };
+
+  const handleViewDocuments = (
+    labour: LabourProfile,
+    assignment: LabourAssignment
+  ) => {
+    console.log("View Documents - Labour:", labour);
+    console.log("View Documents - Assignment:", assignment);
+    setDocumentsLabour(labour);
+    setDocumentsAssignment(assignment);
+    setShowDocumentViewer(true);
+  };
+
+  const handleTimelineUpload = async (stageKey: string, file: File) => {
+    if (!timelineAssignment) return;
+
+    try {
+      let endpoint = "";
+      let successMessage = "";
+
+      switch (stageKey) {
+        case "VISA_PRINTING":
+          endpoint = `/api/clients/assignments/${timelineAssignment.id}/upload-visa`;
+          successMessage = "Visa uploaded successfully";
+          break;
+        default:
+          toast({
+            type: "error",
+            message: "Upload not implemented for this stage",
+          });
+          return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to upload file");
+      }
+
+      toast({ type: "success", message: successMessage });
+      await refreshRequirements();
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast({
+        type: "error",
+        message:
+          error instanceof Error ? error.message : "Failed to upload file",
+      });
+    }
+  };
+
+  const handleTimelineAction = async (stageKey: string) => {
+    if (!timelineAssignment) return;
+
+    try {
+      let endpoint = "";
+      let successMessage = "";
+
+      switch (stageKey) {
+        case "OFFER_LETTER_SIGN":
+          endpoint = `/api/clients/assignments/${timelineAssignment.id}/verify-offer-letter`;
+          successMessage = "Signed offer letter verified successfully";
+          break;
+        case "VISA_APPLYING":
+          endpoint = `/api/clients/assignments/${timelineAssignment.id}/mark-visa-applied`;
+          successMessage = "Visa application marked as completed successfully";
+          break;
+        case "QVC_PAYMENT":
+          endpoint = `/api/clients/assignments/${timelineAssignment.id}/mark-qvc-paid`;
+          successMessage = "QVC payment marked as completed successfully";
+          break;
+        case "ARRIVAL_CONFIRMATION_MODAL":
+          // Open arrival confirmation modal instead of making API call
+          setArrivalConfirmationLabour(timelineLabour);
+          setShowArrivalConfirmation(true);
+          return;
+        default:
+          toast({
+            type: "error",
+            message: "Action not implemented for this stage",
+          });
+          return;
+      }
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to update stage");
+      }
+
+      toast({ type: "success", message: successMessage });
+      await refreshRequirements();
+    } catch (error) {
+      console.error("Error updating stage:", error);
+      toast({
+        type: "error",
+        message:
+          error instanceof Error ? error.message : "Failed to update stage",
+      });
+    }
+  };
+
+  const handleArrivalConfirmation = async (
+    status: "ARRIVED",
+    notes?: string
+  ) => {
+    if (!arrivalConfirmationLabour || !timelineAssignment) return;
+
+    try {
+      const requestBody: {
+        status: string;
+        notes?: string;
+      } = { status, notes };
+
+      const res = await fetch(
+        `/api/clients/assignments/${timelineAssignment.id}/confirm-arrival`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(
+          errorData.error || "Failed to update arrival confirmation"
+        );
+      }
+
+      const successMessage = `Arrival status updated to ${status} successfully`;
+      toast({ type: "success", message: successMessage });
+
+      // Refresh requirements to update the UI
+      await refreshRequirements();
+
+      // Close modal
+      setShowArrivalConfirmation(false);
+      setArrivalConfirmationLabour(null);
+    } catch (error) {
+      console.error("Error updating arrival confirmation:", error);
+      toast({
+        type: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to update arrival confirmation",
+      });
+    }
+  };
+
   const LabourCard = ({
     labour,
-    stages,
+    jobRoleId,
+    assignment,
   }: {
     labour: LabourProfile;
-    stages: {
-      id: string;
-      stage: LabourStage;
-      status: string;
-      notes?: string | null;
-      createdAt: Date;
-      completedAt?: Date | null;
-    }[];
+    jobRoleId: string;
+    assignment: LabourAssignment;
   }) => {
+    const [viewing, setViewing] = useState(false);
+    const [downloading, setDownloading] = useState(false);
+    const [verifying, setVerifying] = useState(false);
+    const { toast } = useToast();
+    const offerLetterBlocked =
+      !offerLetterDetails ||
+      !offerLetterDetails.workingHours ||
+      !offerLetterDetails.workingDays ||
+      !offerLetterDetails.leaveSalary ||
+      !offerLetterDetails.endOfService ||
+      !offerLetterDetails.probationPeriod;
+
+    // Check if OFFER_LETTER_SIGN stage is completed
+    const offerLetterStageCompleted = labour.stages?.some(
+      (stage) =>
+        stage.stage === "OFFER_LETTER_SIGN" && stage.status === "COMPLETED"
+    );
+
+    // Check if signed offer letter exists and stage is not completed
+    const canVerifyOfferLetter =
+      assignment.signedOfferLetterUrl && !offerLetterStageCompleted;
+
+    const handleViewOfferLetter = async () => {
+      setViewing(true);
+      try {
+        if (assignment.signedOfferLetterUrl) {
+          // View signed offer letter
+          window.open(assignment.signedOfferLetterUrl, "_blank");
+        } else {
+          // View generated offer letter
+          const url = `/api/offer-letter/generate?labourId=${labour.id}&jobRoleId=${jobRoleId}`;
+          window.open(url, "_blank");
+        }
+      } catch {
+        toast({ type: "error", message: "Failed to open offer letter PDF" });
+      } finally {
+        setViewing(false);
+      }
+    };
+
+    // Download handler
+
+    // Download handler
+    const handleDownloadOfferLetter = async () => {
+      setDownloading(true);
+      try {
+        if (assignment.signedOfferLetterUrl) {
+          // Download signed offer letter
+          const response = await fetch(assignment.signedOfferLetterUrl);
+          if (!response.ok)
+            throw new Error("Failed to download signed offer letter");
+          const blob = await response.blob();
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = downloadUrl;
+          a.download = `SignedOfferLetter-${labour.name.replace(/\s+/g, "_")}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(downloadUrl);
+        } else {
+          // Download generated offer letter
+          const url = `/api/offer-letter/generate?labourId=${labour.id}&jobRoleId=${jobRoleId}&download=1`;
+          const res = await fetch(url);
+          if (!res.ok) throw new Error("Failed to download offer letter PDF");
+          const blob = await res.blob();
+          const downloadUrl = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = downloadUrl;
+          a.download = `OfferLetter-${labour.name.replace(/\s+/g, "_")}.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(downloadUrl);
+        }
+      } catch {
+        toast({
+          type: "error",
+          message: "Failed to download offer letter PDF",
+        });
+      } finally {
+        setDownloading(false);
+      }
+    };
+
+    const handleVerifyOfferLetter = async () => {
+      if (!assignment.signedOfferLetterUrl) {
+        toast({ type: "error", message: "No signed offer letter to verify" });
+        return;
+      }
+
+      setVerifying(true);
+      try {
+        const res = await fetch(
+          `/api/clients/assignments/${assignment.id}/verify-offer-letter`,
+          {
+            method: "POST",
+          }
+        );
+        if (!res.ok) throw new Error("Failed to verify offer letter");
+
+        toast({
+          type: "success",
+          message: "Signed offer letter verified successfully",
+        });
+        // Refresh the requirements to update the UI
+        await refreshRequirements();
+      } catch {
+        toast({
+          type: "error",
+          message: "Failed to verify signed offer letter",
+        });
+      } finally {
+        setVerifying(false);
+      }
+    };
+
     return (
       <div className="bg-[#EDDDF3] rounded-lg p-4 relative">
         <div className="flex items-center gap-3 mb-3">
@@ -198,7 +655,6 @@ export default function ClientRecruitment() {
               <User className="w-6 h-6 text-[#150B3D]/50" />
             </div>
           )}
-
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold text-[#150B3D] truncate">
               {labour.name}
@@ -215,8 +671,6 @@ export default function ClientRecruitment() {
             </div>
           </div>
         </div>
-
-        {/* Quick info */}
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div>
             <span className="text-[#150B3D]/70">Nationality:</span>
@@ -227,8 +681,6 @@ export default function ClientRecruitment() {
             <span className="block">{labour.age}</span>
           </div>
         </div>
-
-        {/* Current stage */}
         <div className="mt-3 pt-3 border-t border-[#150B3D]/10">
           <div className="flex items-center justify-between">
             <span className="text-sm text-[#150B3D]/70">Current Stage:</span>
@@ -237,15 +689,84 @@ export default function ClientRecruitment() {
             </span>
           </div>
         </div>
-
-        {/* View timeline button */}
         <button
-          onClick={() => setSelectedLabour({ profile: labour, stages })}
           className="mt-3 w-full py-1.5 px-3 bg-[#3D1673] hover:bg-[#2b0e54] text-white text-xs rounded flex items-center justify-center gap-1"
+          onClick={() => {
+            handleViewTimeline(labour, assignment);
+          }}
         >
-          <BarChart2 className="w-3 h-3" />
           View Timeline
         </button>
+        <button
+          className="mt-2 w-full py-1.5 px-3 bg-[#150B3D] hover:bg-[#0e0726] text-white text-xs rounded flex items-center justify-center gap-1 disabled:opacity-50"
+          onClick={
+            labour.currentStage === "READY_TO_TRAVEL" ||
+            labour.currentStage === "TRAVEL_CONFIRMATION" ||
+            labour.currentStage === "ARRIVAL_CONFIRMATION"
+              ? () => handleViewDocuments(labour, assignment)
+              : handleViewOfferLetter
+          }
+          disabled={viewing || offerLetterBlocked}
+          title={
+            offerLetterBlocked
+              ? "Offer letter details not filled by client"
+              : ""
+          }
+        >
+          {labour.currentStage === "READY_TO_TRAVEL" ||
+          labour.currentStage === "TRAVEL_CONFIRMATION" ||
+          labour.currentStage === "ARRIVAL_CONFIRMATION"
+            ? "View Documents"
+            : assignment.signedOfferLetterUrl
+              ? "View Signed Offer Letter"
+              : "View Offer Letter"}
+        </button>
+        {labour.currentStage !== "READY_TO_TRAVEL" &&
+          labour.currentStage !== "TRAVEL_CONFIRMATION" &&
+          labour.currentStage !== "ARRIVAL_CONFIRMATION" && (
+            <button
+              className="mt-2 w-full py-1.5 px-3 bg-[#3D1673] hover:bg-[#2b0e54] text-white text-xs rounded flex items-center justify-center gap-1 disabled:opacity-50"
+              onClick={handleDownloadOfferLetter}
+              disabled={downloading || offerLetterBlocked}
+              title={
+                offerLetterBlocked
+                  ? "Offer letter details not filled by client"
+                  : ""
+              }
+            >
+              {downloading ? (
+                <svg className="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              ) : null}
+              {assignment.signedOfferLetterUrl
+                ? "Download Signed Offer Letter"
+                : "Download Offer Letter"}
+            </button>
+          )}
+
+        {canVerifyOfferLetter && (
+          <button
+            className="mt-2 w-full py-1.5 px-3 bg-[#00C853] hover:bg-[#009e3c] text-white text-xs rounded flex items-center justify-center gap-1 disabled:opacity-50"
+            onClick={handleVerifyOfferLetter}
+            disabled={verifying}
+          >
+            {verifying ? "Verifying..." : "Verify Signed Offer Letter"}
+          </button>
+        )}
       </div>
     );
   };
@@ -413,6 +934,13 @@ export default function ClientRecruitment() {
                 )}
               </div>
             </div>
+            {offerLetterDetails && (
+              <div className="mb-4 flex justify-end">
+                <Button onClick={handleEditDetails} variant="outline">
+                  Edit Offer Letter Details
+                </Button>
+              </div>
+            )}
 
             {/* Labour Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -420,7 +948,8 @@ export default function ClientRecruitment() {
                 <LabourCard
                   key={assignment.id}
                   labour={assignment.labour}
-                  stages={assignment.labour.stages}
+                  jobRoleId={currentJobRole.id}
+                  assignment={assignment}
                 />
               ))}
             </div>
@@ -434,85 +963,238 @@ export default function ClientRecruitment() {
             </p>
           </div>
         )}
+        {/* Timeline Modal */}
+        <Modal
+          isOpen={!!timelineLabour}
+          onClose={() => {
+            setTimelineLabour(null);
+            setTimelineAssignment(null);
+          }}
+          title={
+            timelineLabour ? `${timelineLabour.name}'s Onboarding Timeline` : ""
+          }
+          size="2xl"
+        >
+          {timelineLabour && (
+            <>
+              {/* Debug info */}
+              {console.log("Timeline Assignment:", timelineAssignment)}
+              {console.log("Visa URL:", timelineAssignment?.visaUrl)}
+              <ProgressTracker
+                currentStage={timelineLabour.currentStage}
+                statuses={Object.fromEntries(
+                  (timelineLabour.stages || []).map((s) => [s.stage, s.status])
+                )}
+                userRole="CLIENT_ADMIN"
+                onAction={handleTimelineAction}
+                onUpload={handleTimelineUpload}
+                documents={{
+                  VISA_PRINTING: timelineAssignment?.visaUrl || "",
+                }}
+              />
+            </>
+          )}
+        </Modal>
+        <Modal
+          isOpen={showDetailsModal}
+          onClose={() => setShowDetailsModal(false)}
+          title="Enter Offer Letter Details"
+          showFooter={false}
+        >
+          <form onSubmit={handleDetailsSubmit} className="space-y-4 my-5">
+            {formError && (
+              <div className="text-red-600 text-sm mb-2">{formError}</div>
+            )}
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Working Hours{" "}
+                <span className="text-xs text-gray-500">(1-24 hours)</span>
+              </label>
+              <input
+                name="workingHours"
+                type="number"
+                min={1}
+                max={24}
+                value={detailsForm.workingHours}
+                onChange={handleDetailsChange}
+                className="w-full p-2 border rounded"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Working Days{" "}
+                <span className="text-xs text-gray-500">(1-7 days)</span>
+              </label>
+              <input
+                name="workingDays"
+                type="number"
+                min={1}
+                max={7}
+                value={detailsForm.workingDays}
+                onChange={handleDetailsChange}
+                className="w-full p-2 border rounded"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Leave Salary
+              </label>
+              <input
+                name="leaveSalary"
+                value={detailsForm.leaveSalary}
+                onChange={handleDetailsChange}
+                className="w-full p-2 border rounded"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                End of Service
+              </label>
+              <input
+                name="endOfService"
+                value={detailsForm.endOfService}
+                onChange={handleDetailsChange}
+                className="w-full p-2 border rounded"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Probation Period
+              </label>
+              <input
+                name="probationPeriod"
+                value={detailsForm.probationPeriod}
+                onChange={handleDetailsChange}
+                className="w-full p-2 border rounded"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              className="w-full py-2 px-4 bg-[#3D1673] text-white rounded"
+              disabled={detailsLoading}
+            >
+              {detailsLoading ? "Saving..." : "Save Details"}
+            </button>
+          </form>
+        </Modal>
+
+        {/* Document Viewer Modal */}
+        <TravelDocumentsViewerModal
+          isOpen={showDocumentViewer}
+          onClose={() => {
+            setShowDocumentViewer(false);
+            setDocumentsLabour(null);
+            setDocumentsAssignment(null);
+          }}
+          labourName={documentsLabour?.name || ""}
+          visaUrl={documentsAssignment?.visaUrl || ""}
+          existingTravelDate={
+            documentsAssignment?.travelDate
+              ? (() => {
+                  const travelDate = documentsAssignment.travelDate;
+                  if (
+                    travelDate &&
+                    typeof travelDate === "object" &&
+                    "toISOString" in travelDate
+                  ) {
+                    return (travelDate as Date).toISOString();
+                  }
+                  if (typeof travelDate === "string") {
+                    return travelDate;
+                  }
+                  return "";
+                })()
+              : ""
+          }
+          existingDocuments={
+            documentsLabour && documentsAssignment
+              ? (() => {
+                  const documents = [];
+
+                  // Add flight ticket if available
+                  if (documentsAssignment.flightTicketUrl) {
+                    documents.push({
+                      id: "flight-ticket-1",
+                      name: "Flight Ticket",
+                      type: "flight-ticket",
+                      url: documentsAssignment.flightTicketUrl,
+                      uploadedAt: new Date().toISOString(),
+                    });
+                  }
+
+                  // Add medical certificate if available
+                  if (documentsAssignment.medicalCertificateUrl) {
+                    documents.push({
+                      id: "medical-certificate-1",
+                      name: "Medical Certificate",
+                      type: "medical-certificate",
+                      url: documentsAssignment.medicalCertificateUrl,
+                      uploadedAt: new Date().toISOString(),
+                    });
+                  }
+
+                  // Add police clearance if available
+                  if (documentsAssignment.policeClearanceUrl) {
+                    documents.push({
+                      id: "police-clearance-1",
+                      name: "Police Clearance",
+                      type: "police-clearance",
+                      url: documentsAssignment.policeClearanceUrl,
+                      uploadedAt: new Date().toISOString(),
+                    });
+                  }
+
+                  // Add employment contract if available
+                  if (documentsAssignment.employmentContractUrl) {
+                    documents.push({
+                      id: "employment-contract-1",
+                      name: "Employment Contract",
+                      type: "employment-contract",
+                      url: documentsAssignment.employmentContractUrl,
+                      uploadedAt: new Date().toISOString(),
+                    });
+                  }
+
+                  // Add additional documents if available
+                  if (
+                    documentsAssignment.additionalDocumentsUrls &&
+                    documentsAssignment.additionalDocumentsUrls.length > 0
+                  ) {
+                    documentsAssignment.additionalDocumentsUrls.forEach(
+                      (url, index) => {
+                        documents.push({
+                          id: `additional-documents-${index + 1}`,
+                          name: `Additional Document ${index + 1}`,
+                          type: "additional-documents",
+                          url: url,
+                          uploadedAt: new Date().toISOString(),
+                        });
+                      }
+                    );
+                  }
+
+                  return documents;
+                })()
+              : []
+          }
+        />
+
+        {/* Arrival Confirmation Modal */}
+        <ArrivalConfirmationModal
+          isOpen={showArrivalConfirmation}
+          onClose={() => {
+            setShowArrivalConfirmation(false);
+            setArrivalConfirmationLabour(null);
+          }}
+          onConfirm={handleArrivalConfirmation}
+          labourName={arrivalConfirmationLabour?.name || ""}
+        />
       </div>
-
-      {/* Gantt Chart Modal */}
-      <Modal
-        isOpen={!!selectedLabour}
-        onClose={() => setSelectedLabour(null)}
-        title={`${selectedLabour?.profile.name}'s Recruitment Timeline`}
-        size="2xl"
-      >
-        {selectedLabour && (
-          <div className="space-y-6">
-            <div className="flex items-center gap-4">
-              {selectedLabour.profile.profileImage ? (
-                <img
-                  src={selectedLabour.profile.profileImage}
-                  alt={selectedLabour.profile.name}
-                  className="w-16 h-16 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-16 h-16 rounded-full bg-[#150B3D]/10 flex items-center justify-center">
-                  <User className="w-8 h-8 text-[#150B3D]/50" />
-                </div>
-              )}
-              <div>
-                <h3 className="font-semibold text-lg text-[#150B3D]">
-                  {selectedLabour.profile.name}
-                </h3>
-                <div className="flex gap-2">
-                  <span
-                    className={`text-xs ${getStatusColor(
-                      selectedLabour.profile.status
-                    )}`}
-                  >
-                    {selectedLabour.profile.status
-                      .replace("_", " ")
-                      .toLowerCase()}
-                  </span>
-                  <span
-                    className={`text-xs ${getStatusColor(
-                      selectedLabour.profile.verificationStatus
-                    )}`}
-                  >
-                    {selectedLabour.profile.verificationStatus
-                      .replace("_", " ")
-                      .toLowerCase()}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-[#150B3D]/70 font-medium">
-                  Nationality:
-                </span>
-                <span className="text-[#150B3D]">
-                  {selectedLabour.profile.nationality}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#150B3D]/70 font-medium">Age:</span>
-                <span className="text-[#150B3D]">
-                  {selectedLabour.profile.age}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#150B3D]/70 font-medium">
-                  Current Stage:
-                </span>
-                <span className="text-[#150B3D]">
-                  {selectedLabour.profile.currentStage.replace(/_/g, " ")}
-                </span>
-              </div>
-            </div>
-
-            <GanttChart stages={selectedLabour.stages} />
-          </div>
-        )}
-      </Modal>
     </div>
   );
 }

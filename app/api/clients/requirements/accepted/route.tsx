@@ -36,7 +36,21 @@ export async function GET() {
               where: {
                 clientStatus: "ACCEPTED",
               },
-              include: {
+              select: {
+                id: true,
+                agencyStatus: true,
+                adminStatus: true,
+                clientStatus: true,
+                adminFeedback: true,
+                clientFeedback: true,
+                signedOfferLetterUrl: true,
+                visaUrl: true,
+                travelDate: true,
+                flightTicketUrl: true,
+                medicalCertificateUrl: true,
+                policeClearanceUrl: true,
+                employmentContractUrl: true,
+                additionalDocumentsUrls: true,
                 labour: {
                   include: {
                     stages: {

@@ -4,6 +4,7 @@
 import { SessionProvider } from "next-auth/react";
 import { ToastProvider } from "@/context/toast-provider";
 import { SidebarProvider } from "@/context/SidebarContext";
+import { WebSocketProvider } from "@/context/WebSocketContext";
 import { ReactNode } from "react";
 import DashboardLayoutClient from "@/app/(protected)/dashboardLayoutClient";
 import { UserRole } from "@/lib/generated/prisma";
@@ -25,17 +26,19 @@ export default function ProvidersWrapper({
 }: ProvidersWrapperProps) {
   return (
     <SessionProvider session={session}>
-      <SidebarProvider>
-        <ToastProvider>
-          <DashboardLayoutClient
-            role={role}
-            avatarUrl={session.user.profilePicture || ""}
-            userName={session.user.name || ""}
-          >
-            {children}
-          </DashboardLayoutClient>
-        </ToastProvider>
-      </SidebarProvider>
+      <WebSocketProvider>
+        <SidebarProvider>
+          <ToastProvider>
+            <DashboardLayoutClient
+              role={role}
+              avatarUrl={session.user.profilePicture || ""}
+              userName={session.user.name || ""}
+            >
+              {children}
+            </DashboardLayoutClient>
+          </ToastProvider>
+        </SidebarProvider>
+      </WebSocketProvider>
     </SessionProvider>
   );
 }

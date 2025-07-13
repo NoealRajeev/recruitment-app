@@ -4,15 +4,9 @@
 import { signOut } from "next-auth/react";
 import { UserRole } from "@prisma/client";
 import { useState, useRef, useEffect } from "react";
-import { usePathname } from "next/navigation";
-import {
-  Bell,
-  ChevronDown,
-  LogOut,
-  Search,
-  Settings,
-  User,
-} from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { ChevronDown, LogOut, Search, Settings, User } from "lucide-react";
+import NotificationBell from "../ui/NotificationBell";
 
 interface DashboardHeaderProps {
   role: UserRole;
@@ -26,7 +20,11 @@ export default function DashboardHeader({
   userName,
 }: DashboardHeaderProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  console.log("Current pathname:", pathname);
+  console.log("Router object:", router);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Map paths to their display names
@@ -105,11 +103,8 @@ export default function DashboardHeader({
               <Search className="text-white h-5 w-5" />
             </button>
 
-            {/* Notification Button */}
-            <button className="w-9 h-9 rounded-full bg-[#0B0016] flex items-center justify-center relative">
-              <Bell className="text-white h-5 w-5" />
-              <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+            {/* Notification Bell */}
+            <NotificationBell />
 
             {/* User Profile Dropdown */}
             <div className="relative" ref={dropdownRef}>
@@ -147,8 +142,12 @@ export default function DashboardHeader({
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 py-1">
                   <button
-                    onClick={() => {
-                      console.log("Profile clicked");
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log("Profile button clicked");
+                      alert("Profile button clicked!");
+                      router.push("/dashboard/profile");
                       setIsDropdownOpen(false);
                     }}
                     className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
@@ -157,8 +156,12 @@ export default function DashboardHeader({
                     Profile
                   </button>
                   <button
-                    onClick={() => {
-                      console.log("Settings clicked");
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log("Settings button clicked");
+                      alert("Settings button clicked!");
+                      window.location.href = "/dashboard/settings";
                       setIsDropdownOpen(false);
                     }}
                     className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
@@ -168,6 +171,7 @@ export default function DashboardHeader({
                   </button>
                   <button
                     onClick={() => {
+                      console.log("Logout button clicked");
                       signOut();
                       setIsDropdownOpen(false);
                     }}

@@ -11,16 +11,16 @@ import {
 
 // Define the stage progression order
 const STAGE_ORDER: LabourStage[] = [
-  LabourStage.DOCUMENTS,
-  LabourStage.MEDICAL,
-  LabourStage.QVC,
-  LabourStage.POLICE_CLEARANCE,
-  LabourStage.VISA,
-  LabourStage.FLIGHT,
-  LabourStage.ARRIVAL,
-  LabourStage.WORK_PERMIT,
-  LabourStage.CONTRACT,
-  LabourStage.DEPLOYMENT,
+  LabourStage.OFFER_LETTER_SIGN,
+  LabourStage.VISA_APPLYING,
+  LabourStage.QVC_PAYMENT,
+  LabourStage.CONTRACT_SIGN,
+  LabourStage.MEDICAL_STATUS,
+  LabourStage.FINGERPRINT,
+  LabourStage.VISA_PRINTING,
+  LabourStage.READY_TO_TRAVEL,
+  LabourStage.TRAVEL_CONFIRMATION,
+  LabourStage.ARRIVAL_CONFIRMATION,
 ];
 
 export async function POST(
@@ -139,7 +139,7 @@ export async function POST(
           },
         });
       }
-      if (stage === LabourStage.DEPLOYMENT) {
+      if (stage === LabourStage.ARRIVAL_CONFIRMATION) {
         await tx.labourProfile.update({
           where: { id: params.id },
           data: {

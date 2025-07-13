@@ -146,9 +146,9 @@ export async function PUT(request: Request) {
               tx.labourStageHistory.create({
                 data: {
                   labourId: assignment.labourId,
-                  stage: "INITIALIZED",
-                  status: "COMPLETED",
-                  notes: "Client accepted the labour profile",
+                  stage: "OFFER_LETTER_SIGN",
+                  status: "PENDING",
+                  notes: "Awaiting offer letter signature",
                   documents: [],
                 },
               })

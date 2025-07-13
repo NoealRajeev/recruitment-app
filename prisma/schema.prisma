@@ -122,26 +122,98 @@
     
   }
 
+enum NotificationType {
+  // User Management
+  USER_REGISTERED
+  USER_VERIFIED
+  USER_SUSPENDED
+  USER_DELETED
+  PASSWORD_CHANGED
+  ACCOUNT_RECOVERY
+
+  // Requirement Management
+  REQUIREMENT_CREATED
+  REQUIREMENT_UPDATED
+  REQUIREMENT_STATUS_CHANGED
+  REQUIREMENT_FORWARDED_TO_AGENCY
+  REQUIREMENT_ACCEPTED
+  REQUIREMENT_REJECTED
+  REQUIREMENT_NEEDS_REVISION
+
+  // Labour Profile Management
+  LABOUR_PROFILE_CREATED
+  LABOUR_PROFILE_STATUS_CHANGED
+  LABOUR_PROFILE_VERIFIED
+  LABOUR_PROFILE_DOCUMENT_UPLOADED
+  LABOUR_PROFILE_STAGE_UPDATED
+
+  // Assignment Management
+  ASSIGNMENT_CREATED
+  ASSIGNMENT_STATUS_CHANGED
+  ASSIGNMENT_FEEDBACK_RECEIVED
+
+  // Document Management
+  DOCUMENT_UPLOADED
+  DOCUMENT_VERIFIED
+  DOCUMENT_REJECTED
+  OFFER_LETTER_GENERATED
+  OFFER_LETTER_SIGNED
+  VISA_UPLOADED
+  TRAVEL_DOCUMENTS_UPLOADED
+
+  // Stage Management
+  STAGE_COMPLETED
+  STAGE_FAILED
+  STAGE_PENDING_ACTION
+  TRAVEL_CONFIRMED
+  ARRIVAL_CONFIRMED
+  LABOUR_DEPLOYED
+
+  // Agency Management
+  AGENCY_ASSIGNED
+  AGENCY_RESPONSE_RECEIVED
+  AGENCY_STATUS_CHANGED
+
+  // System Notifications
+  SYSTEM_MAINTENANCE
+  SYSTEM_UPDATE
+  SECURITY_ALERT
+  WELCOME_MESSAGE
+}
+
 enum StageStatus {
   PENDING
   IN_PROGRESS
   COMPLETED
   FAILED
   REJECTED
+  PAID
+  SIGNED
+  REFUSED
+  FIT
+  UNFIT
+  PASSED
+  FILLED
+  TRAVELED
+  RESCHEDULED
+  CANCELED
+  ARRIVED
+  NOT_ARRIVED
+  VISA_PRINTED
 }
 
 enum LabourStage {
-  INITIALIZED
-  DOCUMENTS
-  MEDICAL
-  QVC
-  POLICE_CLEARANCE
-  VISA
-  FLIGHT
-  ARRIVAL
-  WORK_PERMIT
-  CONTRACT
-  DEPLOYMENT
+  OFFER_LETTER_SIGN
+  VISA_APPLYING
+  QVC_PAYMENT
+  CONTRACT_SIGN
+  MEDICAL_STATUS
+  FINGERPRINT
+  VISA_PRINTING
+  READY_TO_TRAVEL
+  TRAVEL_CONFIRMATION
+  ARRIVAL_CONFIRMATION
+  DEPLOYED
 }
 
   enum DeletionType {
@@ -225,6 +297,10 @@ enum RequirementStatus {
     createdById     String?
     createdUsers    User[]          @relation("UserCreation")
     auditLogs       AuditLog[]
+    
+    // Notification relations
+    notifications   Notification[]  @relation("UserNotifications")
+    sentNotifications Notification[] @relation("UserSentNotifications")
 
     @@index([email])
     @@index([status])
@@ -346,6 +422,7 @@ enum RequirementStatus {
     auditLogs      AuditLog[]         @relation("RequirementAudit")
 
     LabourProfile LabourProfile[]
+    OfferLetterDetails OfferLetterDetails?
   }
 
   /// A single row in the "table" of roles for one requirement
@@ -435,7 +512,7 @@ model LabourProfile {
   agencyId               String
   agency                 Agency                     @relation(fields: [agencyId], references: [id])
 
-  currentStage           LabourStage                @default(INITIALIZED)
+  currentStage           LabourStage                @default(OFFER_LETTER_SIGN)
   stages                 LabourStageHistory[]
   
   // Audit logs
@@ -471,6 +548,17 @@ model LabourAssignment {
   // Tracking feedback
   adminFeedback    String?
   clientFeedback   String?
+
+  signedOfferLetterUrl String? // Path to uploaded signed offer letter PDF
+  visaUrl             String? // Path to uploaded visa PDF
+  
+  // Travel documents
+  travelDate          DateTime? // Travel date for the labour
+  flightTicketUrl     String? // Path to uploaded flight ticket
+  medicalCertificateUrl String? // Path to uploaded medical certificate
+  policeClearanceUrl  String? // Path to uploaded police clearance
+  employmentContractUrl String? // Path to uploaded employment contract
+  additionalDocumentsUrls String[] // Paths to uploaded additional documents
   
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -535,3 +623,62 @@ model JobRoleForwarding {
 
   @@unique([jobRoleId, agencyId])
   }
+
+model OfferLetterDetails {
+  id              String   @id @default(uuid())
+  requirementId   String   @unique
+  requirement     Requirement @relation(fields: [requirementId], references: [id])
+  workingHours    String?
+  workingDays     String?
+  leaveSalary     String?
+  endOfService    String?
+  probationPeriod String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Notification {
+  id              String           @id @default(uuid())
+  type            NotificationType
+  title           String
+  message         String
+  recipientId     String
+  recipient       User             @relation("UserNotifications", fields: [recipientId], references: [id], onDelete: Cascade)
+  senderId        String?
+  sender          User?            @relation("UserSentNotifications", fields: [senderId], references: [id], onDelete: SetNull)
+  
+  // Related entities
+  entityType      String?          @db.VarChar(50) // e.g., "Requirement", "LabourProfile", "Assignment"
+  entityId        String?          // ID of the related entity
+  
+  // Notification metadata
+  isRead          Boolean          @default(false)
+  isArchived      Boolean          @default(false)
+  priority        NotificationPriority @default(NORMAL)
+  
+  // Action data
+  actionUrl       String?          // URL to navigate to when notification is clicked
+  actionText      String?          // Text for action button
+  
+  // Timestamps
+  createdAt       DateTime         @default(now())
+  readAt          DateTime?
+  archivedAt      DateTime?
+
+  @@index([recipientId])
+  @@index([senderId])
+  @@index([type])
+  @@index([isRead])
+  @@index([isArchived])
+  @@index([createdAt])
+  @@index([entityType, entityId])
+  @@index([recipientId, isRead])
+  @@index([recipientId, isArchived])
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}

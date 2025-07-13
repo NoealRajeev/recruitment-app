@@ -1,17 +1,9 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  User,
-  Building,
-  BarChart2,
-  Edit,
-} from "lucide-react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { ChevronLeft, ChevronRight, User, Building } from "lucide-react";
 import { useToast } from "@/context/toast-provider";
-import GanttChart from "@/components/ui/GanttChart";
 import {
   RequirementStatus,
   LabourStage,
@@ -19,6 +11,10 @@ import {
   StageStatus,
 } from "@/lib/generated/prisma";
 import { Modal } from "@/components/ui/Modal";
+import ProgressTracker from "@/components/ui/ProgressTracker";
+import TravelDocumentsViewerModal from "@/components/shared/TravelDocumentsViewerModal";
+import EditDocumentsModal from "@/components/shared/EditDocumentsModal";
+import TravelConfirmationModal from "@/components/ui/TravelConfirmationModal";
 
 // Types
 interface Requirement {
@@ -40,6 +36,14 @@ interface LabourAssignment {
   labour: LabourProfile & {
     stages: LabourStageHistory[];
   };
+  signedOfferLetterUrl?: string | null;
+  visaUrl?: string | null;
+  travelDate?: Date | string | null;
+  flightTicketUrl?: string | null;
+  medicalCertificateUrl?: string | null;
+  policeClearanceUrl?: string | null;
+  employmentContractUrl?: string | null;
+  additionalDocumentsUrls?: string[];
 }
 
 interface LabourProfile {
@@ -52,6 +56,7 @@ interface LabourProfile {
   verificationStatus: string;
   profileImage?: string;
   currentStage: LabourStage;
+  stages?: LabourStageHistory[];
 }
 
 interface LabourStageHistory {
@@ -61,6 +66,14 @@ interface LabourStageHistory {
   notes?: string | null;
   createdAt: Date;
   completedAt?: Date | null;
+}
+
+interface OfferLetterDetails {
+  workingHours: string;
+  workingDays: string;
+  leaveSalary: string;
+  endOfService: string;
+  probationPeriod: string;
 }
 
 // Constants
@@ -113,14 +126,164 @@ const updateLabourStage = async (
 // Components
 const LabourCard = ({
   labour,
+  jobRoleId,
   onViewTimeline,
-  onUpdateStage,
+  offerLetterDetails,
+  signedOfferLetterUrl,
+  assignmentId,
+  onSignedOfferLetterUploaded,
+  onEditDocuments,
+  setDocumentViewerLabour,
+  setShowDocumentViewer,
+  setTravelConfirmationLabour,
+  setShowTravelConfirmation,
 }: {
   labour: LabourProfile;
-  stages: LabourStageHistory[];
+  jobRoleId: string;
   onViewTimeline: () => void;
-  onUpdateStage: () => void;
+  offerLetterDetails: OfferLetterDetails | null;
+  signedOfferLetterUrl: string | null;
+  assignmentId: string;
+  onSignedOfferLetterUploaded: () => void;
+  onEditDocuments: () => void;
+  setDocumentViewerLabour: (labour: LabourProfile) => void;
+  setShowDocumentViewer: (open: boolean) => void;
+  setTravelConfirmationLabour: (labour: LabourProfile) => void;
+  setShowTravelConfirmation: (open: boolean) => void;
 }) => {
+  const [downloading, setDownloading] = useState(false);
+  const [viewing, setViewing] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const offerLetterBlocked =
+    !offerLetterDetails ||
+    !offerLetterDetails.workingHours ||
+    !offerLetterDetails.workingDays ||
+    !offerLetterDetails.leaveSalary ||
+    !offerLetterDetails.endOfService ||
+    !offerLetterDetails.probationPeriod;
+
+  const handleDownloadOfferLetter = async () => {
+    setDownloading(true);
+    try {
+      if (signedOfferLetterUrl) {
+        // Download signed offer letter
+        const response = await fetch(signedOfferLetterUrl);
+        if (!response.ok)
+          throw new Error("Failed to download signed offer letter");
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `SignedOfferLetter-${labour.name.replace(/\s+/g, "_")}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } else {
+        // Download generated offer letter
+        const res = await fetch(
+          `/api/offer-letter/generate?labourId=${labour.id}&jobRoleId=${jobRoleId}`
+        );
+        if (!res.ok) throw new Error("Failed to generate offer letter PDF");
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `OfferLetter-${labour.name.replace(/\s+/g, "_")}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      }
+    } catch {
+      toast({ type: "error", message: "Failed to download offer letter PDF" });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleViewOfferLetter = async () => {
+    setViewing(true);
+    try {
+      const url = `/api/offer-letter/generate?labourId=${labour.id}&jobRoleId=${jobRoleId}`;
+      window.open(url, "_blank");
+    } catch {
+      toast({ type: "error", message: "Failed to open offer letter PDF" });
+    } finally {
+      setViewing(false);
+    }
+  };
+
+  const handleViewSignedOfferLetter = () => {
+    if (signedOfferLetterUrl) {
+      // Open signed offer letter in new tab
+      window.open(signedOfferLetterUrl, "_blank");
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+      toast({ type: "error", message: "Only PDF files are allowed." });
+      return;
+    }
+
+    // Create preview URL and show modal
+    const url = URL.createObjectURL(file);
+    setSelectedFile(file);
+    setPreviewUrl(url);
+    setShowPreviewModal(true);
+
+    // Clear the input
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleAcceptUpload = async () => {
+    if (!selectedFile) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("assignmentId", assignmentId);
+      const res = await fetch("/api/offer-letter/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) throw new Error("Failed to upload signed offer letter");
+      toast({ type: "success", message: "Signed offer letter uploaded." });
+      onSignedOfferLetterUploaded();
+      setShowPreviewModal(false);
+    } catch {
+      toast({
+        type: "error",
+        message: "Failed to upload signed offer letter.",
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDiscardUpload = () => {
+    setShowPreviewModal(false);
+    setSelectedFile(null);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     return (
       STATUS_COLORS[status as keyof typeof STATUS_COLORS] ||
@@ -128,86 +291,264 @@ const LabourCard = ({
     );
   };
 
+  // Helper to determine if stage is after READY_TO_TRAVEL
+  const isAfterReadyToTravel = [
+    "TRAVEL_CONFIRMATION",
+    "ARRIVAL_CONFIRMATION",
+    "DEPLOYED",
+  ].includes(labour.currentStage);
+
   return (
-    <div className="bg-[#EDDDF3] rounded-lg p-4 relative">
-      <div className="flex items-center gap-3 mb-3">
-        {labour.profileImage ? (
-          <img
-            src={labour.profileImage}
-            alt={labour.name}
-            className="w-12 h-12 rounded-full object-cover"
-          />
-        ) : (
-          <div className="w-12 h-12 rounded-full bg-[#150B3D]/10 flex items-center justify-center">
-            <User className="w-6 h-6 text-[#150B3D]/50" />
+    <>
+      <div
+        className={`rounded-lg p-4 relative ${
+          labour.currentStage === "DEPLOYED"
+            ? "bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200"
+            : "bg-[#EDDDF3]"
+        }`}
+      >
+        <div className="flex items-center gap-3 mb-3">
+          {labour.profileImage ? (
+            <img
+              src={labour.profileImage}
+              alt={labour.name}
+              className="w-12 h-12 rounded-full object-cover"
+            />
+          ) : (
+            <div className="w-12 h-12 rounded-full bg-[#150B3D]/10 flex items-center justify-center">
+              <User className="w-6 h-6 text-[#150B3D]/50" />
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-[#150B3D] truncate">
+              {labour.name}
+            </h3>
+            <div className="flex gap-2">
+              <span className={`text-xs ${getStatusColor(labour.status)}`}>
+                {labour.status.replace("_", " ").toLowerCase()}
+              </span>
+              <span
+                className={`text-xs ${getStatusColor(labour.verificationStatus)}`}
+              >
+                {labour.verificationStatus.replace("_", " ").toLowerCase()}
+              </span>
+              {labour.currentStage === "DEPLOYED" && (
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+                  🚀 Deployed
+                </span>
+              )}
+            </div>
           </div>
-        )}
-
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-[#150B3D] truncate">
-            {labour.name}
-          </h3>
-          <div className="flex gap-2">
-            <span className={`text-xs ${getStatusColor(labour.status)}`}>
-              {labour.status.replace("_", " ").toLowerCase()}
-            </span>
-            <span
-              className={`text-xs ${getStatusColor(labour.verificationStatus)}`}
-            >
-              {labour.verificationStatus.replace("_", " ").toLowerCase()}
+        </div>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div>
+            <span className="text-[#150B3D]/70">Nationality:</span>
+            <span className="block truncate">{labour.nationality}</span>
+          </div>
+          <div>
+            <span className="text-[#150B3D]/70">Age:</span>
+            <span className="block">{labour.age}</span>
+          </div>
+        </div>
+        <div className="mt-3 pt-3 border-t border-[#150B3D]/10">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-[#150B3D]/70">Current Stage:</span>
+            <span className="text-sm font-medium">
+              {labour.currentStage === "DEPLOYED"
+                ? "✅ Deployed"
+                : labour.currentStage.replace(/_/g, " ")}
             </span>
           </div>
         </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-2 text-sm">
-        <div>
-          <span className="text-[#150B3D]/70">Nationality:</span>
-          <span className="block truncate">{labour.nationality}</span>
-        </div>
-        <div>
-          <span className="text-[#150B3D]/70">Age:</span>
-          <span className="block">{labour.age}</span>
-        </div>
-      </div>
-
-      <div className="mt-3 pt-3 border-t border-[#150B3D]/10">
-        <div className="flex items-center justify-between">
-          <span className="text-sm text-[#150B3D]/70">Current Stage:</span>
-          <span className="text-sm font-medium">
-            {labour.currentStage.replace(/_/g, " ")}
-          </span>
-        </div>
-      </div>
-
-      <div className="mt-3 flex gap-2">
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onViewTimeline();
-          }}
-          className="w-full py-1.5 px-3 bg-[#3D1673] hover:bg-[#2b0e54] text-white text-xs rounded flex items-center justify-center gap-1"
+          className="mt-3 w-full py-1.5 px-3 bg-[#3D1673] hover:bg-[#2b0e54] text-white text-xs rounded flex items-center justify-center gap-1"
+          onClick={onViewTimeline}
         >
-          <BarChart2 className="w-3 h-3" />
           View Timeline
         </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onUpdateStage();
-          }}
-          disabled={labour.currentStage === LabourStage.DEPLOYMENT}
-          className={`w-full py-1.5 px-3 bg-[#150B3D] hover:bg-[#0e0726] text-white text-xs rounded flex items-center justify-center gap-1 ${
-            labour.currentStage === LabourStage.DEPLOYMENT
-              ? "opacity-50 cursor-not-allowed"
-              : ""
-          }`}
-        >
-          <Edit className="w-3 h-3" />
-          Update
-        </button>
+        {/* After READY_TO_TRAVEL: show different buttons based on stage */}
+        {isAfterReadyToTravel ? (
+          <>
+            {labour.currentStage === "DEPLOYED" ? (
+              // DEPLOYED stage: show success message and view documents
+              <>
+                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-center">
+                  <div className="text-green-600 text-xs font-medium">
+                    ✅ Successfully Deployed
+                  </div>
+                  <div className="text-green-500 text-xs mt-1">
+                    Labour has been deployed and is working
+                  </div>
+                </div>
+                <button
+                  className="mt-2 w-full py-1.5 px-3 bg-[#150B3D] hover:bg-[#0e0726] text-white text-xs rounded flex items-center justify-center gap-1"
+                  onClick={() => {
+                    setDocumentViewerLabour(labour);
+                    setShowDocumentViewer(true);
+                  }}
+                >
+                  View Documents
+                </button>
+              </>
+            ) : (
+              // TRAVEL_CONFIRMATION or ARRIVAL_CONFIRMATION stages
+              <>
+                <button
+                  className="mt-2 w-full py-1.5 px-3 bg-[#150B3D] hover:bg-[#0e0726] text-white text-xs rounded flex items-center justify-center gap-1"
+                  onClick={() => {
+                    setDocumentViewerLabour(labour);
+                    setShowDocumentViewer(true);
+                  }}
+                >
+                  View Documents
+                </button>
+                {(labour.currentStage === "TRAVEL_CONFIRMATION" ||
+                  labour.currentStage === "ARRIVAL_CONFIRMATION") && (
+                  <button
+                    className="mt-2 w-full bg-[#150B3D] hover:bg-[#0e0726] text-white py-1.5 px-3 text-xs rounded flex items-center justify-center gap-1"
+                    onClick={() => {
+                      setTravelConfirmationLabour(labour);
+                      setShowTravelConfirmation(true);
+                    }}
+                  >
+                    Update Travel Status
+                  </button>
+                )}
+              </>
+            )}
+          </>
+        ) : (
+          // Before or at READY_TO_TRAVEL: show old buttons (Update Documents, Offer Letter, etc.)
+          <>
+            {signedOfferLetterUrl ? (
+              <button
+                className="mt-2 w-full py-1.5 px-3 bg-[#150B3D] hover:bg-[#0e0726] text-white text-xs rounded flex items-center justify-center gap-1"
+                onClick={handleViewSignedOfferLetter}
+              >
+                View Signed Offer Letter
+              </button>
+            ) : (
+              <button
+                className="mt-2 w-full py-1.5 px-3 bg-[#150B3D] hover:bg-[#0e0726] text-white text-xs rounded flex items-center justify-center gap-1 disabled:opacity-50"
+                onClick={handleViewOfferLetter}
+                disabled={viewing || offerLetterBlocked}
+                title={
+                  offerLetterBlocked
+                    ? "Offer letter details not filled by client"
+                    : ""
+                }
+              >
+                View Offer Letter
+              </button>
+            )}
+            <button
+              className="mt-2 w-full py-1.5 px-3 bg-[#150B3D] hover:bg-[#0e0726] text-white text-xs rounded flex items-center justify-center gap-1 disabled:opacity-50"
+              onClick={
+                labour.currentStage === "READY_TO_TRAVEL" &&
+                signedOfferLetterUrl
+                  ? onEditDocuments
+                  : handleDownloadOfferLetter
+              }
+              disabled={downloading || offerLetterBlocked}
+              title={
+                offerLetterBlocked
+                  ? "Offer letter details not filled by client"
+                  : ""
+              }
+            >
+              {downloading ? (
+                <svg className="animate-spin h-4 w-4 mr-2" viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                    fill="none"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              ) : null}
+              {labour.currentStage === "READY_TO_TRAVEL" && signedOfferLetterUrl
+                ? "Update Documents"
+                : signedOfferLetterUrl
+                  ? "Download Signed Offer Letter"
+                  : "Download Offer Letter"}
+            </button>
+            {!signedOfferLetterUrl && (
+              <button
+                className="mt-2 w-full py-1.5 px-3 bg-[#00C853] hover:bg-[#009e3c] text-white text-xs rounded flex items-center justify-center gap-1 disabled:opacity-50"
+                onClick={handleUploadClick}
+                disabled={uploading || !!signedOfferLetterUrl}
+              >
+                {uploading
+                  ? "Uploading..."
+                  : signedOfferLetterUrl
+                    ? "Signed Offer Letter Uploaded"
+                    : "Upload Signed Offer Letter"}
+              </button>
+            )}
+          </>
+        )}
+        <input
+          type="file"
+          accept="application/pdf"
+          ref={fileInputRef}
+          style={{ display: "none" }}
+          onChange={handleFileChange}
+        />
       </div>
-    </div>
+
+      {/* PDF Preview Modal */}
+      <Modal
+        isOpen={showPreviewModal}
+        onClose={handleDiscardUpload}
+        title="Preview Signed Offer Letter"
+        size="4xl"
+        showFooter
+        onConfirm={handleAcceptUpload}
+        onCancel={handleDiscardUpload}
+        confirmText={uploading ? "Uploading..." : "Accept & Upload"}
+        cancelText="Discard"
+        confirmDisabled={uploading}
+      >
+        <div className="space-y-4">
+          <div className="text-sm text-[#150B3D]/70">
+            <p>File: {selectedFile?.name}</p>
+            <p>
+              Size:{" "}
+              {selectedFile?.size
+                ? (selectedFile.size / 1024 / 1024).toFixed(2)
+                : "0"}{" "}
+              MB
+            </p>
+          </div>
+          <div
+            className="border rounded-lg overflow-hidden"
+            style={{ height: "500px" }}
+          >
+            {previewUrl && (
+              <iframe
+                src={previewUrl}
+                className="w-full h-full"
+                title="PDF Preview"
+              />
+            )}
+          </div>
+          <div className="text-sm text-[#150B3D]/70">
+            <p>
+              Please review the PDF above. Click &quot;Accept &amp; Upload&quot;
+              to proceed or &quot;Discard&quot; to cancel.
+            </p>
+          </div>
+        </div>
+      </Modal>
+    </>
   );
 };
 
@@ -512,10 +853,21 @@ export default function AgencyRecruitment() {
     stages: LabourStageHistory[];
   } | null>(null);
   const [showStageForm, setShowStageForm] = useState(false);
-  const [currentStage, setCurrentStage] = useState<LabourStage>(
-    LabourStage.INITIALIZED
-  );
   const { toast } = useToast();
+  const [timelineLabour, setTimelineLabour] = useState<LabourProfile | null>(
+    null
+  );
+  const [editDocumentsLabour, setEditDocumentsLabour] =
+    useState<LabourProfile | null>(null);
+  const [offerLetterDetails, setOfferLetterDetails] =
+    useState<OfferLetterDetails | null>(null);
+  const [showDocumentViewer, setShowDocumentViewer] = useState(false);
+  const [documentViewerLabour, setDocumentViewerLabour] =
+    useState<LabourProfile | null>(null);
+  const [showEditDocuments, setShowEditDocuments] = useState(false);
+  const [showTravelConfirmation, setShowTravelConfirmation] = useState(false);
+  const [travelConfirmationLabour, setTravelConfirmationLabour] =
+    useState<LabourProfile | null>(null);
 
   // Fetch requirements on mount
   useEffect(() => {
@@ -524,6 +876,7 @@ export default function AgencyRecruitment() {
         setLoading(true);
         const data = await fetchRequirements();
         setRequirements(data);
+
         if (data.length > 0 && !selectedRequirement) {
           setSelectedRequirement(data[0].id);
         }
@@ -539,6 +892,30 @@ export default function AgencyRecruitment() {
     };
 
     loadRequirements();
+  }, [selectedRequirement, toast]);
+
+  // Fetch offer letter details for the selected requirement
+  useEffect(() => {
+    const fetchDetails = async () => {
+      if (!selectedRequirement) return setOfferLetterDetails(null);
+      try {
+        const res = await fetch(
+          `/api/requirements/${selectedRequirement}/offer-letter-details`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setOfferLetterDetails(data);
+        } else {
+          setOfferLetterDetails(null);
+        }
+      } catch {
+        toast({
+          type: "error",
+          message: "Failed to download offer letter PDF",
+        });
+      }
+    };
+    fetchDetails();
   }, [selectedRequirement, toast]);
 
   // Memoized derived state
@@ -593,27 +970,280 @@ export default function AgencyRecruitment() {
     [selectedLabour]
   );
 
-  const handleViewTimeline = useCallback(
-    (labour: LabourProfile, stages: LabourStageHistory[]) => {
-      setSelectedLabour({ profile: labour, stages });
-      setShowStageForm(false);
-    },
-    []
-  );
-
-  const handleOpenUpdateStage = useCallback(
-    (labour: LabourProfile, stages: LabourStageHistory[]) => {
-      setSelectedLabour({ profile: labour, stages });
-      setCurrentStage(labour.currentStage);
-      setShowStageForm(true);
-    },
-    []
-  );
+  const handleViewTimeline = useCallback((labour: LabourProfile) => {
+    setTimelineLabour(labour);
+  }, []);
 
   const handleCloseModal = useCallback(() => {
     setSelectedLabour(null);
     setShowStageForm(false);
   }, []);
+
+  const handleCloseTimelineModal = useCallback(() => {
+    setTimelineLabour(null);
+  }, []);
+
+  const handleTravelConfirmation = async (
+    status: "TRAVELED" | "RESCHEDULED" | "CANCELED",
+    rescheduledDate?: string,
+    notes?: string
+  ) => {
+    if (!travelConfirmationLabour) return;
+
+    try {
+      // Find the assignment for this labour
+      const assignment = requirements
+        .flatMap((req) => req.jobRoles)
+        .flatMap((role) => role.LabourAssignment)
+        .find(
+          (assignment) => assignment.labour.id === travelConfirmationLabour.id
+        );
+
+      if (!assignment) {
+        toast({ type: "error", message: "Assignment not found" });
+        return;
+      }
+
+      const requestBody: {
+        status: string;
+        notes?: string;
+        rescheduledTravelDate?: string;
+      } = { status, notes };
+      if (status === "RESCHEDULED" && rescheduledDate) {
+        requestBody.rescheduledTravelDate = rescheduledDate;
+      }
+
+      const res = await fetch(
+        `/api/agencies/assignments/${assignment.id}/travel-confirmation`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        }
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(
+          errorData.error || "Failed to update travel confirmation"
+        );
+      }
+
+      const successMessage = `Travel status updated to ${status} successfully`;
+      toast({ type: "success", message: successMessage });
+
+      // Refresh requirements to update the UI
+      const updatedRequirements = await fetchRequirements();
+      setRequirements(updatedRequirements);
+
+      // Update timeline labour with new data if it's the same labour
+      if (timelineLabour && timelineLabour.id === travelConfirmationLabour.id) {
+        const updatedLabour = updatedRequirements
+          .flatMap((req) => req.jobRoles)
+          .flatMap((role) => role.LabourAssignment)
+          .find(
+            (assignment) => assignment.labour.id === travelConfirmationLabour.id
+          )?.labour;
+
+        if (updatedLabour) {
+          setTimelineLabour(updatedLabour);
+        }
+      }
+
+      // Close modal
+      setShowTravelConfirmation(false);
+      setTravelConfirmationLabour(null);
+    } catch (error) {
+      console.error("Error updating travel confirmation:", error);
+      toast({
+        type: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to update travel confirmation",
+      });
+    }
+  };
+
+  const handleTimelineUpload = async (stageKey: string, file: File) => {
+    if (!timelineLabour) return;
+
+    try {
+      // Find the assignment for this labour
+      const assignment = requirements
+        .flatMap((req) => req.jobRoles)
+        .flatMap((role) => role.LabourAssignment)
+        .find((assignment) => assignment.labour.id === timelineLabour.id);
+
+      if (!assignment) {
+        toast({ type: "error", message: "Assignment not found" });
+        return;
+      }
+
+      if (stageKey === "OFFER_LETTER_SIGN") {
+        // Upload signed offer letter
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("assignmentId", assignment.id);
+
+        const res = await fetch("/api/offer-letter/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(
+            errorData.error || "Failed to upload signed offer letter"
+          );
+        }
+
+        toast({
+          type: "success",
+          message: "Signed offer letter uploaded successfully",
+        });
+
+        // Refresh requirements to update the UI
+        const updatedRequirements = await fetchRequirements();
+        setRequirements(updatedRequirements);
+
+        // Update timeline labour with new data
+        const updatedLabour = updatedRequirements
+          .flatMap((req) => req.jobRoles)
+          .flatMap((role) => role.LabourAssignment)
+          .find(
+            (assignment) => assignment.labour.id === timelineLabour.id
+          )?.labour;
+
+        if (updatedLabour) {
+          setTimelineLabour(updatedLabour);
+        }
+      } else {
+        toast({
+          type: "error",
+          message: "Upload not implemented for this stage",
+        });
+      }
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast({
+        type: "error",
+        message:
+          error instanceof Error ? error.message : "Failed to upload file",
+      });
+    }
+  };
+
+  const handleTimelineAction = async (stageKey: string) => {
+    if (!timelineLabour) return;
+
+    try {
+      // Find the assignment for this labour
+      const assignment = requirements
+        .flatMap((req) => req.jobRoles)
+        .flatMap((role) => role.LabourAssignment)
+        .find((assignment) => assignment.labour.id === timelineLabour.id);
+
+      if (!assignment) {
+        toast({ type: "error", message: "Assignment not found" });
+        return;
+      }
+
+      let endpoint = "";
+      let successMessage = "";
+
+      if (stageKey === "CONTRACT_SIGN_APPROVE") {
+        endpoint = `/api/agencies/assignments/${assignment.id}/approve-contract`;
+        successMessage = "Contract approved successfully";
+      } else if (stageKey === "CONTRACT_SIGN_REFUSE") {
+        endpoint = `/api/agencies/assignments/${assignment.id}/refuse-contract`;
+        successMessage = "Contract refused successfully";
+      } else if (stageKey === "MEDICAL_STATUS_FIT") {
+        endpoint = `/api/agencies/assignments/${assignment.id}/mark-medical-fit`;
+        successMessage = "Medical status marked as fit successfully";
+      } else if (stageKey === "MEDICAL_STATUS_UNFIT") {
+        endpoint = `/api/agencies/assignments/${assignment.id}/mark-medical-unfit`;
+        successMessage = "Medical status marked as unfit successfully";
+      } else if (stageKey === "FINGERPRINT_PASS") {
+        endpoint = `/api/agencies/assignments/${assignment.id}/mark-fingerprint-pass`;
+        successMessage = "Fingerprint marked as passed successfully";
+      } else if (stageKey === "FINGERPRINT_FAIL") {
+        endpoint = `/api/agencies/assignments/${assignment.id}/mark-fingerprint-fail`;
+        successMessage = "Fingerprint marked as failed successfully";
+      } else if (stageKey === "TRAVEL_CONFIRMATION_TRAVELED") {
+        endpoint = `/api/agencies/assignments/${assignment.id}/travel-confirmation`;
+        successMessage = "Travel status updated to Traveled successfully";
+      } else if (stageKey === "TRAVEL_CONFIRMATION_RESCHEDULED") {
+        endpoint = `/api/agencies/assignments/${assignment.id}/travel-confirmation`;
+        successMessage = "Travel status updated to Rescheduled successfully";
+      } else if (stageKey === "TRAVEL_CONFIRMATION_CANCELED") {
+        endpoint = `/api/agencies/assignments/${assignment.id}/travel-confirmation`;
+        successMessage = "Travel status updated to Canceled successfully";
+      } else if (stageKey === "TRAVEL_CONFIRMATION_MODAL") {
+        // Open travel confirmation modal
+        setTravelConfirmationLabour(timelineLabour);
+        setShowTravelConfirmation(true);
+        return;
+      } else {
+        toast({
+          type: "error",
+          message: "Action not implemented for this stage",
+        });
+        return;
+      }
+
+      let requestBody = {};
+
+      // Add status for travel confirmation actions
+      if (stageKey.startsWith("TRAVEL_CONFIRMATION_")) {
+        const status = stageKey.split("_")[2]; // Extract TRAVELED, RESCHEDULED, or CANCELED
+        requestBody = { status };
+      }
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body:
+          Object.keys(requestBody).length > 0
+            ? JSON.stringify(requestBody)
+            : undefined,
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Failed to update stage");
+      }
+
+      toast({ type: "success", message: successMessage });
+
+      // Refresh requirements to update the UI
+      const updatedRequirements = await fetchRequirements();
+      setRequirements(updatedRequirements);
+
+      // Update timeline labour with new data
+      const updatedLabour = updatedRequirements
+        .flatMap((req) => req.jobRoles)
+        .flatMap((role) => role.LabourAssignment)
+        .find(
+          (assignment) => assignment.labour.id === timelineLabour.id
+        )?.labour;
+
+      if (updatedLabour) {
+        setTimelineLabour(updatedLabour);
+      }
+    } catch (error) {
+      console.error("Error updating stage:", error);
+      toast({
+        type: "error",
+        message:
+          error instanceof Error ? error.message : "Failed to update stage",
+      });
+    }
+  };
 
   return (
     <div className="px-6 flex gap-6 h-screen">
@@ -652,19 +1282,24 @@ export default function AgencyRecruitment() {
                 <LabourCard
                   key={assignment.id}
                   labour={assignment.labour}
-                  stages={assignment.labour.stages}
-                  onViewTimeline={() =>
-                    handleViewTimeline(
-                      assignment.labour,
-                      assignment.labour.stages
-                    )
-                  }
-                  onUpdateStage={() =>
-                    handleOpenUpdateStage(
-                      assignment.labour,
-                      assignment.labour.stages
-                    )
-                  }
+                  jobRoleId={currentJobRole.id}
+                  onViewTimeline={() => handleViewTimeline(assignment.labour)}
+                  offerLetterDetails={offerLetterDetails}
+                  signedOfferLetterUrl={assignment.signedOfferLetterUrl ?? null}
+                  assignmentId={assignment.id}
+                  onSignedOfferLetterUploaded={async () => {
+                    // Refresh requirements to get updated signedOfferLetterUrl
+                    const updatedRequirements = await fetchRequirements();
+                    setRequirements(updatedRequirements);
+                  }}
+                  onEditDocuments={() => {
+                    setEditDocumentsLabour(assignment.labour);
+                    setShowEditDocuments(true);
+                  }}
+                  setDocumentViewerLabour={setDocumentViewerLabour}
+                  setShowDocumentViewer={setShowDocumentViewer}
+                  setTravelConfirmationLabour={setTravelConfirmationLabour}
+                  setShowTravelConfirmation={setShowTravelConfirmation}
                 />
               ))}
             </div>
@@ -682,85 +1317,32 @@ export default function AgencyRecruitment() {
 
       {/* Gantt Chart Modal */}
       <Modal
-        isOpen={!!selectedLabour && !showStageForm}
-        onClose={handleCloseModal}
-        title={`${selectedLabour?.profile.name}'s Recruitment Timeline`}
-        size="3xl"
+        isOpen={!!timelineLabour}
+        onClose={handleCloseTimelineModal}
+        title={
+          timelineLabour ? `${timelineLabour.name}'s Onboarding Timeline` : ""
+        }
+        size="2xl"
       >
-        {selectedLabour && (
-          <div className="space-y-6 pb-8">
-            <div className="flex items-center gap-4">
-              {selectedLabour.profile.profileImage ? (
-                <img
-                  src={selectedLabour.profile.profileImage}
-                  alt={selectedLabour.profile.name}
-                  className="w-16 h-16 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-16 h-16 rounded-full bg-[#150B3D]/10 flex items-center justify-center">
-                  <User className="w-8 h-8 text-[#150B3D]/50" />
-                </div>
-              )}
-              <div>
-                <h3 className="font-semibold text-lg text-[#150B3D]">
-                  {selectedLabour.profile.name}
-                </h3>
-                <div className="flex gap-2">
-                  <span
-                    className={`text-xs ${
-                      STATUS_COLORS[
-                        selectedLabour.profile
-                          .status as keyof typeof STATUS_COLORS
-                      ] || STATUS_COLORS.DEFAULT
-                    }`}
-                  >
-                    {selectedLabour.profile.status
-                      .replace("_", " ")
-                      .toLowerCase()}
-                  </span>
-                  <span
-                    className={`text-xs ${
-                      STATUS_COLORS[
-                        selectedLabour.profile
-                          .verificationStatus as keyof typeof STATUS_COLORS
-                      ] || STATUS_COLORS.DEFAULT
-                    }`}
-                  >
-                    {selectedLabour.profile.verificationStatus
-                      .replace("_", " ")
-                      .toLowerCase()}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-[#150B3D]/70 font-medium">
-                  Nationality:
-                </span>
-                <span className="text-[#150B3D]">
-                  {selectedLabour.profile.nationality}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#150B3D]/70 font-medium">Age:</span>
-                <span className="text-[#150B3D]">
-                  {selectedLabour.profile.age}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-[#150B3D]/70 font-medium">
-                  Current Stage:
-                </span>
-                <span className="text-[#150B3D]">
-                  {selectedLabour.profile.currentStage.replace(/_/g, " ")}
-                </span>
-              </div>
-            </div>
-
-            <GanttChart stages={selectedLabour.stages} />
-          </div>
+        {timelineLabour && (
+          <ProgressTracker
+            currentStage={timelineLabour.currentStage}
+            statuses={Object.fromEntries(
+              (timelineLabour.stages || []).map((s) => [s.stage, s.status])
+            )}
+            userRole="RECRUITMENT_AGENCY"
+            onUpload={handleTimelineUpload}
+            onAction={handleTimelineAction}
+            documents={{
+              VISA_PRINTING:
+                requirements
+                  .flatMap((req) => req.jobRoles)
+                  .flatMap((role) => role.LabourAssignment)
+                  .find(
+                    (assignment) => assignment.labour.id === timelineLabour.id
+                  )?.visaUrl || "",
+            }}
+          />
         )}
       </Modal>
 
@@ -769,8 +1351,408 @@ export default function AgencyRecruitment() {
         isOpen={showStageForm}
         onClose={handleCloseModal}
         labour={selectedLabour?.profile || ({} as LabourProfile)}
-        currentStage={currentStage}
+        currentStage={
+          selectedLabour?.profile.currentStage || LabourStage.CONTRACT_SIGN
+        }
         onUpdate={handleUpdateStage}
+      />
+
+      {/* Document Viewer Modal */}
+      <TravelDocumentsViewerModal
+        isOpen={showDocumentViewer}
+        onClose={() => {
+          setShowDocumentViewer(false);
+          setDocumentViewerLabour(null);
+        }}
+        labourName={documentViewerLabour?.name || ""}
+        existingDocuments={
+          documentViewerLabour
+            ? (() => {
+                const assignment = requirements
+                  .flatMap((req) => req.jobRoles)
+                  .flatMap((role) => role.LabourAssignment)
+                  .find(
+                    (assignment) =>
+                      assignment.labour.id === documentViewerLabour.id
+                  );
+
+                if (!assignment) return [];
+
+                const documents = [];
+
+                // Add flight ticket if available
+                if (assignment.flightTicketUrl) {
+                  documents.push({
+                    id: "flight-ticket-1",
+                    name: "Flight Ticket",
+                    type: "flight-ticket",
+                    url: assignment.flightTicketUrl,
+                    uploadedAt: new Date().toISOString(),
+                  });
+                }
+
+                // Add medical certificate if available
+                if (assignment.medicalCertificateUrl) {
+                  documents.push({
+                    id: "medical-certificate-1",
+                    name: "Medical Certificate",
+                    type: "medical-certificate",
+                    url: assignment.medicalCertificateUrl,
+                    uploadedAt: new Date().toISOString(),
+                  });
+                }
+
+                // Add police clearance if available
+                if (assignment.policeClearanceUrl) {
+                  documents.push({
+                    id: "police-clearance-1",
+                    name: "Police Clearance",
+                    type: "police-clearance",
+                    url: assignment.policeClearanceUrl,
+                    uploadedAt: new Date().toISOString(),
+                  });
+                }
+
+                // Add employment contract if available
+                if (assignment.employmentContractUrl) {
+                  documents.push({
+                    id: "employment-contract-1",
+                    name: "Employment Contract",
+                    type: "employment-contract",
+                    url: assignment.employmentContractUrl,
+                    uploadedAt: new Date().toISOString(),
+                  });
+                }
+
+                // Add additional documents if available
+                if (
+                  assignment.additionalDocumentsUrls &&
+                  assignment.additionalDocumentsUrls.length > 0
+                ) {
+                  assignment.additionalDocumentsUrls.forEach((url, index) => {
+                    documents.push({
+                      id: `additional-documents-${index + 1}`,
+                      name: `Additional Document ${index + 1}`,
+                      type: "additional-documents",
+                      url: url,
+                      uploadedAt: new Date().toISOString(),
+                    });
+                  });
+                }
+
+                return documents;
+              })()
+            : []
+        }
+        visaUrl={
+          requirements
+            .flatMap((req) => req.jobRoles)
+            .flatMap((role) => role.LabourAssignment)
+            .find(
+              (assignment) => assignment.labour.id === documentViewerLabour?.id
+            )?.visaUrl || ""
+        }
+        existingTravelDate={(() => {
+          const assignment = requirements
+            .flatMap((req) => req.jobRoles)
+            .flatMap((role) => role.LabourAssignment)
+            .find(
+              (assignment) => assignment.labour.id === documentViewerLabour?.id
+            );
+
+          if (!assignment?.travelDate) return "";
+
+          // Convert Date object to string if needed
+          const travelDate = assignment.travelDate;
+          if (
+            travelDate &&
+            typeof travelDate === "object" &&
+            "toISOString" in travelDate
+          ) {
+            return (travelDate as Date).toISOString();
+          }
+          if (typeof travelDate === "string") {
+            return travelDate;
+          }
+          return "";
+        })()}
+      />
+
+      {/* Edit Documents Modal */}
+      <EditDocumentsModal
+        isOpen={showEditDocuments}
+        onClose={() => {
+          setShowEditDocuments(false);
+          setEditDocumentsLabour(null);
+        }}
+        labourName={editDocumentsLabour?.name || ""}
+        visaUrl={
+          requirements
+            .flatMap((req) => req.jobRoles)
+            .flatMap((role) => role.LabourAssignment)
+            .find(
+              (assignment) => assignment.labour.id === editDocumentsLabour?.id
+            )?.visaUrl || ""
+        }
+        existingTravelDate={(() => {
+          const assignment = requirements
+            .flatMap((req) => req.jobRoles)
+            .flatMap((role) => role.LabourAssignment)
+            .find(
+              (assignment) => assignment.labour.id === editDocumentsLabour?.id
+            );
+
+          if (!assignment?.travelDate) return "";
+
+          // Convert Date object to string if needed
+          const travelDate = assignment.travelDate;
+          if (
+            travelDate &&
+            typeof travelDate === "object" &&
+            "toISOString" in travelDate
+          ) {
+            return (travelDate as Date).toISOString().split("T")[0];
+          }
+          if (typeof travelDate === "string") {
+            return travelDate;
+          }
+          return "";
+        })()}
+        existingDocuments={
+          editDocumentsLabour
+            ? (() => {
+                const assignment = requirements
+                  .flatMap((req) => req.jobRoles)
+                  .flatMap((role) => role.LabourAssignment)
+                  .find(
+                    (assignment) =>
+                      assignment.labour.id === editDocumentsLabour.id
+                  );
+
+                if (!assignment) return [];
+
+                const documents = [];
+
+                // Add visa document if available
+                if (assignment.visaUrl) {
+                  documents.push({
+                    id: "visa-document-1",
+                    name: "Visa Document",
+                    type: "visa-document",
+                    url: assignment.visaUrl,
+                    uploadedAt: new Date().toISOString(),
+                  });
+                }
+
+                // Add signed offer letter if available
+                if (assignment.signedOfferLetterUrl) {
+                  documents.push({
+                    id: "signed-offer-letter-1",
+                    name: "Signed Offer Letter",
+                    type: "offer-letter",
+                    url: assignment.signedOfferLetterUrl,
+                    uploadedAt: new Date().toISOString(),
+                  });
+                }
+
+                // Add flight ticket if available
+                if (assignment.flightTicketUrl) {
+                  documents.push({
+                    id: "flight-ticket-1",
+                    name: "Flight Ticket",
+                    type: "flight-ticket",
+                    url: assignment.flightTicketUrl,
+                    uploadedAt: new Date().toISOString(),
+                  });
+                }
+
+                // Add medical certificate if available
+                if (assignment.medicalCertificateUrl) {
+                  documents.push({
+                    id: "medical-certificate-1",
+                    name: "Medical Certificate",
+                    type: "medical-certificate",
+                    url: assignment.medicalCertificateUrl,
+                    uploadedAt: new Date().toISOString(),
+                  });
+                }
+
+                // Add police clearance if available
+                if (assignment.policeClearanceUrl) {
+                  documents.push({
+                    id: "police-clearance-1",
+                    name: "Police Clearance",
+                    type: "police-clearance",
+                    url: assignment.policeClearanceUrl,
+                    uploadedAt: new Date().toISOString(),
+                  });
+                }
+
+                // Add employment contract if available (separate from signed offer letter)
+                if (assignment.employmentContractUrl) {
+                  documents.push({
+                    id: "employment-contract-1",
+                    name: "Employment Contract",
+                    type: "employment-contract",
+                    url: assignment.employmentContractUrl,
+                    uploadedAt: new Date().toISOString(),
+                  });
+                }
+
+                // Add additional documents if available
+                if (
+                  assignment.additionalDocumentsUrls &&
+                  assignment.additionalDocumentsUrls.length > 0
+                ) {
+                  assignment.additionalDocumentsUrls.forEach((url, index) => {
+                    documents.push({
+                      id: `additional-documents-${index + 1}`,
+                      name: `Additional Document ${index + 1}`,
+                      type: "additional-documents",
+                      url: url,
+                      uploadedAt: new Date().toISOString(),
+                    });
+                  });
+                }
+
+                return documents;
+              })()
+            : []
+        }
+        onSave={async (data) => {
+          try {
+            if (!editDocumentsLabour) {
+              toast({ type: "error", message: "Labour profile not found" });
+              return;
+            }
+
+            // Find the assignment for this labour
+            const assignment = requirements
+              .flatMap((req) => req.jobRoles)
+              .flatMap((role) => role.LabourAssignment)
+              .find(
+                (assignment) => assignment.labour.id === editDocumentsLabour.id
+              );
+
+            if (!assignment) {
+              toast({ type: "error", message: "Assignment not found" });
+              return;
+            }
+
+            // Prepare form data
+            const formData = new FormData();
+            if (typeof data.travelDate === "string" && data.travelDate.trim()) {
+              formData.append("travelDate", data.travelDate);
+            }
+
+            // Add files to form data
+            if (data.flightTicket) {
+              formData.append("flightTicket", data.flightTicket);
+            }
+
+            // Add other documents (only new files, not existing ones)
+            data.documents.forEach((doc) => {
+              if (doc.file && doc.type !== "visa-document") {
+                switch (doc.type) {
+                  case "medical-certificate":
+                    formData.append("medicalCertificate", doc.file);
+                    break;
+                  case "police-clearance":
+                    formData.append("policeClearance", doc.file);
+                    break;
+                  case "employment-contract":
+                    formData.append("employmentContract", doc.file);
+                    break;
+                  case "additional-documents":
+                    formData.append("additionalDocuments", doc.file);
+                    break;
+                }
+              }
+            });
+
+            // Call API
+            const res = await fetch(
+              `/api/agencies/assignments/${assignment.id}/travel-documents`,
+              {
+                method: "POST",
+                body: formData,
+              }
+            );
+
+            if (!res.ok) {
+              const errorData = await res.json();
+              throw new Error(
+                errorData.error || "Failed to save travel documents"
+              );
+            }
+
+            toast({
+              type: "success",
+              message: "Travel documents saved successfully",
+            });
+
+            // Refresh requirements to update the UI
+            const updatedRequirements = await fetchRequirements();
+            setRequirements(updatedRequirements);
+
+            // Update edit documents labour with new data
+            const updatedLabour = updatedRequirements
+              .flatMap((req) => req.jobRoles)
+              .flatMap((role) => role.LabourAssignment)
+              .find(
+                (assignment) => assignment.labour.id === editDocumentsLabour.id
+              )?.labour;
+
+            if (updatedLabour) {
+              setEditDocumentsLabour(updatedLabour);
+            }
+          } catch (error) {
+            console.error("Error saving travel documents:", error);
+            toast({
+              type: "error",
+              message:
+                error instanceof Error
+                  ? error.message
+                  : "Failed to save travel documents",
+            });
+          }
+        }}
+      />
+
+      {/* Travel Confirmation Modal */}
+      <TravelConfirmationModal
+        isOpen={showTravelConfirmation}
+        onClose={() => {
+          setShowTravelConfirmation(false);
+          setTravelConfirmationLabour(null);
+        }}
+        onConfirm={handleTravelConfirmation}
+        labourName={travelConfirmationLabour?.name || ""}
+        currentTravelDate={(() => {
+          const assignment = requirements
+            .flatMap((req) => req.jobRoles)
+            .flatMap((role) => role.LabourAssignment)
+            .find(
+              (assignment) =>
+                assignment.labour.id === travelConfirmationLabour?.id
+            );
+
+          if (!assignment?.travelDate) return "";
+
+          // Convert Date object to string if needed
+          const travelDate = assignment.travelDate;
+          if (
+            travelDate &&
+            typeof travelDate === "object" &&
+            "toISOString" in travelDate
+          ) {
+            return (travelDate as Date).toISOString();
+          }
+          if (typeof travelDate === "string") {
+            return travelDate;
+          }
+          return "";
+        })()}
       />
     </div>
   );

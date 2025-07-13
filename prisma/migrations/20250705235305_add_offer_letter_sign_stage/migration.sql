@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "LabourStage" ADD VALUE 'OFFER_LETTER_SIGN';

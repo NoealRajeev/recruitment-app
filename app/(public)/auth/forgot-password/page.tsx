@@ -124,7 +124,7 @@ export default function ForgotPasswordPage() {
                   {t.checkYourEmail}
                 </h1>
                 <p className="text-base text-gray-700 mb-4">
-                  {t.passwordResetEmailSentTo(email)}
+                  {/* {t.passwordResetEmailSentTo(email)} */}
                 </p>
                 <p className="text-sm text-gray-600 mb-6">
                   {t.passwordResetInstructions}

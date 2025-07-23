@@ -20,7 +20,7 @@ export function startCronJobs() {
     console.log("Running reminders cron job...");
     const req = {} as NextApiRequest;
     const res = createResponse();
-    await remindersHandler({ req, res } as any);
+    // await remindersHandler({ req, res } as any);
   });
 
   console.log("Cron jobs scheduled");

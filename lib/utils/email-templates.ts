@@ -602,3 +602,52 @@ The Findly Recruitment Team`,
 </div>
 `,
 });
+
+export const getPasswordResetEmail = ({
+  recipientName,
+  resetLink,
+  expiryHours = 24,
+}: {
+  recipientName: string;
+  resetLink: string;
+  expiryHours?: number;
+}): EmailTemplate => ({
+  subject: "Password Reset Request",
+  text: `Dear ${recipientName},
+
+You requested a password reset for your Findly account. Please click the link below to reset your password:
+
+${resetLink}
+
+This link will expire in ${expiryHours} hours. If you didn't request this, please ignore this email.
+
+Best regards,
+The Findly Team`,
+
+  html: `
+<div style="${Object.entries(baseEmailStyles)
+    .map(([key, value]) => `${key}: ${value};`)
+    .join("")}">
+  ${headerTemplate("Password Reset Request")}
+  
+  <p>Dear ${recipientName},</p>
+  <p>You requested a password reset for your Findly account. Please click the button below to reset your password:</p>
+  
+  <div style="text-align: center; margin: 20px 0;">
+    ${actionButton("Reset Password", resetLink)}
+  </div>
+  
+  <p style="text-align: center; font-size: 14px; color: ${secondaryColor};">
+    This link will expire in ${expiryHours} hours.
+  </p>
+  
+  <div style="background: ${warningBackground}; padding: 16px; border-radius: 8px; margin: 20px 0;">
+    <p style="margin: 0; color: #d32f2f;">
+      <strong>Important:</strong> If you didn't request this password reset, please ignore this email or contact our support team.
+    </p>
+  </div>
+  
+  ${footerTemplate}
+</div>
+`,
+});

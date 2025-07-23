@@ -43,7 +43,7 @@ export async function DELETE(
 
       await tx.auditLog.create({
         data: {
-          action: AuditAction.ACCOUNT_DELETION_REQUESTED,
+          action: AuditAction.USER_DELETE,
           entityType: "AGENCY",
           entityId: id, // Use the destructured id
           performedById: session.user.id,

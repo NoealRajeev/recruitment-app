@@ -402,6 +402,59 @@ export const NotificationTemplates = {
     actionText: "View Recruitment",
   }),
 
+  MEDICAL_UNFIT: (
+    labourName: string,
+    jobTitle: string,
+    agencyName: string
+  ): NotificationConfig => ({
+    type: NotificationType.STAGE_FAILED,
+    title: "Medical Examination Failed",
+    message: `${labourName} failed medical examination for ${jobTitle} position at ${agencyName}`,
+    priority: NotificationPriority.HIGH,
+    actionUrl: `/dashboard/agency/recruitment`,
+    actionText: "View Recruitment",
+  }),
+
+  FINGERPRINT_FAIL: (
+    labourName: string,
+    jobTitle: string,
+    agencyName: string
+  ): NotificationConfig => ({
+    type: NotificationType.STAGE_FAILED,
+    title: "Fingerprint Verification Failed",
+    message: `${labourName} failed fingerprint verification for ${jobTitle} position at ${agencyName}`,
+    priority: NotificationPriority.HIGH,
+    actionUrl: `/dashboard/agency/recruitment`,
+    actionText: "View Recruitment",
+  }),
+
+  TRAVEL_CANCELED: (
+    labourName: string,
+    jobTitle: string,
+    agencyName: string
+  ): NotificationConfig => ({
+    type: NotificationType.STAGE_FAILED,
+    title: "Travel Cancelled",
+    message: `${labourName} travel cancelled for ${jobTitle} position at ${agencyName}`,
+    priority: NotificationPriority.HIGH,
+    actionUrl: `/dashboard/agency/recruitment`,
+    actionText: "View Recruitment",
+  }),
+
+  TRAVEL_RESCHEDULED: (
+    labourName: string,
+    jobTitle: string,
+    agencyName: string,
+    rescheduledDate: string
+  ): NotificationConfig => ({
+    type: NotificationType.STAGE_PENDING_ACTION,
+    title: "Travel Rescheduled",
+    message: `${labourName} travel rescheduled to ${rescheduledDate} for ${jobTitle} position at ${agencyName}. New flight ticket required.`,
+    priority: NotificationPriority.HIGH,
+    actionUrl: `/dashboard/agency/recruitment`,
+    actionText: "Upload Flight Ticket",
+  }),
+
   // Assignment Management
   ASSIGNMENT_CREATED: (
     labourName: string,

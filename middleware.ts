@@ -33,6 +33,14 @@ export async function middleware(request: NextRequest) {
   if (shouldSkipMiddleware(pathname)) {
     return NextResponse.next();
   }
+  const cronSecret = request.headers.get("x-cron-secret");
+  if (
+    request.nextUrl.pathname.startsWith("/api/reminders") &&
+    cronSecret !== process.env.CRON_SECRET
+  ) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+  return NextResponse.next();
 
   let token;
   try {
@@ -118,7 +126,11 @@ function redirectToRoleDashboard(
 
 function redirectToLogin(request: NextRequest, error?: string): NextResponse {
   const loginUrl = new URL("/auth/login", request.url);
-  loginUrl.searchParams.set("callbackUrl", request.nextUrl.href);
+  const callbackUrl = request.nextUrl.href;
+  console.log("Redirecting to login with callback URL:", callbackUrl);
+  console.log("Request URL:", request.url);
+  console.log("Next URL:", request.nextUrl.href);
+  loginUrl.searchParams.set("callbackUrl", callbackUrl);
   if (error) loginUrl.searchParams.set("error", error);
   return NextResponse.redirect(loginUrl);
 }

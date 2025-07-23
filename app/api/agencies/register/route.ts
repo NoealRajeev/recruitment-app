@@ -86,7 +86,7 @@ export const POST = handleApiErrors(
       });
 
       try {
-        const verificationLink = `http://localhost:3000/auth/verify-account?email=${encodeURIComponent(data.email)}`;
+        const verificationLink = `${process.env.NEXT_PUBLIC_BASE_URL}/auth/verify-account?email=${encodeURIComponent(data.email)}`;
         const emailTemplate = getAgencyCreationEmail(
           data.agencyName,
           data.email,

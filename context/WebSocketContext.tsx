@@ -3,16 +3,34 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useSession } from "next-auth/react";
+import offlineNotificationService from "@/lib/offline-notifications";
+
+interface Notification {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  isRead: boolean;
+  priority: string;
+  createdAt: string;
+  actionUrl?: string;
+  actionText?: string;
+  sender?: {
+    name: string;
+    role: string;
+  };
+}
 
 interface WebSocketContextType {
   socket: Socket | null;
   isConnected: boolean;
   unreadCount: number;
-  notifications: any[];
+  notifications: Notification[];
   fetchNotifications: () => void;
   markAsRead: (notificationId: string) => void;
   markAllAsRead: () => void;
   archiveNotification: (notificationId: string) => void;
+  isOnline: boolean;
 }
 
 const WebSocketContext = createContext<WebSocketContextType | undefined>(
@@ -38,19 +56,19 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isOnline, setIsOnline] = useState(
+    offlineNotificationService.isOnlineMode()
+  );
 
   useEffect(() => {
     if (!session?.user?.id) return;
 
     // Create socket connection
-    const newSocket = io(
-      process.env.NEXT_PUBLIC_WEBSOCKET_URL || "http://localhost:3001",
-      {
-        transports: ["websocket", "polling"],
-        autoConnect: true,
-      }
-    );
+    const newSocket = io(process.env.NEXT_PUBLIC_WEBSOCKET_URL, {
+      transports: ["websocket", "polling"],
+      autoConnect: true,
+    });
 
     setSocket(newSocket);
 
@@ -106,41 +124,81 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     };
   }, [session?.user?.id]);
 
-  const fetchNotifications = () => {
-    if (socket && session?.user?.id) {
+  const fetchNotifications = async () => {
+    if (isOnline && socket && session?.user?.id) {
       socket.emit("fetchNotifications", {
         userId: session.user.id,
         limit: 20,
         includeRead: false,
       });
+    } else {
+      // Use offline service
+      const offlineNotifications =
+        await offlineNotificationService.fetchNotifications(20, false);
+      setNotifications(offlineNotifications);
+      const count = await offlineNotificationService.getUnreadCount();
+      setUnreadCount(count);
     }
   };
 
-  const markAsRead = (notificationId: string) => {
-    if (socket && session?.user?.id) {
+  const markAsRead = async (notificationId: string) => {
+    if (isOnline && socket && session?.user?.id) {
       socket.emit("markAsRead", {
         notificationId,
         userId: session.user.id,
       });
+    } else {
+      // Use offline service
+      await offlineNotificationService.markAsRead(notificationId);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n))
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
     }
   };
 
-  const markAllAsRead = () => {
-    if (socket && session?.user?.id) {
+  const markAllAsRead = async () => {
+    if (isOnline && socket && session?.user?.id) {
       socket.emit("markAllAsRead", {
         userId: session.user.id,
       });
+    } else {
+      // Use offline service
+      await offlineNotificationService.markAllAsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      setUnreadCount(0);
     }
   };
 
-  const archiveNotification = (notificationId: string) => {
-    if (socket && session?.user?.id) {
+  const archiveNotification = async (notificationId: string) => {
+    if (isOnline && socket && session?.user?.id) {
       socket.emit("archiveNotification", {
         notificationId,
         userId: session.user.id,
       });
+    } else {
+      // Use offline service
+      await offlineNotificationService.archiveNotification(notificationId);
+      setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
     }
   };
+
+  // Update online status when it changes
+  useEffect(() => {
+    const updateOnlineStatus = () => {
+      const online = offlineNotificationService.isOnlineMode();
+      setIsOnline(online);
+      setIsConnected(online);
+    };
+
+    window.addEventListener("online", updateOnlineStatus);
+    window.addEventListener("offline", updateOnlineStatus);
+
+    return () => {
+      window.removeEventListener("online", updateOnlineStatus);
+      window.removeEventListener("offline", updateOnlineStatus);
+    };
+  }, []);
 
   const value: WebSocketContextType = {
     socket,
@@ -151,6 +209,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     markAsRead,
     markAllAsRead,
     archiveNotification,
+    isOnline,
   };
 
   return (

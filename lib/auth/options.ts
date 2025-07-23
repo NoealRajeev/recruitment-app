@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcryptjs";
 import { refreshSession } from "./session";
 import prisma from "@/lib/prisma";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -108,10 +109,15 @@ export const authOptions: AuthOptions = {
     strategy: "jwt",
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === "development",
+  useSecureCookies: process.env.NEXTAUTH_URL?.startsWith("https://") ?? false,
 };
 
 export default NextAuth(authOptions);
 
-export async function getCurrentAuth(req, res) {
+export async function getCurrentAuth(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   return await getServerSession(req, res, authOptions);
 }

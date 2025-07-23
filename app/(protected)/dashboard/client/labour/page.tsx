@@ -3,7 +3,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/context/toast-provider";
 import { Button } from "@/components/ui/Button";
-import { Check, X, Clock, Calendar, Flag, Users, User } from "lucide-react";
+import {
+  Check,
+  X,
+  Clock,
+  Calendar,
+  Flag,
+  Users,
+  User,
+  FileText,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/shared/Card";
 import { RequirementStatus } from "@/lib/generated/prisma";
@@ -378,6 +387,19 @@ export default function ClientLabourReview() {
         </div>
 
         <div className="p-4 border-t border-gray-200">
+          {/* View CV Button - Always visible */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full mb-2 flex items-center justify-center gap-1"
+            onClick={() => {
+              window.open(`/api/cv/generate?labourId=${profile.id}`, "_blank");
+            }}
+          >
+            <FileText className="w-3 h-3" />
+            View CV
+          </Button>
+
           {assignment.clientStatus === "ACCEPTED" ? (
             <div className="flex justify-center">
               <Badge variant="success" className="px-3 py-1">

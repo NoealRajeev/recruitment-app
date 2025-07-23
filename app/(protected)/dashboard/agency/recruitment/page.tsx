@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { ChevronLeft, ChevronRight, User, Building } from "lucide-react";
+import { ChevronLeft, ChevronRight, User, Building, Clock } from "lucide-react";
 import { useToast } from "@/context/toast-provider";
 import {
   RequirementStatus,
@@ -301,76 +301,140 @@ const LabourCard = ({
   return (
     <>
       <div
-        className={`rounded-lg p-4 relative ${
+        className={`rounded-lg overflow-hidden hover:shadow-md transition-shadow h-full flex flex-col ${
           labour.currentStage === "DEPLOYED"
-            ? "bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200"
-            : "bg-[#EDDDF3]"
+            ? "bg-white shadow border border-gray-200"
+            : "bg-[#EDDDF3] p-4 relative"
         }`}
       >
-        <div className="flex items-center gap-3 mb-3">
-          {labour.profileImage ? (
-            <img
-              src={labour.profileImage}
-              alt={labour.name}
-              className="w-12 h-12 rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-12 h-12 rounded-full bg-[#150B3D]/10 flex items-center justify-center">
-              <User className="w-6 h-6 text-[#150B3D]/50" />
-            </div>
-          )}
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-[#150B3D] truncate">
-              {labour.name}
-            </h3>
-            <div className="flex gap-2">
-              <span className={`text-xs ${getStatusColor(labour.status)}`}>
-                {labour.status.replace("_", " ").toLowerCase()}
-              </span>
-              <span
-                className={`text-xs ${getStatusColor(labour.verificationStatus)}`}
-              >
-                {labour.verificationStatus.replace("_", " ").toLowerCase()}
-              </span>
-              {labour.currentStage === "DEPLOYED" && (
-                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
-                  🚀 Deployed
-                </span>
+        {labour.currentStage === "DEPLOYED" ? (
+          // Modern card design for deployed labour
+          <>
+            <div className="relative h-40 bg-gray-100">
+              {labour.profileImage ? (
+                <img
+                  src={labour.profileImage}
+                  alt={labour.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                  <User className="w-16 h-16 text-gray-400" />
+                </div>
               )}
+              {/* Deployed badge overlay */}
+              <div className="absolute top-2 right-2">
+                <span className="inline-flex items-center px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full font-medium">
+                  Deployed
+                </span>
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <span className="text-[#150B3D]/70">Nationality:</span>
-            <span className="block truncate">{labour.nationality}</span>
-          </div>
-          <div>
-            <span className="text-[#150B3D]/70">Age:</span>
-            <span className="block">{labour.age}</span>
-          </div>
-        </div>
-        <div className="mt-3 pt-3 border-t border-[#150B3D]/10">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-[#150B3D]/70">Current Stage:</span>
-            <span className="text-sm font-medium">
-              {labour.currentStage === "DEPLOYED"
-                ? "✅ Deployed"
-                : labour.currentStage.replace(/_/g, " ")}
-            </span>
-          </div>
-        </div>
-        <button
-          className="mt-3 w-full py-1.5 px-3 bg-[#3D1673] hover:bg-[#2b0e54] text-white text-xs rounded flex items-center justify-center gap-1"
-          onClick={onViewTimeline}
-        >
-          View Timeline
-        </button>
+
+            <div className="p-4 flex justify-between items-start border-b border-gray-200">
+              <div>
+                <h3 className="font-semibold text-lg text-gray-900">
+                  {labour.name}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {labour.nationality} • {labour.age} years •{" "}
+                  {labour.gender?.toLowerCase()}
+                </p>
+                <div className="flex gap-2 mt-2">
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full ${getStatusColor(labour.status)}`}
+                  >
+                    {labour.status.replace("_", " ").toLowerCase()}
+                  </span>
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full ${getStatusColor(labour.verificationStatus)}`}
+                  >
+                    {labour.verificationStatus.replace("_", " ").toLowerCase()}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-gray-200">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm text-gray-600">Current Stage:</span>
+                <span className="text-sm font-medium text-green-600">
+                  Deployed
+                </span>
+              </div>
+
+              <button
+                className="w-full py-2 px-3 bg-[#150B3D] hover:bg-[#0e0726] text-white text-sm rounded flex items-center justify-center gap-2 mb-2"
+                onClick={onViewTimeline}
+              >
+                <Clock className="w-4 h-4" />
+                View Timeline
+              </button>
+            </div>
+          </>
+        ) : (
+          // Legacy design for non-deployed labour
+          <>
+            <div className="flex items-center gap-3 mb-3">
+              {labour.profileImage ? (
+                <img
+                  src={labour.profileImage}
+                  alt={labour.name}
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-[#150B3D]/10 flex items-center justify-center">
+                  <User className="w-6 h-6 text-[#150B3D]/50" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-[#150B3D] truncate">
+                  {labour.name}
+                </h3>
+                <div className="flex gap-2">
+                  <span className={`text-xs ${getStatusColor(labour.status)}`}>
+                    {labour.status.replace("_", " ").toLowerCase()}
+                  </span>
+                  <span
+                    className={`text-xs ${getStatusColor(labour.verificationStatus)}`}
+                  >
+                    {labour.verificationStatus.replace("_", " ").toLowerCase()}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <span className="text-[#150B3D]/70">Nationality:</span>
+                <span className="block truncate">{labour.nationality}</span>
+              </div>
+              <div>
+                <span className="text-[#150B3D]/70">Age:</span>
+                <span className="block">{labour.age}</span>
+              </div>
+            </div>
+            <div className="mt-3 pt-3 border-t border-[#150B3D]/10">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-[#150B3D]/70">
+                  Current Stage:
+                </span>
+                <span className="text-sm font-medium">
+                  {labour.currentStage.replace(/_/g, " ")}
+                </span>
+              </div>
+            </div>
+            <button
+              className="mt-3 w-full py-1.5 px-3 bg-[#3D1673] hover:bg-[#2b0e54] text-white text-xs rounded flex items-center justify-center gap-1"
+              onClick={onViewTimeline}
+            >
+              View Timeline
+            </button>
+          </>
+        )}
         {/* After READY_TO_TRAVEL: show different buttons based on stage */}
         {isAfterReadyToTravel ? (
           <>
             {labour.currentStage === "DEPLOYED" ? (
-              // DEPLOYED stage: show success message and view documents
+              // DEPLOYED stage: show success message only
               <>
                 <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded text-center">
                   <div className="text-green-600 text-xs font-medium">
@@ -380,15 +444,6 @@ const LabourCard = ({
                     Labour has been deployed and is working
                   </div>
                 </div>
-                <button
-                  className="mt-2 w-full py-1.5 px-3 bg-[#150B3D] hover:bg-[#0e0726] text-white text-xs rounded flex items-center justify-center gap-1"
-                  onClick={() => {
-                    setDocumentViewerLabour(labour);
-                    setShowDocumentViewer(true);
-                  }}
-                >
-                  View Documents
-                </button>
               </>
             ) : (
               // TRAVEL_CONFIRMATION or ARRIVAL_CONFIRMATION stages
@@ -402,8 +457,7 @@ const LabourCard = ({
                 >
                   View Documents
                 </button>
-                {(labour.currentStage === "TRAVEL_CONFIRMATION" ||
-                  labour.currentStage === "ARRIVAL_CONFIRMATION") && (
+                {labour.currentStage === "TRAVEL_CONFIRMATION" && (
                   <button
                     className="mt-2 w-full bg-[#150B3D] hover:bg-[#0e0726] text-white py-1.5 px-3 text-xs rounded flex items-center justify-center gap-1"
                     onClick={() => {
@@ -869,6 +923,22 @@ export default function AgencyRecruitment() {
   const [travelConfirmationLabour, setTravelConfirmationLabour] =
     useState<LabourProfile | null>(null);
 
+  // Stage order for sorting (DEPLOYED always last)
+  const STAGE_ORDER = [
+    "OFFER_LETTER_SIGN",
+    "VISA_APPLYING",
+    "QVC_PAYMENT",
+    "CONTRACT_SIGN",
+    "MEDICAL_STATUS",
+    "FINGERPRINT",
+    "VISA_PRINTING",
+    "READY_TO_TRAVEL",
+    "TRAVEL_CONFIRMATION",
+    "ARRIVAL_CONFIRMATION",
+    "DEPLOYED",
+  ];
+  const [stageFilter, setStageFilter] = useState<string>("ALL");
+
   // Fetch requirements on mount
   useEffect(() => {
     const loadRequirements = async () => {
@@ -986,7 +1056,8 @@ export default function AgencyRecruitment() {
   const handleTravelConfirmation = async (
     status: "TRAVELED" | "RESCHEDULED" | "CANCELED",
     rescheduledDate?: string,
-    notes?: string
+    notes?: string,
+    flightTicketFile?: File | null
   ) => {
     if (!travelConfirmationLabour) return;
 
@@ -1004,31 +1075,57 @@ export default function AgencyRecruitment() {
         return;
       }
 
-      const requestBody: {
-        status: string;
-        notes?: string;
-        rescheduledTravelDate?: string;
-      } = { status, notes };
-      if (status === "RESCHEDULED" && rescheduledDate) {
-        requestBody.rescheduledTravelDate = rescheduledDate;
-      }
+      if (status === "RESCHEDULED" && flightTicketFile) {
+        // Upload new flight ticket and update travel date
+        const formData = new FormData();
+        formData.append("flightTicket", flightTicketFile);
+        formData.append("status", status);
+        if (rescheduledDate)
+          formData.append("rescheduledTravelDate", rescheduledDate);
+        if (notes) formData.append("notes", notes);
 
-      const res = await fetch(
-        `/api/agencies/assignments/${assignment.id}/travel-confirmation`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-        }
-      );
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(
-          errorData.error || "Failed to update travel confirmation"
+        const res = await fetch(
+          `/api/agencies/assignments/${assignment.id}/travel-confirmation`,
+          {
+            method: "POST",
+            body: formData,
+          }
         );
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(
+            errorData.error || "Failed to update travel confirmation"
+          );
+        }
+      } else {
+        // Normal JSON update for other statuses
+        const requestBody: {
+          status: string;
+          notes?: string;
+          rescheduledTravelDate?: string;
+        } = { status, notes };
+        if (status === "RESCHEDULED" && rescheduledDate) {
+          requestBody.rescheduledTravelDate = rescheduledDate;
+        }
+
+        const res = await fetch(
+          `/api/agencies/assignments/${assignment.id}/travel-confirmation`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestBody),
+          }
+        );
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(
+            errorData.error || "Failed to update travel confirmation"
+          );
+        }
       }
 
       const successMessage = `Travel status updated to ${status} successfully`;
@@ -1245,6 +1342,21 @@ export default function AgencyRecruitment() {
     }
   };
 
+  // Filter and sort labours before rendering
+  const getSortedFilteredAssignments = (assignments: LabourAssignment[]) => {
+    let filtered = assignments;
+    if (stageFilter !== "ALL") {
+      filtered = assignments.filter(
+        (a) => a.labour.currentStage === stageFilter
+      );
+    }
+    return filtered.slice().sort((a, b) => {
+      const aIdx = STAGE_ORDER.indexOf(a.labour.currentStage);
+      const bIdx = STAGE_ORDER.indexOf(b.labour.currentStage);
+      return aIdx - bIdx;
+    });
+  };
+
   return (
     <div className="px-6 flex gap-6 h-screen">
       <RequirementsSidebar
@@ -1257,6 +1369,23 @@ export default function AgencyRecruitment() {
         loading={loading}
       />
       <div className="w-5/6 rounded-lg p-6 overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <div className="font-bold text-lg text-[#150B3D]">
+            Recruitment Tracker
+          </div>
+          <select
+            className="border rounded px-2 py-1 text-sm"
+            value={stageFilter}
+            onChange={(e) => setStageFilter(e.target.value)}
+          >
+            <option value="ALL">All Stages</option>
+            {STAGE_ORDER.map((stage) => (
+              <option key={stage} value={stage}>
+                {stage.replace(/_/g, " ")}
+              </option>
+            ))}
+          </select>
+        </div>
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[...Array(8)].map((_, i) => (
@@ -1277,31 +1406,45 @@ export default function AgencyRecruitment() {
               onNextJobRole={handleNextJobRole}
             />
 
+            {/* Labour Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {currentJobRole.LabourAssignment.map((assignment) => (
-                <LabourCard
-                  key={assignment.id}
-                  labour={assignment.labour}
-                  jobRoleId={currentJobRole.id}
-                  onViewTimeline={() => handleViewTimeline(assignment.labour)}
-                  offerLetterDetails={offerLetterDetails}
-                  signedOfferLetterUrl={assignment.signedOfferLetterUrl ?? null}
-                  assignmentId={assignment.id}
-                  onSignedOfferLetterUploaded={async () => {
-                    // Refresh requirements to get updated signedOfferLetterUrl
-                    const updatedRequirements = await fetchRequirements();
-                    setRequirements(updatedRequirements);
-                  }}
-                  onEditDocuments={() => {
-                    setEditDocumentsLabour(assignment.labour);
-                    setShowEditDocuments(true);
-                  }}
-                  setDocumentViewerLabour={setDocumentViewerLabour}
-                  setShowDocumentViewer={setShowDocumentViewer}
-                  setTravelConfirmationLabour={setTravelConfirmationLabour}
-                  setShowTravelConfirmation={setShowTravelConfirmation}
-                />
-              ))}
+              {currentJobRole &&
+              getSortedFilteredAssignments(currentJobRole.LabourAssignment)
+                .length === 0 ? (
+                <div className="col-span-full text-center text-[#150B3D]/50 py-8">
+                  No labours found for this stage.
+                </div>
+              ) : (
+                currentJobRole &&
+                getSortedFilteredAssignments(
+                  currentJobRole.LabourAssignment
+                ).map((assignment) => (
+                  <LabourCard
+                    key={assignment.id}
+                    labour={assignment.labour}
+                    jobRoleId={currentJobRole.id}
+                    onViewTimeline={() => handleViewTimeline(assignment.labour)}
+                    offerLetterDetails={offerLetterDetails}
+                    signedOfferLetterUrl={
+                      assignment.signedOfferLetterUrl ?? null
+                    }
+                    assignmentId={assignment.id}
+                    onSignedOfferLetterUploaded={async () => {
+                      // Refresh requirements to get updated signedOfferLetterUrl
+                      const updatedRequirements = await fetchRequirements();
+                      setRequirements(updatedRequirements);
+                    }}
+                    onEditDocuments={() => {
+                      setEditDocumentsLabour(assignment.labour);
+                      setShowEditDocuments(true);
+                    }}
+                    setDocumentViewerLabour={setDocumentViewerLabour}
+                    setShowDocumentViewer={setShowDocumentViewer}
+                    setTravelConfirmationLabour={setTravelConfirmationLabour}
+                    setShowTravelConfirmation={setShowTravelConfirmation}
+                  />
+                ))
+              )}
             </div>
           </>
         ) : (

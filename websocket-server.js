@@ -9,7 +9,7 @@ const io = new Server(httpServer, {
   cors: {
     origin:
       process.env.NODE_ENV === "production"
-        ? "https://your-domain.com"
+        ? "https://findly.breaktroughf1.com"
         : "http://localhost:3000",
     methods: ["GET", "POST"],
   },

@@ -4,11 +4,21 @@
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/context/toast-provider";
 import { Button } from "@/components/ui/Button";
-import { Check, X, Clock, Calendar, Flag, Users, User } from "lucide-react";
+import {
+  Check,
+  X,
+  Clock,
+  Calendar,
+  Flag,
+  Users,
+  User,
+  FileText,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/shared/Card";
 import { RequirementStatus } from "@/lib/generated/prisma";
 import { LabourProfile } from "@prisma/client";
+import TravelDocumentsViewerModal from "@/components/shared/TravelDocumentsViewerModal";
 
 interface Agency {
   id: string;
@@ -48,6 +58,11 @@ interface JobRoleWithAssignments {
     clientStatus: RequirementStatus;
     adminFeedback?: string;
     clientFeedback?: string;
+    flightTicketUrl?: string;
+    medicalCertificateUrl?: string;
+    policeClearanceUrl?: string;
+    visaUrl?: string;
+    travelDate?: Date | string;
   }>;
   needsMoreLabour: boolean;
 }
@@ -64,6 +79,17 @@ export default function LabourAssignmentReview() {
   const [loadingAssignments, setLoadingAssignments] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [viewingProfiles, setViewingProfiles] = useState<string | null>(null);
+  const [showDocumentViewer, setShowDocumentViewer] = useState(false);
+  const [documentViewerLabour, setDocumentViewerLabour] =
+    useState<LabourProfile | null>(null);
+  const [documentViewerAssignment, setDocumentViewerAssignment] = useState<{
+    id: string;
+    flightTicketUrl?: string;
+    medicalCertificateUrl?: string;
+    policeClearanceUrl?: string;
+    visaUrl?: string;
+    travelDate?: Date | string;
+  } | null>(null);
   const { toast } = useToast();
 
   // Fetch agencies with assignment counts
@@ -325,6 +351,11 @@ export default function LabourAssignmentReview() {
       clientStatus: RequirementStatus;
       adminFeedback?: string;
       clientFeedback?: string;
+      flightTicketUrl?: string;
+      medicalCertificateUrl?: string;
+      policeClearanceUrl?: string;
+      visaUrl?: string;
+      travelDate?: Date | string;
     };
     onStatusUpdate: (
       assignmentId: string,
@@ -489,6 +520,39 @@ export default function LabourAssignmentReview() {
         </div>
 
         <div className="p-4 border-t border-gray-200">
+          {/* View Documents Button - Show when labour is in Ready to Travel stage or beyond */}
+          {(profile.currentStage === "READY_TO_TRAVEL" ||
+            profile.currentStage === "TRAVEL_CONFIRMATION" ||
+            profile.currentStage === "ARRIVAL_CONFIRMATION" ||
+            profile.currentStage === "DEPLOYED") && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full mb-2 flex items-center justify-center gap-1"
+              onClick={() => {
+                setDocumentViewerLabour(profile);
+                setDocumentViewerAssignment(assignment);
+                setShowDocumentViewer(true);
+              }}
+            >
+              <FileText className="w-3 h-3" />
+              View Documents
+            </Button>
+          )}
+
+          {/* View CV Button - Always visible */}
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full mb-2 flex items-center justify-center gap-1"
+            onClick={() => {
+              window.open(`/api/cv/generate?labourId=${profile.id}`, "_blank");
+            }}
+          >
+            <FileText className="w-3 h-3" />
+            View CV
+          </Button>
+
           {assignment.adminStatus === "ACCEPTED" ? (
             <div className="flex justify-center">
               <Badge variant="success" className="px-3 py-1">
@@ -840,6 +904,78 @@ export default function LabourAssignmentReview() {
           </div>
         )}
       </div>
+
+      {/* Travel Documents Viewer Modal */}
+      <TravelDocumentsViewerModal
+        isOpen={showDocumentViewer}
+        onClose={() => {
+          setShowDocumentViewer(false);
+          setDocumentViewerLabour(null);
+          setDocumentViewerAssignment(null);
+        }}
+        labourName={documentViewerLabour?.name || ""}
+        existingDocuments={
+          documentViewerAssignment
+            ? (() => {
+                const documents = [];
+
+                // Add flight ticket if available
+                if (documentViewerAssignment.flightTicketUrl) {
+                  documents.push({
+                    id: "flight-ticket-1",
+                    name: "Flight Ticket",
+                    type: "flight-ticket",
+                    url: documentViewerAssignment.flightTicketUrl,
+                    uploadedAt: new Date().toISOString(),
+                  });
+                }
+
+                // Add medical certificate if available
+                if (documentViewerAssignment.medicalCertificateUrl) {
+                  documents.push({
+                    id: "medical-certificate-1",
+                    name: "Medical Certificate",
+                    type: "medical-certificate",
+                    url: documentViewerAssignment.medicalCertificateUrl,
+                    uploadedAt: new Date().toISOString(),
+                  });
+                }
+
+                // Add police clearance if available
+                if (documentViewerAssignment.policeClearanceUrl) {
+                  documents.push({
+                    id: "police-clearance-1",
+                    name: "Police Clearance",
+                    type: "police-clearance",
+                    url: documentViewerAssignment.policeClearanceUrl,
+                    uploadedAt: new Date().toISOString(),
+                  });
+                }
+
+                return documents;
+              })()
+            : []
+        }
+        visaUrl={documentViewerAssignment?.visaUrl || ""}
+        existingTravelDate={
+          documentViewerAssignment?.travelDate
+            ? (() => {
+                const travelDate = documentViewerAssignment.travelDate;
+                if (
+                  travelDate &&
+                  typeof travelDate === "object" &&
+                  "toISOString" in travelDate
+                ) {
+                  return (travelDate as Date).toISOString();
+                }
+                if (typeof travelDate === "string") {
+                  return travelDate;
+                }
+                return "";
+              })()
+            : ""
+        }
+      />
     </div>
   );
 }

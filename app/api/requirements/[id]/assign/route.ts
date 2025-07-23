@@ -3,6 +3,9 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { AuditAction, LabourProfileStatus } from "@/lib/generated/prisma";
+import { NotificationType, NotificationPriority } from "@prisma/client";
+import { NotificationService } from "@/lib/notifications";
+import { sendEmail } from "@/lib/utils/email-service";
 
 export async function POST(
   request: Request,
@@ -142,17 +145,34 @@ export async function POST(
         )
       );
 
-      // Update the labour profiles to SHORTLISTED status
+      // Update the labour profiles to SHORTLISTED status and reset stage history for new assignments
       await Promise.all(
-        profileIds.map((profileId: string) =>
-          tx.labourProfile.update({
+        profileIds.map(async (profileId: string) => {
+          // Clear existing stage history for this labour profile
+          await tx.labourStageHistory.deleteMany({
+            where: { labourId: profileId },
+          });
+
+          // Update labour profile with fresh start
+          await tx.labourProfile.update({
             where: { id: profileId },
             data: {
               status: LabourProfileStatus.SHORTLISTED,
               requirementId: jobRole.requirementId,
+              currentStage: "OFFER_LETTER_SIGN", // Reset to initial stage
             },
-          })
-        )
+          });
+
+          // Create fresh OFFER_LETTER_SIGN stage for the new assignment
+          await tx.labourStageHistory.create({
+            data: {
+              labourId: profileId,
+              stage: "OFFER_LETTER_SIGN",
+              status: "PENDING",
+              notes: "New assignment - awaiting offer letter signature",
+            },
+          });
+        })
       );
 
       // Reset rejected labour profiles so they can be assigned elsewhere
@@ -185,11 +205,24 @@ export async function POST(
         : "PARTIALLY_SUBMITTED";
 
       // Update job role status and needsMoreLabour
+      // Fetch previous needsMoreLabour value
+      const prevJobRole = await prisma.jobRole.findUnique({
+        where: { id: jobRoleId },
+        select: {
+          needsMoreLabour: true,
+          assignedAgency: { include: { user: true } },
+          title: true,
+          requirement: {
+            select: { id: true, client: { select: { companyName: true } } },
+          },
+        },
+      });
+      const newNeedsMoreLabour = totalAssignments < forwarding.quantity;
       const updatedJobRole = await tx.jobRole.update({
         where: { id: jobRoleId },
         data: {
           agencyStatus: newAgencyStatus,
-          needsMoreLabour: totalAssignments < forwarding.quantity,
+          needsMoreLabour: newNeedsMoreLabour,
         },
         include: {
           requirement: true,
@@ -200,6 +233,38 @@ export async function POST(
           },
         },
       });
+      // Notify agency if needsMoreLabour transitioned from false to true
+      if (
+        prevJobRole &&
+        !prevJobRole.needsMoreLabour &&
+        newNeedsMoreLabour &&
+        prevJobRole.assignedAgency?.user
+      ) {
+        const agencyUser = prevJobRole.assignedAgency.user;
+        const jobRoleTitle = prevJobRole.title;
+        const companyName = prevJobRole.requirement?.client?.companyName || "";
+        const config = {
+          type: NotificationType.REQUIREMENT_NEEDS_REVISION,
+          title: `Urgent: More Labour Needed for ${jobRoleTitle}`,
+          message: `The requirement for ${companyName} needs more labour profiles for the job role: ${jobRoleTitle}. Please take action immediately.`,
+          priority: NotificationPriority.HIGH,
+          actionUrl: `/dashboard/agency/requirements`,
+          actionText: "View Requirement",
+        };
+        // In-app notification
+        await NotificationService.createNotification({
+          ...config,
+          recipientId: agencyUser.id,
+        });
+        // Email
+        if (agencyUser.email) {
+          await sendEmail({
+            to: agencyUser.email,
+            subject: config.title,
+            text: config.message,
+          });
+        }
+      }
 
       // Check if all job roles for this requirement are now submitted
       if (isFullyAssigned) {

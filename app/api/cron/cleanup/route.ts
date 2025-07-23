@@ -23,13 +23,21 @@ export async function GET() {
       },
     });
 
+    // Delete expired password reset tokens
+    const expiredTokens = await prisma.passwordResetToken.deleteMany({
+      where: {
+        expires: { lte: now },
+      },
+    });
+
     console.log(
-      `Deleted ${immediateDeletions.count} immediate and ${scheduledDeletions.count} scheduled accounts`
+      `Deleted ${immediateDeletions.count} immediate and ${scheduledDeletions.count} scheduled accounts, ${expiredTokens.count} expired password reset tokens`
     );
 
     return NextResponse.json({
       immediateDeletions: immediateDeletions.count,
       scheduledDeletions: scheduledDeletions.count,
+      expiredTokens: expiredTokens.count,
     });
   } catch (error) {
     console.error("Error in cleanup cron job:", error);

@@ -3,6 +3,9 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { AuditAction, RequirementStatus } from "@/lib/generated/prisma";
+import { NotificationService } from "@/lib/notifications";
+import { sendEmail } from "@/lib/utils/email-service";
+import { NotificationType, NotificationPriority } from "@prisma/client";
 
 export async function PUT(
   request: Request,
@@ -102,13 +105,23 @@ export async function PUT(
       const backupAssignments = acceptedAssignments.slice(primaryCount);
 
       // Update all accepted assignments: first N as primary, rest as backup
+      // But preserve existing client status for already approved assignments
       for (let i = 0; i < acceptedAssignments.length; i++) {
         const isPrimary = i < primaryCount;
+        const currentAssignment = acceptedAssignments[i];
+
+        // Only update client status if it's not already approved by client
+        // This prevents resetting already approved assignments
+        const shouldUpdateClientStatus =
+          currentAssignment.clientStatus !== "ACCEPTED";
+
         await tx.labourAssignment.update({
-          where: { id: acceptedAssignments[i].id },
+          where: { id: currentAssignment.id },
           data: {
             isBackup: !isPrimary,
-            clientStatus: isPrimary ? "SUBMITTED" : "PENDING",
+            ...(shouldUpdateClientStatus && {
+              clientStatus: isPrimary ? "SUBMITTED" : "PENDING",
+            }),
           },
         });
       }
@@ -200,12 +213,58 @@ export async function PUT(
       const acceptedPrimaries = jobRoleAssignments.filter(
         (a) => a.adminStatus === "ACCEPTED" && !a.isBackup
       ).length;
+      // Fetch previous needsMoreLabour value
+      const prevJobRole = await tx.jobRole.findUnique({
+        where: { id: assignment.jobRoleId },
+        select: {
+          needsMoreLabour: true,
+          assignedAgency: { include: { user: true } },
+          title: true,
+          requirement: {
+            select: { id: true, client: { select: { companyName: true } } },
+          },
+        },
+      });
+      const newNeedsMoreLabour =
+        acceptedPrimaries < assignment.jobRole.quantity;
       await tx.jobRole.update({
         where: { id: assignment.jobRoleId },
         data: {
-          needsMoreLabour: acceptedPrimaries < assignment.jobRole.quantity,
+          needsMoreLabour: newNeedsMoreLabour,
         },
       });
+      // Notify agency if needsMoreLabour transitioned from false to true
+      if (
+        prevJobRole &&
+        !prevJobRole.needsMoreLabour &&
+        newNeedsMoreLabour &&
+        prevJobRole.assignedAgency?.user
+      ) {
+        const agencyUser = prevJobRole.assignedAgency.user;
+        const jobRoleTitle = prevJobRole.title;
+        const companyName = prevJobRole.requirement?.client?.companyName || "";
+        const config = {
+          type: NotificationType.REQUIREMENT_NEEDS_REVISION,
+          title: `Urgent: More Labour Needed for ${jobRoleTitle}`,
+          message: `The requirement for ${companyName} needs more labour profiles for the job role: ${jobRoleTitle}. Please take action immediately.`,
+          priority: NotificationPriority.HIGH,
+          actionUrl: `/dashboard/agency/requirements`,
+          actionText: "View Requirement",
+        };
+        // In-app notification
+        await NotificationService.createNotification({
+          ...config,
+          recipientId: agencyUser.id,
+        });
+        // Email
+        if (agencyUser.email) {
+          await sendEmail({
+            to: agencyUser.email,
+            subject: config.title,
+            text: config.message,
+          });
+        }
+      }
 
       // Create audit log
       await tx.auditLog.create({

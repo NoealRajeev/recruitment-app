@@ -36,6 +36,10 @@ const nextConfig = {
     });
     return config;
   },
+  // Add experimental features for better external access support
+  experimental: {
+    trustHostHeader: true,
+  },
 };
 
 module.exports = nextConfig;

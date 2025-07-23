@@ -112,15 +112,25 @@ export async function PUT(
 
       // If accepted, create a stage history record for offer letter sign pending
       if (status === "ACCEPTED") {
-        await tx.labourStageHistory.create({
-          data: {
+        // Check if OFFER_LETTER_SIGN stage already exists to prevent duplicates
+        const existingStage = await tx.labourStageHistory.findFirst({
+          where: {
             labourId: currentAssignment.labourId,
             stage: "OFFER_LETTER_SIGN",
-            status: "PENDING",
-            notes: "Awaiting offer letter signature",
-            documents: [],
           },
         });
+
+        if (!existingStage) {
+          await tx.labourStageHistory.create({
+            data: {
+              labourId: currentAssignment.labourId,
+              stage: "OFFER_LETTER_SIGN",
+              status: "PENDING",
+              notes: "Awaiting offer letter signature",
+              documents: [],
+            },
+          });
+        }
 
         // Update the current stage to OFFER_LETTER_SIGN
         await tx.labourProfile.update({
@@ -244,7 +254,7 @@ export async function PUT(
           data: {
             clientStatus: "REJECTED",
             clientFeedback: "Backup candidate - requirement fulfilled",
-            isBackup: false, // Remove backup details
+            isBackup: false,
           },
         });
 

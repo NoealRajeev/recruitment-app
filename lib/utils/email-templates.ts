@@ -533,3 +533,72 @@ export const travelDocumentsUploadedTemplate = ({
   ${footerTemplate}
 </div>
 `;
+export const getStageReminderEmail = ({
+  recipientName,
+  profileName,
+  stageLabel,
+  stageStatus,
+  lastUpdated,
+  recipientType,
+}: {
+  recipientName: string;
+  profileName: string;
+  stageLabel: string;
+  stageStatus: string;
+  lastUpdated: string;
+  recipientType: "client" | "agency";
+}): EmailTemplate => ({
+  subject: `Action Required: ${profileName}'s ${stageLabel} Stage`,
+  text: `Dear ${recipientName},
+
+This is a reminder that ${profileName}'s ${stageLabel} stage has been pending for more than 3 days.
+
+Current Status: ${stageStatus}
+Last Updated: ${lastUpdated}
+
+Please take the necessary action to move this profile to the next stage.
+
+You can view the recruitment tracker here: ${process.env.NEXT_PUBLIC_APP_URL}/dashboard/${recipientType}/recruitment
+
+Best regards,
+The Findly Recruitment Team`,
+
+  html: `
+<div style="${Object.entries(baseEmailStyles)
+    .map(([key, value]) => `${key}: ${value};`)
+    .join("")}">
+  ${headerTemplate("Stage Update Reminder")}
+  
+  <p>Dear ${recipientName},</p>
+  <p>This is a reminder that <strong>${profileName}</strong>'s <strong>${stageLabel}</strong> stage has been pending for more than 3 days.</p>
+  
+  <div style="background: ${lightBackground}; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${primaryColor};">
+    <h3 style="margin-top: 0; color: ${primaryColor};">Current Stage Details</h3>
+    <p><strong>Stage:</strong> ${stageLabel}</p>
+    <p><strong>Current Status:</strong> ${stageStatus}</p>
+    <p><strong>Last Updated:</strong> ${lastUpdated}</p>
+  </div>
+
+  <div style="background: ${warningBackground}; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+    <h3 style="margin-top: 0; color: #d32f2f;">Action Required</h3>
+    <p>Please take the necessary action to move this profile to the next stage of the recruitment process.</p>
+    ${actionButton(
+      "View Recruitment Tracker",
+      `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/${recipientType}/recruitment`
+    )}
+  </div>
+
+  <div style="background: ${infoBackground}; padding: 16px; border-radius: 8px; margin: 20px 0;">
+    <h3 style="margin-top: 0; color: ${primaryColor};">Need Help?</h3>
+    <p>If you have any questions about this stage or the next steps:</p>
+    <ul style="padding-left: 20px; line-height: 1.6;">
+      <li>Review the stage requirements in the recruitment tracker</li>
+      <li>Contact our support team at <a href="mailto:support@findly.com" style="color: ${primaryColor}; font-weight: bold;">support@findly.com</a></li>
+      <li>Check the help documentation for this stage</li>
+    </ul>
+  </div>
+
+  ${footerTemplate}
+</div>
+`,
+});

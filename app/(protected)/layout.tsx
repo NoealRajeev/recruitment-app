@@ -18,6 +18,10 @@ export default async function DashboardLayout({
     redirect("/auth/login");
   }
 
+  if (process.env.NODE_ENV === "production" && typeof window === "undefined") {
+    import("@/lib/cron").then(({ startCronJobs }) => startCronJobs());
+  }
+
   return (
     <html lang="en" className="h-full">
       <body className="min-h-full flex flex-col bg-background text-foreground">

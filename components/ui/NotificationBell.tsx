@@ -12,7 +12,7 @@ interface Notification {
   title: string;
   message: string;
   isRead: boolean;
-  priority: "LOW" | "NORMAL" | "HIGH" | "URGENT";
+  priority: string;
   createdAt: string;
   actionUrl?: string;
   actionText?: string;
@@ -33,7 +33,7 @@ export default function NotificationBell({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const {
-    isConnected,
+    isOnline,
     unreadCount,
     notifications,
     fetchNotifications,
@@ -111,7 +111,7 @@ export default function NotificationBell({
     <div className={`relative ${className}`} ref={dropdownRef}>
       {/* Connection Status Indicator */}
       <div className="absolute -top-1 -right-1">
-        {isConnected ? (
+        {isOnline ? (
           <Wifi className="h-3 w-3 text-green-500" />
         ) : (
           <WifiOff className="h-3 w-3 text-red-500" />
@@ -136,7 +136,14 @@ export default function NotificationBell({
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b">
-            <h3 className="text-lg font-semibold">Notifications</h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-semibold">Notifications</h3>
+              {!isOnline && (
+                <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+                  Offline
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-2">
               {unreadCount > 0 && (
                 <Button

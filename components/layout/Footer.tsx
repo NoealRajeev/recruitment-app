@@ -2,7 +2,7 @@
 import { Facebook, Instagram, Linkedin, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import React, { useEffect } from "react";
 
 // Update company links to match your application
@@ -29,7 +29,6 @@ const legalLinks = [
 ];
 
 export default function Footer() {
-  const router = useRouter();
   const pathname = usePathname();
 
   const currentYear = new Date().getFullYear();
@@ -62,18 +61,6 @@ export default function Footer() {
     }
 
     requestAnimationFrame(animation);
-  };
-
-  // Function to handle navigation click
-  const handleNavClick = (id: string, page = "/") => {
-    if (pathname === page) {
-      handleScroll(id);
-    } else {
-      router.push(page);
-      setTimeout(() => {
-        handleScroll(id);
-      }, 600); // Ensures scroll happens after navigation
-    }
   };
 
   // Automatically scroll to the correct section on page load if there's a hash
@@ -197,7 +184,7 @@ export default function Footer() {
         </div>
         <div className="pt-8 border-t border-gray-800 text-center">
           <p className="text-gray-500 text-sm">
-            &copy; {displayYear} Breakthroughf1 LLP. All rights reserved.
+            &copy; {displayYear} Breaktroughf1 LLP. All rights reserved.
           </p>
           <div className="mt-4 flex flex-wrap justify-center space-x-4 text-sm text-gray-500">
             {legalLinks.map((link) => (

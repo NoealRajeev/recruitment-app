@@ -116,9 +116,46 @@ export const sendTestEmail = async (to: string): Promise<any> => {
   return sendTemplateEmail(testTemplate, to);
 };
 
+/**
+ * Send password reset email
+ * @param email Recipient email address
+ * @param resetUrl Password reset URL
+ * @param userName User's name
+ * @returns Promise with message info or error
+ */
+export const sendPasswordResetEmail = async (
+  email: string,
+  resetUrl: string,
+  userName: string
+): Promise<any> => {
+  console.log("Sending password reset email to:", email);
+  console.log("Reset URL:", resetUrl);
+  console.log("User name:", userName);
+  const resetTemplate: EmailTemplate = {
+    subject: "Password Reset Request - Findly",
+    text: `Hello ${userName},\n\nYou requested a password reset for your Findly account. Please click the following link to reset your password:\n\n${resetUrl}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this password reset, please ignore this email.\n\nBest regards,\nFindly Team`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+        <h2 style="color: #2C0053;">Password Reset Request</h2>
+        <p>Hello ${userName},</p>
+        <p>You requested a password reset for your Findly account. Please click the button below to reset your password:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetUrl}" style="background-color: #2C0053; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">Reset Password</a>
+        </div>
+        <p style="color: #666; font-size: 14px;">This link will expire in 1 hour.</p>
+        <p style="color: #666; font-size: 14px;">If you didn't request this password reset, please ignore this email.</p>
+        <p style="color: #555; margin-top: 30px;">Best regards,<br/>Findly Team</p>
+      </div>
+    `,
+  };
+
+  return sendTemplateEmail(resetTemplate, email);
+};
+
 export default {
   sendEmail,
   sendTemplateEmail,
   sendTestEmail,
+  sendPasswordResetEmail,
   transporter,
 };

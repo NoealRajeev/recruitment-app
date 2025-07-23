@@ -157,17 +157,27 @@ export async function PUT(request: Request) {
         // Create stage history records for accepted assignments
         if (status === "ACCEPTED") {
           await Promise.all(
-            assignments.map((assignment) =>
-              tx.labourStageHistory.create({
-                data: {
+            assignments.map(async (assignment) => {
+              // Check if OFFER_LETTER_SIGN stage already exists to prevent duplicates
+              const existingStage = await tx.labourStageHistory.findFirst({
+                where: {
                   labourId: assignment.labourId,
                   stage: "OFFER_LETTER_SIGN",
-                  status: "PENDING",
-                  notes: "Awaiting offer letter signature",
-                  documents: [],
                 },
-              })
-            )
+              });
+
+              if (!existingStage) {
+                await tx.labourStageHistory.create({
+                  data: {
+                    labourId: assignment.labourId,
+                    stage: "OFFER_LETTER_SIGN",
+                    status: "PENDING",
+                    notes: "Awaiting offer letter signature",
+                    documents: [],
+                  },
+                });
+              }
+            })
           );
         }
 
@@ -258,7 +268,7 @@ export async function PUT(request: Request) {
               },
             });
 
-            // Update all backup labour profiles for this job role
+            // Update all backup labour profiles for this job role to APPROVED and remove requirement details
             await tx.labourProfile.updateMany({
               where: {
                 LabourAssignment: {
@@ -271,10 +281,11 @@ export async function PUT(request: Request) {
               data: {
                 status: "APPROVED",
                 verificationStatus: "VERIFIED",
+                requirementId: null, // Remove requirement connection
               },
             });
 
-            // Mark all backup assignments as rejected
+            // Mark all backup assignments as rejected and remove backup details
             await tx.labourAssignment.updateMany({
               where: {
                 jobRoleId: jobRole.id,
@@ -283,6 +294,23 @@ export async function PUT(request: Request) {
               data: {
                 clientStatus: "REJECTED",
                 clientFeedback: "Backup candidate - requirement fulfilled",
+                isBackup: false, // Remove backup details
+              },
+            });
+
+            // Also update rejected labour profiles to APPROVED and remove requirement details
+            await tx.labourProfile.updateMany({
+              where: {
+                LabourAssignment: {
+                  some: {
+                    jobRoleId: jobRole.id,
+                    clientStatus: "REJECTED",
+                  },
+                },
+              },
+              data: {
+                status: "APPROVED",
+                requirementId: null,
               },
             });
 

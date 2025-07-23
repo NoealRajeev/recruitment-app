@@ -3,14 +3,13 @@
 
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import ProjectSummary from "@/components/dashboard/ProjectSummary";
-import StatsOverview from "@/components/dashboard/StatsOverview";
-import { Plus } from "lucide-react";
+import DashboardStats from "@/components/dashboard/DashboardStats";
+import { Plus, Download } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { useToast } from "@/context/toast-provider";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/select";
-import Image from "next/image";
+import { Button } from "@/components/ui/Button";
 
 interface DashboardData {
   stats: {
@@ -23,54 +22,32 @@ interface DashboardData {
   recentActivity: [];
 }
 
-interface AdminFormData {
+interface AdminUser {
+  id: string;
   name: string;
   email: string;
-  phone: string;
-  department: string;
-  profilePicture: File | null;
-  profilePreview: string | null;
+  role: string;
+  status: string;
+  profilePicture?: string;
 }
 
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState<AdminFormData>({
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [selectedReportType, setSelectedReportType] = useState("comprehensive");
+  const [selectedFormat, setSelectedFormat] = useState("pdf");
+  const [generatingReport, setGeneratingReport] = useState(false);
+  const { toast } = useToast();
+
+  const [adminUser, setAdminUser] = useState<AdminUser>({
+    id: "",
     name: "",
     email: "",
-    phone: "",
-    department: "",
-    profilePicture: null,
-    profilePreview: null,
+    role: "",
+    status: "",
   });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
-
-  const checkEmailAvailability = useCallback(
-    async (email: string): Promise<boolean> => {
-      try {
-        const response = await fetch("/api/auth/check-identifier", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type: "email", value: email }),
-        });
-
-        if (!response.ok) {
-          throw new Error("Failed to check email availability");
-        }
-
-        const data = await response.json();
-        return data.available;
-      } catch (error) {
-        console.error("Email check failed:", error);
-        return false;
-      }
-    },
-    []
-  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -97,176 +74,98 @@ export default function Dashboard() {
     fetchData();
   }, [toast]);
 
-  const handleInputChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Clear any existing error for this field
-    if (errors[name]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
-
-    // Check email availability when email changes
-    if (name === "email" && value) {
-      setIsCheckingEmail(true);
-      try {
-        const isAvailable = await checkEmailAvailability(value);
-        if (!isAvailable) {
-          setErrors((prev) => ({
-            ...prev,
-            email: "Email is already in use",
-          }));
-        }
-      } catch (error) {
-        console.error("Error checking email availability:", error);
-      } finally {
-        setIsCheckingEmail(false);
-      }
-    }
-  };
-
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    if (errors[name]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev };
-        delete newErrors[name];
-        return newErrors;
-      });
-    }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      // Validate file type and size
-      if (!file.type.startsWith("image/")) {
-        setErrors((prev) => ({
-          ...prev,
-          profilePicture: "Please upload an image file",
-        }));
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        // 5MB
-        setErrors((prev) => ({
-          ...prev,
-          profilePicture: "File size should be less than 5MB",
-        }));
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData((prev) => ({
-          ...prev,
-          profilePicture: file,
-          profilePreview: reader.result as string,
-        }));
-      };
-      reader.readAsDataURL(file);
-
-      if (errors.profilePicture) {
-        setErrors((prev) => {
-          const newErrors = { ...prev };
-          delete newErrors.profilePicture;
-          return newErrors;
-        });
-      }
-    }
-  };
-
-  const validateForm = async () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.name.trim()) newErrors.name = "Name is required";
-
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
-    } else {
-      // Check email availability again before submission
-      try {
-        const isAvailable = await checkEmailAvailability(formData.email);
-        if (!isAvailable) {
-          newErrors.email = "Email is already in use";
-        }
-      } catch (error) {
-        newErrors.email = "Failed to verify email availability";
-      }
-    }
-
-    if (!formData.phone.trim()) newErrors.phone = "Phone number is required";
-    if (!formData.profilePicture)
-      newErrors.profilePicture = "Profile picture is required";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const handleSubmit = async () => {
-    const isValid = await validateForm();
-    if (!isValid) return;
-
-    setIsSubmitting(true);
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("name", formData.name);
-      formDataToSend.append("email", formData.email);
-      formDataToSend.append("phone", formData.phone);
-      formDataToSend.append("department", formData.department);
-      if (formData.profilePicture) {
-        formDataToSend.append("profilePicture", formData.profilePicture);
-      }
-
       const response = await fetch("/api/admin/register", {
         method: "POST",
-        body: formDataToSend,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(adminUser),
       });
 
       if (response.ok) {
         toast({
           type: "success",
-          message: "Admin account created successfully",
+          message: "Admin user created successfully",
         });
         setIsModalOpen(false);
-        setFormData({
+        setAdminUser({
+          id: "",
           name: "",
           email: "",
-          phone: "",
-          department: "",
-          profilePicture: null,
-          profilePreview: null,
+          role: "",
+          status: "",
         });
       } else {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create admin account");
+        const error = await response.json();
+        toast({
+          type: "error",
+          message: error.error || "Failed to create admin user",
+        });
       }
     } catch (error) {
-      console.error("Error creating admin account:", error);
+      console.error("Error creating admin user:", error);
       toast({
         type: "error",
-        message:
-          error instanceof Error
-            ? error.message
-            : "Failed to create admin account",
+        message: "Failed to create admin user",
       });
-    } finally {
-      setIsSubmitting(false);
     }
   };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setAdminUser((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleDownloadReport = useCallback(async (reportType: string) => {
+    setSelectedReportType(reportType);
+    setIsReportModalOpen(true);
+  }, []);
+
+  const generateReport = useCallback(async () => {
+    setGeneratingReport(true);
+    try {
+      const response = await fetch("/api/reports/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reportType: selectedReportType,
+          format: selectedFormat,
+          filters: {},
+        }),
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${selectedReportType}-${selectedFormat}-report.${selectedFormat === "pdf" ? "pdf" : "xlsx"}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } else {
+        const error = await response.json();
+        toast({
+          type: "error",
+          message: error.error || "Failed to generate report",
+        });
+      }
+    } catch (error) {
+      console.error("Error generating report:", error);
+      toast({
+        type: "error",
+        message: "Failed to generate report",
+      });
+    } finally {
+      setGeneratingReport(false);
+    }
+  }, [selectedReportType, selectedFormat, toast]);
 
   if (loading) {
     return (
@@ -288,27 +187,31 @@ export default function Dashboard() {
     <div className="pb-6 px-6 space-y-6">
       {/* Header Row */}
       <div className="flex items-center justify-between">
-        {/* Overview Title with Vertical Line */}
-        <div className="flex items-center space-x-3">
-          <div className="h-[1.75rem] w-[3px] bg-[#635372]/37 rounded-full" />
-          <h1 className="text-2xl font-bold text-[#2C0053]">Overview</h1>
+        <div />
+        {/* Action Buttons */}
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => setIsReportModalOpen(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <Download className="w-5 h-5" />
+            <span>Generate Report</span>
+          </button>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-[#2C0053] text-white rounded-lg hover:bg-[#3C006F] transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            <span>New Account</span>
+          </button>
         </div>
-
-        {/* New Account with Icon */}
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center space-x-2 cursor-pointer"
-        >
-          <Plus className="w-6 h-6 text-[#2C0053]" />
-          <h1 className="text-xl font-bold text-[#2C0053]">New Account</h1>
-        </button>
       </div>
 
       {/* Main Layout */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Left Column: Stats + ProjectSummary */}
         <div className="space-y-6 xl:col-span-2">
-          <StatsOverview
+          <DashboardStats
             stats={{
               totalRequests: data.stats.totalRequests,
               pendingReviews: data.stats.pendingReviews,
@@ -316,6 +219,7 @@ export default function Dashboard() {
               agenciesActive: data.stats.agenciesActive,
             }}
             variant="admin"
+            onDownloadReport={handleDownloadReport}
           />
           <ProjectSummary requirements={data.recentRequirements} />
         </div>
@@ -331,91 +235,144 @@ export default function Dashboard() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title="Create New Admin Account"
-        size="2xl"
+        size="md"
         showFooter={true}
         onConfirm={handleSubmit}
         confirmText="Create Account"
-        confirmDisabled={isSubmitting || isCheckingEmail}
-        isLoading={isSubmitting}
+        onCancel={() => setIsModalOpen(false)}
+        cancelText="Cancel"
       >
-        <div className="space-y-4 pb-10">
-          {/* Profile Picture Upload */}
-          <div className="flex flex-col items-center mb-4">
-            <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-dashed border-gray-300 mb-2">
-              {formData.profilePreview ? (
-                <Image
-                  src={formData.profilePreview}
-                  alt="Profile preview"
-                  layout="fill"
-                  objectFit="cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                  <span className="text-gray-400">No image</span>
-                </div>
-              )}
-            </div>
-            <label className="cursor-pointer">
-              <span className="px-4 py-2 bg-purple-100 text-purple-700 rounded-md text-sm font-medium hover:bg-purple-200 transition-colors">
-                {formData.profilePicture ? "Change Photo" : "Upload Photo"}
-              </span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="hidden"
-              />
-            </label>
-            {errors.profilePicture && (
-              <p className="text-sm text-red-500 mt-1">
-                {errors.profilePicture}
-              </p>
-            )}
-          </div>
-
+        <div className="space-y-4">
           <Input
             label="Full Name"
             name="name"
-            value={formData.name}
+            value={adminUser.name}
             onChange={handleInputChange}
+            placeholder="Enter full name"
             required
-            error={errors.name}
-            placeholder="Enter admin's full name"
           />
-
           <Input
             label="Email"
             name="email"
             type="email"
-            value={formData.email}
+            value={adminUser.email}
             onChange={handleInputChange}
+            placeholder="Enter email address"
             required
-            error={errors.email}
-            placeholder="Enter admin's email"
           />
-
           <Input
-            label="Phone Number"
-            name="phone"
-            value={formData.phone}
+            label="Role"
+            name="role"
+            value={adminUser.role}
             onChange={handleInputChange}
+            placeholder="Enter role"
             required
-            error={errors.phone}
-            placeholder="Enter phone number"
           />
+          <Input
+            label="Status"
+            name="status"
+            value={adminUser.status}
+            onChange={handleInputChange}
+            placeholder="Enter status"
+            required
+          />
+        </div>
+      </Modal>
 
-          <Select
-            label="Department"
-            name="department"
-            value={formData.department}
-            onChange={handleSelectChange}
-            options={[
-              { value: "operations", label: "Operations" },
-              { value: "recruitment", label: "Recruitment" },
-              { value: "compliance", label: "Compliance" },
-              { value: "finance", label: "Finance" },
-            ]}
-          />
+      {/* Report Generation Modal */}
+      <Modal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        title="Generate Report"
+        size="md"
+        showFooter={true}
+        onConfirm={generateReport}
+        confirmText={generatingReport ? "Generating..." : "Generate Report"}
+        onCancel={() => setIsReportModalOpen(false)}
+        cancelText="Cancel"
+        isConfirmLoading={generatingReport}
+        footerContent={
+          <div className="flex gap-2 w-full">
+            <Button
+              type="button"
+              className="w-full"
+              variant="default"
+              disabled={generatingReport}
+              onClick={async () => {
+                setGeneratingReport(true);
+                try {
+                  const response = await fetch("/api/reports/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      reportType: selectedReportType,
+                      format: selectedFormat,
+                      filters: {},
+                    }),
+                  });
+                  if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    window.open(url, "_blank");
+                  } else {
+                    const error = await response.json();
+                    toast({
+                      type: "error",
+                      message: error.error || "Failed to generate report",
+                    });
+                  }
+                } catch (error) {
+                  toast({
+                    type: "error",
+                    message: "Failed to generate report",
+                  });
+                } finally {
+                  setGeneratingReport(false);
+                }
+              }}
+            >
+              {generatingReport ? "Opening..." : "View Report"}
+            </Button>
+            <Button
+              type="button"
+              className="w-full"
+              variant="default"
+              disabled={generatingReport}
+              onClick={generateReport}
+            >
+              {generatingReport ? "Generating..." : "Generate Report"}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Report Type
+            </label>
+            <select
+              value={selectedReportType}
+              onChange={(e) => setSelectedReportType(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="comprehensive">Comprehensive Report</option>
+              <option value="analytics">Analytics Report</option>
+              <option value="system">System Overview</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Format
+            </label>
+            <select
+              value={selectedFormat}
+              onChange={(e) => setSelectedFormat(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="pdf">PDF</option>
+              <option value="excel">Excel</option>
+            </select>
+          </div>
         </div>
       </Modal>
     </div>

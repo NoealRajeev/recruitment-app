@@ -74,6 +74,11 @@ export default function LoginPage() {
 
     // Use callbackUrl, not from
     const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+    console.log("Login page callback URL:", callbackUrl);
+    console.log(
+      "All search params:",
+      Object.fromEntries(searchParams.entries())
+    );
 
     try {
       const result = await signIn("credentials", {

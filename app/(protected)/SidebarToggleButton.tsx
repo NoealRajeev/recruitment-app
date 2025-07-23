@@ -25,7 +25,7 @@ export default function SidebarToggleButton() {
     >
       <span
         className={`transition-transform duration-350 ${
-          isExpanded ? "" : "rotate-180"
+          isExpanded ? "rotate-180" : ""
         }`}
       >
         <ChevronRight />

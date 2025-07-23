@@ -9,7 +9,8 @@ interface TravelConfirmationModalProps {
   onConfirm: (
     status: "TRAVELED" | "RESCHEDULED" | "CANCELED",
     rescheduledDate?: string,
-    notes?: string
+    notes?: string,
+    flightTicketFile?: File
   ) => void;
   labourName: string;
   currentTravelDate?: string;
@@ -29,41 +30,90 @@ const TravelConfirmationModal: React.FC<TravelConfirmationModalProps> = ({
   const [rescheduledTime, setRescheduledTime] = useState("");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [flightTicketFile, setFlightTicketFile] = useState<File | null>(null);
+  const [errors, setErrors] = useState<{
+    date?: string;
+    file?: string;
+  }>({});
 
   // Get today's date in YYYY-MM-DD format for min attribute
   const today = new Date().toISOString().split("T")[0];
 
+  // Validation function for rescheduled status
+  const validateRescheduledRequirements = () => {
+    const newErrors: { date?: string; file?: string } = {};
+
+    // Validate date
+    if (!rescheduledDate) {
+      newErrors.date = "Please select a new travel date";
+    } else {
+      const selectedDate = new Date(rescheduledDate);
+      const todayDate = new Date();
+      todayDate.setHours(0, 0, 0, 0);
+
+      if (selectedDate < todayDate) {
+        newErrors.date = "Please select a date that is today or in the future";
+      }
+    }
+
+    // Validate file
+    if (!flightTicketFile) {
+      newErrors.file = "Please upload a new flight ticket PDF";
+    } else {
+      // Check file type
+      if (flightTicketFile.type !== "application/pdf") {
+        newErrors.file = "Please upload a PDF file only";
+      }
+      // Check file size (max 10MB)
+      else if (flightTicketFile.size > 10 * 1024 * 1024) {
+        newErrors.file = "File size must be less than 10MB";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Check if confirm button should be disabled
+  const isConfirmDisabled = () => {
+    if (!selectedStatus || isSubmitting) return true;
+
+    if (selectedStatus === "RESCHEDULED") {
+      return (
+        !rescheduledDate || !flightTicketFile || Object.keys(errors).length > 0
+      );
+    }
+
+    return false;
+  };
+
   const handleConfirm = async () => {
     if (!selectedStatus) return;
+
+    // Additional validation for rescheduled status
+    if (
+      selectedStatus === "RESCHEDULED" &&
+      !validateRescheduledRequirements()
+    ) {
+      return;
+    }
 
     setIsSubmitting(true);
     try {
       let finalRescheduledDate = "";
       if (selectedStatus === "RESCHEDULED") {
-        if (!rescheduledDate) {
-          alert("Please select a new travel date");
-          setIsSubmitting(false);
-          return;
-        }
-
-        // Validate that the selected date is not before today
-        const selectedDate = new Date(rescheduledDate);
-        const todayDate = new Date();
-        todayDate.setHours(0, 0, 0, 0); // Reset time to start of day for comparison
-
-        if (selectedDate < todayDate) {
-          alert("Please select a date that is today or in the future");
-          setIsSubmitting(false);
-          return;
-        }
-
         // Combine date and time
         finalRescheduledDate = rescheduledTime
           ? `${rescheduledDate}T${rescheduledTime}:00.000Z`
           : `${rescheduledDate}T00:00:00.000Z`;
       }
 
-      await onConfirm(selectedStatus, finalRescheduledDate, notes);
+      await onConfirm(
+        selectedStatus,
+        finalRescheduledDate,
+        notes,
+        flightTicketFile || undefined
+      );
       // Show success message for rescheduled status
       if (selectedStatus === "RESCHEDULED") {
         console.log("Travel date has been rescheduled successfully");
@@ -82,6 +132,8 @@ const TravelConfirmationModal: React.FC<TravelConfirmationModalProps> = ({
     setRescheduledTime("");
     setNotes("");
     setIsSubmitting(false);
+    setFlightTicketFile(null);
+    setErrors({});
     onClose();
   };
 
@@ -98,6 +150,84 @@ const TravelConfirmationModal: React.FC<TravelConfirmationModalProps> = ({
         hour12: true,
       })
       .replace(/am|pm/, (match) => match.toUpperCase());
+  };
+
+  // Handle date change with validation
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = e.target.value;
+
+    // Clear date error immediately when user starts typing
+    if (errors.date) {
+      setErrors((prev) => ({ ...prev, date: undefined }));
+    }
+
+    setRescheduledDate(newDate);
+
+    // Validate immediately with the new date
+    if (selectedStatus === "RESCHEDULED") {
+      // Use setTimeout to ensure state is updated before validation
+      setTimeout(() => {
+        const newErrors: { date?: string; file?: string } = { ...errors };
+
+        // Validate the new date
+        if (!newDate) {
+          newErrors.date = "Please select a new travel date";
+        } else {
+          const selectedDate = new Date(newDate);
+          const todayDate = new Date();
+          todayDate.setHours(0, 0, 0, 0);
+
+          if (selectedDate < todayDate) {
+            newErrors.date =
+              "Please select a date that is today or in the future";
+          } else {
+            // Clear date error if validation passes
+            delete newErrors.date;
+          }
+        }
+
+        setErrors(newErrors);
+      }, 0);
+    }
+  };
+
+  // Handle file change with validation
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+
+    // Clear file error immediately when user selects a file
+    if (errors.file) {
+      setErrors((prev) => ({ ...prev, file: undefined }));
+    }
+
+    setFlightTicketFile(file);
+
+    // Validate immediately with the new file
+    if (selectedStatus === "RESCHEDULED") {
+      // Use setTimeout to ensure state is updated before validation
+      setTimeout(() => {
+        const newErrors: { date?: string; file?: string } = { ...errors };
+
+        // Validate the new file
+        if (!file) {
+          newErrors.file = "Please upload a new flight ticket PDF";
+        } else {
+          // Check file type
+          if (file.type !== "application/pdf") {
+            newErrors.file = "Please upload a PDF file only";
+          }
+          // Check file size (max 10MB)
+          else if (file.size > 10 * 1024 * 1024) {
+            newErrors.file = "File size must be less than 10MB";
+          } else {
+            // Clear file error if validation passes
+            delete newErrors.file;
+          }
+        }
+
+        setErrors(newErrors);
+      }, 0);
+    }
   };
 
   return (
@@ -165,7 +295,11 @@ const TravelConfirmationModal: React.FC<TravelConfirmationModalProps> = ({
                 ? "border-yellow-500 bg-yellow-50"
                 : "border-gray-200 hover:border-yellow-300"
             }`}
-            onClick={() => setSelectedStatus("RESCHEDULED")}
+            onClick={() => {
+              setSelectedStatus("RESCHEDULED");
+              // Clear errors when switching to rescheduled status
+              setErrors({});
+            }}
           >
             <div className="flex items-center gap-3">
               <div
@@ -235,16 +369,21 @@ const TravelConfirmationModal: React.FC<TravelConfirmationModalProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Date
+                  Date <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="date"
                   value={rescheduledDate}
-                  onChange={(e) => setRescheduledDate(e.target.value)}
+                  onChange={handleDateChange}
                   min={today}
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                  className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 ${
+                    errors.date ? "border-red-500" : "border-gray-300"
+                  }`}
                   required
                 />
+                {errors.date && (
+                  <p className="text-red-500 text-sm mt-1">{errors.date}</p>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -260,7 +399,7 @@ const TravelConfirmationModal: React.FC<TravelConfirmationModalProps> = ({
             </div>
 
             {/* Preview of new travel date */}
-            {rescheduledDate && (
+            {rescheduledDate && !errors.date && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Calendar className="w-4 h-4 text-yellow-600" />
@@ -277,6 +416,30 @@ const TravelConfirmationModal: React.FC<TravelConfirmationModalProps> = ({
                 </p>
               </div>
             )}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Upload New Flight Ticket (PDF){" "}
+                <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={handleFileChange}
+                className={`w-full p-2 border rounded-md focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 ${
+                  errors.file ? "border-red-500" : "border-gray-300"
+                }`}
+                required
+              />
+              {flightTicketFile && !errors.file && (
+                <div className="text-xs text-gray-600 mt-1">
+                  Selected: {flightTicketFile.name} (
+                  {(flightTicketFile.size / 1024 / 1024).toFixed(2)} MB)
+                </div>
+              )}
+              {errors.file && (
+                <p className="text-red-500 text-sm mt-1">{errors.file}</p>
+              )}
+            </div>
           </div>
         )}
 
@@ -305,7 +468,7 @@ const TravelConfirmationModal: React.FC<TravelConfirmationModalProps> = ({
           </Button>
           <Button
             onClick={handleConfirm}
-            disabled={!selectedStatus || isSubmitting}
+            disabled={isConfirmDisabled()}
             className={
               selectedStatus === "TRAVELED"
                 ? "bg-green-600 hover:bg-green-700"

@@ -3,6 +3,9 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { AuditAction, RequirementStatus } from "@/lib/generated/prisma";
+import { NotificationType, NotificationPriority } from "@prisma/client";
+import { NotificationService } from "@/lib/notifications";
+import { sendEmail } from "@/lib/utils/email-service";
 
 export async function PUT(request: Request) {
   try {
@@ -94,7 +97,10 @@ export async function PUT(request: Request) {
             adminStatus: status as RequirementStatus,
             adminFeedback: status === "ACCEPTED" ? null : feedback, // Clear feedback if accepted
             ...(status === "ACCEPTED" && {
-              clientStatus: "SUBMITTED", // Set to SUBMITTED for client review
+              // Only set client status to SUBMITTED if it's not already approved by client
+              ...(assignment.clientStatus !== "ACCEPTED" && {
+                clientStatus: "SUBMITTED", // Set to SUBMITTED for client review
+              }),
               agencyStatus: "ACCEPTED", // Set agency status to ACCEPTED
             }),
             ...(status === "REJECTED" && {
@@ -245,10 +251,56 @@ export async function PUT(request: Request) {
         const acceptedPrimaries = jobRoleAssignments.filter(
           (a) => a.adminStatus === "ACCEPTED" && !a.isBackup
         ).length;
+        // Fetch previous needsMoreLabour value
+        const prevJobRole = await tx.jobRole.findUnique({
+          where: { id: jobRoleId },
+          select: {
+            needsMoreLabour: true,
+            assignedAgency: { include: { user: true } },
+            title: true,
+            requirement: {
+              select: { id: true, client: { select: { companyName: true } } },
+            },
+          },
+        });
+        const newNeedsMoreLabour = acceptedPrimaries < jobRole.quantity;
         await tx.jobRole.update({
           where: { id: jobRoleId },
-          data: { needsMoreLabour: acceptedPrimaries < jobRole.quantity },
+          data: { needsMoreLabour: newNeedsMoreLabour },
         });
+        // Notify agency if needsMoreLabour transitioned from false to true
+        if (
+          prevJobRole &&
+          !prevJobRole.needsMoreLabour &&
+          newNeedsMoreLabour &&
+          prevJobRole.assignedAgency?.user
+        ) {
+          const agencyUser = prevJobRole.assignedAgency.user;
+          const jobRoleTitle = prevJobRole.title;
+          const companyName =
+            prevJobRole.requirement?.client?.companyName || "";
+          const config = {
+            type: NotificationType.REQUIREMENT_NEEDS_REVISION,
+            title: `Urgent: More Labour Needed for ${jobRoleTitle}`,
+            message: `The requirement for ${companyName} needs more labour profiles for the job role: ${jobRoleTitle}. Please take action immediately.`,
+            priority: NotificationPriority.HIGH,
+            actionUrl: `/dashboard/agency/requirements`,
+            actionText: "View Requirement",
+          };
+          // In-app notification
+          await NotificationService.createNotification({
+            ...config,
+            recipientId: agencyUser.id,
+          });
+          // Email
+          if (agencyUser.email) {
+            await sendEmail({
+              to: agencyUser.email,
+              subject: config.title,
+              text: config.message,
+            });
+          }
+        }
       }
 
       // Check each requirement to see if all job roles are fulfilled

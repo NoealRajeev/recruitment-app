@@ -189,7 +189,7 @@ export async function notifyContractRefused(
   labourName: string,
   jobTitle: string,
   agencyName: string,
-  agencyId: string,
+  agencyUserId: string,
   clientId?: string
 ) {
   const config = NotificationTemplates.CONTRACT_REFUSED(
@@ -201,7 +201,7 @@ export async function notifyContractRefused(
   // Notify agency
   await NotificationService.createNotification({
     ...config,
-    recipientId: agencyId,
+    recipientId: agencyUserId,
   });
 
   // Notify client if provided
@@ -216,7 +216,149 @@ export async function notifyContractRefused(
   await NotificationService.createNotificationsForRole(
     UserRole.RECRUITMENT_ADMIN,
     config,
-    agencyId
+    agencyUserId
+  );
+}
+
+export async function notifyMedicalUnfit(
+  labourName: string,
+  jobTitle: string,
+  agencyName: string,
+  agencyUserId: string,
+  clientId?: string
+) {
+  const config = NotificationTemplates.MEDICAL_UNFIT(
+    labourName,
+    jobTitle,
+    agencyName
+  );
+
+  // Notify agency
+  await NotificationService.createNotification({
+    ...config,
+    recipientId: agencyUserId,
+  });
+
+  // Notify client if provided
+  if (clientId) {
+    await NotificationService.createNotification({
+      ...config,
+      recipientId: clientId,
+    });
+  }
+
+  // Notify admins about medical unfit
+  await NotificationService.createNotificationsForRole(
+    UserRole.RECRUITMENT_ADMIN,
+    config,
+    agencyUserId
+  );
+}
+
+export async function notifyFingerprintFail(
+  labourName: string,
+  jobTitle: string,
+  agencyName: string,
+  agencyUserId: string,
+  clientId?: string
+) {
+  const config = NotificationTemplates.FINGERPRINT_FAIL(
+    labourName,
+    jobTitle,
+    agencyName
+  );
+
+  // Notify agency
+  await NotificationService.createNotification({
+    ...config,
+    recipientId: agencyUserId,
+  });
+
+  // Notify client if provided
+  if (clientId) {
+    await NotificationService.createNotification({
+      ...config,
+      recipientId: clientId,
+    });
+  }
+
+  // Notify admins about fingerprint failure
+  await NotificationService.createNotificationsForRole(
+    UserRole.RECRUITMENT_ADMIN,
+    config,
+    agencyUserId
+  );
+}
+
+export async function notifyTravelCanceled(
+  labourName: string,
+  jobTitle: string,
+  agencyName: string,
+  agencyUserId: string,
+  clientId?: string
+) {
+  const config = NotificationTemplates.TRAVEL_CANCELED(
+    labourName,
+    jobTitle,
+    agencyName
+  );
+
+  // Notify agency
+  await NotificationService.createNotification({
+    ...config,
+    recipientId: agencyUserId,
+  });
+
+  // Notify client if provided
+  if (clientId) {
+    await NotificationService.createNotification({
+      ...config,
+      recipientId: clientId,
+    });
+  }
+
+  // Notify admins about travel cancellation
+  await NotificationService.createNotificationsForRole(
+    UserRole.RECRUITMENT_ADMIN,
+    config,
+    agencyUserId
+  );
+}
+
+export async function notifyTravelRescheduled(
+  labourName: string,
+  jobTitle: string,
+  agencyName: string,
+  rescheduledDate: string,
+  agencyUserId: string,
+  clientId?: string
+) {
+  const config = NotificationTemplates.TRAVEL_RESCHEDULED(
+    labourName,
+    jobTitle,
+    agencyName,
+    rescheduledDate
+  );
+
+  // Notify agency
+  await NotificationService.createNotification({
+    ...config,
+    recipientId: agencyUserId,
+  });
+
+  // Notify client if provided
+  if (clientId) {
+    await NotificationService.createNotification({
+      ...config,
+      recipientId: clientId,
+    });
+  }
+
+  // Notify admins about travel rescheduling
+  await NotificationService.createNotificationsForRole(
+    UserRole.RECRUITMENT_ADMIN,
+    config,
+    agencyUserId
   );
 }
 

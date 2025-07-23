@@ -464,10 +464,23 @@ export default function ClientReviewPage() {
               ) : clientDocuments.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {clientDocuments.map((doc) => {
-                    const absoluteUrl = `${window.location.origin}${doc.url}`;
+                    // Use proxy for PDF files to avoid CORS issues
                     const isImage = /\.(png|jpg|jpeg|gif|webp)$/i.test(doc.url);
                     const isPdf = /\.(pdf)$/i.test(doc.url);
                     const fileName = doc.url.split("/").pop() || "document";
+
+                    // Extract the relative path from the URL
+                    const relativePath = doc.url.replace(/^\/uploads\//, "");
+                    const absoluteUrl = isPdf
+                      ? `${window.location.origin}/api/documents/proxy?path=${encodeURIComponent(relativePath)}`
+                      : `${window.location.origin}${doc.url}`;
+
+                    console.log("Document URL construction:", {
+                      originalUrl: doc.url,
+                      isPdf,
+                      relativePath,
+                      absoluteUrl,
+                    });
                     const currentStatus =
                       documentStatuses[doc.id] || doc.status;
                     const isImportant =

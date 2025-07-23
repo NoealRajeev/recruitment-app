@@ -2,10 +2,13 @@
 "use client";
 
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
-import StatsOverview from "@/components/dashboard/StatsOverview";
-import LabourProfilesTable from "@/components/dashboard/LabourProfilesTable";
-import { useEffect, useState } from "react";
+import DashboardStats from "@/components/dashboard/DashboardStats";
+import { useEffect, useState, useCallback } from "react";
 import { useToast } from "@/context/toast-provider";
+import { Download } from "lucide-react";
+import LabourProfilesTable from "@/components/dashboard/LabourProfilesTable";
+import { Modal } from "@/components/ui/Modal";
+import { Button } from "@/components/ui/Button";
 
 interface DashboardData {
   stats: {
@@ -18,8 +21,11 @@ interface DashboardData {
     id: string;
     name: string;
     nationality: string;
+    age: number;
+    gender: string;
     status: string;
     verificationStatus: string;
+    profileImage?: string;
     createdAt: Date;
     documents: Array<{
       type: string;
@@ -40,6 +46,10 @@ interface DashboardData {
 export default function AgencyDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [selectedReportType, setSelectedReportType] = useState("comprehensive");
+  const [selectedFormat, setSelectedFormat] = useState("pdf");
+  const [generatingReport, setGeneratingReport] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -67,6 +77,48 @@ export default function AgencyDashboard() {
     fetchData();
   }, [toast]);
 
+  const handleDownloadReport = useCallback(async (reportType: string) => {
+    setSelectedReportType(reportType);
+    setIsReportModalOpen(true);
+  }, []);
+
+  const generateReport = useCallback(async () => {
+    setGeneratingReport(true);
+    try {
+      const response = await fetch("/api/reports/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reportType: selectedReportType,
+          format: selectedFormat,
+          filters: {},
+        }),
+      });
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${selectedReportType}-${selectedFormat}-report.${selectedFormat === "pdf" ? "pdf" : "xlsx"}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+      } else {
+        throw new Error("Failed to generate report");
+      }
+    } catch (error) {
+      console.error("Error generating report:", error);
+      toast({
+        type: "error",
+        message: "Failed to generate report",
+      });
+    } finally {
+      setGeneratingReport(false);
+      setIsReportModalOpen(false);
+    }
+  }, [selectedReportType, selectedFormat, toast]);
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -87,12 +139,16 @@ export default function AgencyDashboard() {
     <div className="pb-6 px-6 space-y-6">
       {/* Header Row */}
       <div className="flex items-center justify-between">
-        {/* Overview Title with Vertical Line */}
-        <div className="flex items-center space-x-3">
-          <div className="h-[1.75rem] w-[3px] bg-[#635372]/37 rounded-full" />
-          <h1 className="text-2xl font-bold text-[#2C0053]">
-            Agency Dashboard
-          </h1>
+        <div />
+        {/* Action Buttons */}
+        <div className="flex items-center space-x-4">
+          <button
+            onClick={() => setIsReportModalOpen(true)}
+            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <Download className="w-5 h-5" />
+            <span>Generate Report</span>
+          </button>
         </div>
       </div>
 
@@ -100,7 +156,7 @@ export default function AgencyDashboard() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Left Column: Stats + Labour Profiles */}
         <div className="space-y-6 xl:col-span-2">
-          <StatsOverview
+          <DashboardStats
             stats={{
               totalProfiles: data.stats.totalProfiles,
               pendingVerification: data.stats.pendingVerification,
@@ -108,6 +164,7 @@ export default function AgencyDashboard() {
               deployedProfiles: data.stats.deployedProfiles,
             }}
             variant="agency"
+            onDownloadReport={handleDownloadReport}
           />
           <LabourProfilesTable profiles={data.recentProfiles} />
         </div>
@@ -117,6 +174,103 @@ export default function AgencyDashboard() {
           <ActivityFeed activities={data.recentActivity} />
         </div>
       </div>
+
+      {/* Report Generation Modal */}
+      <Modal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        title="Generate Report"
+        size="md"
+        showFooter={true}
+        onConfirm={generateReport}
+        confirmText={generatingReport ? "Generating..." : "Generate Report"}
+        onCancel={() => setIsReportModalOpen(false)}
+        cancelText="Cancel"
+        isConfirmLoading={generatingReport}
+        footerContent={
+          <div className="flex gap-2 w-full">
+            <Button
+              type="button"
+              className="w-full"
+              variant="default"
+              disabled={generatingReport}
+              onClick={async () => {
+                setGeneratingReport(true);
+                try {
+                  const response = await fetch("/api/reports/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      reportType: selectedReportType,
+                      format: selectedFormat,
+                      filters: {},
+                    }),
+                  });
+                  if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    window.open(url, "_blank");
+                  } else {
+                    const error = await response.json();
+                    toast({
+                      type: "error",
+                      message: error.error || "Failed to generate report",
+                    });
+                  }
+                } catch (error) {
+                  toast({
+                    type: "error",
+                    message: "Failed to generate report",
+                  });
+                } finally {
+                  setGeneratingReport(false);
+                }
+              }}
+            >
+              {generatingReport ? "Opening..." : "View Report"}
+            </Button>
+            <Button
+              type="button"
+              className="w-full"
+              variant="default"
+              disabled={generatingReport}
+              onClick={generateReport}
+            >
+              {generatingReport ? "Generating..." : "Generate Report"}
+            </Button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Report Type
+            </label>
+            <select
+              value={selectedReportType}
+              onChange={(e) => setSelectedReportType(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="comprehensive">Comprehensive Report</option>
+              <option value="profiles">Profile Report</option>
+              <option value="deployment">Deployment Report</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Format
+            </label>
+            <select
+              value={selectedFormat}
+              onChange={(e) => setSelectedFormat(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+              <option value="pdf">PDF</option>
+              <option value="excel">Excel</option>
+            </select>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

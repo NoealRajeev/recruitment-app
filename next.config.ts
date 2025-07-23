@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+import path from "path";
 const nextConfig = {
   images: {
     domains: [
@@ -41,10 +42,6 @@ const nextConfig = {
     });
 
     return config;
-  },
-  // Add experimental features for better external access support
-  experimental: {
-    trustHostHeader: true,
   },
 };
 

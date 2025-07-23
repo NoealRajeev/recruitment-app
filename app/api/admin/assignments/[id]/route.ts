@@ -5,14 +5,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { AuditAction } from "@prisma/client";
 
-type RouteParams = {
-  params: {
-    id: string;
-  };
-};
+interface Context {
+  params: { id: string };
+}
 
-export async function PUT(request: NextRequest, { params }: RouteParams) {
-  const id = params.id;
+export async function PUT(request: NextRequest, context: Context) {
+  const { id } = context.params;
 
   try {
     // 1) Auth & role check

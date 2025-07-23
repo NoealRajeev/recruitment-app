@@ -152,10 +152,12 @@ export const sendPasswordResetEmail = async (
   return sendTemplateEmail(resetTemplate, email);
 };
 
-export default {
+export const emailService = {
   sendEmail,
   sendTemplateEmail,
   sendTestEmail,
   sendPasswordResetEmail,
   transporter,
 };
+
+export default emailService;

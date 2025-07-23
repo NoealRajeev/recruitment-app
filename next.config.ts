@@ -1,24 +1,21 @@
+// next.config.js
+const path = require("path");
+
 /** @type {import('next').NextConfig} */
-import path from "path";
 const nextConfig = {
   images: {
-    domains: [
-      "cdn.jsdelivr.net", // For faker-js images
-      "localhost", // For local development
-      // Add your production domain when deployed
-    ],
+    domains: ["cdn.jsdelivr.net", "localhost", "findly.breaktroughf1.com"],
   },
+
   output: "standalone",
-  // Enable static file serving from public folder
+
+  // serve PDFs from /uploads with correct headers
   async headers() {
     return [
       {
         source: "/uploads/:path*",
         headers: [
-          {
-            key: "Content-Type",
-            value: "application/pdf",
-          },
+          { key: "Content-Type", value: "application/pdf" },
           {
             key: "Cache-Control",
             value: "public, max-age=31536000, immutable",
@@ -27,17 +24,19 @@ const nextConfig = {
       },
     ];
   },
+
   webpack(config) {
-    // 1) ensure we don't wipe out Next's built-in aliases:
+    // 1️⃣ Pull in _all_ of Next’s default aliases (including its TS path-map)
     config.resolve.alias = {
-      ...(config.resolve.alias ?? {}),
-      // 2) add @ → project root:
+      ...(config.resolve.alias || {}),
+
+      // 2️⃣ Then add your own “@ → project root” mapping:
       "@": path.resolve(__dirname),
     };
 
-    // 3) push your PDF asset loader:
+    // 3️⃣ Finally, your PDF loader
     config.module.rules.push({
-      test: /\.(pdf)$/i,
+      test: /\.pdf$/i,
       type: "asset/resource",
       generator: { filename: "static/[hash][ext][query]" },
     });

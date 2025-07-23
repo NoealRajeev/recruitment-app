@@ -7,17 +7,7 @@ import { redirect } from "next/navigation";
 import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 
-interface SearchParams {
-  query?: string;
-  filter?: string;
-  page?: string;
-}
-
-export default async function Audit({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
+export default async function Audit({ searchParams }) {
   // Server-side session check
   const session = await getServerSession(authOptions);
 
@@ -26,60 +16,48 @@ export default async function Audit({
     redirect("/dashboard");
   }
 
-  // Build the where clause for filtering with proper Prisma types
+  // Narrow incoming params to strings
+  const query: string | undefined =
+    typeof searchParams.query === "string" ? searchParams.query : undefined;
+  const filter: string | undefined =
+    typeof searchParams.filter === "string" ? searchParams.filter : undefined;
+  const pageNum = parseInt(
+    typeof searchParams.page === "string" ? searchParams.page : "1",
+    10
+  );
+  const page = Number.isNaN(pageNum) || pageNum < 1 ? 1 : pageNum;
+
+  // Build the where clause for filtering
   const where: Prisma.AuditLogWhereInput = {
     AND: [
-      searchParams.query
+      query
         ? {
             OR: [
-              {
-                description: {
-                  contains: searchParams.query,
-                  mode: "insensitive",
-                },
-              },
-              {
-                entityType: {
-                  contains: searchParams.query,
-                  mode: "insensitive",
-                },
-              },
-              {
-                entityId: { contains: searchParams.query, mode: "insensitive" },
-              },
+              { description: { contains: query, mode: "insensitive" } },
+              { entityType: { contains: query, mode: "insensitive" } },
+              { entityId: { contains: query, mode: "insensitive" } },
               {
                 performedBy: {
                   OR: [
-                    {
-                      name: {
-                        contains: searchParams.query,
-                        mode: "insensitive",
-                      },
-                    },
-                    {
-                      email: {
-                        contains: searchParams.query,
-                        mode: "insensitive",
-                      },
-                    },
+                    { name: { contains: query, mode: "insensitive" } },
+                    { email: { contains: query, mode: "insensitive" } },
                   ],
                 },
               },
             ],
           }
         : {},
-      searchParams.filter && searchParams.filter !== "ALL"
-        ? { action: { startsWith: searchParams.filter.split(" - ")[0] } }
+      filter && filter !== "ALL"
+        ? { action: { startsWith: filter.split(" - ")[0] } }
         : {},
     ],
   };
 
   // Pagination
-  const page = parseInt(searchParams.page || "1");
   const pageSize = 20;
   const skip = (page - 1) * pageSize;
 
-  // Fetch audit logs with filtering
+  // Fetch audit logs and count
   const [auditLogs, totalCount] = await Promise.all([
     prisma.auditLog.findMany({
       where,
@@ -88,69 +66,46 @@ export default async function Audit({
       orderBy: { createdAt: "desc" },
       include: {
         performedBy: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-          },
+          select: { id: true, name: true, email: true },
         },
       },
     }),
     prisma.auditLog.count({ where }),
   ]);
 
-  // Format date for display
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  // Format time for display
-  const formatTime = (date: Date) => {
-    return (
-      new Date(date).toLocaleTimeString("en-US", {
-        hour12: false,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      }) +
-      "." +
-      new Date(date).getMilliseconds().toString().padStart(3, "0")
-    );
-  };
-
-  // Get color based on action type
+  // Helpers for formatting
+  const formatDate = (d: Date) =>
+    d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const formatTime = (d: Date) =>
+    `${d.toLocaleTimeString("en-US", {
+      hour12: false,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    })}.${d.getMilliseconds().toString().padStart(3, "0")}`;
   const getLogTypeColor = (action: AuditAction) => {
-    if (action.includes("ERROR") || action.includes("FAILED")) {
+    if (action.includes("ERROR") || action.includes("FAILED"))
       return "border-l-4 border-red-500";
-    }
-    if (action.includes("WARNING")) {
-      return "border-l-4 border-yellow-500";
-    }
+    if (action.includes("WARNING")) return "border-l-4 border-yellow-500";
     if (
       action.includes("SUCCESS") ||
       action.includes("CREATED") ||
       action.includes("UPDATED")
-    ) {
+    )
       return "border-l-4 border-green-500";
-    }
     return "border-l-4 border-blue-500";
   };
 
-  // Calculate pagination
   const totalPages = Math.ceil(totalCount / pageSize);
 
   return (
     <div className="p-6 space-y-6 bg-[#F8F6FB] min-h-screen">
-      {/* Header Section */}
+      {/* Header: filter + search */}
       <div className="bg-[#EDDDF3] rounded-lg p-4 flex items-center gap-4">
-        {/* Filter Dropdown */}
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-[#150B3D]/70" />
           <select
-            defaultValue={searchParams.filter || "ALL"}
+            defaultValue={filter || "ALL"}
             className="bg-white border border-[#635372]/30 rounded px-3 py-1.5 text-sm text-[#150B3D] focus:outline-none focus:ring-2 focus:ring-[#150B3D]/20"
           >
             <option value="ALL">All Actions</option>
@@ -160,14 +115,12 @@ export default async function Audit({
             <option value="ERROR - Logs">Error Actions</option>
           </select>
         </div>
-
-        {/* Search Input */}
         <div className="flex-1 max-w-md relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-[#150B3D]/50" />
           <input
             type="text"
             placeholder="Search logs..."
-            defaultValue={searchParams.query || ""}
+            defaultValue={query || ""}
             className="w-full pl-10 pr-4 py-1.5 border border-[#635372]/30 rounded-md text-sm text-[#150B3D] placeholder-[#150B3D]/50 focus:outline-none focus:ring-2 focus:ring-[#150B3D]/20 bg-white"
           />
         </div>
@@ -175,32 +128,27 @@ export default async function Audit({
 
       {/* Stats */}
       <div className="text-sm text-[#150B3D]/70 font-medium">
-        Showing {auditLogs.length} of {totalCount} event/s
-        {searchParams.query && ` matching "${searchParams.query}"`}
+        Showing {auditLogs.length} of {totalCount} event
+        {totalCount === 1 ? "" : "s"}
+        {query && ` matching "${query}"`}
       </div>
 
-      {/* Log Entries */}
+      {/* Logs table */}
       <div className="bg-[#EDDDF3]/40 rounded-lg overflow-hidden shadow-sm">
-        {/* Table Header */}
+        {/* Header row */}
         <div className="grid grid-cols-12 gap-4 px-6 py-4 bg-[#EDDDF3]/40 border-b border-[#635372]/20">
-          <div className="col-span-2 text-sm font-semibold text-[#150B3D] uppercase tracking-wide">
-            DATE
-          </div>
-          <div className="col-span-2 text-sm font-semibold text-[#150B3D] uppercase tracking-wide">
-            ACTION
-          </div>
-          <div className="col-span-2 text-sm font-semibold text-[#150B3D] uppercase tracking-wide">
-            ENTITY
-          </div>
-          <div className="col-span-4 text-sm font-semibold text-[#150B3D] uppercase tracking-wide">
-            DESCRIPTION
-          </div>
-          <div className="col-span-2 text-sm font-semibold text-[#150B3D] uppercase tracking-wide">
-            PERFORMED BY
-          </div>
+          {["DATE", "ACTION", "ENTITY", "DESCRIPTION", "PERFORMED BY"].map(
+            (label, idx) => (
+              <div
+                key={idx}
+                className="text-sm font-semibold text-[#150B3D] uppercase tracking-wide"
+              >
+                {label}
+              </div>
+            )
+          )}
         </div>
-
-        {/* Log Entries */}
+        {/* Data rows */}
         <div className="divide-y divide-[#635372]/10">
           {auditLogs.length > 0 ? (
             auditLogs.map((log) => (
@@ -220,10 +168,10 @@ export default async function Audit({
                   {log.entityType}
                 </div>
                 <div className="col-span-4 text-sm text-[#150B3D]">
-                  {log.description || "No description"}
+                  {log.description ?? "No description"}
                 </div>
                 <div className="col-span-2 text-sm text-[#150B3D]">
-                  {log.performedBy?.name || "System"}
+                  {log.performedBy?.name ?? "System"}
                 </div>
               </div>
             ))
@@ -241,9 +189,9 @@ export default async function Audit({
           {page > 1 && (
             <a
               href={`?${new URLSearchParams({
-                ...(searchParams.query && { query: searchParams.query }),
-                ...(searchParams.filter && { filter: searchParams.filter }),
-                page: (page - 1).toString(),
+                ...(query ? { query } : {}),
+                ...(filter ? { filter } : {}),
+                page: String(page - 1),
               })}`}
               className="px-4 py-2 bg-[#EDDDF3] rounded-md hover:bg-[#E5D0ED]"
             >
@@ -256,9 +204,9 @@ export default async function Audit({
           {page < totalPages && (
             <a
               href={`?${new URLSearchParams({
-                ...(searchParams.query && { query: searchParams.query }),
-                ...(searchParams.filter && { filter: searchParams.filter }),
-                page: (page + 1).toString(),
+                ...(query ? { query } : {}),
+                ...(filter ? { filter } : {}),
+                page: String(page + 1),
               })}`}
               className="px-4 py-2 bg-[#EDDDF3] rounded-md hover:bg-[#E5D0ED]"
             >

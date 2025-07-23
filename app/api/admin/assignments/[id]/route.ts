@@ -1,15 +1,17 @@
 // app/api/admin/assignments/[id]/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { AuditAction } from "@prisma/client";
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+type RouteParams = {
+  params: {
+    id: string;
+  };
+};
+
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   const id = params.id;
 
   try {

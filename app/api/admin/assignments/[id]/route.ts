@@ -1,4 +1,4 @@
-// app/api/admin/assignments/[assignmentId]/status/route.ts
+// app/api/admin/assignments/[id]/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
@@ -7,7 +7,7 @@ import { AuditAction } from "@/lib/generated/prisma";
 
 export async function PUT(
   request: Request,
-  { params }: { params: { assignmentId: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -15,7 +15,7 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { assignmentId } = params;
+    const { id } = params;
     const { status, feedback } = await request.json();
 
     if (!["ACCEPTED", "REJECTED"].includes(status)) {
@@ -27,7 +27,7 @@ export async function PUT(
 
     // Get current assignment for audit log
     const currentAssignment = await prisma.labourAssignment.findUnique({
-      where: { id: assignmentId },
+      where: { id: id },
       include: {
         jobRole: {
           select: {
@@ -54,7 +54,7 @@ export async function PUT(
     const updatedAssignment = await prisma.$transaction(async (tx) => {
       // Update the assignment status
       const assignment = await tx.labourAssignment.update({
-        where: { id: assignmentId },
+        where: { id: id },
         data: {
           adminStatus: status,
           adminFeedback: feedback,
@@ -112,7 +112,7 @@ export async function PUT(
         data: {
           action: AuditAction.LABOUR_PROFILE_STATUS_CHANGE,
           entityType: "LabourAssignment",
-          entityId: assignmentId,
+          entityId: id,
           performedById: session.user.id,
           oldData: {
             adminStatus: currentAssignment.adminStatus,

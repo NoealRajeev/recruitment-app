@@ -27,14 +27,15 @@ const nextConfig = {
       },
     ];
   },
-  webpack: (config, { isServer }) => {
-    // 1) tell webpack that "@" = the project root
+  webpack(config) {
+    // 1) ensure we don't wipe out Next's built-in aliases:
     config.resolve.alias = {
-      ...(config.resolve.alias || {}),
+      ...(config.resolve.alias ?? {}),
+      // 2) add @ → project root:
       "@": path.resolve(__dirname),
     };
 
-    // 2) your existing PDF‐loader rule
+    // 3) push your PDF asset loader:
     config.module.rules.push({
       test: /\.(pdf)$/i,
       type: "asset/resource",

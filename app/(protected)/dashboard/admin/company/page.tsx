@@ -8,7 +8,7 @@ import CompanyCardContent from "@/components/shared/Cards/CompanyCardContent";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { AccountStatus, DocumentCategory } from "@/lib/generated/prisma";
-import { Badge, BadgeProps } from "@/components/ui/badge";
+import { Badge, BadgeProps } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PDFViewer } from "@/components/shared/PDFViewer";
 import { FileIcon } from "lucide-react";

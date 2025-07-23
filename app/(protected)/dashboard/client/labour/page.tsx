@@ -13,7 +13,7 @@ import {
   User,
   FileText,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/Badge";
 import { Card, CardContent, CardHeader } from "@/components/shared/Card";
 import { RequirementStatus } from "@/lib/generated/prisma";
 import { LabourProfile } from "@prisma/client";

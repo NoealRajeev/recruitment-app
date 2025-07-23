@@ -23,7 +23,7 @@ import { useToast } from "@/context/toast-provider";
 import { useState, useEffect } from "react";
 import { RequirementStatus, ContractDuration } from "@/lib/generated/prisma";
 import { Modal } from "@/components/ui/Modal";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/Badge";
 
 interface JobRoleAssignment {
   id: string;

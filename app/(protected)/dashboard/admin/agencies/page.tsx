@@ -17,7 +17,7 @@ import logSecurityEvent from "@/lib/utils/helpers";
 import { Pagination } from "@/components/ui/Pagination";
 import { useLanguage } from "@/context/LanguageContext";
 import { HorizontalSelect } from "@/components/ui/HorizontalSelect";
-import { Badge, BadgeProps } from "@/components/ui/badge";
+import { Badge, BadgeProps } from "@/components/ui/Badge";
 
 interface AgencyDocument {
   id: string;

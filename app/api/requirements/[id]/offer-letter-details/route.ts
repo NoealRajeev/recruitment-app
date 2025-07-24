@@ -4,10 +4,11 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id: requirementId } = await params;
+  request: NextRequest,
+  context: { params: Promise<Record<string, string>> }
+): Promise<NextResponse> {
+  const { id: requirementId } = await context.params;
+
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -30,15 +31,15 @@ export async function GET(
 }
 
 export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  const { id: requirementId } = params;
+  request: NextRequest,
+  context: { params: Promise<Record<string, string>> }
+): Promise<NextResponse> {
+  const { id: requirementId } = await context.params;
   const session = await getServerSession(authOptions);
   if (!session?.user || session.user.role !== "CLIENT_ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const body = await req.json();
+  const body = await request.json();
   const {
     workingHours: initialWorkingHours,
     workingDays: initialWorkingDays,

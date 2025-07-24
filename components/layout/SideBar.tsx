@@ -52,12 +52,6 @@ const navItems = {
       icon: MapPin,
       exact: false,
     },
-    {
-      href: "/dashboard/admin/audit",
-      label: "Audit Logs",
-      icon: ScrollText,
-      exact: false,
-    },
   ],
   CLIENT_ADMIN: [
     { href: "/dashboard/client", label: "Dashboard", icon: Home, exact: true },
@@ -122,7 +116,8 @@ export default function SideBar({
   role: UserRole;
   isExpanded: boolean;
 }) {
-  const pathname = usePathname();
+  const rawPath = usePathname();
+  const pathname = rawPath ?? "";
   const items = navItems[role];
 
   const isActive = (href: string, exact: boolean) => {

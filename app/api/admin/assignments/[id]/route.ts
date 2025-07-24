@@ -5,12 +5,16 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { AuditAction } from "@prisma/client";
 
-interface Context {
-  params: { id: string };
-}
+export async function PUT(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  // according to the Next.js docs, params is a Promise that you must await
+  const { id } = await context.params;
 
-export async function PUT(request: NextRequest, context: Context) {
-  const { id } = context.params;
+  if (!id) {
+    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  }
 
   try {
     // 1) Auth & role check

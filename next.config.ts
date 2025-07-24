@@ -1,15 +1,14 @@
-// next.config.js
-const path = require("path");
+// next.config.ts
+import path from "path";
+import type { NextConfig } from "next";
 
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+const nextConfig: NextConfig = {
   images: {
     domains: ["cdn.jsdelivr.net", "localhost", "findly.breaktroughf1.com"],
   },
 
   output: "standalone",
 
-  // serve PDFs from /uploads with correct headers
   async headers() {
     return [
       {
@@ -26,15 +25,17 @@ const nextConfig = {
   },
 
   webpack(config) {
-    // 1️⃣ Pull in _all_ of Next’s default aliases (including its TS path-map)
+    // 1️⃣ Preserve Next.js’s built-in aliases
+    config.resolve = config.resolve || {};
     config.resolve.alias = {
-      ...(config.resolve.alias || {}),
-
-      // 2️⃣ Then add your own “@ → project root” mapping:
+      ...(config.resolve.alias ?? {}),
+      // 2️⃣ Add your “@ → project root” mapping
       "@": path.resolve(__dirname),
     };
 
-    // 3️⃣ Finally, your PDF loader
+    // 3️⃣ Emit PDF imports as static assets
+    config.module = config.module || {};
+    config.module.rules = config.module.rules ?? [];
     config.module.rules.push({
       test: /\.pdf$/i,
       type: "asset/resource",
@@ -45,4 +46,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;

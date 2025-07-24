@@ -6,12 +6,14 @@ import path from "path";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
-) {
+  context: { params: Promise<{ id: string }> }
+): Promise<Response> {
+  // pull the id out of the promised params
+  const { id } = await context.params;
   try {
     // First get the client to verify it exists
     const client = await prisma.client.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       select: { userId: true },
     });
 

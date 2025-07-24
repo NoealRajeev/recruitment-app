@@ -1,13 +1,14 @@
 // app/api/clients/job-role/[id]/replace-rejected/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 
 export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -30,7 +31,7 @@ export async function POST(
     // Get the job role
     const jobRole = await prisma.jobRole.findUnique({
       where: {
-        id: params.id,
+        id: id,
         requirement: {
           clientId: client.id,
         },

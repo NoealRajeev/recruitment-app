@@ -11,9 +11,10 @@ import { authOptions } from "@/lib/auth/options";
 // GET /api/requirements/[id] - Get a specific requirement
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
-) {
-  const { id } = params;
+  context: { params: Promise<{ id: string }> }
+): Promise<Response> {
+  // pull the id out of the promised params
+  const { id } = await context.params;
 
   try {
     const session = await getServerSession(authOptions);
@@ -86,8 +87,10 @@ export async function GET(
 // PATCH /api/requirements/[id] - Update a requirement
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
-) {
+  context: { params: Promise<{ id: string }> }
+): Promise<Response> {
+  // pull the id out of the promised params
+  const { id } = await context.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -133,7 +136,7 @@ export async function PATCH(
 
     // Check if requirement exists
     const existingRequirement = await prisma.requirement.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         jobRoles: true,
         client: true,
@@ -211,7 +214,7 @@ export async function PATCH(
       // Update requirement status if provided and allowed
       if (status) {
         await tx.requirement.update({
-          where: { id: params.id },
+          where: { id: id },
           data: { status },
         });
       }
@@ -263,7 +266,7 @@ export async function PATCH(
               // Create new role
               return tx.jobRole.create({
                 data: {
-                  requirementId: params.id,
+                  requirementId: id,
                   title: role.title || "",
                   quantity: role.quantity || 1,
                   nationality: role.nationality || "",
@@ -307,7 +310,7 @@ export async function PATCH(
 
       // Get the updated requirement
       const updated = await tx.requirement.findUnique({
-        where: { id: params.id },
+        where: { id: id },
         include: {
           jobRoles: true,
           client: {
@@ -323,7 +326,7 @@ export async function PATCH(
         data: {
           action: AuditAction.REQUIREMENT_UPDATE,
           entityType: "Requirement",
-          entityId: params.id,
+          entityId: id,
           performedById: session.user.id,
           newData: {
             status: status || existingRequirement.status,
@@ -351,8 +354,10 @@ export async function PATCH(
 // DELETE /api/requirements/[id] - Delete a requirement
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
-) {
+  context: { params: Promise<Record<string, string>> }
+): Promise<Response> {
+  // await the generic key/value params
+  const { id } = await context.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -371,7 +376,7 @@ export async function DELETE(
 
     // Check if requirement exists and user has access
     const existingRequirement = await prisma.requirement.findUnique({
-      where: { id: params.id },
+      where: { id: id },
     });
 
     if (!existingRequirement) {
@@ -393,12 +398,12 @@ export async function DELETE(
     await prisma.$transaction(async (tx) => {
       // Delete job roles first
       await tx.jobRole.deleteMany({
-        where: { requirementId: params.id },
+        where: { requirementId: id },
       });
 
       // Then delete the requirement
       await tx.requirement.delete({
-        where: { id: params.id },
+        where: { id: id },
       });
 
       // Create audit log
@@ -406,7 +411,7 @@ export async function DELETE(
         data: {
           action: AuditAction.REQUIREMENT_DELETE,
           entityType: "Requirement",
-          entityId: params.id,
+          entityId: id,
           performedById: client.id,
         },
       });

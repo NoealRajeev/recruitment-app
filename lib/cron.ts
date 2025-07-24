@@ -1,6 +1,5 @@
 import cron from "node-cron";
 import { NextApiRequest, NextApiResponse } from "next";
-import remindersHandler from "@/app/api/reminders/route";
 
 // Helper to convert NextApiResponse to proper type
 const createResponse = () => {

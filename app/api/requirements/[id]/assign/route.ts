@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
@@ -8,16 +8,16 @@ import { NotificationService } from "@/lib/notifications";
 import { sendEmail } from "@/lib/utils/email-service";
 
 export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
+  const { id: jobRoleId } = await context.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== "RECRUITMENT_AGENCY") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id: jobRoleId } = params;
     const { profileIds } = await request.json();
 
     // Verify the agency exists
@@ -64,8 +64,9 @@ export async function POST(
 
     if (profiles.length !== profileIds.length) {
       const missingProfiles = profileIds.filter(
-        (id) => !profiles.some((p) => p.id === id)
+        (id: string) => !profiles.some((p) => p.id === id)
       );
+
       return NextResponse.json(
         {
           error:
@@ -325,18 +326,17 @@ export async function POST(
   }
 }
 
-// GET /api/requirements/[id]/assign - Get all assignments for a job role (including rejected)
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
-): Promise<NextResponse> {
+  context: { params: Promise<{ id: string }> }
+): Promise<Response> {
+  // pull the id out of the promised params
+  const { id: jobRoleId } = await context.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== "RECRUITMENT_AGENCY") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const { id: jobRoleId } = params;
 
     // Verify the agency exists
     const agency = await prisma.agency.findUnique({

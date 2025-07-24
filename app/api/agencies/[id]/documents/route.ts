@@ -6,11 +6,13 @@ import { promises as fs } from "fs";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
-) {
+  context: { params: Promise<{ id: string }> }
+): Promise<Response> {
+  // pull the id out of the promised params
+  const { id } = await context.params;
   try {
     const agency = await prisma.agency.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: { user: true },
     });
 

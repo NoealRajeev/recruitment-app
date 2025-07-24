@@ -17,7 +17,8 @@ interface FormErrors {
 export default function LoginPage() {
   const { language, setLanguage, t } = useLanguage();
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const rawParams = useSearchParams();
+  const searchParams = rawParams ?? new URLSearchParams();
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({

@@ -1,51 +1,39 @@
 // app/api/reminders/route.ts
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { sendEmail } from "@/lib/utils/email-service";
 import { ONBOARDING_STEPS } from "@/components/ui/ProgressTracker";
 import { getStageReminderEmail } from "@/lib/utils/email-templates";
 
-export async function GET() {
+export async function GET(
+  request: NextRequest,
+  context: { params: Promise<Record<string, string>> }
+): Promise<NextResponse> {
   try {
-    // Find all labour profiles that have stages not updated for 3 days
+    // 1) calculate cutoff date
     const threeDaysAgo = new Date();
     threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
 
+    // 2) load all profiles whose currentStage hasn’t advanced in 3+ days
     const staleProfiles = await prisma.labourProfile.findMany({
       where: {
-        currentStage: {
-          not: "DEPLOYED", // Don't check deployed profiles
-        },
+        currentStage: { not: "DEPLOYED" },
         stages: {
           some: {
-            stage: {
-              not: "DEPLOYED",
-            },
-            updatedAt: {
-              lt: threeDaysAgo,
-            },
+            stage: { not: "DEPLOYED" },
+            updatedAt: { lt: threeDaysAgo },
           },
         },
       },
       include: {
         stages: true,
-        agency: {
-          include: {
-            user: true,
-          },
-        },
+        agency: { include: { user: true } },
         LabourAssignment: {
           include: {
             jobRole: {
               include: {
                 requirement: {
-                  include: {
-                    client: {
-                      include: {
-                        user: true,
-                      },
-                    },
-                  },
+                  include: { client: { include: { user: true } } },
                 },
               },
             },
@@ -56,44 +44,36 @@ export async function GET() {
 
     let sentReminders = 0;
 
-    // Process each stale profile
+    // 3) for each stale profile, figure out who owns this stage
     for (const profile of staleProfiles) {
       const currentStage = profile.currentStage;
       const stageInfo = profile.stages.find((s) => s.stage === currentStage);
-
       if (!stageInfo) continue;
 
-      // Determine who is responsible for this stage
-      const stageDefinition = ONBOARDING_STEPS.find(
-        (s) => s.key === currentStage
-      );
-      if (!stageDefinition) continue;
+      const stageDef = ONBOARDING_STEPS.find((s) => s.key === currentStage);
+      if (!stageDef) continue;
 
-      // Get the responsible user (client or agency)
       let responsibleUser = null;
-      let recipientType = "";
+      let recipientType: "client" | "agency" = "client";
 
-      if (
-        stageDefinition.owner === "Client" &&
-        profile.LabourAssignment.length > 0
-      ) {
-        const assignment = profile.LabourAssignment[0];
-        responsibleUser = assignment.jobRole.requirement.client.user;
+      if (stageDef.owner === "Client" && profile.LabourAssignment.length > 0) {
+        responsibleUser =
+          profile.LabourAssignment[0].jobRole.requirement.client.user;
         recipientType = "client";
-      } else if (stageDefinition.owner === "Agency" && profile.agency) {
+      } else if (stageDef.owner === "Agency" && profile.agency) {
         responsibleUser = profile.agency.user;
         recipientType = "agency";
       }
-
       if (!responsibleUser) continue;
 
+      // 4) build & send the reminder email
       const emailData = getStageReminderEmail({
         recipientName: responsibleUser.name,
         profileName: profile.name,
-        stageLabel: stageDefinition.label,
+        stageLabel: stageDef.label,
         stageStatus: stageInfo.status,
         lastUpdated: stageInfo.updatedAt.toLocaleString(),
-        recipientType: recipientType as "client" | "agency",
+        recipientType,
       });
 
       await sendEmail({
@@ -106,6 +86,7 @@ export async function GET() {
       sentReminders++;
     }
 
+    // 5) respond with count
     return NextResponse.json({
       success: true,
       message: `Sent ${sentReminders} reminder emails`,
@@ -117,12 +98,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
-
-export default async function handler(req: Request, res: Response) {
-  const result = await GET(req as any);
-  return new Response(result.body, {
-    status: result.status,
-    headers: result.headers,
-  });
 }

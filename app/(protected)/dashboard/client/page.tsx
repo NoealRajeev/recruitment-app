@@ -107,10 +107,11 @@ export default function ClientDashboard() {
       } else {
         throw new Error("Failed to generate report");
       }
-    } catch (error) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
       toast({
         type: "error",
-        message: `Failed to generate report: ${error.message}`,
+        message: `Failed to generate report: ${message}`,
       });
     } finally {
       setGeneratingReport(false);

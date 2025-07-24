@@ -7,10 +7,11 @@ import { AuditAction } from "@/lib/generated/prisma";
 
 export async function DELETE(
   request: Request,
-  context: { params: Record<string, string> }
-) {
-  const { params } = context;
-  const agencyId = params.id;
+  context: { params: Promise<Record<string, string>> }
+): Promise<Response> {
+  // await the generic key/value params
+  const { id } = await context.params;
+  const agencyId = id;
 
   const session = await getServerSession(authOptions);
   if (!session?.user || session.user.role !== "RECRUITMENT_ADMIN") {

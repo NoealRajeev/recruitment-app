@@ -19,7 +19,8 @@ export default function DashboardHeader({
   avatarUrl,
   userName,
 }: DashboardHeaderProps) {
-  const pathname = usePathname();
+  const rawPath = usePathname();
+  const pathname = rawPath ?? "";
   const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 

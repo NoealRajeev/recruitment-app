@@ -1,5 +1,5 @@
 // app/api/agencies/labour/[id]/stages/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
@@ -24,9 +24,11 @@ const STAGE_ORDER: LabourStage[] = [
 ];
 
 export async function POST(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  const { id } = await context.params;
+
   const session = await getServerSession(authOptions);
   if (!session?.user || session.user.role !== "RECRUITMENT_AGENCY") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -66,7 +68,7 @@ export async function POST(
     // Verify the labour profile belongs to this agency
     const labourAssignment = await prisma.labourAssignment.findFirst({
       where: {
-        labourId: params.id,
+        labourId: id,
         agencyId: agency.id,
       },
     });
@@ -82,7 +84,7 @@ export async function POST(
     const updatedLabour = await prisma.$transaction(async (tx) => {
       // Get current labour profile
       const labour = await tx.labourProfile.findUnique({
-        where: { id: params.id },
+        where: { id: id },
         include: { stages: true },
       });
 
@@ -93,7 +95,7 @@ export async function POST(
       // Create new stage history
       const newStage = await tx.labourStageHistory.create({
         data: {
-          labourId: params.id,
+          labourId: id,
           stage,
           status,
           notes,
@@ -122,7 +124,7 @@ export async function POST(
           if (!existingNextStage) {
             await tx.labourStageHistory.create({
               data: {
-                labourId: params.id,
+                labourId: id,
                 stage: nextStage,
                 status: nextStatus,
                 createdAt: new Date(),
@@ -133,7 +135,7 @@ export async function POST(
 
         // Update current stage in labour profile
         await tx.labourProfile.update({
-          where: { id: params.id },
+          where: { id: id },
           data: {
             currentStage: nextStage || stage,
           },
@@ -141,7 +143,7 @@ export async function POST(
       }
       if (stage === LabourStage.ARRIVAL_CONFIRMATION) {
         await tx.labourProfile.update({
-          where: { id: params.id },
+          where: { id: id },
           data: {
             status: LabourProfileStatus.DEPLOYED,
           },

@@ -22,7 +22,7 @@ export default function DashboardLayoutClient({
   userName: string;
 }) {
   const { isExpanded } = useSidebar();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? "";
   const routes = getRoutes(role);
 
   // Check if it's a valid route or a global page (profile, settings, test-notifications)

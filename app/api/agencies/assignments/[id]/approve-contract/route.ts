@@ -4,15 +4,16 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 
 export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
   if (!session?.user || session.user.role !== "RECRUITMENT_AGENCY") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const assignmentId = params.id;
+  const assignmentId = id;
 
   try {
     // Get agency profile

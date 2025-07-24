@@ -6,8 +6,9 @@ import { notifyArrivalConfirmed } from "@/lib/notification-helpers";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+  context: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
   if (!session?.user || session.user.role !== "CLIENT_ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -15,7 +16,6 @@ export async function POST(
 
   try {
     const { status, notes } = await request.json();
-    const { id } = await params;
 
     // Validate status
     if (status !== "ARRIVED") {

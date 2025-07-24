@@ -5,8 +5,9 @@ import prisma from "@/lib/prisma";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  context: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  const { id } = await context.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -55,7 +56,7 @@ export async function PUT(
     // Check if assignment exists and belongs to the client
     const assignment = await prisma.labourAssignment.findFirst({
       where: {
-        id: params.id,
+        id: id,
         jobRole: {
           requirement: {
             clientId: client.id,
@@ -82,7 +83,7 @@ export async function PUT(
     // Update travel date
     const updatedAssignment = await prisma.labourAssignment.update({
       where: {
-        id: params.id,
+        id: id,
       },
       data: {
         travelDate: parsedDate,
@@ -102,7 +103,7 @@ export async function PUT(
       data: {
         action: "LABOUR_PROFILE_STATUS_CHANGE",
         entityType: "LABOUR_ASSIGNMENT",
-        entityId: params.id,
+        entityId: id,
         description: `Travel date updated for ${assignment.labour.name} to ${parsedDate.toLocaleDateString()}`,
         performedById: session.user.id,
         oldData: { travelDate: assignment.travelDate },
@@ -112,7 +113,7 @@ export async function PUT(
     });
 
     console.log(
-      `Travel date updated for assignment ${params.id} by client ${session.user.id}`
+      `Travel date updated for assignment ${id} by client ${session.user.id}`
     );
 
     return NextResponse.json({

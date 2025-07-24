@@ -1,14 +1,20 @@
 // app/api/agencies/[id]/recover/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { AuditAction } from "@/lib/generated/prisma";
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  // according to the Next.js docs, params is a Promise that you must await
+  const { id } = await context.params;
+
+  if (!id) {
+    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  }
   const session = await getServerSession(authOptions);
   if (!session?.user || session.user.role !== "RECRUITMENT_ADMIN") {
     return NextResponse.json(
@@ -20,7 +26,7 @@ export async function PUT(
   try {
     const result = await prisma.$transaction(async (tx) => {
       const updatedAgency = await tx.agency.update({
-        where: { id: params.id },
+        where: { id: id },
         data: {
           user: {
             update: {
@@ -40,7 +46,7 @@ export async function PUT(
         data: {
           action: AuditAction.AGENCY_UPDATE,
           entityType: "AGENCY",
-          entityId: params.id,
+          entityId: id,
           performedById: session.user.id,
           description: "Account recovered from deletion",
           oldData: {

@@ -5,12 +5,13 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { AuditAction } from "@prisma/client";
 
-// app/api/agencies/[id]/route.ts
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
-) {
-  const { id } = params; // Destructure and await params
+  context: { params: Promise<Record<string, string>> }
+): Promise<Response> {
+  // await the generic key/value params
+  const { id } = await context.params;
+
   const session = await getServerSession(authOptions);
 
   if (!session?.user || session.user.role !== "RECRUITMENT_ADMIN") {

@@ -1,12 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -47,7 +48,7 @@ export async function PUT(
     const result = await prisma.$transaction(async (tx) => {
       // First get the current assignment with related data
       const currentAssignment = await tx.labourAssignment.findUnique({
-        where: { id: params.id },
+        where: { id: id },
         include: {
           jobRole: {
             select: {
@@ -78,7 +79,7 @@ export async function PUT(
 
       // Update the assignment
       const updatedAssignment = await tx.labourAssignment.update({
-        where: { id: params.id },
+        where: { id: id },
         data: {
           clientStatus: status,
           ...(status === "ACCEPTED" && {
@@ -200,7 +201,7 @@ export async function PUT(
       if (status === "ACCEPTED" && acceptedCount >= jobRole.quantity) {
         // 1. First reject all unselected assignments for this job role
         const unselectedAssignments = jobRole.LabourAssignment.filter(
-          (a) => a.clientStatus !== "ACCEPTED" && a.id !== params.id
+          (a) => a.clientStatus !== "ACCEPTED" && a.id !== id
         );
 
         await Promise.all(

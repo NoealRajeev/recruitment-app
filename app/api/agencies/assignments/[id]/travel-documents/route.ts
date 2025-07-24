@@ -19,15 +19,15 @@ if (!fs.existsSync(UPLOAD_DIR)) {
 }
 
 export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  const { id: assignmentId } = await context.params;
+
   const session = await getServerSession(authOptions);
   if (!session?.user || session.user.role !== "RECRUITMENT_AGENCY") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
-  const { id: assignmentId } = await params;
 
   try {
     // Get agency profile
@@ -70,7 +70,7 @@ export async function POST(
       );
     }
 
-    const formData = await req.formData();
+    const formData = await request.formData();
     const travelDate = formData.get("travelDate") as string;
     const flightTicket = formData.get("flightTicket") as File | null;
     const medicalCertificate = formData.get(

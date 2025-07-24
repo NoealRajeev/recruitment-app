@@ -7,8 +7,10 @@ import { useToast } from "@/context/toast-provider";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/shared/Card";
+import { useRouter } from "next/navigation";
 
 export default function ForgotPasswordPage() {
+  const router = useRouter();
   const { language, setLanguage, t } = useLanguage();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -271,7 +273,7 @@ export default function ForgotPasswordPage() {
                 </Button>
                 <Button
                   type="button"
-                  onClick={() => window.history.back()}
+                  onClick={() => router.back()}
                   disabled={isLoading}
                   variant="outline"
                   className="w-full border-none shadow-sm"

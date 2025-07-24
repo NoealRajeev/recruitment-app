@@ -24,9 +24,13 @@ export default function ResetPasswordPage() {
   const [userEmail, setUserEmail] = useState("");
   const [resetMode, setResetMode] = useState<"session" | "token">("session");
   const router = useRouter();
-  const searchParams = useSearchParams();
+
+  const rawParams = useSearchParams();
+  const searchParams = rawParams ?? new URLSearchParams();
+
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const token = searchParams.get("token");
+
   const { toast } = useToast();
   const { data: session, status } = useSession();
   const sessionUserEmail = session?.user?.email;

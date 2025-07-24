@@ -1,5 +1,5 @@
 // app/api/agencies/[id]/status/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
@@ -15,9 +15,15 @@ const StatusUpdateSchema = z.object({
 });
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  // according to the Next.js docs, params is a Promise that you must await
+  const { id } = await context.params;
+
+  if (!id) {
+    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  }
   const traceId = crypto.randomUUID();
   const headers = { "Content-Type": "application/json" };
 
@@ -31,8 +37,6 @@ export async function PUT(
       );
     }
 
-    // Validate agency ID
-    const { id } = params;
     if (!id || typeof id !== "string" || !/^[0-9a-f-]{36}$/.test(id)) {
       return NextResponse.json(
         { error: "Invalid agency ID format" },

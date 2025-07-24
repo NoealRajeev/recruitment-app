@@ -13,15 +13,17 @@ if (!fs.existsSync(UPLOAD_DIR)) {
 }
 
 export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  const { id } = await context.params;
+
   const session = await getServerSession(authOptions);
   if (!session?.user || session.user.role !== "CLIENT_ADMIN") {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const assignmentId = params.id;
+  const assignmentId = id;
 
   try {
     // Get client profile
@@ -64,7 +66,7 @@ export async function POST(
       );
     }
 
-    const formData = await req.formData();
+    const formData = await request.formData();
     const file = formData.get("file") as File | null;
 
     if (!file || file.type !== "application/pdf") {

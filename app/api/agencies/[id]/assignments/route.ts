@@ -7,15 +7,15 @@ import { RequirementStatus } from "@/lib/generated/prisma";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
-) {
+  context: { params: Promise<{ id: string }> }
+): Promise<Response> {
+  // pull the id out of the promised params
+  const { id } = await context.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== "RECRUITMENT_ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const { id } = params;
 
     const jobRoles = await prisma.jobRole.findMany({
       where: {

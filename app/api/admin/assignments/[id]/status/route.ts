@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
@@ -8,17 +8,21 @@ import { sendEmail } from "@/lib/utils/email-service";
 import { NotificationType, NotificationPriority } from "@prisma/client";
 
 export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+): Promise<NextResponse> {
+  // according to the Next.js docs, params is a Promise that you must await
+  const { id } = await context.params;
+
+  if (!id) {
+    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  }
   try {
     // 1. Verify authentication and authorization
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== "RECRUITMENT_ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const { id } = params;
 
     // 2. Validate request body
     const { status, feedback } = await request.json();
@@ -39,7 +43,7 @@ export async function PUT(
 
     // 3. Get current assignment data for audit log
     const currentAssignment = await prisma.labourAssignment.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       include: {
         jobRole: {
           select: {
@@ -67,7 +71,7 @@ export async function PUT(
     const updatedAssignment = await prisma.$transaction(async (tx) => {
       // Update the assignment status
       const assignment = await tx.labourAssignment.update({
-        where: { id: params.id },
+        where: { id: id },
         data: {
           adminStatus: status as RequirementStatus,
           adminFeedback: status === "ACCEPTED" ? null : feedback,

@@ -1,6 +1,9 @@
-import { Linkedin, Mail, Twitter } from "lucide-react";
-import Image from "next/image";
+// app/(public)/about/page.tsx
+"use client";
+
 import React from "react";
+import Image from "next/image";
+import { Linkedin, Mail, Twitter } from "lucide-react";
 
 export default function AboutPage() {
   const stats = [
@@ -36,7 +39,6 @@ export default function AboutPage() {
     <>
       {/* Hero Section */}
       <section className="relative py-16 lg:py-24 min-h-screen flex items-center">
-        {/* Background Image */}
         <div className="absolute inset-0 -z-10">
           <Image
             src="/assets/About-Bg.png"
@@ -53,8 +55,6 @@ export default function AboutPage() {
             }}
           />
         </div>
-
-        {/* Content */}
         <div className="container mx-auto px-4 text-white">
           <div className="max-w-3xl">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
@@ -68,7 +68,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Company Overview Section */}
+      {/* Company Overview */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
@@ -86,21 +86,13 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Stats Section - Modern Circular Cards */}
+      {/* Stats */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-            {stats.map((stat, index) => (
-              <div key={index} className="flex flex-col items-center">
-                {/* Circular Card with subtle shadow and border */}
-                <div
-                  className="
-            w-48 h-48 rounded-full 
-            bg-white border-2 border-purple-100 
-            shadow-md hover:shadow-lg transition-shadow
-            flex items-center justify-center
-          "
-                >
+            {stats.map((stat, i) => (
+              <div key={i} className="flex flex-col items-center">
+                <div className="w-48 h-48 rounded-full bg-white border-2 border-purple-100 shadow-md hover:shadow-lg transition-shadow flex items-center justify-center">
                   <div className="text-center p-6">
                     <p className="text-5xl font-bold text-purple-600 mb-2">
                       {stat.value}
@@ -116,30 +108,25 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Mission/Values/Promise Section */}
+      {/* Promise Section */}
       <section className="py-16 lg:py-24 bg-white">
         <div className="container mx-auto px-4">
           <div className="flex flex-col lg:flex-row items-center">
-            {/* Right Column - Circles Only */}
             <div className="relative w-[600px] h-[863px] overflow-visible z-10 mr-32">
               <Image
                 src="/assets/about-element.png"
-                alt="Mission Alt"
+                alt="Mission Illustration"
                 width={600}
                 height={863}
                 className="object-contain"
                 priority
               />
             </div>
-
-            {/* Left Column - Text Content */}
             <div className="lg:w-1/2 lg:pl-28 mb-12 lg:mb-0">
               <h2 className="text-4xl md:text-5xl font-bold text-[#290842] mb-8">
                 Promise
               </h2>
-
               <div className="space-y-12">
-                {/* Mission */}
                 <div>
                   <h3 className="text-3xl font-bold text-[#6914A8] mb-4">
                     Our Mission
@@ -149,8 +136,6 @@ export default function AboutPage() {
                     global industries.
                   </p>
                 </div>
-
-                {/* Values */}
                 <div>
                   <h3 className="text-3xl font-bold text-[#6914A8] mb-4">
                     Our Values
@@ -159,8 +144,6 @@ export default function AboutPage() {
                     A world where talent meets opportunity without borders.
                   </p>
                 </div>
-
-                {/* Promise */}
                 <div>
                   <h3 className="text-3xl font-bold text-[#6914A8] mb-4">
                     Our Promise
@@ -175,70 +158,50 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Founders Section */}
-      <section className="relative w-full min-h-screen flex md:flex-row flex-col items-center justify-center text-center px-6 py-16 animate-fade-in-bg pt-36 sm:pt-10">
-        {/* Title */}
-        <div className="flex flex-col md:items-start items-center text-left space-y-4 mx-auto my-auto">
-          <h2 className="text-5xl sm:text-5xl md:text-7xl font-bold text-[#290842] tracking-wide">
+      {/* Founders */}
+      <section className="relative w-full min-h-screen flex md:flex-row flex-col items-center justify-center text-center px-6 py-16 pt-36 sm:pt-10">
+        <div className="flex flex-col md:items-start items-center space-y-4 mx-auto my-auto">
+          <h2 className="text-5xl md:text-7xl font-bold text-[#290842] tracking-wide">
             Meet The
           </h2>
-          <h2 className="text-5xl sm:text-5xl md:text-7xl font-bold text-[#290842] tracking-wide">
+          <h2 className="text-5xl md:text-7xl font-bold text-[#290842] tracking-wide">
             Founders.
           </h2>
         </div>
-        {/* Founders Section */}
         <div className="grid md:grid-rows-2 grid-cols-1 gap-12 max-w-6xl mx-auto pt-20 md:pt-12">
-          {founders.map((founder, index) => (
-            <React.Fragment key={index}>
-              <div className="flex md:flex-row flex-col items-center text-center md:text-left space-y-2 md:space-x-20">
+          {founders.map((f, i) => (
+            <React.Fragment key={i}>
+              <div className="flex md:flex-row flex-col items-center md:items-start md:text-start space-y-2 md:space-x-20">
                 <div className="flex flex-col items-center text-center space-y-4 pb-6">
-                  {/* Profile Image */}
-                  {
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={founder.image}
-                      alt={founder.name}
-                      className="w-40 h-40 rounded-full object-cover shadow-lg"
-                    />
-                  }
+                  <img
+                    src={f.image}
+                    alt={f.name}
+                    className="w-40 h-40 rounded-full object-cover shadow-lg"
+                  />
                   <div className="flex justify-center space-x-5 mt-4">
-                    <a
-                      href={founder.twitter}
-                      aria-label="Twitter"
-                      className="text-gray-200 hover:text-gray-400 transition-colors"
-                    >
-                      <Twitter className="w-6 h-6 fill-current" />
+                    <a href={f.twitter} aria-label="Twitter">
+                      <Twitter className="w-6 h-6" />
                     </a>
-                    <a
-                      href={`mailto:${founder.email}`}
-                      aria-label="Email"
-                      className="text-gray-200 hover:text-gray-400 transition-colors"
-                    >
-                      <Mail className="w-6 h-6 " />
+                    <a href={`mailto:${f.email}`} aria-label="Email">
+                      <Mail className="w-6 h-6" />
                     </a>
-                    <a
-                      href={founder.linkedin}
-                      aria-label="LinkedIn"
-                      className="text-gray-200 hover:text-gray-400  transition-colors"
-                    >
-                      <Linkedin className="w-6 h-6 fill-current" />
+                    <a href={f.linkedin} aria-label="LinkedIn">
+                      <Linkedin className="w-6 h-6" />
                     </a>
                   </div>
                 </div>
-                {/* Founder Details */}
-                <div className="flex flex-col items-center text-center md:items-start md:text-start space-y-5 max-w-lg">
-                  <h3 className="sm:text-3xl text-2xl font-semibold text-[#656565] ">
-                    {founder.name}
+                <div className="flex flex-col max-w-lg space-y-5">
+                  <h3 className="text-2xl sm:text-3xl font-semibold text-[#656565]">
+                    {f.name}
                   </h3>
-                  <p className="sm:text-lg text-base text-gray_ font-medium">
-                    {founder.role}
+                  <p className="text-base sm:text-lg font-medium text-gray_">
+                    {f.role}
                   </p>
-                  <p className="mt-2 sm:text-lg text-base text-black leading-relaxed pb-8">
-                    {founder.description}
+                  <p className="mt-2 text-base sm:text-lg text-black leading-relaxed pb-8">
+                    {f.description}
                   </p>
-                  {/* Vertical Divider (Only Between Profiles) */}
-                  {index !== founders.length - 1 && (
-                    <div className="h-2 w-32 bg-[#A6A6A6] mx-10 rounded mt-20"></div>
+                  {i < founders.length - 1 && (
+                    <div className="h-2 w-32 bg-[#A6A6A6] mx-10 rounded mt-20" />
                   )}
                 </div>
               </div>

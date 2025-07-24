@@ -10,7 +10,8 @@ import { useToast } from "@/context/toast-provider";
 
 export default function VerifyAccount() {
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const rawParams = useSearchParams();
+  const searchParams = rawParams ?? new URLSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [email, setEmail] = useState("");
   const [userRole, setUserRole] = useState<UserRole | null>(null);

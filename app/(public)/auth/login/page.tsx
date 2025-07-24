@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
@@ -25,7 +25,16 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
+  const [isClient, setIsClient] = useState(false);
 
+  useEffect(() => {
+    setIsClient(true);
+    // Initialize language based on browser if needed
+    if (typeof window !== "undefined") {
+      const lang = navigator.language.startsWith("ar") ? "ar" : "en";
+      setLanguage(lang);
+    }
+  }, [setLanguage]);
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
     let isValid = true;
@@ -116,6 +125,14 @@ export default function LoginPage() {
   const handleRegisterRedirect = () => {
     router.push("/auth/register");
   };
+
+  if (!isClient) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">

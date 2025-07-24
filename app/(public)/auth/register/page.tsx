@@ -15,6 +15,13 @@ import { Card } from "@/components/shared/Card";
 import { z } from "zod";
 import { useToast } from "@/context/toast-provider";
 import { CompanySector, CompanySize } from "@/lib/generated/prisma";
+import dynamic from "next/dynamic";
+
+// Dynamically import the language selector to ensure it's client-side only
+const LanguageSelector = dynamic(
+  () => import("@/components/ui/LanguageSelector"),
+  { ssr: false }
+);
 
 const countryCodes = [
   { code: "+974", name: "Qatar" },
@@ -65,7 +72,7 @@ const solidWidths: Record<number, string> = {
 };
 
 export default function RegisterPage() {
-  const { language, setLanguage, t } = useLanguage();
+  const { t, language } = useLanguage();
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -112,6 +119,12 @@ export default function RegisterPage() {
     licenseFile: null,
     otherDocuments: [],
   });
+
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Memoize enum mappings based on language
   const sectorMapping = useMemo(
@@ -1015,20 +1028,18 @@ export default function RegisterPage() {
     }
   };
 
+  if (!isClient) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
       <div className="w-[1500px] h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
-        <div className="absolute top-4 right-4 z-20">
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value as "en" | "ar")}
-            className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
-            aria-label="Select language"
-          >
-            <option value="en">English</option>
-            <option value="ar">العربية</option>
-          </select>
-        </div>
+        <LanguageSelector />
 
         <div className="relative px-16 pt-10 pb-6">
           <div className="absolute inset-x-0 top-1/2 h-0.5 z-0">

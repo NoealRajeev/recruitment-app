@@ -1,29 +1,39 @@
-// app/(public)/auth/forgot-password/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/toast-provider";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/shared/Card";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+
+// Dynamically import the language selector
+const LanguageSelector = dynamic(
+  () => import("@/components/ui/LanguageSelector"),
+  { ssr: false }
+);
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
-  const { language, setLanguage, t } = useLanguage();
+  const { t } = useLanguage();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrors({});
 
-    // Basic email validation
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setErrors({ email: t.invalidEmail });
       setIsLoading(false);
@@ -89,21 +99,19 @@ export default function ForgotPasswordPage() {
     }
   };
 
+  if (!isClient) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
   if (isSubmitted) {
     return (
       <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
         <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
-          <div className="absolute top-4 right-4 z-20">
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as "en" | "ar")}
-              className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
-              aria-label="Select language"
-            >
-              <option value="en">English</option>
-              <option value="ar">العربية</option>
-            </select>
-          </div>
+          <LanguageSelector />
           <div className="flex-1 mx-16 rounded-lg py-8 flex flex-col justify-between">
             <Card className="p-6">
               <div className="text-center mb-6">
@@ -190,17 +198,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
       <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
-        <div className="absolute top-4 right-4 z-20">
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value as "en" | "ar")}
-            className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
-            aria-label="Select language"
-          >
-            <option value="en">English</option>
-            <option value="ar">العربية</option>
-          </select>
-        </div>
+        <LanguageSelector />
         <div className="flex-1 mx-16 rounded-lg py-8 flex flex-col justify-between">
           <Card className="p-6">
             <div className="text-center mb-6">

@@ -4,17 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import {
-  User,
-  Mail,
-  Phone,
-  Building,
-  MapPin,
-  Globe,
-  Edit,
-  Save,
-  X,
-} from "lucide-react";
+import { User, Mail, Phone, Edit, Save, X } from "lucide-react";
 
 interface UserProfile {
   id: string;

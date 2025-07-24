@@ -16,7 +16,6 @@ import {
   ClipboardList,
   User,
   MapPin,
-  ScrollText,
 } from "lucide-react";
 
 const navItems = {

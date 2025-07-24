@@ -3,9 +3,8 @@
 
 import { User } from "@prisma/client";
 import prisma from "@/lib/prisma";
-import { authOptions, getCurrentAuth } from "./options";
+import { authOptions } from "./options";
 import { getServerSession } from "next-auth";
-import { NextRequest, NextResponse } from "next/server";
 
 /**
  * Updates both database and session atomically

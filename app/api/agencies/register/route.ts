@@ -10,7 +10,6 @@ import { randomBytes } from "crypto";
 import { UserRole, AccountStatus, AuditAction } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
-import { UnauthorizedError } from "@/lib/errors";
 import { faker } from "@faker-js/faker";
 import { getAgencyCreationEmail } from "@/lib/utils/email-templates";
 import { sendTemplateEmail } from "@/lib/utils/email-service";

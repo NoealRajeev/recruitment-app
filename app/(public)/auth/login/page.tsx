@@ -7,6 +7,13 @@ import { useLanguage } from "@/context/LanguageContext";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/shared/Card";
+import dynamic from "next/dynamic";
+
+// Dynamically import the language selector to ensure it's client-side only
+const LanguageSelector = dynamic(
+  () => import("@/components/ui/LanguageSelector"),
+  { ssr: false }
+);
 
 interface FormErrors {
   email?: string;
@@ -15,10 +22,9 @@ interface FormErrors {
 }
 
 export default function LoginPage() {
-  const { language, setLanguage, t } = useLanguage();
+  const { t } = useLanguage();
   const router = useRouter();
-  const rawParams = useSearchParams();
-  const searchParams = rawParams ?? new URLSearchParams();
+  const searchParams = useSearchParams();
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -29,17 +35,12 @@ export default function LoginPage() {
 
   useEffect(() => {
     setIsClient(true);
-    // Initialize language based on browser if needed
-    if (typeof window !== "undefined") {
-      const lang = navigator.language.startsWith("ar") ? "ar" : "en";
-      setLanguage(lang);
-    }
-  }, [setLanguage]);
+  }, []);
+
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
     let isValid = true;
 
-    // Email validation
     if (!formData.email) {
       newErrors.email = t.required;
       isValid = false;
@@ -48,7 +49,6 @@ export default function LoginPage() {
       isValid = false;
     }
 
-    // Password validation
     if (!formData.password) {
       newErrors.password = t.required;
       isValid = false;
@@ -68,7 +68,6 @@ export default function LoginPage() {
       [name]: value,
     }));
 
-    // Clear error when user types
     if (errors[name as keyof FormErrors]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -76,31 +75,21 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
     setLoading(true);
     setErrors({});
-
-    // Use callbackUrl, not from
-    const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
-    console.log("Login page callback URL:", callbackUrl);
-    console.log(
-      "All search params:",
-      Object.fromEntries(searchParams.entries())
-    );
 
     try {
       const result = await signIn("credentials", {
         email: formData.email,
         password: formData.password,
         redirect: false,
-        callbackUrl,
+        callbackUrl: searchParams?.get("callbackUrl") || "/dashboard",
       });
 
       if (result?.error) {
         if (result.error === "Account not verified") {
-          // Redirect to verification page with email as query param
           router.push(
             `/auth/verify-account?email=${encodeURIComponent(formData.email)}`
           );
@@ -109,7 +98,6 @@ export default function LoginPage() {
         throw new Error(result.error);
       }
 
-      // Redirect to result.url (provided by NextAuth)
       if (result?.url) {
         router.push(result.url);
       }
@@ -137,17 +125,7 @@ export default function LoginPage() {
   return (
     <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
       <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
-        <div className="absolute top-4 right-4 z-20">
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value as "en" | "ar")}
-            className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
-            aria-label="Select language"
-          >
-            <option value="en">English</option>
-            <option value="ar">العربية</option>
-          </select>
-        </div>
+        <LanguageSelector />
         <div className="flex-1 mx-16 rounded-lg py-8 flex flex-col justify-between">
           <Card className="p-6">
             <div className="text-center mb-2">

@@ -1,16 +1,16 @@
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { PrismaClient } from "./lib/generated/prisma/index.js";
+import { env } from "@/lib/env";
 
 const prisma = new PrismaClient();
 
 const httpServer = createServer();
 const io = new Server(httpServer, {
   cors: {
-    origin:
-      process.env.NODE_ENV === "production"
-        ? "https://findly.breaktroughf1.com"
-        : "http://localhost:3000",
+    origin: env.isProduction
+      ? "https://findly.breaktroughf1.com"
+      : "http://localhost:3000",
     methods: ["GET", "POST"],
   },
 });
@@ -192,7 +192,7 @@ const sendNotificationToUser = async (userId, notificationData) => {
 // Export the function for use in other parts of the app
 export { sendNotificationToUser };
 
-const PORT = process.env.WEBSOCKET_PORT || 3001;
+const PORT = env.NEXT_PUBLIC_WEBSOCKET_URL?.split(":").pop() || 3001;
 httpServer.listen(PORT, () => {
   console.log(`WebSocket server running on port ${PORT}`);
 });

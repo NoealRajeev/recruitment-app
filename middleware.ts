@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import type { UserRole } from "@prisma/client";
 import { validateCsrfToken } from "@/lib/auth/csrf";
+import { env } from "./lib/env";
 
 const publicRoutes = new Set([
   "/",
@@ -36,7 +37,7 @@ export async function middleware(request: NextRequest) {
   const cronSecret = request.headers.get("x-cron-secret");
   if (
     request.nextUrl.pathname.startsWith("/api/reminders") &&
-    cronSecret !== process.env.CRON_SECRET
+    cronSecret !== env.CRON_SECRET
   ) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
@@ -46,7 +47,7 @@ export async function middleware(request: NextRequest) {
   try {
     token = await getToken({
       req: request,
-      secret: process.env.NEXTAUTH_SECRET,
+      secret: env.NEXTAUTH_SECRET,
     });
   } catch (error) {
     console.error("Token validation error:", error);

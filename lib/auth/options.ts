@@ -6,6 +6,7 @@ import { compare } from "bcryptjs";
 import { refreshSession } from "./session";
 import prisma from "@/lib/prisma";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { env } from "../env";
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -108,9 +109,9 @@ export const authOptions: AuthOptions = {
   session: {
     strategy: "jwt",
   },
-  secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === "development",
-  useSecureCookies: process.env.NEXTAUTH_URL?.startsWith("https://") ?? false,
+  secret: env.NEXTAUTH_SECRET,
+  debug: env.isDevelopment,
+  useSecureCookies: env.NEXTAUTH_URL.startsWith("https://"),
 };
 
 export default NextAuth(authOptions);

@@ -2,6 +2,7 @@
 // lib/email-service.ts
 import nodemailer from "nodemailer";
 import { EmailTemplate } from "./email-templates";
+import { env } from "../env";
 
 // Type for email sending options
 interface EmailOptions {
@@ -20,17 +21,17 @@ interface EmailOptions {
 
 // Create transporter instance
 const transporter = nodemailer.createTransport({
-  service: process.env.SMTP_SERVICE || "gmail",
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  from: process.env.SMTP_FROM,
-  secure: process.env.SMTP_SECURE === "true",
+  service: env.SMTP_SERVICE || "gmail",
+  host: env.SMTP_HOST,
+  port: parseInt(env.SMTP_PORT || "587"),
+  from: env.SMTP_FROM,
+  secure: true,
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: env.SMTP_USER,
+    pass: env.SMTP_PASS,
   },
   tls: {
-    rejectUnauthorized: process.env.NODE_ENV === "production",
+    rejectUnauthorized: env.isProduction,
   },
 });
 
@@ -51,7 +52,7 @@ transporter.verify((error) => {
 export const sendEmail = async (options: EmailOptions): Promise<any> => {
   try {
     const mailOptions = {
-      from: `"Findly" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
+      from: `"Findly" <${env.SMTP_FROM || env.SMTP_USER}>`,
       ...options,
     };
 

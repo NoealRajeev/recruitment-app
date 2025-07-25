@@ -6,6 +6,7 @@ import path from "path";
 import fs from "fs";
 import { sendTemplateEmail } from "@/lib/utils/email-service";
 import { getVisaNotificationEmail } from "@/lib/utils/email-templates";
+import { env } from "@/lib/env";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "visas");
 if (!fs.existsSync(UPLOAD_DIR)) {
@@ -130,7 +131,7 @@ export async function POST(
           assignment.labour.name,
           client.companyName,
           assignment.jobRole.title,
-          `${process.env.NEXTAUTH_URL}${url}`
+          `${env.NEXTAUTH_URL}${url}`
         );
 
         sendTemplateEmail(

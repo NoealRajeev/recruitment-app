@@ -1,7 +1,8 @@
+import { env } from "./env";
 import { seedDatabase } from "./seed/seed";
 
 export async function initializeApp() {
-  if (process.env.NODE_ENV !== "development") return;
+  if (!env.isDevelopment) return;
 
   try {
     console.log("🚀 Initializing application...");

@@ -1,16 +1,18 @@
 // lib/prisma.ts
 import { PrismaClient } from "@prisma/client";
+import { env } from "./env";
 
 declare global {
-  // allow global `var` declarations
-  // eslint-disable-next-line no-var
   var prisma: PrismaClient | undefined;
 }
 
-const prisma = globalThis.prisma || new PrismaClient();
-
-if (process.env.NODE_ENV !== "production") {
-  globalThis.prisma = prisma;
+// Ensure DATABASE_URL exists
+if (!env.DATABASE_URL) {
+  throw new Error("DATABASE_URL must be set in environment variables");
 }
+
+const prisma = global.prisma ?? new PrismaClient();
+
+if (!env.isProduction) global.prisma = prisma;
 
 export default prisma;

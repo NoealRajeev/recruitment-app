@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import prisma from "@/lib/prisma";
 import { sendPasswordResetEmail } from "@/lib/utils/email-service";
+import { env } from "@/lib/env";
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,10 +47,10 @@ export async function POST(request: NextRequest) {
     });
 
     // Send password reset email
-    const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${token}`;
+    const resetUrl = `${env.NEXTAUTH_URL}/auth/reset-password?token=${token}`;
 
     console.log("Password reset URL:", resetUrl);
-    console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
+    console.log("NEXTAUTH_URL:", env.NEXTAUTH_URL);
 
     try {
       await sendPasswordResetEmail(email, resetUrl, user.name);

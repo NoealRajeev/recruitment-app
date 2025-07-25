@@ -1,3 +1,5 @@
+import { env } from "../env";
+
 // lib/email-templates.ts
 export interface EmailTemplate {
   subject: string;
@@ -26,7 +28,7 @@ const infoBackground = "#f0f8ff";
 
 const headerTemplate = (title: string) => `
   <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid ${primaryColor}; padding-bottom: 15px;">
-    <img src="${process.env.NEXTAUTH_URL}/logo.png" alt="Findly Logo" style="max-height: 60px;">
+    <img src="${env.NEXTAUTH_URL}/logo.png" alt="Findly Logo" style="max-height: 60px;">
     <h1 style="color: ${primaryColor}; margin-top: 10px; margin-bottom: 5px;">${title}</h1>
   </div>
 `;
@@ -35,7 +37,7 @@ const footerTemplate = `
   <div style="border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px; text-align: center;">
     <p style="color: ${primaryColor}; font-weight: bold; margin-bottom: 5px;">Best regards,</p>
     <p style="color: ${secondaryColor}; margin-top: 0;">The Findly Team</p>
-    <img src="${process.env.NEXTAUTH_URL}/logo-small.png" alt="Findly Logo" style="max-height: 40px; margin-top: 20px;">
+    <img src="${env.NEXTAUTH_URL}/logo-small.png" alt="Findly Logo" style="max-height: 40px; margin-top: 20px;">
   </div>
 `;
 
@@ -109,7 +111,7 @@ Temporary Password: ${password}
 
 Please log in and change your password immediately for security reasons.
 
-Login URL: ${process.env.NEXTAUTH_URL}/auth/login
+Login URL: ${env.NEXTAUTH_URL}/auth/login
 
 Thank you,
 The Findly Team`,
@@ -130,7 +132,7 @@ The Findly Team`,
   
   <p style="color: #d32f2f; font-weight: bold;">Please log in and change your password immediately for security reasons.</p>
   
-  ${actionButton("Login to Findly", `${process.env.NEXTAUTH_URL}/auth/login`)}
+  ${actionButton("Login to Findly", `${env.NEXTAUTH_URL}/auth/login`)}
   
   ${footerTemplate}
 </div>
@@ -176,7 +178,7 @@ The Findly Leadership Team`,
     <h3 style="margin-top: 0; color: ${primaryColor};">Your Login Credentials</h3>
     <p><strong>Email:</strong> ${email}</p>
     <p><strong>Temporary Password:</strong> ${password}</p>
-    ${actionButton("Access Admin Dashboard", `${process.env.NEXTAUTH_URL}/admin/login`)}
+    ${actionButton("Access Admin Dashboard", `${env.NEXTAUTH_URL}/admin/login`)}
   </div>
 
   <h3 style="color: ${primaryColor};">First Steps</h3>
@@ -275,7 +277,7 @@ export const getAgencyWelcomeEmail = (
   agencyName: string,
   email: string,
   password: string,
-  loginLink: string = `${process.env.NEXTAUTH_URL}/auth/login`
+  loginLink: string = `${env.NEXTAUTH_URL}/auth/login`
 ): EmailTemplate => ({
   subject: `Welcome to Findly, ${agencyName}! Your Agency Account is Ready`,
   text: `Dear ${agencyName},
@@ -558,7 +560,7 @@ Last Updated: ${lastUpdated}
 
 Please take the necessary action to move this profile to the next stage.
 
-You can view the recruitment tracker here: ${process.env.NEXT_PUBLIC_APP_URL}/dashboard/${recipientType}/recruitment
+You can view the recruitment tracker here: ${env.NEXT_PUBLIC_APP_URL}/dashboard/${recipientType}/recruitment
 
 Best regards,
 The Findly Recruitment Team`,
@@ -584,7 +586,7 @@ The Findly Recruitment Team`,
     <p>Please take the necessary action to move this profile to the next stage of the recruitment process.</p>
     ${actionButton(
       "View Recruitment Tracker",
-      `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/${recipientType}/recruitment`
+      `${env.NEXT_PUBLIC_APP_URL}/dashboard/${recipientType}/recruitment`
     )}
   </div>
 

@@ -12,6 +12,7 @@ import {
   ValidatedHandler,
   Handler,
 } from "@/types";
+import { env } from "../env";
 
 export function withAdminAuth<Params = unknown>(
   handler: AuthenticatedHandler<Params>
@@ -146,7 +147,7 @@ export function handleApiErrors<Params = unknown>(
       return NextResponse.json(
         {
           error: "Internal server error",
-          ...(process.env.NODE_ENV === "development" && {
+          ...(env.isDevelopment && {
             details: String(error),
           }),
         },

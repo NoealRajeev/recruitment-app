@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import prisma from "@/lib/prisma";
 import * as XLSX from "xlsx";
+import { env } from "@/lib/env";
 
 // Add the lazy-load getPuppeteer function
 const getPuppeteer = async () => {
@@ -892,7 +893,7 @@ async function generatePDFReport(
 
 function generatePDFHTML(data: unknown, title: string) {
   const summary = (data as any)?.summary || {};
-  const logoUrl = process.env.NEXT_PUBLIC_LOGO_URL;
+  const logoUrl = env.NEXT_PUBLIC_LOGO_URL;
 
   return `
     <!DOCTYPE html>

@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
   images: {
     domains: ["cdn.jsdelivr.net", "localhost", "findly.breaktroughf1.com"],
   },
+  reactStrictMode: true,
+  swcMinify: true,
+  compiler: {
+    styledComponents: true,
+  },
   output: "standalone",
 
   async headers() {

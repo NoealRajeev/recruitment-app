@@ -1,9 +1,19 @@
 "use client";
 
 import { useLanguage } from "@/context/LanguageContext";
+import { useEffect, useState } from "react";
 
 export default function LanguageSelector() {
   const { language, setLanguage } = useLanguage();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <div className="absolute top-4 right-4 z-20">

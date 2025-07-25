@@ -146,6 +146,14 @@ export const translations = {
     passwordResetInstructions:
       "Click the link in the email to reset your password. The link will expire in 1 hour.",
     sendResetLink: "Send Reset Link",
+    // Add the new keys here:
+    invalidToken: "Invalid or expired token",
+    validationFailed: "Token validation failed",
+    validatingToken: "Validating token...",
+    invalidTokenTitle: "Invalid Token",
+    invalidTokenMessage: "The password reset link is invalid or has expired.",
+    requestNewLink: "Request New Link",
+    resettingFor: "Resetting password for",
     resendEmail: "Resend Email",
     sending: "Sending...",
     backToForgotPassword: "Back to Forgot Password",
@@ -596,6 +604,14 @@ export const translations = {
     sectionNoteJob: "*يحدد هذا القسم الوظائف والمؤهلات المطلوبة للعمال.",
     sectionNoteRequirements:
       "*يساعدنا هذا القسم في مطابقة أفضل المرشحين لاحتياجاتك.",
+    invalidToken: "رمز غير صالح أو منتهي الصلاحية",
+    validationFailed: "فشل التحقق من الرمز",
+    validatingToken: "جارٍ التحقق من الرمز...",
+    invalidTokenTitle: "رمز غير صالح",
+    invalidTokenMessage:
+      "رابط إعادة تعيين كلمة المرور غير صالح أو انتهت صلاحيته.",
+    requestNewLink: "طلب رابط جديد",
+    resettingFor: "إعادة تعيين كلمة المرور لـ",
     jobCategory: "فئة الوظيفة",
     contractType: "نوع العقد",
     duration: "المدة",

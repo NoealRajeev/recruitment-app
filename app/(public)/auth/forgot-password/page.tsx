@@ -9,7 +9,7 @@ import { Card } from "@/components/shared/Card";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 
-// Dynamically import the language selector
+// Dynamically import components that use browser APIs
 const LanguageSelector = dynamic(
   () => import("@/components/ui/LanguageSelector"),
   { ssr: false }
@@ -134,7 +134,7 @@ export default function ForgotPasswordPage() {
                   {t.checkYourEmail}
                 </h1>
                 <p className="text-base text-gray-700 mb-4">
-                  {/* {t.passwordResetEmailSentTo(email)} */}
+                  {t.passwordResetEmailSentTo}
                 </p>
                 <p className="text-sm text-gray-600 mb-6">
                   {t.passwordResetInstructions}

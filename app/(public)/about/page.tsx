@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 
-// Dynamically import any components that might use browser APIs
+// Dynamically import components that might use browser APIs
 const StatsSection = dynamic(() => import("@/components/about/StatsSection"), {
   ssr: false,
 });
@@ -14,6 +14,20 @@ const FoundersSection = dynamic(
 );
 
 export default function AboutPage() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Hero Section */}

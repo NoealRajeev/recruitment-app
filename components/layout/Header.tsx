@@ -20,9 +20,15 @@ export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const [active, setActive] = useState("home");
+  const [isClient, setIsClient] = useState(false);
 
-  // Smooth Scroll Function
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const handleScroll = useCallback((id: string, duration = 1500) => {
+    if (typeof window === "undefined") return;
+
     const section = document.getElementById(id.toLowerCase());
     if (!section) return;
 
@@ -99,6 +105,8 @@ export default function Header() {
     window.addEventListener("scroll", detectActiveSection);
     return () => window.removeEventListener("scroll", detectActiveSection);
   }, [pathname]);
+
+  if (!isClient) return null;
 
   return (
     <header className="text-black sticky top-0 z-50 bg-white/90">

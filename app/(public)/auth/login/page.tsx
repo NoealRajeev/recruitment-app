@@ -1,234 +1,162 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
+import { Suspense, useState } from "react";
+import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { useEffect, useState } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/shared/Card";
-import dynamic from "next/dynamic";
 
-// Dynamically import the language selector to ensure it's client-side only
+// dynamically load language selector (client-only)
 const LanguageSelector = dynamic(
   () => import("@/components/ui/LanguageSelector"),
   { ssr: false }
 );
 
-interface FormErrors {
-  email?: string;
-  password?: string;
-  form?: string;
+// ——— LoginForm ———
+// All the form state & submit logic lives here,
+// but it gets its callbackUrl as a prop.
+interface LoginFormProps {
+  callbackUrl: string;
 }
-
-export default function LoginPage() {
+function LoginForm({ callbackUrl }: LoginFormProps) {
   const { t } = useLanguage();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [errors, setErrors] = useState<FormErrors>({});
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState<{
+    email?: string;
+    password?: string;
+    form?: string;
+  }>({});
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  const [isClient, setIsClient] = useState(false);
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-    let isValid = true;
-
-    if (!formData.email) {
-      newErrors.email = t.required;
-      isValid = false;
-    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-      newErrors.email = t.invalidEmail;
-      isValid = false;
-    }
-
-    if (!formData.password) {
-      newErrors.password = t.required;
-      isValid = false;
-    } else if (formData.password.length < 8) {
-      newErrors.password = t.passwordMinLength;
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
+  const validate = () => {
+    const errs: typeof errors = {};
+    if (!formData.email) errs.email = t.required;
+    else if (!/^\S+@\S+\.\S+$/.test(formData.email))
+      errs.email = t.invalidEmail;
+    if (!formData.password) errs.password = t.required;
+    else if (formData.password.length < 8) errs.password = t.passwordMinLength;
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    if (errors[name as keyof FormErrors]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
+    setFormData((f) => ({ ...f, [name]: value }));
+    if (errors[name as keyof typeof errors]) {
+      setErrors((e) => ({ ...e, [name]: undefined }));
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
-
+    if (!validate()) return;
     setLoading(true);
     setErrors({});
 
-    try {
-      const result = await signIn("credentials", {
-        email: formData.email,
-        password: formData.password,
-        redirect: false,
-        callbackUrl: searchParams?.get("callbackUrl") || "/dashboard",
-      });
+    const result = await signIn("credentials", {
+      email: formData.email,
+      password: formData.password,
+      redirect: false,
+      callbackUrl,
+    });
 
-      if (result?.error) {
-        if (result.error === "Account not verified") {
-          router.push(
-            `/auth/verify-account?email=${encodeURIComponent(formData.email)}`
-          );
-          return;
-        }
-        throw new Error(result.error);
+    if (result?.error) {
+      if (result.error === "Account not verified") {
+        router.push(
+          `/auth/verify-account?email=${encodeURIComponent(formData.email)}`
+        );
+        return;
       }
-
-      if (result?.url) {
-        router.push(result.url);
-      }
-    } catch (error) {
-      setErrors({
-        form: error instanceof Error ? error.message : t.loginFailed,
-      });
-    } finally {
-      setLoading(false);
+      setErrors({ form: result.error });
+    } else if (result?.url) {
+      router.push(result.url);
     }
-  };
 
-  const handleRegisterRedirect = () => {
-    router.push("/auth/register");
+    setLoading(false);
   };
-
-  if (!isClient) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div>Loading...</div>
-      </div>
-    );
-  }
 
   return (
-    <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
-      <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
+    <form onSubmit={handleSubmit} className="grid gap-8 mt-6">
+      {errors.form && (
+        <div className="text-red-600 text-center bg-red-50 rounded p-2">
+          {errors.form}
+        </div>
+      )}
+
+      <Input
+        label={t.email}
+        name="email"
+        type="email"
+        value={formData.email}
+        onChange={handleChange}
+        error={errors.email}
+        required
+        placeholder={t.emailPlaceholder}
+      />
+
+      <Input
+        label={t.password}
+        name="password"
+        type="password"
+        value={formData.password}
+        onChange={handleChange}
+        error={errors.password}
+        required
+        placeholder={t.passwordPlaceholder}
+      />
+
+      <div className="flex justify-between items-center">
+        <Button type="submit" disabled={loading}>
+          {loading ? t.processing : t.signIn}
+        </Button>
+        <p
+          className="text-sm text-blue-600 cursor-pointer"
+          onClick={() => router.push("/auth/forgot-password")}
+        >
+          {t.forgotPasswordPrompt}
+        </p>
+      </div>
+    </form>
+  );
+}
+
+// ——— LoginFormWrapper ———
+// Only this tiny component calls `useSearchParams()`
+import { useSearchParams } from "next/navigation";
+function LoginFormWrapper() {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams?.get("callbackUrl") ?? "/dashboard";
+  return <LoginForm callbackUrl={callbackUrl} />;
+}
+
+// ——— Page Component ———
+export default function LoginPage() {
+  const { t } = useLanguage();
+  const router = useRouter();
+
+  return (
+    <div className="flex justify-center items-start min-h-screen bg-gray-100 p-6 text-[#2C0053]">
+      <div className="relative bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden w-full max-w-md">
         <LanguageSelector />
-        <div className="flex-1 mx-16 rounded-lg py-8 flex flex-col justify-between">
+
+        <div className="p-6">
           <Card className="p-6">
-            <div className="text-center mb-2">
-              <h1 className="text-2xl font-semibold mb-1">{t.welcomeBack}</h1>
-              <p className="text-base text-gray-700 mb-2">
-                {t.loginToContinue}
-              </p>
+            <div className="text-center mb-4">
+              <h1 className="text-2xl font-semibold">{t.welcomeBack}</h1>
+              <p className="text-gray-700">{t.loginToContinue}</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="grid gap-8 mt-6">
-              <div className="col-span-5 space-y-4">
-                <h2 className="text-lg font-semibold mb-2">{t.loginDetails}</h2>
-
-                {/* Form-level error */}
-                {errors.form && (
-                  <div className="text-[#FF0404] text-sm text-center p-2 bg-red-50 rounded max-w-xl">
-                    {errors.form}
-                  </div>
-                )}
-
-                {/* Email field */}
-                <Input
-                  label={t.email}
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  error={errors.email}
-                  required
-                  placeholder={t.emailPlaceholder}
-                  id="email"
-                />
-
-                {/* Password field */}
-                <Input
-                  label={t.password}
-                  name="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  error={errors.password}
-                  required
-                  placeholder={t.passwordPlaceholder}
-                  id="password"
-                />
-
-                <h2 className="text-lg font-semibold mb-2">{t.quickActions}</h2>
-                <div className="space-y-4">
-                  <p
-                    className="text-sm text-gray-600 cursor-pointer hover:text-[#2C0053]"
-                    onClick={() => router.push("/auth/forgot-password")}
-                  >
-                    {t.forgotPasswordPrompt}
-                  </p>
-                </div>
-              </div>
-            </form>
+            {/* wrap only the part that uses useSearchParams in Suspense */}
+            <Suspense
+              fallback={<div className="text-center py-8">Loading…</div>}
+            >
+              <LoginFormWrapper />
+            </Suspense>
           </Card>
-          <div className="col-span-12 mt-6 flex justify-center gap-12">
-            <Button
-              type="submit"
-              onClick={() => document.querySelector("form")?.requestSubmit()}
-              disabled={loading}
-              className="px-8 py-2"
-            >
-              {loading ? (
-                <>
-                  <svg
-                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                  >
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                    ></circle>
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                  </svg>
-                  {t.processing}
-                </>
-              ) : (
-                t.signIn
-              )}
-            </Button>
-            <Button
-              type="button"
-              onClick={handleRegisterRedirect}
-              disabled={loading}
-              variant="outline"
-              className="px-8 py-2 border-none shadow-sm"
-            >
-              {t.register}
-            </Button>
-          </div>
         </div>
       </div>
     </div>

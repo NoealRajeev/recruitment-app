@@ -135,8 +135,7 @@ export async function POST(
 
         sendTemplateEmail(
           emailTemplate,
-          //   assignment.labour.email,
-          "noealrajeev987@gmail.com",
+          assignment.labour.email,
           undefined,
           undefined,
           [

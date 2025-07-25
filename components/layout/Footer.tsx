@@ -3,7 +3,7 @@ import { Facebook, Instagram, Linkedin, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 // Update company links to match your application
 const companyLinks = [
@@ -30,6 +30,12 @@ const legalLinks = [
 
 export default function Footer() {
   const pathname = usePathname();
+
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const currentYear = new Date().getFullYear();
   const displayYear = currentYear === 2025 ? "2025" : `2025 - ${currentYear}`;
@@ -72,6 +78,17 @@ export default function Footer() {
       }
     }
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isClient || typeof window === "undefined") return;
+
+    const hash = window.location.hash.replace("#", "");
+    if (hash) {
+      setTimeout(() => handleScroll(hash, 1200), 600);
+    }
+  }, [pathname, isClient]);
+
+  if (!isClient) return null;
 
   return (
     <footer className="bg-[#0B0016] text-white pt-16 pb-8">

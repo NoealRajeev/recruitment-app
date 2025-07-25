@@ -1,373 +1,274 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+// app/(public)/auth/verify-account/page.tsx
 "use client";
+
+import { Suspense } from "react";
 import { Card } from "@/components/shared/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
-import { AccountStatus, UserRole } from "@prisma/client";
 import { useLanguage } from "@/context/LanguageContext";
 import { useToast } from "@/context/toast-provider";
 
-export default function VerifyAccount() {
+// top‐level page component: just renders a suspense boundary
+export default function VerifyAccountPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex justify-center items-center min-h-screen">
+          <p>Loading…</p>
+        </div>
+      }
+    >
+      <VerifyAccountForm />
+    </Suspense>
+  );
+}
+
+// inner component: now safe to call useSearchParams(), useRouter(), etc.
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { AccountStatus, UserRole } from "@prisma/client";
+
+function VerifyAccountForm() {
   const router = useRouter();
   const rawParams = useSearchParams();
-  const searchParams = rawParams ?? new URLSearchParams();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [email, setEmail] = useState("");
-  const [userRole, setUserRole] = useState<UserRole | null>(null);
-  const [userStatus, setUserStatus] = useState<AccountStatus | null>(null);
+  const statusParam = rawParams?.get("status");
+  const emailParam = rawParams?.get("email") || "";
   const { language, setLanguage, t } = useLanguage();
   const { toast } = useToast();
 
-  // Form state for documents
-  const [formData, setFormData] = useState({
-    crFile: null as File | null,
-    licenseFile: null as File | null,
-    insuranceFile: null as File | null,
-    idProof: null as File | null,
-    addressProof: null as File | null,
-    otherDocuments: [] as File[],
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [email, setEmail] = useState(emailParam);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [userStatus, setUserStatus] = useState<AccountStatus | null>(null);
+
+  const [formData, setFormData] = useState<{
+    crFile: File | null;
+    licenseFile: File | null;
+    insuranceFile: File | null;
+    idProof: File | null;
+    addressProof: File | null;
+    otherDocuments: File[];
+  }>({
+    crFile: null,
+    licenseFile: null,
+    insuranceFile: null,
+    idProof: null,
+    addressProof: null,
+    otherDocuments: [],
   });
 
-  // Fetch user data based on email from URL
+  // fetch user on mount if we have an email
   useEffect(() => {
-    const emailParam = searchParams.get("email");
-    if (emailParam) {
-      setEmail(emailParam);
-      fetchUserData(emailParam);
-    }
-  }, [searchParams]);
+    if (!emailParam) return;
+    fetchUserData(emailParam);
+  }, [emailParam]);
 
-  const fetchUserData = async (email: string) => {
+  async function fetchUserData(email: string) {
     try {
-      const response = await fetch(
-        `/api/users?email=${encodeURIComponent(email)}`
-      );
-      if (response.ok) {
-        const userData = await response.json();
-        setUserRole(userData.role);
-        setUserStatus(userData.status);
+      const res = await fetch(`/api/users?email=${encodeURIComponent(email)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setUserRole(data.role);
+        setUserStatus(data.status);
       }
-    } catch (error) {
-      console.error("Failed to fetch user data:", error);
+    } catch (err) {
+      console.error(err);
     }
-  };
+  }
 
-  const handleFileChange = (
+  function handleFileChange(
     e: React.ChangeEvent<HTMLInputElement>,
-    field: keyof typeof formData
-  ) => {
-    if (e.target.files) {
-      if (field === "otherDocuments") {
-        setFormData((prev) => ({
-          ...prev,
-          otherDocuments: Array.from(e.target.files || []),
-        }));
-      } else {
-        setFormData((prev) => ({
-          ...prev,
-          [field]: e.target.files?.[0] || null,
-        }));
-      }
+    field:
+      | "crFile"
+      | "licenseFile"
+      | "insuranceFile"
+      | "idProof"
+      | "addressProof"
+      | "otherDocuments"
+  ) {
+    if (!e.target.files) return;
+    if (field === "otherDocuments") {
+      setFormData((f) => ({
+        ...f,
+        otherDocuments: Array.from(e.target.files!),
+      }));
+    } else {
+      setFormData((f) => ({ ...f, [field]: e.target.files![0] }));
     }
-  };
+  }
 
-  const handleSubmit = async () => {
+  async function handleSubmit() {
     if (!email || !userRole) return;
-
     setIsSubmitting(true);
+
     try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("email", email);
-      formDataToSend.append("userRole", userRole);
+      const fd = new FormData();
+      fd.append("email", email);
+      fd.append("userRole", userRole);
 
-      // Append files based on user role
       if (userRole === UserRole.RECRUITMENT_AGENCY) {
-        if (formData.licenseFile)
-          formDataToSend.append("licenseFile", formData.licenseFile);
-        if (formData.insuranceFile)
-          formDataToSend.append("insuranceFile", formData.insuranceFile);
-        if (formData.idProof)
-          formDataToSend.append("idProof", formData.idProof);
-        if (formData.addressProof)
-          formDataToSend.append("addressProof", formData.addressProof);
+        formData.licenseFile && fd.append("licenseFile", formData.licenseFile);
+        formData.insuranceFile &&
+          fd.append("insuranceFile", formData.insuranceFile);
+        formData.idProof && fd.append("idProof", formData.idProof);
+        formData.addressProof &&
+          fd.append("addressProof", formData.addressProof);
       } else if (userRole === UserRole.CLIENT_ADMIN) {
-        if (formData.crFile) formDataToSend.append("crFile", formData.crFile);
-        if (formData.licenseFile)
-          formDataToSend.append("licenseFile", formData.licenseFile);
+        formData.crFile && fd.append("crFile", formData.crFile);
+        formData.licenseFile && fd.append("licenseFile", formData.licenseFile);
       }
+      formData.otherDocuments.forEach((f) => fd.append("otherDocuments", f));
 
-      formData.otherDocuments.forEach((file) => {
-        formDataToSend.append(`otherDocuments`, file);
-      });
-
-      const response = await fetch("/api/verify-account", {
+      const res = await fetch("/api/verify-account", {
         method: "POST",
-        body: formDataToSend,
+        body: fd,
       });
+      if (!res.ok) throw new Error((await res.json()).error || "Submit failed");
 
-      if (response.ok) {
-        toast({
-          type: "success",
-          message: "Document Submitted",
-        });
-        router.push("/auth/verify-account?status=submitted");
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Submission failed");
-      }
-    } catch (error) {
-      toast({
-        type: "error",
-        message:
-          error instanceof Error ? error.message : "Failed to submit documents",
-      });
-      console.error("Submission failed:", error);
+      toast({ type: "success", message: t.documentsSubmitted });
+      router.push(`/auth/verify-account?status=submitted`);
+    } catch (err: any) {
+      toast({ type: "error", message: err.message });
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }
 
-  // If documents have been submitted, show success message
-  if (searchParams.get("status") === "submitted") {
+  // —— views based on statusParam —— //
+
+  if (statusParam === "submitted") {
     return (
-      <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
-        <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
-          <div className="flex-1 mx-16 rounded-lg py-8 flex flex-col justify-between">
-            <div className="absolute top-6 right-6">
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as "en" | "ar")}
-                className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
-                aria-label="Select language"
-              >
-                <option value="en">English</option>
-                <option value="ar">العربية</option>
-              </select>
-            </div>
-            <Card className="p-6 text-center">
-              <div className="mb-6">
-                <svg
-                  className="mx-auto h-16 w-16 text-green-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <h1 className="text-2xl font-semibold text-gray-800 mb-2">
-                {t.documentsSubmitted}
-              </h1>
-              <p className="text-gray-600 mb-6">
-                {t.documentsSubmittedMessage}
-              </p>
-              <Button
-                onClick={() => router.push("/")}
-                className="w-full max-w-xs mx-auto"
-              >
-                {t.returnToHome}
-              </Button>
-            </Card>
-          </div>
-        </div>
-      </div>
+      <CenterLayout>
+        <Card className="p-6 text-center">
+          <CheckmarkIcon />
+          <h1 className="text-2xl font-semibold mb-2">
+            {t.documentsSubmitted}
+          </h1>
+          <p className="mb-6">{t.documentsSubmittedMessage}</p>
+          <Button onClick={() => router.push("/")}>{t.returnToHome}</Button>
+        </Card>
+      </CenterLayout>
     );
   }
 
-  // Show document submission page for RECRUITMENT_AGENCY with NOT_VERIFIED status
   if (
     userRole === UserRole.RECRUITMENT_AGENCY &&
-    userStatus === "NOT_VERIFIED"
+    userStatus === AccountStatus.NOT_VERIFIED
   ) {
     return (
-      <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
-        <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
-          <div className="flex-1 mx-16 rounded-lg py-8 flex flex-col justify-between">
-            <div className="absolute top-6 right-6">
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value as "en" | "ar")}
-                className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
-                aria-label="Select language"
-              >
-                <option value="en">English</option>
-                <option value="ar">العربية</option>
-              </select>
-            </div>
-            <Card className="p-6">
-              <div className="text-center mb-6">
-                <h1 className="text-2xl font-semibold mb-1">
-                  {t.completeYourRegistration}
-                </h1>
-                <p className="text-gray-600">
-                  {t.uploadRequiredDocuments}{" "}
-                  <span className="font-medium">{email}</span>
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 gap-8 mt-6">
-                <div className="space-y-4">
-                  <Input
-                    label={t.businessLicense}
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange(e, "licenseFile")}
-                    required
-                    id="licenseFile"
-                  />
-                  <Input
-                    label={t.insuranceCertificate}
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange(e, "insuranceFile")}
-                    required
-                    id="insuranceFile"
-                  />
-                  <Input
-                    label={t.idProof}
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange(e, "idProof")}
-                    required
-                    id="idProof"
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  <Input
-                    label={t.addressProof}
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange(e, "addressProof")}
-                    required
-                    id="addressProof"
-                  />
-                </div>
-
-                <div className="space-y-4">
-                  <Input
-                    label={t.otherDocuments}
-                    type="file"
-                    multiple
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => handleFileChange(e, "otherDocuments")}
-                    id="otherDocuments"
-                  />
-                </div>
-              </div>
-
-              <div className="mt-8 flex justify-center">
-                <Button
-                  onClick={handleSubmit}
-                  disabled={
-                    isSubmitting ||
-                    !formData.licenseFile ||
-                    !formData.insuranceFile ||
-                    !formData.idProof ||
-                    !formData.addressProof
-                  }
-                  className="px-8 py-2 w-full max-w-xs"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <svg
-                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                      {t.submitting}
-                    </>
-                  ) : (
-                    t.submitDocuments
-                  )}
-                </Button>
-              </div>
-            </Card>
+      <CenterLayout>
+        <Card className="p-6">
+          <h1 className="text-xl font-semibold mb-2">
+            {t.completeYourRegistration}
+          </h1>
+          <p className="mb-4">
+            {t.uploadRequiredDocuments} <strong>{email}</strong>
+          </p>
+          <div className="grid gap-4">
+            <Input
+              label={t.businessLicense}
+              type="file"
+              onChange={(e) => handleFileChange(e, "licenseFile")}
+              required
+            />
+            <Input
+              label={t.insuranceCertificate}
+              type="file"
+              onChange={(e) => handleFileChange(e, "insuranceFile")}
+              required
+            />
+            <Input
+              label={t.idProof}
+              type="file"
+              onChange={(e) => handleFileChange(e, "idProof")}
+              required
+            />
+            <Input
+              label={t.addressProof}
+              type="file"
+              onChange={(e) => handleFileChange(e, "addressProof")}
+              required
+            />
+            <Input
+              label={t.otherDocuments}
+              type="file"
+              multiple
+              onChange={(e) => handleFileChange(e, "otherDocuments")}
+            />
           </div>
-        </div>
-      </div>
+          <Button
+            onClick={handleSubmit}
+            disabled={
+              isSubmitting ||
+              !formData.licenseFile ||
+              !formData.insuranceFile ||
+              !formData.idProof ||
+              !formData.addressProof
+            }
+            className="mt-6 w-full"
+          >
+            {isSubmitting ? t.submitting : t.submitDocuments}
+          </Button>
+        </Card>
+      </CenterLayout>
     );
   }
 
-  // Default view - show under review page for all other cases
+  // default “under review” state
   return (
-    <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
-      <div className="w-fit h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
-        <div className="flex-1 mx-16 rounded-lg py-8 flex flex-col justify-between">
-          <div className="absolute top-6 right-6">
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as "en" | "ar")}
-              className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
-              aria-label="Select language"
-            >
-              <option value="en">English</option>
-              <option value="ar">العربية</option>
-            </select>
-          </div>
-          <Card className="p-6 text-center">
-            <div className="mb-6">
-              <svg
-                className="mx-auto h-16 w-16 text-[#2C0053]"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            <h1 className="text-2xl font-semibold text-gray-800 mb-2">
-              {userStatus === AccountStatus.NOT_VERIFIED
-                ? t.registrationSubmitted
-                : t.verificationComplete}
-            </h1>
-            <p className="text-gray-600 mb-4">
-              {userStatus === AccountStatus.NOT_VERIFIED
-                ? t.registrationUnderReview
-                : t.accountVerified}
-            </p>
-            {userStatus === AccountStatus.NOT_VERIFIED && (
-              <p className="text-gray-500 text-sm mb-6">
-                {t.reviewProcessTime}
-              </p>
-            )}
-            <Button
-              onClick={() => router.push("/")}
-              className="w-full max-w-xs mx-auto"
-            >
-              {t.returnToHome}
-            </Button>
-          </Card>
-        </div>
+    <CenterLayout>
+      <Card className="p-6 text-center">
+        <CheckmarkIcon />
+        <h1 className="text-2xl font-semibold mb-2">
+          {userStatus === AccountStatus.NOT_VERIFIED
+            ? t.registrationSubmitted
+            : t.verificationComplete}
+        </h1>
+        <p className="mb-4">
+          {userStatus === AccountStatus.NOT_VERIFIED
+            ? t.registrationUnderReview
+            : t.accountVerified}
+        </p>
+        <Button onClick={() => router.push("/")}>{t.returnToHome}</Button>
+      </Card>
+    </CenterLayout>
+  );
+}
+
+// ——— small helpers ——— //
+
+function CenterLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex justify-center items-start min-h-screen bg-gray-100 p-6 text-[#2C0053]">
+      <div className="w-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden relative">
+        <LanguageSelect />
+        <div className="p-6">{children}</div>
       </div>
     </div>
+  );
+}
+
+import dynamic from "next/dynamic";
+const LanguageSelect = dynamic(
+  () => import("@/components/ui/LanguageSelector"),
+  { ssr: false }
+);
+
+function CheckmarkIcon() {
+  return (
+    <svg
+      className="mx-auto h-16 w-16 text-green-500 mb-4"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M9 12l2 2 4-4"
+      />
+    </svg>
   );
 }

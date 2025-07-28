@@ -13,7 +13,7 @@ import { authOptions } from "@/lib/auth/options";
 import { faker } from "@faker-js/faker";
 import { getAgencyCreationEmail } from "@/lib/utils/email-templates";
 import { sendTemplateEmail } from "@/lib/utils/email-service";
-import { env } from "@/lib/env.server";
+import { publicEnv } from "@/lib/env.public";
 
 export async function POST(
   request: NextRequest,
@@ -123,7 +123,7 @@ export async function POST(
   // 6) Send verification email (best‐effort)
   try {
     const link =
-      `${env.NEXT_PUBLIC_BASE_URL}/auth/verify-account?email=` +
+      `${publicEnv.NEXT_PUBLIC_BASE_URL}/auth/verify-account?email=` +
       encodeURIComponent(data.email);
     const emailTemplate = getAgencyCreationEmail(
       data.agencyName,

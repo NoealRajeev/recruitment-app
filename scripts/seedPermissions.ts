@@ -1,6 +1,5 @@
 // scripts/seedPermissions.ts
 import { seedDatabase } from "../lib/seed/seed";
-// import prisma from "@/lib/prisma";
 
 (async () => {
   try {

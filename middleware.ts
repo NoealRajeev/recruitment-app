@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import type { UserRole } from "@prisma/client";
 import { validateCsrfToken } from "@/lib/auth/csrf";
-import { env } from "./lib/env";
+import { env } from "./lib/env.server";
 
 const publicRoutes = new Set([
   "/",

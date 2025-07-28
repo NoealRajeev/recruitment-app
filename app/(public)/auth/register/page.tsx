@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/shared/Card";
 import { z } from "zod";
 import { useToast } from "@/context/toast-provider";
-import { CompanySector, CompanySize } from "@/lib/generated/prisma";
 import dynamic from "next/dynamic";
 
 // Dynamically import the language selector to ensure it's client-side only
@@ -531,8 +530,8 @@ export default function RegisterPage() {
       // Add all form data
       formDataToSend.append("companyName", formData.companyName);
       formDataToSend.append("registrationNumber", formData.registrationNumber);
-      formDataToSend.append("sector", formData.sector as CompanySector);
-      formDataToSend.append("companySize", formData.companySize as CompanySize);
+      formDataToSend.append("sector", formData.sector);
+      formDataToSend.append("companySize", formData.companySize);
       formDataToSend.append("website", formData.website || "");
       formDataToSend.append("address", formData.address);
       formDataToSend.append("city", formData.city);
@@ -563,8 +562,6 @@ export default function RegisterPage() {
         const errorData = await response.json();
         throw new Error(errorData.error || "Registration failed");
       }
-
-      await response.json();
 
       toast({
         type: "success",

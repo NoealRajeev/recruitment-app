@@ -1,4 +1,5 @@
-import { env } from "../env";
+import { publicEnv } from "../env.public";
+import { env } from "../env.server";
 
 // lib/email-templates.ts
 export interface EmailTemplate {
@@ -560,7 +561,7 @@ Last Updated: ${lastUpdated}
 
 Please take the necessary action to move this profile to the next stage.
 
-You can view the recruitment tracker here: ${env.NEXT_PUBLIC_APP_URL}/dashboard/${recipientType}/recruitment
+You can view the recruitment tracker here: ${publicEnv.NEXT_PUBLIC_APP_URL}/dashboard/${recipientType}/recruitment
 
 Best regards,
 The Findly Recruitment Team`,
@@ -586,7 +587,7 @@ The Findly Recruitment Team`,
     <p>Please take the necessary action to move this profile to the next stage of the recruitment process.</p>
     ${actionButton(
       "View Recruitment Tracker",
-      `${env.NEXT_PUBLIC_APP_URL}/dashboard/${recipientType}/recruitment`
+      `${publicEnv.NEXT_PUBLIC_APP_URL}/dashboard/${recipientType}/recruitment`
     )}
   </div>
 

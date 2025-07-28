@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import "../(public)/globals.css";
 import ProvidersWrapper from "@/context/ProvidersWrapper";
 import { UserRole } from "@/lib/generated/prisma";
-import { env } from "@/lib/env";
+import { env } from "@/lib/env.server";
 
 export default async function DashboardLayout({
   children,

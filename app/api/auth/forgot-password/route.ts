@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import prisma from "@/lib/prisma";
 import { sendPasswordResetEmail } from "@/lib/utils/email-service";
-import { env } from "@/lib/env";
+import { env } from "@/lib/env.server";
 
 export async function POST(request: NextRequest) {
   try {

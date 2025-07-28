@@ -12,7 +12,7 @@ import {
   ValidatedHandler,
   Handler,
 } from "@/types";
-import { env } from "../env";
+import { env } from "../env.server";
 
 export function withAdminAuth<Params = unknown>(
   handler: AuthenticatedHandler<Params>

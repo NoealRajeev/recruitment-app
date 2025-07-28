@@ -1,11 +1,8 @@
-// app/api/auth/register/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { hash } from "bcryptjs";
 import { z } from "zod";
 import { randomBytes } from "crypto";
-import { promises as fs } from "fs";
-import path from "path";
 import {
   AccountStatus,
   AuditAction,
@@ -15,6 +12,8 @@ import {
   DocumentType,
   UserRole,
 } from "@/lib/generated/prisma";
+import { uploadFile } from "@/lib/s3";
+import { env } from "@/lib/env.server";
 
 const RegistrationSchema = z.object({
   companyName: z.string().min(2),
@@ -42,31 +41,18 @@ function generateRandomPassword(length = 12): string {
     .substring(0, length);
 }
 
-async function saveFileToDisk(file: File, userId: string): Promise<string> {
-  // Create uploads directory if it doesn't exist
-  const uploadsDir = path.join(
-    process.cwd(),
-    "public",
-    "uploads",
-    "client",
-    userId
-  );
-  await fs.mkdir(uploadsDir, { recursive: true });
-
-  // Convert file to buffer
+async function processS3Upload(file: File, userId: string): Promise<string> {
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
+  const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
 
-  // Generate unique filename
-  const fileExt = path.extname(file.name);
-  const fileName = `${Date.now()}-${file.name.replace(fileExt, "")}${fileExt}`;
-  const filePath = path.join(uploadsDir, fileName);
+  const key = await uploadFile(
+    new File([buffer], fileName, { type: file.type }),
+    env.S3_UPLOAD_PREFIX,
+    userId
+  );
 
-  // Save file
-  await fs.writeFile(filePath, buffer);
-
-  // Return relative path for database storage
-  return `/uploads/client/${userId}/${fileName}`;
+  return key;
 }
 
 export async function POST(request: Request) {
@@ -159,13 +145,13 @@ export async function POST(request: Request) {
 
       // Process documents
       const processDocument = async (file: File, type: DocumentType) => {
-        const url = await saveFileToDisk(file, user.id);
+        const key = await processS3Upload(file, user.id);
 
         await tx.document.create({
           data: {
             ownerId: user.id,
             type,
-            url,
+            url: key,
             status: AccountStatus.NOT_VERIFIED,
             category:
               type === DocumentType.OTHER
@@ -207,7 +193,10 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error("Registration error:", error);
-    return NextResponse.json({ error: "Registration failed" }, { status: 500 });
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Registration failed" },
+      { status: 500 }
+    );
   }
 }
 

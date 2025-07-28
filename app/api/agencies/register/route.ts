@@ -13,7 +13,7 @@ import { authOptions } from "@/lib/auth/options";
 import { faker } from "@faker-js/faker";
 import { getAgencyCreationEmail } from "@/lib/utils/email-templates";
 import { sendTemplateEmail } from "@/lib/utils/email-service";
-import { env } from "@/lib/env";
+import { env } from "@/lib/env.server";
 
 export async function POST(
   request: NextRequest,

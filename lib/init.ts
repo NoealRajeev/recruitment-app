@@ -1,4 +1,4 @@
-import { env } from "./env";
+import { env } from "./env.server";
 import { seedDatabase } from "./seed/seed";
 
 export async function initializeApp() {

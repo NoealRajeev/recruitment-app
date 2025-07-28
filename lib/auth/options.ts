@@ -6,7 +6,7 @@ import { compare } from "bcryptjs";
 import { refreshSession } from "./session";
 import prisma from "@/lib/prisma";
 import type { NextApiRequest, NextApiResponse } from "next";
-import { env } from "../env";
+import { env } from "../env.server";
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),

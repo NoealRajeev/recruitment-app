@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import prisma from "@/lib/prisma";
 import * as XLSX from "xlsx";
-import { env } from "@/lib/env";
+import { env } from "@/lib/env.server";
 
 // Add the lazy-load getPuppeteer function
 const getPuppeteer = async () => {

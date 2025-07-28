@@ -6,7 +6,7 @@ import path from "path";
 import fs from "fs";
 import { sendTemplateEmail } from "@/lib/utils/email-service";
 import { getVisaNotificationEmail } from "@/lib/utils/email-templates";
-import { env } from "@/lib/env";
+import { env } from "@/lib/env.server";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "visas");
 if (!fs.existsSync(UPLOAD_DIR)) {

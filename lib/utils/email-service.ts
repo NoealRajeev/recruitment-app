@@ -2,7 +2,7 @@
 // lib/email-service.ts
 import nodemailer from "nodemailer";
 import { EmailTemplate } from "./email-templates";
-import { env } from "../env";
+import { env } from "../env.server";
 
 // Type for email sending options
 interface EmailOptions {
@@ -21,7 +21,7 @@ interface EmailOptions {
 
 // Create transporter instance
 const transporter = nodemailer.createTransport({
-  service: env.SMTP_SERVICE || "gmail",
+  service: "gmail",
   host: env.SMTP_HOST,
   port: parseInt(env.SMTP_PORT || "587"),
   from: env.SMTP_FROM,

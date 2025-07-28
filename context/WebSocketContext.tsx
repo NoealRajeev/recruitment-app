@@ -4,7 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { useSession } from "next-auth/react";
 import offlineNotificationService from "@/lib/offline-notifications";
-import { env } from "@/lib/env";
+import { publicEnv } from "@/lib/env.public";
 
 interface Notification {
   id: string;
@@ -66,7 +66,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
     if (!session?.user?.id) return;
 
     // Create socket connection
-    const newSocket = io(env.NEXT_PUBLIC_WEBSOCKET_URL || "", {
+    const newSocket = io(publicEnv.NEXT_PUBLIC_WEBSOCKET_URL || "", {
       transports: ["websocket", "polling"],
       autoConnect: true,
     });

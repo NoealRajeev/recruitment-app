@@ -1,6 +1,6 @@
 // lib/prisma.ts
 import { PrismaClient } from "@prisma/client";
-import { env } from "./env";
+import { env } from "./env.server";
 
 declare global {
   var prisma: PrismaClient | undefined;

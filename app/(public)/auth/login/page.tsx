@@ -81,44 +81,48 @@ function LoginForm({ callbackUrl }: LoginFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="grid gap-8 mt-6">
-      {errors.form && (
-        <div className="text-red-600 text-center bg-red-50 rounded p-2">
-          {errors.form}
+      <div className="col-span-5 space-y-4">
+        <h2 className="text-lg font-semibold mb-2">{t.loginDetails}</h2>
+
+        {errors.form && (
+          <div className="text-[#FF0404] text-sm text-center p-2 bg-red-50 rounded max-w-xl">
+            {errors.form}
+          </div>
+        )}
+
+        <Input
+          label={t.email}
+          name="email"
+          type="email"
+          value={formData.email}
+          onChange={handleChange}
+          error={errors.email}
+          required
+          placeholder={t.emailPlaceholder}
+          id="email"
+        />
+
+        <Input
+          label={t.password}
+          name="password"
+          type="password"
+          value={formData.password}
+          onChange={handleChange}
+          error={errors.password}
+          required
+          placeholder={t.passwordPlaceholder}
+          id="password"
+        />
+
+        <h2 className="text-lg font-semibold mb-2">{t.quickActions}</h2>
+        <div className="space-y-4">
+          <p
+            className="text-sm text-gray-600 cursor-pointer hover:text-[#2C0053]"
+            onClick={() => router.push("/auth/forgot-password")}
+          >
+            {t.forgotPasswordPrompt}
+          </p>
         </div>
-      )}
-
-      <Input
-        label={t.email}
-        name="email"
-        type="email"
-        value={formData.email}
-        onChange={handleChange}
-        error={errors.email}
-        required
-        placeholder={t.emailPlaceholder}
-      />
-
-      <Input
-        label={t.password}
-        name="password"
-        type="password"
-        value={formData.password}
-        onChange={handleChange}
-        error={errors.password}
-        required
-        placeholder={t.passwordPlaceholder}
-      />
-
-      <div className="flex justify-between items-center">
-        <Button type="submit" disabled={loading}>
-          {loading ? t.processing : t.signIn}
-        </Button>
-        <p
-          className="text-sm text-blue-600 cursor-pointer"
-          onClick={() => router.push("/auth/forgot-password")}
-        >
-          {t.forgotPasswordPrompt}
-        </p>
       </div>
     </form>
   );

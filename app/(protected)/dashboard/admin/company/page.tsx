@@ -228,6 +228,10 @@ export default function ClientReviewPage() {
     );
   };
 
+  const getFileExtension = (filename: string) => {
+    return filename.split(".").pop()?.toLowerCase() || "";
+  };
+
   if (loading) {
     return (
       <div className="px-6 py-8 space-y-12">
@@ -464,23 +468,17 @@ export default function ClientReviewPage() {
               ) : clientDocuments.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {clientDocuments.map((doc) => {
-                    // Use proxy for PDF files to avoid CORS issues
-                    const isImage = /\.(png|jpg|jpeg|gif|webp)$/i.test(doc.url);
-                    const isPdf = /\.(pdf)$/i.test(doc.url);
+                    const fileExt = getFileExtension(doc.url);
+                    const isImage = [
+                      "jpg",
+                      "jpeg",
+                      "png",
+                      "gif",
+                      "webp",
+                    ].includes(fileExt);
+                    const isPdf = fileExt === "pdf";
                     const fileName = doc.url.split("/").pop() || "document";
 
-                    // Extract the relative path from the URL
-                    const relativePath = doc.url.replace(/^\/uploads\//, "");
-                    const absoluteUrl = isPdf
-                      ? `${window.location.origin}/api/documents/proxy?path=${encodeURIComponent(relativePath)}`
-                      : `${window.location.origin}${doc.url}`;
-
-                    console.log("Document URL construction:", {
-                      originalUrl: doc.url,
-                      isPdf,
-                      relativePath,
-                      absoluteUrl,
-                    });
                     const currentStatus =
                       documentStatuses[doc.id] || doc.status;
                     const isImportant =
@@ -489,7 +487,9 @@ export default function ClientReviewPage() {
                     return (
                       <div
                         key={doc.id}
-                        className={`border rounded-lg p-4 space-y-2 ${isImportant ? "border-l-4 border-blue-500" : ""}`}
+                        className={`border rounded-lg p-4 space-y-2 ${
+                          isImportant ? "border-l-4 border-blue-500" : ""
+                        }`}
                       >
                         <div className="flex justify-between items-center">
                           <h4 className="font-medium capitalize">
@@ -512,7 +512,9 @@ export default function ClientReviewPage() {
                                   e.target.value as AccountStatus
                                 )
                               }
-                              className={`text-sm border rounded px-2 py-1 ${isImportant ? "font-semibold" : ""}`}
+                              className={`text-sm border rounded px-2 py-1 ${
+                                isImportant ? "font-semibold" : ""
+                              }`}
                             >
                               <option value="NOT_VERIFIED">Not Verified</option>
                               <option value="VERIFIED">Verified</option>
@@ -525,7 +527,7 @@ export default function ClientReviewPage() {
                             <div className="flex-1 overflow-hidden flex items-center justify-center">
                               {isImage ? (
                                 <img
-                                  src={absoluteUrl}
+                                  src={`/api/documents/${encodeURIComponent(doc.url)}`}
                                   alt={doc.type}
                                   className="max-w-full max-h-full object-contain"
                                   onError={(e) => {
@@ -535,10 +537,12 @@ export default function ClientReviewPage() {
                                 />
                               ) : isPdf ? (
                                 <div className="w-full h-full">
-                                  <PDFViewer url={absoluteUrl} />
+                                  <PDFViewer
+                                    url={`/api/documents/${encodeURIComponent(doc.url)}`}
+                                  />
                                   <div className="mt-2 text-center">
                                     <a
-                                      href={absoluteUrl}
+                                      href={`/api/documents/${encodeURIComponent(doc.url)}`}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="text-blue-600 hover:underline text-sm"
@@ -561,7 +565,7 @@ export default function ClientReviewPage() {
                                 {fileName}
                               </span>
                               <a
-                                href={absoluteUrl}
+                                href={`/api/documents/${encodeURIComponent(doc.url)}`}
                                 download={fileName}
                                 target="_blank"
                                 rel="noopener noreferrer"

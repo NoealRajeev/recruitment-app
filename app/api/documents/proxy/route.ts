@@ -1,3 +1,4 @@
+// /api/documents/proxy
 import { NextRequest, NextResponse } from "next/server";
 import { promises as fs } from "fs";
 import path from "path";
@@ -7,10 +8,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const filePath = searchParams.get("path");
 
-    console.log("[Proxy API] Incoming filePath:", filePath);
-
     if (!filePath) {
-      console.error("[Proxy API] No file path provided");
       return NextResponse.json(
         { error: "File path is required" },
         { status: 400 }

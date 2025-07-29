@@ -8,7 +8,6 @@ const publicRoutes = new Set([
   "/",
   "/about",
   "/contact",
-  "/submit-requirement",
   "/auth/verify-account",
   "/auth/forgot-password",
   "/auth/reset-password",
@@ -41,7 +40,6 @@ export async function middleware(request: NextRequest) {
   ) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
-  return NextResponse.next();
 
   let token;
   try {

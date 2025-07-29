@@ -26,7 +26,10 @@ export async function uploadFile(
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
   const ext = path.extname(file.name);
-  const key = `${projectPrefix}/${userId}/${Date.now()}-${uuidv4()}${ext}`;
+  // Ensure consistent key format without leading/trailing slashes
+  const key = `${projectPrefix}/${userId}/${Date.now()}-${uuidv4()}${ext}`
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "");
 
   await s3.send(
     new PutObjectCommand({
@@ -34,7 +37,7 @@ export async function uploadFile(
       Key: key,
       Body: buffer,
       ContentType: file.type,
-      ACL: "private", // Make files private by default
+      ACL: "private",
     })
   );
 
@@ -42,13 +45,17 @@ export async function uploadFile(
 }
 
 export async function getFileUrl(key: string): Promise<string> {
-  // Generate presigned URL for private files
+  // Clean the key first
+  const cleanKey = key.replace(/^\/+/, "").replace(/\/+$/, "");
+
   const command = new GetObjectCommand({
     Bucket: env.S3_BUCKET_NAME,
-    Key: key,
+    Key: cleanKey,
+    ResponseContentDisposition: "inline",
   });
 
-  return getSignedUrl(s3, command);
+  // URL expires in 1 hour
+  return getSignedUrl(s3, command, { expiresIn: 3600 });
 }
 
 export async function deleteFile(key: string): Promise<void> {

@@ -16,9 +16,9 @@
     "prisma:studio": "prisma studio",
     "seed": "npx tsx scripts/seedPermissions.ts",
     "predev": "npm run prisma:generate",
-    "prebuild": "npm run prisma:generate && npm run prisma:migrate",
+    "prebuild": "npm run prisma:generate --data-proxy && npm run prisma:migrate",
     "postinstall": "npm run prisma:generate",
-    "vercel:prebuild": "npx prisma generate && npx prisma migrate deploy && npm run seed",
+    "vercel:prebuild": "npx prisma generate --data-proxy && npx prisma migrate deploy && npm run seed",
     "build": "npm run vercel:prebuild && next build"
   },
   "dependencies": {

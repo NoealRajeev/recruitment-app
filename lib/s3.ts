@@ -26,12 +26,16 @@ export async function uploadFile(
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
   const ext = path.extname(file.name);
-  // Ensure consistent key format without leading/trailing slashes
   const key = `${projectPrefix}/${userId}/${Date.now()}-${uuidv4()}${ext}`
     .replace(/^\/+/, "")
     .replace(/\/+$/, "");
 
-  await s3.send(
+  console.log("[S3 Upload] File name:", file.name);
+  console.log("[S3 Upload] File type:", file.type);
+  console.log("[S3 Upload] Buffer length:", buffer.length);
+  console.log("[S3 Upload] S3 Key:", key);
+
+  const response = await s3.send(
     new PutObjectCommand({
       Bucket: env.S3_BUCKET_NAME,
       Key: key,
@@ -41,12 +45,15 @@ export async function uploadFile(
     })
   );
 
+  console.log("[S3 Upload] Upload response:", response);
+
   return key;
 }
 
 export async function getFileUrl(key: string): Promise<string> {
-  // Clean the key first
   const cleanKey = key.replace(/^\/+/, "").replace(/\/+$/, "");
+  console.log("[S3 getFileUrl] Requested key:", key);
+  console.log("[S3 getFileUrl] Cleaned key:", cleanKey);
 
   const command = new GetObjectCommand({
     Bucket: env.S3_BUCKET_NAME,
@@ -54,8 +61,10 @@ export async function getFileUrl(key: string): Promise<string> {
     ResponseContentDisposition: "inline",
   });
 
-  // URL expires in 1 hour
-  return getSignedUrl(s3, command, { expiresIn: 3600 });
+  const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+  console.log("[S3 getFileUrl] Signed URL:", url);
+
+  return url;
 }
 
 export async function deleteFile(key: string): Promise<void> {

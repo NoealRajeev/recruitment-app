@@ -1116,10 +1116,6 @@ export default function Agencies() {
                                     src={absoluteUrl}
                                     alt={doc.type}
                                     className="max-w-full max-h-full object-contain"
-                                    onError={(e) => {
-                                      (e.target as HTMLImageElement).src =
-                                        "/file-error.png";
-                                    }}
                                   />
                                 ) : isPdf ? (
                                   <div className="w-full h-full">

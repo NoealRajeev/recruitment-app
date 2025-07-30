@@ -9,8 +9,7 @@ export async function GET(
 ): Promise<NextResponse> {
   try {
     const { key } = await context.params;
-
-    console.log("Received key:", key); // Debug log
+    console.log("[API] Document GET request for key:", key);
 
     if (!key || typeof key !== "string") {
       return NextResponse.json(
@@ -25,6 +24,7 @@ export async function GET(
 
     // Get the presigned URL from S3
     const url = await getFileUrl(decodedKey);
+    console.log("[API] Generated signed URL:", url);
 
     return NextResponse.json({
       url,

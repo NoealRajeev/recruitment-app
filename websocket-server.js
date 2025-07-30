@@ -1,7 +1,7 @@
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { PrismaClient } from "./lib/generated/prisma/index.js";
-import { env } from "@/lib/env";
+import { env } from "./lib/env.server.ts";
 
 const prisma = new PrismaClient();
 

@@ -3,6 +3,7 @@ namespace NodeJS {
   interface ProcessEnv {
     // Required
     DATABASE_URL: string;
+    DIRECT_DATABASE_URL: string;
     NEXTAUTH_SECRET: string;
     NEXTAUTH_URL: string;
     NEXT_PUBLIC_BASE_URL: string;

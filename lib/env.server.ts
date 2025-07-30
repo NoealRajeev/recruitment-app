@@ -17,6 +17,7 @@ export const env = {
   DATABASE_URL: getEnv("DATABASE_URL"),
   NEXTAUTH_SECRET: getEnv("NEXTAUTH_SECRET"),
   NEXTAUTH_URL: getEnv("NEXTAUTH_URL"),
+  DIRECT_DATABASE_URL: getEnv("DIRECT_DATABASE_URL"),
 
   // Centralized S3
   AWS_ACCESS_KEY_ID: getEnv("AWS_ACCESS_KEY_ID"),

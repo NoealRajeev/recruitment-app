@@ -5,9 +5,14 @@ import {
   AccountStatus,
   CompanySector,
   CompanySize,
+  PrismaClient,
 } from "@prisma/client";
-import prisma from "@/lib/prisma";
 import { faker } from "@faker-js/faker";
+import { env } from "../env.server";
+
+const prisma = new PrismaClient({
+  datasources: { db: { url: env.DIRECT_DATABASE_URL } },
+});
 
 interface SeedUser {
   email: string;

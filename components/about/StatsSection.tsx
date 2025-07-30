@@ -2,7 +2,7 @@
 
 export default function StatsSection() {
   const stats = [
-    { value: "10+", label: "Years Experience" },
+    { value: "5+", label: "Years Experience" },
     { value: "5,000+", label: "Professionals Deployed" },
     { value: "15+", label: "Countries Served" },
   ];

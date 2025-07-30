@@ -98,8 +98,8 @@ export default function Footer() {
             <Link href="/" className="flex items-center">
               <Image
                 src="/assets/Logo-white.png"
-                width={200}
-                height={32}
+                width={400}
+                height={52}
                 alt="CodeBreak Logo"
                 priority
               />
@@ -138,9 +138,9 @@ export default function Footer() {
               </a>
             </div>
             <div className="mt-4 space-y-1 text-gray-400">
-              <p>Email: recruitment@yourcompany.com</p>
-              <p>Phone: +1 (234) 567-8900</p>
-              <p>Address: Your Company HQ, Dubai, UAE</p>
+              <p>Email: info@findlyqatar.com</p>
+              <p>Phone: +974 567-8900</p>
+              <p>Address: Findly HQ, Doha, Qatar</p>
             </div>
           </div>
 
@@ -201,7 +201,15 @@ export default function Footer() {
         </div>
         <div className="pt-8 border-t border-gray-800 text-center">
           <p className="text-gray-500 text-sm">
-            &copy; {displayYear} Breaktroughf1 LLP. All rights reserved.
+            &copy; {displayYear}{" "}
+            <Link
+              target="_blank"
+              href="https://breaktroughf1.com/"
+              className="hover:text-white/60 ease-in-out"
+            >
+              Breaktroughf1 LLP
+            </Link>
+            . All rights reserved.
           </p>
           <div className="mt-4 flex flex-wrap justify-center space-x-4 text-sm text-gray-500">
             {legalLinks.map((link) => (

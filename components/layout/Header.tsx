@@ -126,7 +126,7 @@ export default function Header() {
         >
           <Image
             src="/assets/Logo-black.png"
-            width={200}
+            width={300}
             height={32}
             alt="CodeBreak Logo"
             priority

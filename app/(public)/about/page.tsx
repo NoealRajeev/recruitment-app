@@ -69,8 +69,8 @@ export default function AboutPage() {
               <span className="text-[#2C0053]/65 text-7xl font-monkeyland mr-2.5">
                 “
               </span>
-              [Company Name] is a leading foreign labor recruitment specialist
-              with [X] years of experience in bridging skilled workforce gaps
+              Findly Qatar is a leading foreign labor recruitment specialist
+              with 2 years of experience in bridging skilled workforce gaps
               across industries. Licensed by [Government Body], we&apos;ve
               successfully deployed over [X,XXX] professionals to projects in
               [Key Countries].

@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Suspense, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useLanguage } from "@/context/LanguageContext";
 import { Input } from "@/components/ui/Input";
@@ -15,13 +15,19 @@ const LanguageSelector = dynamic(
   { ssr: false }
 );
 
-// ——— LoginForm ———
-// All the form state & submit logic lives here,
-// but it gets its callbackUrl as a prop.
 interface LoginFormProps {
   callbackUrl: string;
+  onSubmit: () => void;
+  loading: boolean;
+  formError?: string;
 }
-function LoginForm({ callbackUrl }: LoginFormProps) {
+
+function LoginForm({
+  callbackUrl,
+  onSubmit,
+  loading,
+  formError,
+}: LoginFormProps) {
   const { t } = useLanguage();
   const router = useRouter();
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -30,7 +36,6 @@ function LoginForm({ callbackUrl }: LoginFormProps) {
     password?: string;
     form?: string;
   }>({});
-  const [loading, setLoading] = useState(false);
 
   const validate = () => {
     const errs: typeof errors = {};
@@ -54,29 +59,7 @@ function LoginForm({ callbackUrl }: LoginFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
-    setLoading(true);
-    setErrors({});
-
-    const result = await signIn("credentials", {
-      email: formData.email,
-      password: formData.password,
-      redirect: false,
-      callbackUrl,
-    });
-
-    if (result?.error) {
-      if (result.error === "Account not verified") {
-        router.push(
-          `/auth/verify-account?email=${encodeURIComponent(formData.email)}`
-        );
-        return;
-      }
-      setErrors({ form: result.error });
-    } else if (result?.url) {
-      router.push(result.url);
-    }
-
-    setLoading(false);
+    onSubmit();
   };
 
   return (
@@ -84,9 +67,9 @@ function LoginForm({ callbackUrl }: LoginFormProps) {
       <div className="col-span-5 space-y-4">
         <h2 className="text-lg font-semibold mb-2">{t.loginDetails}</h2>
 
-        {errors.form && (
+        {(errors.form || formError) && (
           <div className="text-[#FF0404] text-sm text-center p-2 bg-red-50 rounded max-w-xl">
-            {errors.form}
+            {errors.form || formError}
           </div>
         )}
 
@@ -128,19 +111,63 @@ function LoginForm({ callbackUrl }: LoginFormProps) {
   );
 }
 
-// ——— LoginFormWrapper ———
-// Only this tiny component calls `useSearchParams()`
-import { useSearchParams } from "next/navigation";
 function LoginFormWrapper() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams?.get("callbackUrl") ?? "/dashboard";
-  return <LoginForm callbackUrl={callbackUrl} />;
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const [formError, setFormError] = useState("");
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    setFormError("");
+
+    const form = document.querySelector("form");
+    if (!form) return;
+
+    const formData = new FormData(form);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+      callbackUrl,
+    });
+
+    if (result?.error) {
+      if (result.error === "Account not verified") {
+        router.push(`/auth/verify-account?email=${encodeURIComponent(email)}`);
+        return;
+      }
+      setFormError(result.error);
+    } else if (result?.url) {
+      router.push(result.url);
+    }
+
+    setLoading(false);
+  };
+
+  return (
+    <>
+      <LoginForm
+        callbackUrl={callbackUrl}
+        onSubmit={handleSubmit}
+        loading={loading}
+        formError={formError}
+      />
+    </>
+  );
 }
 
-// ——— Page Component ———
 export default function LoginPage() {
   const { t } = useLanguage();
   const router = useRouter();
+
+  const handleRegisterRedirect = () => {
+    router.push("/auth/register");
+  };
 
   return (
     <div className="flex justify-center items-start min-h-screen bg-gray-100 p-6 text-[#2C0053]">
@@ -154,13 +181,32 @@ export default function LoginPage() {
               <p className="text-gray-700">{t.loginToContinue}</p>
             </div>
 
-            {/* wrap only the part that uses useSearchParams in Suspense */}
             <Suspense
               fallback={<div className="text-center py-8">Loading…</div>}
             >
               <LoginFormWrapper />
             </Suspense>
           </Card>
+
+          <div className="mt-6 flex justify-center gap-4">
+            <Button
+              type="submit"
+              onClick={() => document.querySelector("form")?.requestSubmit()}
+              disabled={false}
+              className="px-8 py-2"
+            >
+              {t.signIn}
+            </Button>
+            <Button
+              type="button"
+              onClick={handleRegisterRedirect}
+              disabled={false}
+              variant="outline"
+              className="px-8 py-2 border-none shadow-sm"
+            >
+              {t.register}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

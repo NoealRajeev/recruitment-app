@@ -1240,7 +1240,7 @@ export default function Agencies() {
                 <AgencyCardContent
                   agencyName={agency.agencyName}
                   location={`${agency.country} • ${agency.registrationNo}`}
-                  logoUrl={agency.logoUrl || "/api/placeholder/48x48"}
+                  logoUrl={agency.logoUrl || ""}
                   email={agency.user.email}
                   registerNo={agency.registrationNo}
                   time={

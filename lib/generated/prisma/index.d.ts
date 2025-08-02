@@ -374,6 +374,20 @@ export const DocumentVerificationStatus: {
 export type DocumentVerificationStatus = (typeof DocumentVerificationStatus)[keyof typeof DocumentVerificationStatus]
 
 
+export const Department: {
+  RECRUITMENT: 'RECRUITMENT',
+  HR: 'HR',
+  OPERATIONS: 'OPERATIONS',
+  FINANCE: 'FINANCE',
+  COMPLIANCE: 'COMPLIANCE',
+  BUSINESS_DEVELOPMENT: 'BUSINESS_DEVELOPMENT',
+  IT: 'IT',
+  MARKETING: 'MARKETING'
+};
+
+export type Department = (typeof Department)[keyof typeof Department]
+
+
 export const NotificationPriority: {
   LOW: 'LOW',
   NORMAL: 'NORMAL',
@@ -448,6 +462,10 @@ export const LabourProfileStatus: typeof $Enums.LabourProfileStatus
 export type DocumentVerificationStatus = $Enums.DocumentVerificationStatus
 
 export const DocumentVerificationStatus: typeof $Enums.DocumentVerificationStatus
+
+export type Department = $Enums.Department
+
+export const Department: typeof $Enums.Department
 
 export type NotificationPriority = $Enums.NotificationPriority
 
@@ -6931,7 +6949,7 @@ export namespace Prisma {
     id: string | null
     userId: string | null
     name: string | null
-    department: string | null
+    department: $Enums.Department | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -6940,7 +6958,7 @@ export namespace Prisma {
     id: string | null
     userId: string | null
     name: string | null
-    department: string | null
+    department: $Enums.Department | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -7062,7 +7080,7 @@ export namespace Prisma {
     id: string
     userId: string
     name: string
-    department: string | null
+    department: $Enums.Department | null
     permissions: JsonValue | null
     createdAt: Date
     updatedAt: Date
@@ -7148,7 +7166,7 @@ export namespace Prisma {
       id: string
       userId: string
       name: string
-      department: string | null
+      department: $Enums.Department | null
       permissions: Prisma.JsonValue | null
       createdAt: Date
       updatedAt: Date
@@ -7579,7 +7597,7 @@ export namespace Prisma {
     readonly id: FieldRef<"Admin", 'String'>
     readonly userId: FieldRef<"Admin", 'String'>
     readonly name: FieldRef<"Admin", 'String'>
-    readonly department: FieldRef<"Admin", 'String'>
+    readonly department: FieldRef<"Admin", 'Department'>
     readonly permissions: FieldRef<"Admin", 'Json'>
     readonly createdAt: FieldRef<"Admin", 'DateTime'>
     readonly updatedAt: FieldRef<"Admin", 'DateTime'>
@@ -23047,6 +23065,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Department'
+   */
+  export type EnumDepartmentFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Department'>
+    
+
+
+  /**
+   * Reference to a field of type 'Department[]'
+   */
+  export type ListEnumDepartmentFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Department[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Json'
    */
   export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -23625,7 +23657,7 @@ export namespace Prisma {
     id?: StringFilter<"Admin"> | string
     userId?: StringFilter<"Admin"> | string
     name?: StringFilter<"Admin"> | string
-    department?: StringNullableFilter<"Admin"> | string | null
+    department?: EnumDepartmentNullableFilter<"Admin"> | $Enums.Department | null
     permissions?: JsonNullableFilter<"Admin">
     createdAt?: DateTimeFilter<"Admin"> | Date | string
     updatedAt?: DateTimeFilter<"Admin"> | Date | string
@@ -23650,7 +23682,7 @@ export namespace Prisma {
     OR?: AdminWhereInput[]
     NOT?: AdminWhereInput | AdminWhereInput[]
     name?: StringFilter<"Admin"> | string
-    department?: StringNullableFilter<"Admin"> | string | null
+    department?: EnumDepartmentNullableFilter<"Admin"> | $Enums.Department | null
     permissions?: JsonNullableFilter<"Admin">
     createdAt?: DateTimeFilter<"Admin"> | Date | string
     updatedAt?: DateTimeFilter<"Admin"> | Date | string
@@ -23677,7 +23709,7 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"Admin"> | string
     userId?: StringWithAggregatesFilter<"Admin"> | string
     name?: StringWithAggregatesFilter<"Admin"> | string
-    department?: StringNullableWithAggregatesFilter<"Admin"> | string | null
+    department?: EnumDepartmentNullableWithAggregatesFilter<"Admin"> | $Enums.Department | null
     permissions?: JsonNullableWithAggregatesFilter<"Admin">
     createdAt?: DateTimeWithAggregatesFilter<"Admin"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Admin"> | Date | string
@@ -25351,7 +25383,7 @@ export namespace Prisma {
   export type AdminCreateInput = {
     id?: string
     name: string
-    department?: string | null
+    department?: $Enums.Department | null
     permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -25362,7 +25394,7 @@ export namespace Prisma {
     id?: string
     userId: string
     name: string
-    department?: string | null
+    department?: $Enums.Department | null
     permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -25371,7 +25403,7 @@ export namespace Prisma {
   export type AdminUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableEnumDepartmentFieldUpdateOperationsInput | $Enums.Department | null
     permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25382,7 +25414,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableEnumDepartmentFieldUpdateOperationsInput | $Enums.Department | null
     permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25392,7 +25424,7 @@ export namespace Prisma {
     id?: string
     userId: string
     name: string
-    department?: string | null
+    department?: $Enums.Department | null
     permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -25401,7 +25433,7 @@ export namespace Prisma {
   export type AdminUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableEnumDepartmentFieldUpdateOperationsInput | $Enums.Department | null
     permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -25411,7 +25443,7 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableEnumDepartmentFieldUpdateOperationsInput | $Enums.Department | null
     permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -27328,6 +27360,13 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
+
+  export type EnumDepartmentNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.Department | EnumDepartmentFieldRefInput<$PrismaModel> | null
+    in?: $Enums.Department[] | ListEnumDepartmentFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.Department[] | ListEnumDepartmentFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumDepartmentNullableFilter<$PrismaModel> | $Enums.Department | null
+  }
   export type JsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
@@ -27378,6 +27417,16 @@ export namespace Prisma {
     department?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type EnumDepartmentNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Department | EnumDepartmentFieldRefInput<$PrismaModel> | null
+    in?: $Enums.Department[] | ListEnumDepartmentFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.Department[] | ListEnumDepartmentFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumDepartmentNullableWithAggregatesFilter<$PrismaModel> | $Enums.Department | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumDepartmentNullableFilter<$PrismaModel>
+    _max?: NestedEnumDepartmentNullableFilter<$PrismaModel>
   }
   export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
     | PatchUndefined<
@@ -29019,6 +29068,10 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type NullableEnumDepartmentFieldUpdateOperationsInput = {
+    set?: $Enums.Department | null
+  }
+
   export type UserUpdateOneRequiredWithoutAdminProfileNestedInput = {
     create?: XOR<UserCreateWithoutAdminProfileInput, UserUncheckedCreateWithoutAdminProfileInput>
     connectOrCreate?: UserCreateOrConnectWithoutAdminProfileInput
@@ -30174,6 +30227,23 @@ export namespace Prisma {
     _min?: NestedEnumCompanySizeFilter<$PrismaModel>
     _max?: NestedEnumCompanySizeFilter<$PrismaModel>
   }
+
+  export type NestedEnumDepartmentNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.Department | EnumDepartmentFieldRefInput<$PrismaModel> | null
+    in?: $Enums.Department[] | ListEnumDepartmentFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.Department[] | ListEnumDepartmentFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumDepartmentNullableFilter<$PrismaModel> | $Enums.Department | null
+  }
+
+  export type NestedEnumDepartmentNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.Department | EnumDepartmentFieldRefInput<$PrismaModel> | null
+    in?: $Enums.Department[] | ListEnumDepartmentFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.Department[] | ListEnumDepartmentFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumDepartmentNullableWithAggregatesFilter<$PrismaModel> | $Enums.Department | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumDepartmentNullableFilter<$PrismaModel>
+    _max?: NestedEnumDepartmentNullableFilter<$PrismaModel>
+  }
   export type NestedJsonNullableFilter<$PrismaModel = never> =
     | PatchUndefined<
         Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
@@ -30573,7 +30643,7 @@ export namespace Prisma {
   export type AdminCreateWithoutUserInput = {
     id?: string
     name: string
-    department?: string | null
+    department?: $Enums.Department | null
     permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -30582,7 +30652,7 @@ export namespace Prisma {
   export type AdminUncheckedCreateWithoutUserInput = {
     id?: string
     name: string
-    department?: string | null
+    department?: $Enums.Department | null
     permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -31000,7 +31070,7 @@ export namespace Prisma {
   export type AdminUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableEnumDepartmentFieldUpdateOperationsInput | $Enums.Department | null
     permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -31009,7 +31079,7 @@ export namespace Prisma {
   export type AdminUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
-    department?: NullableStringFieldUpdateOperationsInput | string | null
+    department?: NullableEnumDepartmentFieldUpdateOperationsInput | $Enums.Department | null
     permissions?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string

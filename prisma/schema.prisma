@@ -1,11 +1,11 @@
 generator client {
   provider        = "prisma-client-js"
   output          = "../lib/generated/prisma"
+  binaryTargets   = ["native"]
 }
   datasource db {
     provider = "postgresql"
     url      = env("DATABASE_URL")
-    directUrl  = env("DIRECT_DATABASE_URL")
   }
 
   // ========== ENUMS ==========
@@ -270,6 +270,17 @@ enum RequirementStatus {
     REJECTED
   }
 
+  enum Department {
+  RECRUITMENT
+  HR
+  OPERATIONS
+  FINANCE
+  COMPLIANCE
+  BUSINESS_DEVELOPMENT
+  IT
+  MARKETING
+}
+
   // ========== MODELS ==========
   model User {
     id              String          @id @default(uuid())
@@ -364,7 +375,7 @@ enum RequirementStatus {
     userId          String          @unique
     user            User            @relation(fields: [userId], references: [id])
     name            String          @db.VarChar(255)
-    department      String?         @db.VarChar(100)
+    department      Department?
     permissions     Json?
     createdAt       DateTime        @default(now())
     updatedAt       DateTime        @updatedAt

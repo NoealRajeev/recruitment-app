@@ -527,18 +527,16 @@ export default function ClientReviewPage() {
                             <div className="flex-1 overflow-hidden flex items-center justify-center">
                               {isImage ? (
                                 <img
-                                  src={`/api/documents/${encodeURIComponent(doc.url)}`}
+                                  src={doc.url}
                                   alt={doc.type}
                                   className="max-w-full max-h-full object-contain"
                                 />
                               ) : isPdf ? (
                                 <div className="w-full h-full">
-                                  <PDFViewer
-                                    url={`/api/documents/${encodeURIComponent(doc.url)}`}
-                                  />
+                                  <PDFViewer url={doc.url} />
                                   <div className="mt-2 text-center">
                                     <a
-                                      href={`/api/documents/${encodeURIComponent(doc.url)}`}
+                                      href={doc.url}
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       className="text-blue-600 hover:underline text-sm"
@@ -561,7 +559,7 @@ export default function ClientReviewPage() {
                                 {fileName}
                               </span>
                               <a
-                                href={`/api/documents/${encodeURIComponent(doc.url)}`}
+                                href={doc.url}
                                 download={fileName}
                                 target="_blank"
                                 rel="noopener noreferrer"

@@ -36,28 +36,69 @@ function LoginForm({
     password?: string;
     form?: string;
   }>({});
+  const [isTouched, setIsTouched] = useState({
+    email: false,
+    password: false,
+  });
+
+  const validateEmail = (email: string) => {
+    if (!email) return t.required;
+    if (!/^\S+@\S+\.\S+$/.test(email)) return t.invalidEmail;
+    return undefined;
+  };
+
+  const validatePassword = (password: string) => {
+    if (!password) return t.required;
+    if (password.length < 8) return t.passwordMinLength;
+    return undefined;
+  };
 
   const validate = () => {
-    const errs: typeof errors = {};
-    if (!formData.email) errs.email = t.required;
-    else if (!/^\S+@\S+\.\S+$/.test(formData.email))
-      errs.email = t.invalidEmail;
-    if (!formData.password) errs.password = t.required;
-    else if (formData.password.length < 8) errs.password = t.passwordMinLength;
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
+    const emailError = validateEmail(formData.email);
+    const passwordError = validatePassword(formData.password);
+
+    setErrors({
+      email: emailError,
+      password: passwordError,
+    });
+
+    return !emailError && !passwordError;
+  };
+
+  const handleBlur = (field: "email" | "password") => {
+    setIsTouched((prev) => ({ ...prev, [field]: true }));
+
+    // Validate only the blurred field
+    if (field === "email") {
+      setErrors((prev) => ({
+        ...prev,
+        email: validateEmail(formData.email),
+      }));
+    } else {
+      setErrors((prev) => ({
+        ...prev,
+        password: validatePassword(formData.password),
+      }));
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((f) => ({ ...f, [name]: value }));
-    if (errors[name as keyof typeof errors]) {
-      setErrors((e) => ({ ...e, [name]: undefined }));
+
+    // Only validate if the field has been touched
+    if (isTouched[name as keyof typeof isTouched]) {
+      setErrors((e) => ({
+        ...e,
+        [name]:
+          name === "email" ? validateEmail(value) : validatePassword(value),
+      }));
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsTouched({ email: true, password: true }); // Mark all fields as touched
     if (!validate()) return;
     onSubmit();
   };
@@ -79,10 +120,12 @@ function LoginForm({
           type="email"
           value={formData.email}
           onChange={handleChange}
+          onBlur={() => handleBlur("email")}
           error={errors.email}
           required
           placeholder={t.emailPlaceholder}
           id="email"
+          disabled={loading}
         />
 
         <Input
@@ -91,17 +134,19 @@ function LoginForm({
           type="password"
           value={formData.password}
           onChange={handleChange}
+          onBlur={() => handleBlur("password")}
           error={errors.password}
           required
           placeholder={t.passwordPlaceholder}
           id="password"
+          disabled={loading}
         />
 
         <h2 className="text-lg font-semibold mb-2">{t.quickActions}</h2>
         <div className="space-y-4">
           <p
             className="text-sm text-gray-600 cursor-pointer hover:text-[#2C0053]"
-            onClick={() => router.push("/auth/forgot-password")}
+            onClick={() => !loading && router.push("/auth/forgot-password")}
           >
             {t.forgotPasswordPrompt}
           </p>
@@ -129,24 +174,30 @@ function LoginFormWrapper() {
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-      callbackUrl,
-    });
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+        callbackUrl,
+      });
 
-    if (result?.error) {
-      if (result.error === "Account not verified") {
-        router.push(`/auth/verify-account?email=${encodeURIComponent(email)}`);
-        return;
+      if (result?.error) {
+        if (result.error === "Account not verified") {
+          router.push(
+            `/auth/verify-account?email=${encodeURIComponent(email)}`
+          );
+          return;
+        }
+        setFormError(result.error);
+      } else if (result?.url) {
+        router.push(result.url);
       }
-      setFormError(result.error);
-    } else if (result?.url) {
-      router.push(result.url);
+    } catch (error) {
+      setFormError("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -164,6 +215,7 @@ function LoginFormWrapper() {
 export default function LoginPage() {
   const { t } = useLanguage();
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRegisterRedirect = () => {
     router.push("/auth/register");
@@ -191,16 +243,45 @@ export default function LoginPage() {
           <div className="mt-6 flex justify-center gap-4">
             <Button
               type="submit"
-              onClick={() => document.querySelector("form")?.requestSubmit()}
-              disabled={false}
+              onClick={() => {
+                setIsSubmitting(true);
+                document.querySelector("form")?.requestSubmit();
+              }}
+              disabled={isSubmitting}
               className="px-8 py-2"
             >
-              {t.signIn}
+              {isSubmitting ? (
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                  </svg>
+                  {t.signIn}
+                </>
+              ) : (
+                t.signIn
+              )}
             </Button>
             <Button
               type="button"
               onClick={handleRegisterRedirect}
-              disabled={false}
+              disabled={isSubmitting}
               variant="outline"
               className="px-8 py-2 border-none shadow-sm"
             >

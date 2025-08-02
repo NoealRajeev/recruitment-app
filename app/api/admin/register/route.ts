@@ -3,7 +3,12 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
-import { UserRole, AuditAction, AccountStatus } from "@/lib/generated/prisma";
+import {
+  UserRole,
+  AuditAction,
+  AccountStatus,
+  Department,
+} from "@/lib/generated/prisma";
 import { hash } from "bcryptjs";
 import { randomBytes } from "crypto";
 import { promises as fs } from "fs";
@@ -58,13 +63,19 @@ export async function POST(request: Request) {
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
     const phone = formData.get("phone") as string;
-    const department = formData.get("department") as string;
+    const department = formData.get("department") as Department;
     const profilePicture = formData.get("profilePicture") as File | null;
 
     // Basic validation
-    if (!name || !email || !phone || !department) {
+    if (
+      !name ||
+      !email ||
+      !phone ||
+      !department ||
+      !Object.values(Department).includes(department as Department)
+    ) {
       return NextResponse.json(
-        { error: "Missing required fields" },
+        { error: "Missing required fields or invalid department" },
         { status: 400 }
       );
     }

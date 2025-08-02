@@ -25,7 +25,7 @@ export async function GET(
       select: {
         id: true,
         type: true,
-        url: true, // This now contains the S3 key
+        url: true, // This now contains the local file path
         status: true,
         category: true,
         uploadedAt: true,
@@ -35,13 +35,7 @@ export async function GET(
       },
     });
 
-    // Clean up any accidental prefixes in the URL
-    const cleanedDocuments = documents.map((doc) => ({
-      ...doc,
-      url: doc.url.replace(/^\/?api\/documents\//, ""),
-    }));
-
-    return NextResponse.json(cleanedDocuments);
+    return NextResponse.json(documents);
   } catch (error) {
     console.error("Error in documents route:", error);
     return NextResponse.json(

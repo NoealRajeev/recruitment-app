@@ -5,11 +5,13 @@ import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import ProjectSummary from "@/components/dashboard/ProjectSummary";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import { Plus, Download } from "lucide-react";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useToast } from "@/context/toast-provider";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
+import { Department } from "@/lib/generated/prisma";
+import Image from "next/image";
 
 interface DashboardData {
   stats: {
@@ -26,9 +28,10 @@ interface AdminUser {
   id: string;
   name: string;
   email: string;
+  phone: string;
   role: string;
-  status: string;
-  profilePicture?: string;
+  department?: Department;
+  profilePicture?: File | string | null;
 }
 
 export default function Dashboard() {
@@ -39,14 +42,29 @@ export default function Dashboard() {
   const [selectedReportType, setSelectedReportType] = useState("comprehensive");
   const [selectedFormat, setSelectedFormat] = useState("pdf");
   const [generatingReport, setGeneratingReport] = useState(false);
+  const [isCreatingAdmin, setIsCreatingAdmin] = useState(false);
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const departmentOptions = [
+    { value: "RECRUITMENT", label: "Recruitment" },
+    { value: "HR", label: "Human Resources" },
+    { value: "OPERATIONS", label: "Operations" },
+    { value: "FINANCE", label: "Finance" },
+    { value: "COMPLIANCE", label: "Compliance" },
+    { value: "BUSINESS_DEVELOPMENT", label: "Business Development" },
+    { value: "IT", label: "IT" },
+    { value: "MARKETING", label: "Marketing" },
+  ];
 
   const [adminUser, setAdminUser] = useState<AdminUser>({
     id: "",
     name: "",
     email: "",
-    role: "",
-    status: "",
+    phone: "",
+    role: "RECRUITMENT_ADMIN",
+    department: undefined,
+    profilePicture: null,
   });
 
   useEffect(() => {
@@ -76,12 +94,24 @@ export default function Dashboard() {
 
   const handleSubmit = async () => {
     try {
+      setIsCreatingAdmin(true);
+      const formData = new FormData();
+      formData.append("name", adminUser.name);
+      formData.append("email", adminUser.email);
+      formData.append("phone", adminUser.phone);
+      formData.append("role", adminUser.role);
+
+      if (adminUser.department) {
+        formData.append("department", adminUser.department);
+      }
+
+      if (adminUser.profilePicture instanceof File) {
+        formData.append("profilePicture", adminUser.profilePicture);
+      }
+
       const response = await fetch("/api/admin/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(adminUser),
+        body: formData,
       });
 
       if (response.ok) {
@@ -90,13 +120,7 @@ export default function Dashboard() {
           message: "Admin user created successfully",
         });
         setIsModalOpen(false);
-        setAdminUser({
-          id: "",
-          name: "",
-          email: "",
-          role: "",
-          status: "",
-        });
+        resetAdminForm();
       } else {
         const error = await response.json();
         toast({
@@ -110,6 +134,23 @@ export default function Dashboard() {
         type: "error",
         message: "Failed to create admin user",
       });
+    } finally {
+      setIsCreatingAdmin(false);
+    }
+  };
+
+  const resetAdminForm = () => {
+    setAdminUser({
+      id: "",
+      name: "",
+      email: "",
+      phone: "",
+      role: "RECRUITMENT_ADMIN",
+      department: undefined,
+      profilePicture: null,
+    });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
   };
 
@@ -119,6 +160,50 @@ export default function Dashboard() {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setAdminUser((prev) => ({
+      ...prev,
+      department: e.target.value as Department,
+    }));
+  };
+
+  const handleProfilePictureChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.size > 5 * 1024 * 1024) {
+        // 5MB limit
+        toast({
+          type: "error",
+          message: "File size should be less than 5MB",
+        });
+        return;
+      }
+      if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        toast({
+          type: "error",
+          message: "Only JPEG, PNG, and WebP images are allowed",
+        });
+        return;
+      }
+      setAdminUser((prev) => ({
+        ...prev,
+        profilePicture: file,
+      }));
+    }
+  };
+
+  const handleRemoveProfilePicture = () => {
+    setAdminUser((prev) => ({
+      ...prev,
+      profilePicture: null,
+    }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleDownloadReport = useCallback(async (reportType: string) => {
@@ -149,6 +234,7 @@ export default function Dashboard() {
         a.click();
         a.remove();
         window.URL.revokeObjectURL(url);
+        setIsReportModalOpen(false);
       } else {
         const error = await response.json();
         toast({
@@ -233,16 +319,101 @@ export default function Dashboard() {
       {/* New Admin Modal */}
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          resetAdminForm();
+        }}
         title="Create New Admin Account"
         size="md"
         showFooter={true}
         onConfirm={handleSubmit}
-        confirmText="Create Account"
-        onCancel={() => setIsModalOpen(false)}
+        confirmText={isCreatingAdmin ? "Creating..." : "Create Account"}
+        onCancel={() => {
+          setIsModalOpen(false);
+          resetAdminForm();
+        }}
         cancelText="Cancel"
+        isConfirmLoading={isCreatingAdmin}
       >
         <div className="space-y-4">
+          <div className="flex flex-col items-center">
+            {adminUser.profilePicture ? (
+              <div className="relative group">
+                <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200">
+                  {adminUser.profilePicture instanceof File ? (
+                    <Image
+                      src={URL.createObjectURL(adminUser.profilePicture)}
+                      alt="Profile preview"
+                      width={96}
+                      height={96}
+                      className="object-cover w-full h-full"
+                    />
+                  ) : (
+                    <Image
+                      src={adminUser.profilePicture}
+                      alt="Profile"
+                      width={96}
+                      height={96}
+                      className="object-cover w-full h-full"
+                    />
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRemoveProfilePicture}
+                  className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-12 w-12 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+              </div>
+            )}
+            <label className="mt-2">
+              <span className="text-sm text-blue-600 cursor-pointer hover:text-blue-800">
+                Upload Photo
+              </span>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleProfilePictureChange}
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+              />
+            </label>
+            <p className="text-xs text-gray-500 mt-1">
+              JPEG, PNG or WebP (Max 5MB)
+            </p>
+          </div>
+
           <Input
             label="Full Name"
             name="name"
@@ -261,21 +432,34 @@ export default function Dashboard() {
             required
           />
           <Input
-            label="Role"
-            name="role"
-            value={adminUser.role}
+            label="Phone"
+            name="phone"
+            type="tel"
+            value={adminUser.phone}
             onChange={handleInputChange}
-            placeholder="Enter role"
+            placeholder="Enter phone number"
             required
           />
-          <Input
-            label="Status"
-            name="status"
-            value={adminUser.status}
-            onChange={handleInputChange}
-            placeholder="Enter status"
-            required
-          />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Department <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="department"
+              value={adminUser.department || ""}
+              onChange={handleDepartmentChange}
+              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+              required
+            >
+              <option value="">Select Department</option>
+              {departmentOptions.map((dept) => (
+                <option key={dept.value} value={dept.value}>
+                  {dept.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <input type="hidden" name="role" value={adminUser.role} />
         </div>
       </Modal>
 

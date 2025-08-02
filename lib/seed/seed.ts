@@ -5,6 +5,7 @@ import {
   AccountStatus,
   CompanySector,
   CompanySize,
+  Department,
 } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 import prisma from "@/lib/prisma";
@@ -21,7 +22,7 @@ interface SeedUser {
   profile: {
     // Admin-specific fields
     admin?: {
-      department?: string;
+      department?: Department;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       permissions?: any;
     };
@@ -77,7 +78,7 @@ async function seedBaseData() {
       profilePicture: faker.image.avatar(),
       profile: {
         admin: {
-          department: "Management",
+          department: Department.OPERATIONS,
           permissions: {
             canCreateUsers: true,
             canVerifyClients: true,

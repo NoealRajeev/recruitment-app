@@ -14,6 +14,7 @@ import {
   DocumentType,
   UserRole,
 } from "@/lib/generated/prisma";
+import { notifyDocumentUploaded } from "@/lib/notification-helpers";
 
 const RegistrationSchema = z.object({
   companyName: z.string().min(2),
@@ -179,6 +180,42 @@ export async function POST(request: Request) {
 
       for (const doc of otherDocuments) {
         await processDocument(doc, DocumentType.OTHER);
+      }
+      
+      // Send notifications for document uploads
+      try {
+        // Find a recruitment admin to notify
+        const adminUser = await tx.user.findFirst({
+          where: { role: UserRole.RECRUITMENT_ADMIN },
+          select: { id: true },
+        });
+        
+        // Send notifications for each document type
+        await notifyDocumentUploaded(
+          "Company Registration",
+          user.name,
+          user.id,
+          adminUser?.id
+        );
+        
+        await notifyDocumentUploaded(
+          "License",
+          user.name,
+          user.id,
+          adminUser?.id
+        );
+        
+        if (otherDocuments.length > 0) {
+          await notifyDocumentUploaded(
+            "Supporting Documents",
+            user.name,
+            user.id,
+            adminUser?.id
+          );
+        }
+      } catch (notificationError) {
+        console.error("Failed to send notifications:", notificationError);
+        // Continue even if notification fails
       }
 
       // Audit log

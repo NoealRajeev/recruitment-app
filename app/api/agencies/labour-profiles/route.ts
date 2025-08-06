@@ -10,7 +10,9 @@ import {
   DocumentCategory,
   DocumentType,
   Gender,
+  UserRole,
 } from "@/lib/generated/prisma";
+import { notifyDocumentUploaded } from "@/lib/notification-helpers";
 import fs from "fs";
 import path from "path";
 import { v4 as uuidv4 } from "uuid";
@@ -211,7 +213,7 @@ export async function POST(request: Request) {
           const filePath = path.join(labourDir, filename);
           fs.writeFileSync(filePath, buffer);
 
-          await tx.document.create({
+          const document = await tx.document.create({
             data: {
               ownerId: session.user.id,
               type,
@@ -230,6 +232,27 @@ export async function POST(request: Request) {
                 profileImage: `/uploads/${labourFolder}/${filename}`,
               },
             });
+          }
+          
+          // Send notification for document upload
+          try {
+            // Find a recruitment admin to notify
+            const admin = await tx.user.findFirst({
+              where: { role: UserRole.RECRUITMENT_ADMIN },
+              select: { id: true },
+            });
+            
+            if (admin) {
+              await notifyDocumentUploaded(
+                type.toString(),
+                profile.name,
+                agency.id,
+                admin.id
+              );
+            }
+          } catch (notificationError) {
+            console.error("Error sending document upload notification:", notificationError);
+            // Continue with the process even if notification fails
           }
         }
       }
@@ -366,7 +389,7 @@ export async function PUT(request: Request) {
           const filePath = path.join(labourDir, filename);
           fs.writeFileSync(filePath, buffer);
 
-          await tx.document.create({
+          const document = await tx.document.create({
             data: {
               ownerId: session.user.id,
               type,
@@ -385,6 +408,27 @@ export async function PUT(request: Request) {
                 profileImage: `/uploads/${labourFolder}/${filename}`,
               },
             });
+          }
+          
+          // Send notification for document upload
+          try {
+            // Find a recruitment admin to notify
+            const admin = await tx.user.findFirst({
+              where: { role: UserRole.RECRUITMENT_ADMIN },
+              select: { id: true },
+            });
+            
+            if (admin) {
+              await notifyDocumentUploaded(
+                type.toString(),
+                profile.name,
+                agency.id,
+                admin.id
+              );
+            }
+          } catch (notificationError) {
+            console.error("Error sending document upload notification:", notificationError);
+            // Continue with the process even if notification fails
           }
         }
       }

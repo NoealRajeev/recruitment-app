@@ -7,6 +7,7 @@ import fs from "fs";
 import { sendTemplateEmail } from "@/lib/utils/email-service";
 import { getVisaNotificationEmail } from "@/lib/utils/email-templates";
 import { env } from "@/lib/env.server";
+import { notifyDocumentUploaded } from "@/lib/notification-helpers";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "visas");
 if (!fs.existsSync(UPLOAD_DIR)) {
@@ -151,6 +152,24 @@ export async function POST(
         console.error("Error sending visa notification email:", emailError);
         // Don't fail the entire request if email fails
       }
+    }
+
+    // Send in-app notifications
+    try {
+      // Notify agency about visa upload
+      await notifyDocumentUploaded(
+        "VISA",
+        assignment.labour.name,
+        assignment.agencyId,
+        // Find admin users to notify
+        (await prisma.user.findFirst({
+          where: { role: "RECRUITMENT_ADMIN" },
+          select: { id: true },
+        }))?.id
+      );
+    } catch (notificationError) {
+      console.error("Notification sending failed:", notificationError);
+      // Continue even if notification fails
     }
 
     return NextResponse.json({

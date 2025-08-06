@@ -1,6 +1,6 @@
-# Manpower Recruitment Web Application
+# Findly - Manpower Recruitment Platform
 
-A full-stack Next.js 14 application for managing foreign labor recruitment. This system is designed for a middleman agency (Party 1) to facilitate connections between client companies (Party 2) and recruitment agencies. The application offers both a public-facing website and a secure dashboard for logged-in clients to manage their requirements.
+A full-stack Next.js 14 application for managing foreign labor recruitment. This system is designed for a middleman agency (BreaktroughF1 LLP) to facilitate connections between client companies in Qatar and recruitment agencies. The application offers both a public-facing website and a secure dashboard for logged-in clients to manage their requirements.
 
 ---
 
@@ -14,22 +14,30 @@ A full-stack Next.js 14 application for managing foreign labor recruitment. This
 
 - **Framework**: [Next.js 14](https://nextjs.org/)
 - **Language**: TypeScript
+- **Database**: PostgreSQL with Prisma ORM
 - **Styling**: Tailwind CSS
-- **Auth**: Session-based (Pluggable)
-- **Icons**: Lucide Icons
-- **Form Handling**: React Hook Form
+- **Auth**: NextAuth.js (Session-based)
+- **File Storage**: AWS S3
+- **Real-time**: WebSocket Server
+- **Form Handling**: React Hook Form + Zod validation
 - **API Communication**: Axios
+- **Deployment**: Vercel with AWS EC2 fallback
+- **Email**: SMTP integration
 
 ---
 
-## 🎯 Purpose
+## 🎯 Purpose & Features
 
-This application streamlines the recruitment process by:
+Findly is a web-based control-center that helps companies in Qatar bring in skilled blue-collar workers from abroad without drowning in paperwork. It serves as a digital "assembly line" that moves every candidate from first enquiry to arrival on site, keeping everyone—HR teams, overseas agents, and the workers themselves—on the same page.
 
-- Offering a clean, informative landing page
-- Allowing companies to submit labor requirements
-- Guiding them through a structured recruitment process
-- Giving access to a dashboard to manage applications and feedback
+### Key Features
+
+- **Multi-role Platform**: Serves clients (companies in Qatar), agencies (recruiting partners), and admins (internal ops team)
+- **Streamlined Workflow**: From requirement creation to candidate arrival
+- **Document Management**: Secure storage and handling of important documents
+- **Real-time Updates**: Instant notifications across all parties
+- **Compliance**: Built-in audit trails and role-based access control
+- **Internationalization**: Support for multiple languages
 
 ---
 
@@ -47,6 +55,80 @@ Here's a breakdown of the main folders and what they contain:
 ├── config & root files   # Next.js config, ESLint, TSConfig, etc.
 
 ```
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ and npm/yarn
+- PostgreSQL database
+
+### Environment Setup
+
+1. Clone the repository
+2. Copy the environment variables template:
+   ```bash
+   cp .env.example .env
+   ```
+3. Update the `.env` file with your configuration:
+   - Set up your PostgreSQL database connection string
+   - Configure authentication secrets
+   - Set up email service credentials
+   - Configure AWS credentials (if using S3 for file storage)
+
+### Installation
+
+```bash
+# Install dependencies
+npm install
+
+# Set up the database
+npx prisma migrate dev
+
+# Start the development server
+npm run dev
+```
+
+### Running the WebSocket Server
+
+```bash
+# In a separate terminal
+node websocket-server.js
+```
+
+---
+
+## 🏗️ Architecture
+
+### Database Schema
+
+The application uses PostgreSQL with Prisma ORM. Key models include:
+
+- **Users**: Different user roles (Client Admin, Recruitment Agency, Recruitment Admin)
+- **Requirements**: Job requirements posted by clients
+- **Candidates**: Worker profiles submitted by agencies
+- **Documents**: Secure storage of important documents (passports, medical certificates, etc.)
+- **Notifications**: System for real-time updates
+
+### Workflow
+
+1. **Create a Requirement**: Client posts job requirements
+2. **Add Candidates**: Agency submits worker profiles and documents
+3. **Review & Shortlist**: Client reviews and selects candidates
+4. **Visa Processing**: System tracks document collection and visa status
+5. **Final Boarding**: Worker travels and arrives on site
+
+---
+
+## 🔒 Security & Compliance
+
+- **Role-based Access Control**: Users only see what their role allows
+- **Audit Trail**: Every field change is time-stamped for legal audits
+- **Secure Document Storage**: Documents are stored in private S3 buckets with expiring URLs
+- **Data Privacy**: GDPR-style opt-in with data deletion options
+- **Authentication**: Secure session-based authentication with NextAuth.js
 
 ---
 

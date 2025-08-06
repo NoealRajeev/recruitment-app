@@ -194,6 +194,7 @@ function LoginFormWrapper() {
         router.push(result.url);
       }
     } catch (error) {
+      setLoading(false);
       setFormError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);

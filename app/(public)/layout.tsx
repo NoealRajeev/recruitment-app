@@ -14,6 +14,25 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              name: "Findly",
+              url: "https://findly.breaktroughf1.com",
+              potentialAction: {
+                "@type": "SearchAction",
+                target:
+                  "https://findly.breaktroughf1.com/search?q={search_term_string}",
+                "query-input": "required name=search_term_string",
+              },
+            }),
+          }}
+        ></script>
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <LanguageProvider>
           <AuthProvider>

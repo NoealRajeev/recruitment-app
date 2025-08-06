@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import path from "path";
 import fs from "fs";
+import { notifyOfferLetterSigned } from "@/lib/notification-helpers";
 
 const UPLOAD_DIR = path.join(
   process.cwd(),
@@ -88,6 +89,48 @@ export async function POST(req: NextRequest) {
       },
     });
   });
+
+  // Get labour profile and assignment details for notification
+  const labourAssignment = await prisma.labourAssignment.findUnique({
+    where: { id: assignmentId },
+    select: {
+      id: true,
+      agencyId: true,
+      jobRole: {
+        select: {
+          requirement: {
+            select: {
+              clientId: true
+            }
+          }
+        }
+      },
+      labourId: true
+    },
+  });
+  
+  // Get labour profile details
+  const labourProfile = labourAssignment ? await prisma.labourProfile.findUnique({
+    where: { id: labourAssignment.labourId },
+    select: {
+      id: true,
+      name: true
+    }
+  }) : null;
+
+  // Send notifications
+  try {
+    if (labourAssignment && labourProfile && labourAssignment.jobRole?.requirement?.clientId) {
+      await notifyOfferLetterSigned(
+        labourProfile.name,
+        labourAssignment.agencyId,
+        labourAssignment.jobRole.requirement.clientId
+      );
+    }
+  } catch (notificationError) {
+    console.error("Notification sending failed:", notificationError);
+    // Continue even if notification fails
+  }
 
   return new Response(JSON.stringify({ success: true, url }), { status: 200 });
 }

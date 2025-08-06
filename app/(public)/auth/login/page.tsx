@@ -156,7 +156,7 @@ function LoginForm({
   );
 }
 
-function LoginFormWrapper() {
+function LoginFormWrapper({ onErrorOccurred }: { onErrorOccurred?: () => void }) {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams?.get("callbackUrl") ?? "/dashboard";
   const [loading, setLoading] = useState(false);
@@ -178,7 +178,7 @@ function LoginFormWrapper() {
       const result = await signIn("credentials", {
         email,
         password,
-        redirect: false,
+        redirect: true,
         callbackUrl,
       });
 
@@ -190,12 +190,16 @@ function LoginFormWrapper() {
           return;
         }
         setFormError(result.error);
+        // Call the callback when an error occurs
+        if (onErrorOccurred) onErrorOccurred();
       } else if (result?.url) {
         router.push(result.url);
       }
     } catch (error) {
       setLoading(false);
       setFormError("An unexpected error occurred. Please try again.");
+      // Call the callback when an error occurs
+      if (onErrorOccurred) onErrorOccurred();
     } finally {
       setLoading(false);
     }
@@ -221,6 +225,11 @@ export default function LoginPage() {
   const handleRegisterRedirect = () => {
     router.push("/auth/register");
   };
+  
+  // Reset isSubmitting when an error occurs
+  const handleErrorOccurred = () => {
+    setIsSubmitting(false);
+  };
 
   return (
     <div className="flex justify-center items-start min-h-screen bg-gray-100 p-6 text-[#2C0053]">
@@ -237,7 +246,7 @@ export default function LoginPage() {
             <Suspense
               fallback={<div className="text-center py-8">Loading…</div>}
             >
-              <LoginFormWrapper />
+              <LoginFormWrapper onErrorOccurred={handleErrorOccurred} />
             </Suspense>
           </Card>
 

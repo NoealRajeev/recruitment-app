@@ -27,14 +27,14 @@ const lightBackground = "#f8f9fa";
 const warningBackground = "#fff8e1";
 const infoBackground = "#f0f8ff";
 
-const headerTemplate = (title: string) => `
+export const headerTemplate = (title: string) => `
   <div style="text-align: center; margin-bottom: 20px; border-bottom: 2px solid ${primaryColor}; padding-bottom: 15px;">
     <img src="${env.NEXTAUTH_URL}/assets/Logo-black.png" alt="Findly Logo" style="max-height: 60px;">
     <h1 style="color: ${primaryColor}; margin-top: 10px; margin-bottom: 5px;">${title}</h1>
   </div>
 `;
 
-const footerTemplate = `
+export const footerTemplate = `
   <div style="border-top: 1px solid #eee; margin-top: 30px; padding-top: 20px; text-align: center;">
     <p style="color: ${primaryColor}; font-weight: bold; margin-bottom: 5px;">Best regards,</p>
     <p style="color: ${secondaryColor}; margin-top: 0;">The Findly Team</p>

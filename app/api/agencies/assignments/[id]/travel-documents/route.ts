@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth/options";
 import path from "path";
 import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
+import { notifyDocumentUploaded } from "@/lib/notification-helpers";
 
 const UPLOAD_DIR = path.join(
   process.cwd(),
@@ -272,6 +273,26 @@ export async function POST(
           affectedFields: ["currentStage", "travelDocuments"],
         },
       });
+      
+      // Send notifications for complete document upload
+      try {
+        // Notify for each document type
+        for (const docType of uniqueUploadedTypes) {
+          await notifyDocumentUploaded(
+            docType,
+            assignment.labour.name,
+            assignment.agencyId,
+            // Find admin users to notify
+            (await prisma.user.findFirst({
+              where: { role: "RECRUITMENT_ADMIN" },
+              select: { id: true },
+            }))?.id
+          );
+        }
+      } catch (notificationError) {
+        console.error("Notification sending failed:", notificationError);
+        // Continue even if notification fails
+      }
     } else {
       // Create audit log for partial document upload
       await prisma.auditLog.create({
@@ -286,6 +307,26 @@ export async function POST(
           affectedFields: ["travelDocuments"],
         },
       });
+      
+      // Send notifications for partial document upload
+      try {
+        // Notify for each document type that was uploaded
+        for (const doc of savedDocuments) {
+          await notifyDocumentUploaded(
+            doc.type,
+            assignment.labour.name,
+            assignment.agencyId,
+            // Find admin users to notify
+            (await prisma.user.findFirst({
+              where: { role: "RECRUITMENT_ADMIN" },
+              select: { id: true },
+            }))?.id
+          );
+        }
+      } catch (notificationError) {
+        console.error("Notification sending failed:", notificationError);
+        // Continue even if notification fails
+      }
     }
 
     return NextResponse.json({

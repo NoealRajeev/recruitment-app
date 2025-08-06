@@ -11,6 +11,7 @@ import {
   UserRole,
 } from "@/lib/generated/prisma";
 import { sendTemplateEmail } from "@/lib/utils/email-service";
+import { notifyDocumentUploaded } from "@/lib/notification-helpers";
 
 async function saveFileToDisk(file: File, userId: string): Promise<string> {
   // Create uploads directory if it doesn't exist
@@ -125,6 +126,56 @@ export async function POST(request: Request) {
           processDocument(file, DocumentType.OTHER)
         ),
       ]);
+      
+      // Send notifications for document uploads
+      try {
+        // Find a recruitment admin to notify
+        const adminUser = await tx.user.findFirst({
+          where: { role: UserRole.RECRUITMENT_ADMIN },
+          select: { id: true },
+        });
+        
+        // Send notifications for each document type
+        await notifyDocumentUploaded(
+          "License",
+          user.name,
+          user.id,
+          adminUser?.id
+        );
+        
+        await notifyDocumentUploaded(
+          "Insurance",
+          user.name,
+          user.id,
+          adminUser?.id
+        );
+        
+        await notifyDocumentUploaded(
+          "ID Proof",
+          user.name,
+          user.id,
+          adminUser?.id
+        );
+        
+        await notifyDocumentUploaded(
+          "Address Proof",
+          user.name,
+          user.id,
+          adminUser?.id
+        );
+        
+        if (otherDocuments.length > 0) {
+          await notifyDocumentUploaded(
+            "Supporting Documents",
+            user.name,
+            user.id,
+            adminUser?.id
+          );
+        }
+      } catch (notificationError) {
+        console.error("Failed to send notifications:", notificationError);
+        // Continue even if notification fails
+      }
 
       // 3. Update user status
       const updatedUser = await tx.user.update({

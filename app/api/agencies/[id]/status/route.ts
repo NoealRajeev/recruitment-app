@@ -7,6 +7,7 @@ import { z } from "zod";
 import { AuditAction } from "@prisma/client";
 import { sendTemplateEmail } from "@/lib/utils/email-service";
 import { getAgencyWelcomeEmail } from "@/lib/utils/email-templates";
+import { notifyDocumentVerified } from "@/lib/notification-helpers";
 
 const StatusUpdateSchema = z.object({
   status: z.enum(["VERIFIED", "REJECTED", "NOT_VERIFIED"]),
@@ -86,9 +87,23 @@ export async function PUT(
 
       // If verifying, also verify all important documents
       if (status === "VERIFIED") {
+        // Get documents before updating them
+        const documentsToVerify = await tx.document.findMany({
+          where: {
+            ownerId: agency.userId,
+            status: { not: "VERIFIED" },
+            category: "IMPORTANT", // Only verify important documents
+          },
+          select: {
+            id: true,
+            type: true,
+          },
+        });
+        
+        // Update documents
         await tx.document.updateMany({
           where: {
-            ownerId: agency.userId, // Changed from agency.user.id to agency.userId
+            ownerId: agency.userId,
             status: { not: "VERIFIED" },
             category: "IMPORTANT", // Only verify important documents
           },
@@ -96,6 +111,20 @@ export async function PUT(
             status: "VERIFIED",
           },
         });
+        
+        // Send notifications for each verified document
+        try {
+          for (const doc of documentsToVerify) {
+            await notifyDocumentVerified(
+              doc.type,
+              agency.user.name,
+              agency.id
+            );
+          }
+        } catch (notificationError) {
+          console.error("Failed to send document verification notifications:", notificationError);
+          // Continue even if notification fails
+        }
       }
 
       // Send approval email if verifying and temp password exists

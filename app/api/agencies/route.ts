@@ -22,6 +22,7 @@ export async function GET() {
             status: true,
             deleteAt: true,
             deletionType: true,
+            profilePicture: true,
           },
         },
       },

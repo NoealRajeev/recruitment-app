@@ -132,7 +132,7 @@ export default function SideBar({
       {/* Header */}
       {isExpanded && (
         <div className="flex justify-center mb-16">
-          <div className="relative h-15 w-[180px]">
+          <div className="relative h-15 w-[480px]">
             <Image
               src="/assets/Logo-white.png"
               alt="Logo"

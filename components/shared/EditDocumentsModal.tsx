@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import React, { useState } from "react";
 import {
   UploadCloud,
@@ -97,12 +98,10 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
   const [timeInput, setTimeInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Update documents when existingDocuments changes
   React.useEffect(() => {
     setDocuments(existingDocuments);
   }, [existingDocuments]);
 
-  // Add visa document to state if visaUrl is provided and not already present
   React.useEffect(() => {
     if (visaUrl && !documents.some((doc) => doc.type === "visa-document")) {
       setDocuments((prev) => [
@@ -118,11 +117,16 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
     }
   }, [visaUrl]);
 
-  // When modal opens, if no existingTravelDate, reset date/time input
   React.useEffect(() => {
-    if (isOpen && !existingTravelDate) {
-      setDateInput("");
-      setTimeInput("");
+    if (isOpen) {
+      if (existingTravelDate) {
+        const dateObj = new Date(existingTravelDate);
+        setDateInput(dateObj.toISOString().split("T")[0]);
+        setTimeInput(dateObj.toISOString().split("T")[1].substring(0, 5));
+      } else {
+        setDateInput("");
+        setTimeInput("");
+      }
     }
   }, [isOpen, existingTravelDate]);
 
@@ -135,11 +139,9 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
       uploadedAt: new Date().toISOString(),
     };
     setDocuments((prev) => {
-      // For additional documents, allow multiple files
       if (type === "additional-documents") {
         return [...prev, newDocument];
       }
-      // For other documents, remove existing document of the same type
       const filtered = prev.filter((doc) => doc.type !== type);
       return [...filtered, newDocument];
     });
@@ -176,20 +178,29 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      second: "2-digit",
       hour12: true,
-      timeZone: "UTC",
-      timeZoneName: "short",
     });
-    // Make AM/PM uppercase
     formatted = formatted.replace(/am|pm/, (match) => match.toUpperCase());
     return formatted;
   };
 
+  const hasAnyDocuments = documents.length > 0;
+  const hasFlightTicket = !!getDocumentByType("flight-ticket");
+  const hasNewUploads =
+    documents.some((doc) => doc.file) || (dateInput && timeInput);
+  const allRequiredDocsPresent = [
+    "flight-ticket",
+    "medical-certificate",
+    "police-clearance",
+    "employment-contract",
+  ].every((type) => documents.some((doc) => doc.type === type));
+  const travelDatePresent =
+    !!existingTravelDate || (!!dateInput && !!timeInput);
+
   const handleSubmit = async () => {
-    // Validate travel date is required only when a new flight ticket is being uploaded
     const flightTicket = getDocumentByType("flight-ticket");
     const isUploadingNewFlightTicket = flightTicket && flightTicket.file;
+
     if (isUploadingNewFlightTicket && !(dateInput && timeInput)) {
       toast({
         type: "error",
@@ -199,8 +210,10 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
     }
 
     let travelDateToSend: string | undefined = undefined;
-    if (!existingTravelDate && dateInput && timeInput) {
-      // Normalize time to always have seconds
+
+    if (existingTravelDate && !dateInput && !timeInput) {
+      travelDateToSend = existingTravelDate;
+    } else if (dateInput && timeInput) {
       let normalizedTime = timeInput;
       if (/^\d{2}:\d{2}$/.test(timeInput)) {
         normalizedTime = timeInput + ":00";
@@ -233,23 +246,6 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
     }
   };
 
-  // Helper to check if all required docs and travel date are present
-  const allRequiredDocsPresent = [
-    "flight-ticket",
-    "medical-certificate",
-    "police-clearance",
-    "employment-contract",
-  ].every((type) => documents.some((doc) => doc.type === type));
-  const travelDatePresent =
-    !!existingTravelDate || (!!dateInput && !!timeInput);
-  const hasNewAdditionalDoc = documents.some(
-    (doc) => doc.type === "additional-documents" && doc.file
-  );
-  const isUploadingNewFlightTicket = (() => {
-    const flightTicket = getDocumentByType("flight-ticket");
-    return flightTicket && flightTicket.file;
-  })();
-
   const DocumentCard = ({
     docType,
   }: {
@@ -258,7 +254,6 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
     const document = getDocumentByType(docType.key);
     const IconComponent = docType.icon;
 
-    // Show uploaded documents with beautiful UI (including visa and all other uploaded docs)
     if (
       document &&
       (document.url || document.file) &&
@@ -273,14 +268,10 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
         >
           <div className="flex items-start gap-3 mb-3">
             <div
-              className={`p-2 rounded-lg ${
-                document.file ? "bg-orange-50" : "bg-green-50"
-              }`}
+              className={`p-2 rounded-lg ${document.file ? "bg-orange-50" : "bg-green-50"}`}
             >
               <IconComponent
-                className={`w-5 h-5 ${
-                  document.file ? "text-orange-600" : "text-green-600"
-                }`}
+                className={`w-5 h-5 ${document.file ? "text-orange-600" : "text-green-600"}`}
               />
             </div>
             <div>
@@ -308,9 +299,7 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
             >
               <div className="flex items-center gap-2">
                 <FileText
-                  className={`w-4 h-4 ${
-                    document.file ? "text-orange-600" : "text-green-600"
-                  }`}
+                  className={`w-4 h-4 ${document.file ? "text-orange-600" : "text-green-600"}`}
                 />
                 <span className="text-sm font-medium text-green-800">
                   {document.name}
@@ -367,7 +356,7 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
         </div>
       );
     }
-    // Special handling for additional documents (multiple files)
+
     if (docType.key === "additional-documents") {
       const additionalDocs = getDocumentsByType("additional-documents");
       return (
@@ -426,9 +415,7 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     <FileText
-                      className={`w-4 h-4 ${
-                        doc.file ? "text-orange-600" : "text-green-600"
-                      }`}
+                      className={`w-4 h-4 ${doc.file ? "text-orange-600" : "text-green-600"}`}
                     />
                     <span className="text-sm font-medium text-green-800">
                       {doc.name}
@@ -522,7 +509,7 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
         </div>
       );
     }
-    // Documents that are not uploaded yet: show upload interface
+
     if (!document || (!document.url && !document.file)) {
       return (
         <div className="bg-white border-2 border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -565,7 +552,6 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
         </div>
       );
     }
-    // If document is uploaded and not additional-documents, do not show upload input
     return null;
   };
 
@@ -582,17 +568,12 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
       cancelText="Cancel"
       confirmDisabled={
         isSubmitting ||
-        (isUploadingNewFlightTicket
-          ? !(dateInput && timeInput)
-          : getDocumentByType("flight-ticket") && !travelDatePresent) ||
-        (!isUploadingNewFlightTicket &&
-          allRequiredDocsPresent &&
-          travelDatePresent &&
-          !hasNewAdditionalDoc)
+        !hasAnyDocuments ||
+        (allRequiredDocsPresent && !hasNewUploads) ||
+        (hasFlightTicket && !travelDatePresent && !(dateInput && timeInput))
       }
     >
       <div className="space-y-6 mb-5">
-        {/* Document Status Notice */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-blue-600" />
@@ -609,7 +590,6 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
           </div>
         </div>
 
-        {/* Travel Information Section - Minimalist Card */}
         <div className="bg-white border rounded-xl shadow-sm p-5 flex flex-col gap-2">
           <div className="flex items-center gap-3 mb-1">
             <Calendar className="w-5 h-5 text-blue-600" />
@@ -621,7 +601,7 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
             <label className="text-sm text-[#150B3D]/80 min-w-[120px] font-medium mb-0 md:mb-0 md:mr-2">
               Travel Date & Time
             </label>
-            {existingTravelDate ? (
+            {existingTravelDate && !dateInput && !timeInput ? (
               <span className="text-base font-semibold text-[#3D1673] bg-gray-50 px-3 py-2 rounded-md border border-gray-200">
                 {formatDateTime(existingTravelDate)}
               </span>
@@ -648,15 +628,15 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
               </div>
             )}
           </div>
-          {!existingTravelDate &&
-            getDocumentByType("flight-ticket") &&
+          {getDocumentByType("flight-ticket") &&
+            !existingTravelDate &&
             (!dateInput || !timeInput) && (
               <p className="text-xs text-red-500 mt-1 ml-[120px]">
                 Travel date and time are required when flight ticket is uploaded
               </p>
             )}
         </div>
-        {/* Documents Grid */}
+
         <div>
           <h3 className="text-lg font-medium text-gray-900 mb-4">
             Required Travel Documents
@@ -667,13 +647,17 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
             ))}
           </div>
         </div>
-        {/* Summary */}
+
         <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
           <h4 className="font-medium text-gray-900 mb-2">Document Summary</h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div className="flex items-center gap-2">
               <div
-                className={`w-3 h-3 rounded-full ${getDocumentByType("flight-ticket") ? "bg-green-500" : "bg-red-500"}`}
+                className={`w-3 h-3 rounded-full ${
+                  getDocumentByType("flight-ticket")
+                    ? "bg-green-500"
+                    : "bg-red-500"
+                }`}
               ></div>
               <span
                 className={
@@ -687,7 +671,11 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
             </div>
             <div className="flex items-center gap-2">
               <div
-                className={`w-3 h-3 rounded-full ${getDocumentByType("medical-certificate") ? "bg-green-500" : "bg-red-500"}`}
+                className={`w-3 h-3 rounded-full ${
+                  getDocumentByType("medical-certificate")
+                    ? "bg-green-500"
+                    : "bg-red-500"
+                }`}
               ></div>
               <span
                 className={
@@ -701,7 +689,11 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
             </div>
             <div className="flex items-center gap-2">
               <div
-                className={`w-3 h-3 rounded-full ${getDocumentByType("police-clearance") ? "bg-green-500" : "bg-red-500"}`}
+                className={`w-3 h-3 rounded-full ${
+                  getDocumentByType("police-clearance")
+                    ? "bg-green-500"
+                    : "bg-red-500"
+                }`}
               ></div>
               <span
                 className={
@@ -715,7 +707,11 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
             </div>
             <div className="flex items-center gap-2">
               <div
-                className={`w-3 h-3 rounded-full ${getDocumentByType("employment-contract") ? "bg-green-500" : "bg-red-500"}`}
+                className={`w-3 h-3 rounded-full ${
+                  getDocumentByType("employment-contract")
+                    ? "bg-green-500"
+                    : "bg-red-500"
+                }`}
               ></div>
               <span
                 className={
@@ -729,7 +725,11 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
             </div>
             <div className="flex items-center gap-2">
               <div
-                className={`w-3 h-3 rounded-full ${getDocumentByType("visa-document") ? "bg-green-500" : "bg-blue-500"}`}
+                className={`w-3 h-3 rounded-full ${
+                  getDocumentByType("visa-document")
+                    ? "bg-green-500"
+                    : "bg-blue-500"
+                }`}
               ></div>
               <span
                 className={
@@ -744,7 +744,11 @@ const EditDocumentsModal: React.FC<EditDocumentsModalProps> = ({
             </div>
             <div className="flex items-center gap-2">
               <div
-                className={`w-3 h-3 rounded-full ${getDocumentsByType("additional-documents").length > 0 ? "bg-green-500" : "bg-gray-400"}`}
+                className={`w-3 h-3 rounded-full ${
+                  getDocumentsByType("additional-documents").length > 0
+                    ? "bg-green-500"
+                    : "bg-gray-400"
+                }`}
               ></div>
               <span
                 className={

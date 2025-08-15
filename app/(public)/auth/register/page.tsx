@@ -209,10 +209,10 @@ export default function RegisterPage() {
     []
   );
 
-  // Fix the useEffect timer setup
+  // Responsive‑safe timers
   useEffect(() => {
-    let emailTimer: NodeJS.Timeout | null = null;
-    let phoneTimer: NodeJS.Timeout | null = null;
+    let emailTimer: ReturnType<typeof setInterval> | null = null;
+    let phoneTimer: ReturnType<typeof setInterval> | null = null;
 
     if (emailOtpResendTime > 0) {
       emailTimer = setInterval(() => {
@@ -590,20 +590,23 @@ export default function RegisterPage() {
     switch (currentStep) {
       case 1:
         return (
-          <Card className="p-6">
+          <Card className="p-4 sm:p-6">
             <div className="text-center mb-2">
-              <h1 className="text-2xl font-semibold mb-1">
+              <h1 className="text-xl sm:text-2xl font-semibold mb-1">
                 {t.getRegisteredNow}
               </h1>
-              <p className="text-base text-gray-700 mb-2">{t.knowMore}</p>
+              <p className="text-sm sm:text-base text-gray-700 mb-2">
+                {t.knowMore}
+              </p>
               <p className="text-xs text-gray-500 italic text-left">
                 {t.sectionNoteCompany}
               </p>
             </div>
 
-            <div className="grid grid-cols-12 gap-8 mt-6">
-              <div className="col-span-5 space-y-4">
-                <h2 className="text-lg font-semibold mb-2">
+            {/* grid becomes single column on mobile */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 mt-6">
+              <div className="md:col-span-5 space-y-4">
+                <h2 className="text-base sm:text-lg font-semibold mb-2">
                   {t.companyDetails}
                 </h2>
                 <Input
@@ -669,7 +672,7 @@ export default function RegisterPage() {
                   id="country"
                   className="!bg-white"
                 />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
                     label={t.city || "City"}
                     name="city"
@@ -702,12 +705,13 @@ export default function RegisterPage() {
                 />
               </div>
 
-              <div className="col-span-2 flex justify-center items-center">
+              {/* vertical divider hides on mobile */}
+              <div className="hidden md:flex md:col-span-2 justify-center items-center">
                 <div className="w-[2px] h-2/3 bg-[#2C0053]/30 rounded-full"></div>
               </div>
 
-              <div className="col-span-5 space-y-4">
-                <h2 className="text-lg font-semibold mb-2">
+              <div className="md:col-span-5 space-y-4">
+                <h2 className="text-base sm:text-lg font-semibold mb-2">
                   {t.contactPerson}
                 </h2>
                 <Input
@@ -759,7 +763,7 @@ export default function RegisterPage() {
                           {isSendingOtp.email ? "Sending..." : "Send OTP"}
                         </Button>
                       ) : (
-                        <div className="flex gap-2 items-center">
+                        <div className="flex flex-wrap gap-2 items-center">
                           <Input
                             name="emailOtp"
                             value={formData.emailOtp}
@@ -827,7 +831,7 @@ export default function RegisterPage() {
                         value: cc.code,
                         label: `${cc.code} (${cc.name})`,
                       }))}
-                      className="w-32 !bg-white"
+                      className="w-28 sm:w-32 !bg-white"
                       disabled={formData.phoneVerified}
                     />
                     <div className="flex-1">
@@ -866,7 +870,7 @@ export default function RegisterPage() {
                           {isSendingOtp.phone ? "Sending..." : "Send OTP"}
                         </Button>
                       ) : (
-                        <div className="flex gap-2 items-center">
+                        <div className="flex flex-wrap gap-2 items-center">
                           <Input
                             name="phoneOtp"
                             value={formData.phoneOtp}
@@ -932,7 +936,7 @@ export default function RegisterPage() {
                       value: cc.code,
                       label: `${cc.code} (${cc.name})`,
                     }))}
-                    className="w-32 !bg-white"
+                    className="w-28 sm:w-32 !bg-white"
                   />
                   <div className="flex-1">
                     <Input
@@ -953,12 +957,12 @@ export default function RegisterPage() {
 
       case 2:
         return (
-          <Card className="p-6">
+          <Card className="p-4 sm:p-6">
             <div className="text-center mb-2">
-              <h1 className="text-2xl font-semibold mb-1">
+              <h1 className="text-xl sm:text-2xl font-semibold mb-1">
                 Upload Required Documents
               </h1>
-              <p className="text-base text-gray-700 mb-2">
+              <p className="text-sm sm:text-base text-gray-700 mb-2">
                 Please upload the required documents to complete your
                 registration
               </p>
@@ -1034,13 +1038,18 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="flex justify-center items-start min-h-screen pt-10 pb-6 px-6 text-[#2C0053] bg-gray-100">
-      <div className="w-[1500px] h-fit bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
-        <LanguageSelector />
+    <div className="flex justify-center items-start min-h-screen pt-6 sm:pt-10 pb-6 px-3 sm:px-6 text-[#2C0053] bg-gray-100">
+      {/* container becomes fluid on mobile, keeps your look on larger screens */}
+      <div className="w-full max-w-screen-xl bg-[#EFEBF2] rounded-xl shadow-lg overflow-hidden flex flex-col relative">
+        <div className="px-3 sm:px-4 pt-3 sm:pt-4">
+          <LanguageSelector />
+        </div>
 
-        <div className="relative px-16 pt-10 pb-6">
-          <div className="absolute inset-x-0 top-1/2 h-0.5 z-0">
-            <div className="absolute -left-44 right-0 h-full flex w-full max-w-[1380px] mx-auto">
+        {/* Stepper area: scales down & is scrollable on tiny screens */}
+        <div className="relative px-4 sm:px-8 lg:px-16 pt-6 sm:pt-10 pb-4 sm:pb-6">
+          {/* Progress line */}
+          <div className="absolute inset-x-0 top-1/2 h-0.5 z-0 hidden sm:block">
+            <div className="absolute -left-10 md:-left-20 lg:-left-44 right-0 h-full flex w-full max-w-[1380px] mx-auto">
               <div
                 className="h-full bg-[#2C0053] transition-all duration-300"
                 style={{
@@ -1051,7 +1060,6 @@ export default function RegisterPage() {
                         "100%",
                 }}
               />
-
               <div
                 className="h-full border-t-2 border-dotted border-gray-300 transition-all duration-300"
                 style={{
@@ -1066,24 +1074,40 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <div className="flex justify-between relative z-10 mt-4">
+          {/* Step bullets */}
+          <div className="flex justify-between relative z-10 mt-2 sm:mt-4 overflow-x-auto no-scrollbar">
             {steps.map((step) => (
               <div
                 key={step.id}
-                className="text-center flex-1 max-w-[200px] relative"
+                className="text-center flex-1 max-w-[160px] sm:max-w-[200px] relative"
               >
                 <div
-                  className={`w-12 h-12 mx-auto rounded-full text-lg font-bold mb-3 flex items-center justify-center ${
+                  className={`mx-auto rounded-full font-bold mb-2 sm:mb-3 flex items-center justify-center ${
                     currentStep >= step.id
                       ? "bg-[#2C0053] text-white"
                       : "bg-gray-200 text-gray-600"
                   } ${currentStep > step.id ? "ring-2 ring-[#2C0053]" : ""}`}
                   aria-current={currentStep === step.id ? "step" : undefined}
+                  style={{
+                    width:
+                      currentStep >= 0
+                        ? (window?.innerWidth ?? 0) < 640
+                          ? 40
+                          : 48
+                        : 48,
+                    height:
+                      currentStep >= 0
+                        ? (window?.innerWidth ?? 0) < 640
+                          ? 40
+                          : 48
+                        : 48,
+                    fontSize: (window?.innerWidth ?? 0) < 640 ? 14 : 16,
+                  }}
                 >
                   {step.id}
                 </div>
                 <span
-                  className={`text-sm font-medium ${
+                  className={`text-xs sm:text-sm font-medium ${
                     currentStep >= step.id ? "text-[#2C0053]" : "text-gray-500"
                   }`}
                 >
@@ -1094,17 +1118,18 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <div className="flex-1 mx-16 rounded-lg py-8 flex flex-col justify-between">
+        <div className="flex-1 px-3 sm:px-6 lg:mx-16 rounded-lg py-6 sm:py-8 flex flex-col justify-between">
           {renderStepContent()}
 
-          <div className="col-span-12 mt-6 flex justify-center gap-12">
+          {/* Actions: stack on mobile */}
+          <div className="col-span-12 mt-6 flex flex-col sm:flex-row justify-center gap-3 sm:gap-6 lg:gap-12">
             {currentStep === 1 ? (
               <>
                 <Button
                   type="button"
                   onClick={handleNextStep}
                   disabled={isSubmitting}
-                  className="px-8 py-2"
+                  className="px-6 sm:px-8 py-2 w-full sm:w-auto"
                 >
                   {isSubmitting ? (
                     <>
@@ -1139,7 +1164,7 @@ export default function RegisterPage() {
                   onClick={handleLoginRedirect}
                   disabled={isSubmitting}
                   variant="outline"
-                  className="px-8 py-2 border-none shadow-sm"
+                  className="px-6 sm:px-8 py-2 border-none shadow-sm w-full sm:w-auto"
                 >
                   {t.logIn}
                 </Button>
@@ -1150,7 +1175,7 @@ export default function RegisterPage() {
                   type="button"
                   onClick={() => setCurrentStep(1)}
                   variant="outline"
-                  className="px-8 py-2"
+                  className="px-6 sm:px-8 py-2 w-full sm:w-auto"
                 >
                   Back
                 </Button>
@@ -1160,7 +1185,7 @@ export default function RegisterPage() {
                   disabled={
                     isSubmitting || !documents.crFile || !documents.licenseFile
                   }
-                  className="px-8 py-2"
+                  className="px-6 sm:px-8 py-2 w-full sm:w-auto"
                 >
                   {isSubmitting ? (
                     <>

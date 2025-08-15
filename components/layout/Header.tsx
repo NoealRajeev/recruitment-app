@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState, useCallback } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { Button } from "../ui/Button";
+import { Menu } from "lucide-react";
 
 const navItems = [
   "Home",
@@ -56,7 +57,6 @@ export default function Header() {
     requestAnimationFrame(animation);
   }, []);
 
-  // Handle Navigation Click
   const handleNavClick = (id: string) => {
     if (pathname === "/") {
       handleScroll(id);
@@ -68,7 +68,6 @@ export default function Header() {
     }
   };
 
-  // Detect Active Section on Scroll
   useEffect(() => {
     const sections = document.querySelectorAll("section");
     const footer = document.querySelector("footer");
@@ -117,8 +116,8 @@ export default function Header() {
             "linear-gradient(to top, rgba(0, 0, 0, 0) 0%, black 100%)",
           maskImage: "linear-gradient(to top, rgba(0, 0, 0, 0) 0%, black 100%)",
         }}
-      ></div>
-      <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+      />
+      <div className="container mx-auto px-4 h-16 sm:h-20 flex items-center justify-between">
         {/* Logo */}
         <Link
           href="/"
@@ -126,14 +125,15 @@ export default function Header() {
         >
           <Image
             src="/assets/Logo-black.png"
-            width={300}
+            width={220}
             height={32}
-            alt="CodeBreak Logo"
+            alt="Findly Logo"
             priority
+            className="w-auto h-8 sm:h-10"
           />
         </Link>
 
-        {/* Desktop Navigation - Fixed Layout Issue */}
+        {/* Desktop Navigation */}
         <nav className="hidden md:flex space-x-8">
           <ul className="flex space-x-6">
             {navItems.map((item) => (
@@ -153,15 +153,16 @@ export default function Header() {
           </ul>
         </nav>
 
-        {/* Action Buttons */}
-        <div className="flex items-center space-x-4">
+        {/* Actions */}
+        <div className="flex items-center space-x-3 sm:space-x-4">
+          {/* Desktop buttons */}
           <Link href="/auth/login">
-            <div className="hidden sm:block text-sm font-medium py-2 px-3 rounded hover:bg-gradient-to-r hover:from-[#6914A8] hover:to-[#290842] hover:text-white">
+            <div className="hidden sm:block text-sm font-medium py-2 px-3 rounded hover:bg-gradient-to-r hover:from-[#6914A8] hover:to-[#290842] hover:text-white transition">
               Log In
             </div>
           </Link>
           <Link href="/auth/register">
-            <Button className="text-sm font-medium text-white transition-all duration-200 bg-gradient-to-r from-[#6914A8] to-[#290842] hover:from-[#6914A8] hover:to-[#290842] hover:scale-105 hover:shadow-lg hover:shadow-[#6914A8]/30">
+            <Button className="hidden sm:inline-block text-sm font-medium text-white transition-all duration-200 bg-gradient-to-r from-[#6914A8] to-[#290842] hover:scale-105 hover:shadow-lg hover:shadow-[#6914A8]/30">
               Sign Up
             </Button>
           </Link>
@@ -169,25 +170,34 @@ export default function Header() {
           {/* Mobile Menu */}
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <i className="fas fa-bars text-xl"></i>
-              </Button>
+              {/* Icon-only button: transparent bg, brand-colored icon */}
+              <button
+                aria-label="Open menu"
+                className="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-md hover:bg-black/5 active:bg-black/10 transition"
+              >
+                <Menu className="h-6 w-6 text-[#2C0053]" />
+              </button>
             </SheetTrigger>
+
+            {/* Theming the panel to app colors */}
             <SheetContent
               side="right"
-              className="bg-[#000a26] text-white border-[#101d3d] p-0"
+              className="bg-white text-[#2C0053] border-l border-[#E6D9F0] p-0"
             >
               <div className="flex flex-col h-full">
-                <div className="p-4 border-b border-[#101d3d]">
+                {/* Mobile Logo */}
+                <div className="p-4 border-b border-[#E6D9F0]">
                   <Image
-                    src="/assets/Logo-text-plain.png"
-                    width={200}
-                    height={32}
-                    alt="CodeBreak Logo"
+                    src="/assets/Logo-black.png"
+                    width={180}
+                    height={28}
+                    alt="Findly Logo"
                     priority
                   />
                 </div>
-                <nav className="flex flex-col p-4">
+
+                {/* Mobile Nav */}
+                <nav className="flex flex-col p-4 space-y-1">
                   <ul>
                     {navItems.map((item) => (
                       <li key={item}>
@@ -196,11 +206,11 @@ export default function Header() {
                             setIsMobileMenuOpen(false);
                             handleNavClick(item);
                           }}
-                          className={`py-3 px-4 ${
+                          className={`w-full text-left py-3 px-4 rounded-md transition-all duration-200 font-medium ${
                             active === item.toLowerCase()
-                              ? "bg-[#101d3d] text-white"
-                              : "text-gray-300 hover:bg-[#101d3d] hover:text-white"
-                          } rounded-md transition-all duration-200 font-medium`}
+                              ? "bg-[#F3ECF7] text-[#2C0053]"
+                              : "hover:bg-[#F7F1FA] text-[#2C0053]/80"
+                          }`}
                         >
                           {item}
                         </button>
@@ -208,17 +218,19 @@ export default function Header() {
                     ))}
                   </ul>
                 </nav>
-                <div className="mt-auto p-4 border-t border-[#101d3d]">
-                  <Link href="/auth/login">
+
+                {/* Mobile Auth buttons — themed */}
+                <div className="mt-auto p-4 border-t border-[#E6D9F0] space-y-3">
+                  <Link href="/auth/login" className="block">
                     <Button
                       variant="outline"
-                      className="w-full text-white border-white hover:bg-[#101d3d]"
+                      className="w-full border-[#2C0053] text-[#2C0053] hover:bg-[#F3ECF7]"
                     >
                       Log In
                     </Button>
                   </Link>
-                  <Link href="/auth/register">
-                    <Button className="w-full bg-[#ED1C24] hover:bg-[#d4171e]">
+                  <Link href="/auth/register" className="block">
+                    <Button className="w-full bg-gradient-to-r from-[#6914A8] to-[#290842] text-white hover:opacity-95">
                       Sign Up
                     </Button>
                   </Link>

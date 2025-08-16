@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
+import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/shared/Card";
@@ -17,12 +18,12 @@ import logSecurityEvent from "@/lib/utils/helpers";
 import { Pagination } from "@/components/ui/Pagination";
 import { useLanguage } from "@/context/LanguageContext";
 import { HorizontalSelect } from "@/components/ui/HorizontalSelect";
-import { Badge, BadgeProps } from "@/components/ui/Badge";
+import { Badge, type BadgeProps } from "@/components/ui/Badge";
 
 interface AgencyDocument {
   id: string;
-  type: string;
-  url: string;
+  type: string | null;
+  url: string | null;
   status: AccountStatus;
   uploadedAt: string;
   category: DocumentCategory;
@@ -42,11 +43,15 @@ interface Agency {
   user: {
     id: string;
     email: string;
-    status: AccountStatus;
+    status: AccountStatus | string | null;
     deleteAt?: Date | null;
-    deletionType?: string;
+    deletionType?: string | null;
   };
-  documents?: AgencyDocument[];
+  // Some installs may include these (guarded in UI):
+  address?: string | null;
+  city?: string | null;
+  postalCode?: string | null;
+  licenseNumber?: string | null;
 }
 
 interface RegistrationFormData {
@@ -63,7 +68,6 @@ interface RegistrationFormData {
   postalCode: string;
 }
 
-// Constants moved to separate file
 const COUNTRY_CODES = [
   { code: "+974", name: "Qatar" },
   { code: "+971", name: "UAE" },
@@ -88,7 +92,53 @@ export default function Agencies() {
   const { toast } = useToast();
   const { t } = useLanguage();
 
-  // State management
+  // ---------- Safe helpers ----------
+  const normalizeStatus = (val: unknown): AccountStatus | "UNKNOWN" => {
+    const s = typeof val === "string" ? val : "";
+    const all = Object.values(AccountStatus) as string[];
+    return all.includes(s) ? (s as AccountStatus) : "UNKNOWN";
+  };
+
+  const getStatusColor = useCallback((raw: unknown) => {
+    const status = normalizeStatus(raw);
+    switch (status) {
+      case AccountStatus.REJECTED:
+        return "text-[#ED1C24]/70";
+      case AccountStatus.NOT_VERIFIED:
+        return "text-[#150B3D]/70";
+      case AccountStatus.VERIFIED:
+        return "text-[#00C853]/70";
+      case AccountStatus.SUBMITTED:
+        return "text-[#150B3D]/70";
+      case AccountStatus.SUSPENDED:
+        return "text-[#ED1C24]/70";
+      default:
+        return "text-[#150B3D]/70";
+    }
+  }, []);
+
+  const getStatusBadge = (raw: unknown) => {
+    const status = normalizeStatus(raw);
+
+    const variantMap: Partial<
+      Record<AccountStatus | "UNKNOWN", BadgeProps["variant"]>
+    > = {
+      [AccountStatus.VERIFIED]: "default",
+      [AccountStatus.REJECTED]: "destructive",
+      [AccountStatus.NOT_VERIFIED]: "outline",
+      [AccountStatus.SUBMITTED]: "outline",
+      [AccountStatus.SUSPENDED]: "destructive",
+      UNKNOWN: "outline",
+    };
+
+    const label = String(status || "UNKNOWN")
+      .replace(/_/g, " ")
+      .toLowerCase();
+
+    return <Badge variant={variantMap[status] ?? "outline"}>{label}</Badge>;
+  };
+
+  // ---------- State ----------
   const [registrationData, setRegistrationData] =
     useState<RegistrationFormData>({
       agencyName: "",
@@ -109,47 +159,52 @@ export default function Agencies() {
   const [activeTab, setActiveTab] = useState<
     "all" | "pending" | "verified" | "rejected"
   >("all");
+
+  // Document review modal
   const [selectedAgency, setSelectedAgency] = useState<Agency | null>(null);
   const [agencyDocuments, setAgencyDocuments] = useState<AgencyDocument[]>([]);
   const [documentsLoading, setDocumentsLoading] = useState(false);
   const [documentsError, setDocumentsError] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [agencyToDelete, setAgencyToDelete] = useState<Agency | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
   const [documentStatuses, setDocumentStatuses] = useState<
     Record<string, AccountStatus>
   >({});
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // Memoized utility functions
+  // Delete modal
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [agencyToDelete, setAgencyToDelete] = useState<Agency | null>(null);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // NEW: Info modal (card click)
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+  const [infoAgency, setInfoAgency] = useState<Agency | null>(null);
+
+  // ---------- Utils ----------
   const isOlderThan12Hours = useCallback((date: Date) => {
     const now = new Date();
     const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
     return date < twelveHoursAgo;
   }, []);
 
-  const getRemainingTime = useCallback((deleteAt?: Date): string => {
+  const getRemainingTime = useCallback((deleteAt?: Date | null): string => {
     if (!deleteAt) return "No deletion scheduled";
-
     const now = new Date();
     const diffInMs = deleteAt.getTime() - now.getTime();
-
     if (diffInMs <= 0) return "Pending deletion";
-
     const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
     const diffInMinutes = Math.floor(
       (diffInMs % (1000 * 60 * 60)) / (1000 * 60)
     );
-
     return `${diffInHours}h ${diffInMinutes}m remaining`;
   }, []);
 
   const formatTimeAgo = useCallback((date: Date) => {
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
     if (diffInSeconds < 60) return `${diffInSeconds} sec ago`;
     if (diffInSeconds < 3600)
       return `${Math.floor(diffInSeconds / 60)} min ago`;
@@ -158,90 +213,10 @@ export default function Agencies() {
     return `${Math.floor(diffInSeconds / 86400)} days ago`;
   }, []);
 
-  const getStatusColor = useCallback((status: AccountStatus) => {
-    switch (status) {
-      case AccountStatus.REJECTED:
-        return "text-[#ED1C24]/70";
-      case AccountStatus.NOT_VERIFIED:
-        return "text-[#150B3D]/70";
-      case AccountStatus.VERIFIED:
-        return "text-[#00C853]/70";
-      default:
-        return "text-[#150B3D]/70";
-    }
-  }, []);
-
-  const getStatusBadge = (status: AccountStatus) => {
-    const variantMap: Record<AccountStatus, BadgeProps["variant"]> = {
-      [AccountStatus.VERIFIED]: "default",
-      [AccountStatus.REJECTED]: "destructive",
-      [AccountStatus.NOT_VERIFIED]: "outline",
-      [AccountStatus.SUBMITTED]: "outline",
-      [AccountStatus.SUSPENDED]: "destructive",
-    };
-
-    return (
-      <Badge variant={variantMap[status]}>
-        {status.replace("_", " ").toLowerCase()}
-      </Badge>
-    );
-  };
-
-  const fetchAgencyDocuments = async (agencyId: string) => {
-    try {
-      setDocumentsLoading(true);
-      setDocumentsError(null);
-      const res = await fetch(`/api/agencies/${agencyId}/documents`);
-
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-
-      const docs = await res.json();
-
-      if (!Array.isArray(docs)) {
-        throw new Error("Invalid documents format");
-      }
-
-      setAgencyDocuments(docs);
-
-      const statuses: Record<string, AccountStatus> = {};
-      docs.forEach((doc: AgencyDocument) => {
-        statuses[doc.id] = doc.status;
-      });
-      setDocumentStatuses(statuses);
-    } catch (error) {
-      console.error("Error fetching documents:", error);
-      setDocumentsError(
-        error instanceof Error ? error.message : "Failed to load documents"
-      );
-    } finally {
-      setDocumentsLoading(false);
-    }
-  };
-
-  const handleDocumentStatusChange = (docId: string, status: AccountStatus) => {
-    setDocumentStatuses((prev) => ({
-      ...prev,
-      [docId]: status,
-    }));
-  };
-
-  // Check if all important documents are verified
-  const allImportantDocumentsVerified = agencyDocuments.every((doc) => {
-    if (doc.category === DocumentCategory.IMPORTANT) {
-      return (
-        (documentStatuses[doc.id] || doc.status) === AccountStatus.VERIFIED
-      );
-    }
-    return true;
-  });
-
-  // Fetch agencies from API
+  // ---------- Data fetch ----------
   useEffect(() => {
     if (status === "loading") return;
 
-    // Redirect if not admin
     if (
       status === "unauthenticated" ||
       session?.user.role !== UserRole.RECRUITMENT_ADMIN
@@ -254,22 +229,13 @@ export default function Agencies() {
       try {
         setIsLoading(true);
         const response = await fetch("/api/agencies");
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch agencies");
-        }
-
+        if (!response.ok) throw new Error("Failed to fetch agencies");
         const data: Agency[] = await response.json();
         setAgencies(data);
-        logSecurityEvent("AGENCIES_FETCHED", {
-          count: data.length,
-        });
+        logSecurityEvent("AGENCIES_FETCHED", { count: data.length });
       } catch (error) {
         console.error("Error fetching agencies:", error);
-        toast({
-          type: "error",
-          message: "Failed to load agencies",
-        });
+        toast({ type: "error", message: "Failed to load agencies" });
         logSecurityEvent("AGENCIES_FETCH_FAILED", {
           error: error instanceof Error ? error.message : "Unknown error",
         });
@@ -281,88 +247,78 @@ export default function Agencies() {
     fetchAgencies();
   }, [status, session, router, toast]);
 
-  // Filtered and paginated agencies
+  // ---------- Tabs mapping ----------
+  const tabToStatus: Record<
+    "all" | "pending" | "verified" | "rejected",
+    AccountStatus | null
+  > = {
+    all: null,
+    pending: AccountStatus.NOT_VERIFIED,
+    verified: AccountStatus.VERIFIED,
+    rejected: AccountStatus.REJECTED,
+  };
+
+  // ---------- Filter & paginate ----------
   const filteredAgencies = useMemo(() => {
     return agencies.filter((agency) => {
+      const statusNorm = normalizeStatus(agency?.user?.status);
       if (
-        agency.user.status === AccountStatus.VERIFIED &&
+        statusNorm === AccountStatus.VERIFIED &&
         isOlderThan12Hours(new Date(agency.createdAt))
       ) {
         return false;
       }
-
       if (activeTab === "all") return true;
-      return agency.user.status === (activeTab.toUpperCase() as AccountStatus);
+      const wanted = tabToStatus[activeTab];
+      return statusNorm === wanted;
     });
   }, [agencies, activeTab, isOlderThan12Hours]);
-
-  const countryOptions = useMemo(
-    () =>
-      t.nationalityOptions?.map((nat) => ({
-        value: nat,
-        label: nat,
-      })) || [],
-    [t.nationalityOptions]
-  );
 
   const paginatedAgencies = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     return filteredAgencies.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   }, [filteredAgencies, currentPage]);
 
-  // Event handlers
-  const handleImmediateDelete = async (agencyId: string) => {
+  // ---------- Documents ----------
+  const fetchAgencyDocuments = async (agencyId: string) => {
     try {
-      const response = await fetch(
-        `/api/agencies/${agencyId}/delete-immediate`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) throw new Error("Failed to delete account");
-
-      const { id, user } = await response.json();
-
-      setAgencies((prev) =>
-        prev.map((agency) =>
-          agency.id === id
-            ? {
-                ...agency,
-                user: {
-                  ...agency.user,
-                  ...user,
-                },
-              }
-            : agency
-        )
-      );
-
-      setIsDeleteModalOpen(false);
-      toast({
-        type: "success",
-        message: "Account will be permanently deleted in 1 hour",
-      });
-      logSecurityEvent("AGENCY_DELETED", {
-        agencyId,
-        deletionType: "IMMEDIATE",
-      });
+      setDocumentsLoading(true);
+      setDocumentsError(null);
+      const res = await fetch(`/api/agencies/${agencyId}/documents`);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const docs = (await res.json()) as AgencyDocument[];
+      if (!Array.isArray(docs)) throw new Error("Invalid documents format");
+      setAgencyDocuments(docs);
+      const statuses: Record<string, AccountStatus> = {};
+      docs.forEach((doc) => (statuses[doc.id] = doc.status));
+      setDocumentStatuses(statuses);
     } catch (error) {
-      console.error("Error deleting account:", error);
-      toast({
-        type: "error",
-        message:
-          error instanceof Error ? error.message : "Failed to delete account",
-      });
-      logSecurityEvent("AGENCY_DELETE_FAILED", {
-        agencyId,
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
+      console.error("Error fetching documents:", error);
+      setDocumentsError(
+        error instanceof Error ? error.message : "Failed to load documents"
+      );
+    } finally {
+      setDocumentsLoading(false);
     }
   };
 
+  const handleDocumentStatusChange = (docId: string, status: AccountStatus) => {
+    setDocumentStatuses((prev) => ({ ...prev, [docId]: status }));
+  };
+
+  const allImportantDocumentsVerified = agencyDocuments.every((doc) => {
+    if (doc.category === DocumentCategory.IMPORTANT) {
+      return (
+        (documentStatuses[doc.id] || doc.status) === AccountStatus.VERIFIED
+      );
+    }
+    return true;
+  });
+
+  // ---------- Handlers ----------
   const handleRowClick = async (agency: Agency) => {
-    if (agency.user.status === AccountStatus.NOT_VERIFIED) {
+    const statusNorm = normalizeStatus(agency.user?.status);
+    if (statusNorm === AccountStatus.NOT_VERIFIED) {
       setSelectedAgency(agency);
       await fetchAgencyDocuments(agency.id);
       setIsModalOpen(true);
@@ -372,10 +328,7 @@ export default function Agencies() {
 
   const handleRegistrationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setRegistrationData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setRegistrationData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleRegistration = async () => {
@@ -383,18 +336,14 @@ export default function Agencies() {
       setIsRegistering(true);
       const response = await fetch("/api/agencies/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(registrationData),
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || "Registration failed");
       }
-
-      const newAgency = await response.json();
+      const newAgency: Agency = await response.json();
       setAgencies((prev) => [newAgency, ...prev]);
       setRegistrationData({
         agencyName: "",
@@ -409,11 +358,7 @@ export default function Agencies() {
         city: "",
         postalCode: "",
       });
-
-      toast({
-        type: "success",
-        message: "Agency registered successfully",
-      });
+      toast({ type: "success", message: "Agency registered successfully" });
       logSecurityEvent("AGENCY_REGISTERED", { agencyId: newAgency.id });
     } catch (error) {
       console.error("Registration error:", error);
@@ -438,9 +383,7 @@ export default function Agencies() {
       setIsUpdating(true);
       const response = await fetch(`/api/agencies/${agencyId}/status`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: newStatus,
           reason:
@@ -452,27 +395,19 @@ export default function Agencies() {
             newStatus === AccountStatus.REJECTED ? "SCHEDULED" : undefined,
         }),
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to update status");
-      }
-
-      const updatedAgency = await response.json();
+      if (!response.ok) throw new Error("Failed to update status");
+      const updatedAgency: Agency = await response.json();
       setAgencies((prev) =>
-        prev.map((agency) =>
-          agency.id === updatedAgency.id ? updatedAgency : agency
-        )
+        prev.map((a) => (a.id === updatedAgency.id ? updatedAgency : a))
       );
-
       if (newStatus !== AccountStatus.NOT_VERIFIED) {
         setIsModalOpen(false);
         setSelectedAgency(null);
         setRejectionReason("");
       }
-
       toast({
         type: "success",
-        message: `Agency status updated to ${newStatus.toLowerCase()}`,
+        message: `Agency status updated to ${String(newStatus).toLowerCase()}`,
       });
       logSecurityEvent("AGENCY_STATUS_UPDATED", {
         agencyId,
@@ -481,10 +416,7 @@ export default function Agencies() {
       });
     } catch (error) {
       console.error("Status update error:", error);
-      toast({
-        type: "error",
-        message: "Failed to update agency status",
-      });
+      toast({ type: "error", message: "Failed to update agency status" });
       logSecurityEvent("AGENCY_STATUS_UPDATE_FAILED", {
         agencyId,
         error: error instanceof Error ? error.message : "Unknown error",
@@ -494,27 +426,53 @@ export default function Agencies() {
     }
   };
 
+  const handleImmediateDelete = async (agencyId: string) => {
+    try {
+      const response = await fetch(
+        `/api/agencies/${agencyId}/delete-immediate`,
+        { method: "DELETE" }
+      );
+      if (!response.ok) throw new Error("Failed to delete account");
+      const { id, user } = await response.json();
+      setAgencies((prev) =>
+        prev.map((a) =>
+          a.id === id ? { ...a, user: { ...a.user, ...user } } : a
+        )
+      );
+      setIsDeleteModalOpen(false);
+      toast({
+        type: "success",
+        message: "Account will be permanently deleted in 1 hour",
+      });
+      logSecurityEvent("AGENCY_DELETED", {
+        agencyId,
+        deletionType: "IMMEDIATE",
+      });
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      toast({
+        type: "error",
+        message:
+          error instanceof Error ? error.message : "Failed to delete account",
+      });
+      logSecurityEvent("AGENCY_DELETE_FAILED", {
+        agencyId,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  };
+
   const handleRecoverAccount = async (agencyId: string) => {
     try {
       const response = await fetch(`/api/agencies/${agencyId}/recover`, {
         method: "PUT",
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to recover account");
-      }
-
-      const updatedAgency = await response.json();
-      setAgencies(
-        agencies.map((agency) =>
-          agency.id === updatedAgency.id ? updatedAgency : agency
-        )
+      if (!response.ok) throw new Error("Failed to recover account");
+      const updatedAgency: Agency = await response.json();
+      setAgencies((prev) =>
+        prev.map((a) => (a.id === updatedAgency.id ? updatedAgency : a))
       );
-
-      toast({
-        type: "success",
-        message: "Account recovery successful",
-      });
+      toast({ type: "success", message: "Account recovery successful" });
       logSecurityEvent("AGENCY_RECOVERED", { agencyId });
     } catch (error) {
       console.error("Error recovering account:", error);
@@ -530,6 +488,13 @@ export default function Agencies() {
     }
   };
 
+  // NEW: open/close info popup from card click
+  const openInfoModal = (agency: Agency) => {
+    setInfoAgency(agency);
+    setIsInfoModalOpen(true);
+  };
+
+  // ---------- Loading ----------
   if (status === "loading" || isLoading) {
     return (
       <div className="px-6 flex justify-center items-center min-h-screen bg-[#F8F6FB]">
@@ -541,6 +506,7 @@ export default function Agencies() {
     );
   }
 
+  // ---------- Render ----------
   return (
     <div className="px-6 space-y-6">
       {/* Top Section - Registration and Verification */}
@@ -554,6 +520,7 @@ export default function Agencies() {
           <h2 className="text-xl font-semibold text-[#2C0053]">Verification</h2>
         </div>
       </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Registration Card */}
         <Card className="p-6 bg-[#EDDDF3]">
@@ -609,6 +576,8 @@ export default function Agencies() {
               required
               aria-required="true"
             />
+
+            {/* Phone with country code */}
             <div className="flex items-center gap-14">
               <label
                 htmlFor="phone"
@@ -619,15 +588,14 @@ export default function Agencies() {
 
               <div className="flex-1">
                 <div className="flex border rounded-md overflow-hidden">
-                  {/* Country Code */}
                   <select
                     name="countryCode"
                     value={registrationData.countryCode}
                     onChange={(e) =>
-                      setRegistrationData({
-                        ...registrationData,
+                      setRegistrationData((prev) => ({
+                        ...prev,
                         countryCode: e.target.value,
-                      })
+                      }))
                     }
                     className="px-3 py-2 text-sm text-gray-700 outline-none"
                     required
@@ -639,8 +607,6 @@ export default function Agencies() {
                       </option>
                     ))}
                   </select>
-
-                  {/* Phone Input */}
                   <input
                     type="tel"
                     id="phone"
@@ -655,6 +621,7 @@ export default function Agencies() {
                 </div>
               </div>
             </div>
+
             <Input
               variant="horizontal"
               label="Address :"
@@ -680,12 +647,17 @@ export default function Agencies() {
               name="country"
               value={registrationData.country}
               onChange={(e) =>
-                setRegistrationData({
-                  ...registrationData,
+                setRegistrationData((prev) => ({
+                  ...prev,
                   country: e.target.value,
-                })
+                }))
               }
-              options={countryOptions}
+              options={
+                t.nationalityOptions?.map((nat) => ({
+                  value: nat,
+                  label: nat,
+                })) ?? []
+              }
               required
               aria-required="true"
             />
@@ -697,13 +669,12 @@ export default function Agencies() {
               onChange={handleRegistrationChange}
               placeholder="Enter postal code"
             />
+
             <div className="flex justify-center mt-4">
               <Button
                 onClick={handleRegistration}
-                disabled={isRegistering} // ⇦ NEW
-                className="w-1/3 bg-[#3D1673] hover:bg-[#2b0e54]
-             text-white py-2 px-4 rounded-md
-             disabled:opacity-60 disabled:cursor-not-allowed" // UX tweak
+                disabled={isRegistering}
+                className="w-1/3 bg-[#3D1673] hover:bg-[#2b0e54] text-white py-2 px-4 rounded-md disabled:opacity-60 disabled:cursor-not-allowed"
                 aria-label="Register agency"
               >
                 {isRegistering ? (
@@ -774,6 +745,7 @@ export default function Agencies() {
               Rejected
             </Button>
           </div>
+
           <div className="overflow-x-auto">
             <table className="min-w-full">
               <thead>
@@ -793,67 +765,86 @@ export default function Agencies() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-transparent">
-                {paginatedAgencies.map((agency) => (
-                  <tr
-                    key={agency.id}
-                    className={`hover:bg-blue-25 ${
-                      agency.user.status === AccountStatus.NOT_VERIFIED
-                        ? "cursor-pointer hover:bg-[#EDDDF3]"
-                        : ""
-                    }`}
-                    onClick={() => handleRowClick(agency)}
-                    aria-label={`Agency ${agency.agencyName}`}
-                  >
-                    <td className="py-2 px-3 text-sm text-[#150B3D]/70">
-                      {agency.agencyName}
-                      {agency.user.deleteAt && (
-                        <span className="text-xs text-red-500 ml-2">
-                          (Deletion Pending)
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-2 px-3 text-sm text-[#150B3D]/70">
-                      {agency.user.email}
-                    </td>
-                    <td
-                      className={`py-2 px-3 text-sm font-medium ${getStatusColor(
-                        agency.user.status
-                      )}`}
+                {paginatedAgencies.map((agency) => {
+                  const statusNorm = normalizeStatus(agency?.user?.status);
+                  return (
+                    <tr
+                      key={agency.id}
+                      className={`hover:bg-blue-25 ${
+                        statusNorm === AccountStatus.NOT_VERIFIED
+                          ? "cursor-pointer hover:bg-[#EDDDF3]"
+                          : ""
+                      }`}
+                      onClick={() => handleRowClick(agency)}
+                      aria-label={`Agency ${agency.agencyName}`}
                     >
-                      {getStatusBadge(agency.user.status)}
-                    </td>
-                    <td className="py-2 px-3 text-sm text-[#150B3D]/70 space-x-2">
-                      {agency.user.status === AccountStatus.NOT_VERIFIED && (
-                        <>
-                          <Button
-                            size="sm"
+                      <td className="py-2 px-3 text-sm text-[#150B3D]/70">
+                        {agency.agencyName}
+                        {agency.user.deleteAt && (
+                          <span className="text-xs text-red-500 ml-2">
+                            (Deletion Pending)
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-2 px-3 text-sm text-[#150B3D]/70">
+                        {agency.user.email}
+                      </td>
+                      <td
+                        className={`py-2 px-3 text-sm font-medium ${getStatusColor(
+                          statusNorm
+                        )}`}
+                      >
+                        {getStatusBadge(statusNorm)}
+                      </td>
+                      <td className="py-2 px-3 text-sm text-[#150B3D]/70 space-x-2">
+                        {statusNorm === AccountStatus.NOT_VERIFIED && (
+                          <>
+                            <Button
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStatusUpdate(
+                                  agency.id,
+                                  AccountStatus.VERIFIED
+                                );
+                              }}
+                              aria-label={`Approve ${agency.agencyName}`}
+                            >
+                              Approve
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedAgency(agency);
+                                setIsModalOpen(true);
+                              }}
+                              aria-label={`Reject ${agency.agencyName}`}
+                            >
+                              Reject
+                            </Button>
+                          </>
+                        )}
+
+                        {(statusNorm === AccountStatus.REJECTED ||
+                          statusNorm === AccountStatus.NOT_VERIFIED ||
+                          statusNorm === AccountStatus.VERIFIED) && (
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleStatusUpdate(
-                                agency.id,
-                                AccountStatus.VERIFIED
-                              );
+                              setAgencyToDelete(agency);
+                              setIsDeleteModalOpen(true);
                             }}
-                            aria-label={`Approve ${agency.agencyName}`}
+                            className="text-red-500 hover:text-red-700"
+                            title="Delete account"
+                            aria-label={`Delete ${agency.agencyName}`}
                           >
-                            Approve
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedAgency(agency);
-                              setIsModalOpen(true);
-                            }}
-                            aria-label={`Reject ${agency.agencyName}`}
-                          >
-                            Reject
-                          </Button>
-                        </>
-                      )}
-                      {agency.user.status === AccountStatus.REJECTED && (
-                        <>
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
+
+                        {statusNorm === AccountStatus.REJECTED && (
                           <Button
                             size="sm"
                             onClick={(e) => {
@@ -867,53 +858,14 @@ export default function Agencies() {
                           >
                             Re-review
                           </Button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setAgencyToDelete(agency);
-                              setIsDeleteModalOpen(true);
-                            }}
-                            className="text-red-500 hover:text-red-700"
-                            title="Delete account"
-                            aria-label={`Delete ${agency.agencyName}`}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </>
-                      )}
-                      {agency.user.status === AccountStatus.NOT_VERIFIED && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setAgencyToDelete(agency);
-                            setIsDeleteModalOpen(true);
-                          }}
-                          className="text-red-500 hover:text-red-700"
-                          title="Delete account"
-                          aria-label={`Delete ${agency.agencyName}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      )}
-                      {agency.user.status === AccountStatus.VERIFIED && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setAgencyToDelete(agency);
-                            setIsDeleteModalOpen(true);
-                          }}
-                          className="text-red-500 hover:text-red-700"
-                          title="Delete account"
-                          aria-label={`Delete ${agency.agencyName}`}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
+
             {filteredAgencies.length > ITEMS_PER_PAGE && (
               <div className="mt-4 flex justify-center">
                 <Pagination
@@ -928,7 +880,63 @@ export default function Agencies() {
           </div>
         </Card>
       </div>
-      {/* Document Viewer Modal */}
+
+      {/* ===========================
+          Bottom Section - Agency Cards Grid
+          (Now opens Info Modal on click)
+      ============================ */}
+      <div className="mt-6">
+        <h2 className="text-xl font-semibold mb-3">Agencies</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {agencies
+            .filter((agency) => {
+              const statusNorm = normalizeStatus(agency?.user?.status);
+              return (
+                statusNorm === AccountStatus.VERIFIED ||
+                statusNorm === AccountStatus.REJECTED
+              );
+            })
+            .map((agency) => (
+              <div key={agency.id} className="relative">
+                <AgencyCardContent
+                  agencyName={agency.agencyName}
+                  location={`${agency.country} • ${agency.registrationNo}`}
+                  logoUrl={agency.profilePicture || ""}
+                  email={agency.user.email}
+                  registerNo={agency.registrationNo}
+                  time={
+                    normalizeStatus(agency.user.status) ===
+                      AccountStatus.REJECTED && agency.user.deleteAt
+                      ? getRemainingTime(
+                          agency.user.deleteAt
+                            ? new Date(agency.user.deleteAt)
+                            : null
+                        )
+                      : formatTimeAgo(new Date(agency.createdAt))
+                  }
+                  onClick={() => openInfoModal(agency)} // <-- OPEN MODAL
+                  aria-label={`View details for ${agency.agencyName}`}
+                />
+
+                {/* Status indicator */}
+                <div className="absolute bottom-3 left-2 right-2 flex justify-between items-start">
+                  {normalizeStatus(agency.user.status) ===
+                    AccountStatus.REJECTED && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                      Rejected
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+        </div>
+      </div>
+
+      {/* ===========================
+          Modals
+      ============================ */}
+
+      {/* Document Reviewer Modal (unchanged behavior) */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => {
@@ -936,7 +944,9 @@ export default function Agencies() {
           setSelectedAgency(null);
           setRejectionReason("");
         }}
-        title={`Review Documents - ${selectedAgency ? selectedAgency.agencyName : ""}`}
+        title={`Review Documents - ${
+          selectedAgency ? selectedAgency.agencyName : ""
+        }`}
         size="5xl"
         showFooter={true}
         footerContent={
@@ -1043,7 +1053,7 @@ export default function Agencies() {
               </div>
             </div>
 
-            {/* Documents Section with single scroll */}
+            {/* Documents Section */}
             <div className="flex-1 overflow-hidden flex flex-col">
               <h3 className="font-semibold text-lg mb-4">
                 Submitted Documents
@@ -1087,12 +1097,18 @@ export default function Agencies() {
                 <div className="flex-1 overflow-y-auto pr-2">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4">
                     {agencyDocuments.map((doc) => {
-                      const absoluteUrl = `${window.location.origin}${doc.url}`;
+                      const rawUrl = doc?.url ?? "";
+                      const absoluteUrl = rawUrl
+                        ? rawUrl.startsWith("http")
+                          ? rawUrl
+                          : `${window.location.origin}${rawUrl}`
+                        : "";
                       const isImage = /\.(png|jpg|jpeg|gif|webp)$/i.test(
-                        doc.url
+                        rawUrl
                       );
-                      const isPdf = /\.(pdf)$/i.test(doc.url);
-                      const fileName = doc.url.split("/").pop() || "document";
+                      const isPdf = /\.pdf$/i.test(rawUrl);
+                      const fileName =
+                        (rawUrl && rawUrl.split("/").pop()) || "document";
                       const currentStatus =
                         documentStatuses[doc.id] || doc.status;
                       const isImportant =
@@ -1107,7 +1123,9 @@ export default function Agencies() {
                         >
                           <div className="flex justify-between items-center">
                             <h4 className="font-medium capitalize">
-                              {doc.type.toLowerCase().replace(/_/g, " ")}
+                              {String(doc?.type ?? "document")
+                                .toLowerCase()
+                                .replace(/_/g, " ")}
                               {isImportant && (
                                 <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded">
                                   Important
@@ -1115,6 +1133,7 @@ export default function Agencies() {
                               )}
                             </h4>
                           </div>
+
                           <div className="mt-2">
                             <div className="flex items-center space-x-2 mb-2">
                               <span className="text-sm font-medium">
@@ -1140,17 +1159,16 @@ export default function Agencies() {
                               </select>
                             </div>
 
-                            {/* Document Viewer */}
                             <div className="border rounded-md p-2 h-64 flex flex-col">
                               <div className="flex-1 overflow-hidden flex items-center justify-center">
-                                {isImage ? (
+                                {isImage && absoluteUrl ? (
                                   // eslint-disable-next-line @next/next/no-img-element
                                   <img
                                     src={absoluteUrl}
-                                    alt={doc.type}
+                                    alt={String(doc?.type ?? "document")}
                                     className="max-w-full max-h-full object-contain"
                                   />
-                                ) : isPdf ? (
+                                ) : isPdf && absoluteUrl ? (
                                   <div className="w-full h-full">
                                     <PDFViewer url={absoluteUrl} />
                                     <div className="mt-2 text-center">
@@ -1177,15 +1195,17 @@ export default function Agencies() {
                                 <span className="text-xs text-gray-500 truncate">
                                   {fileName}
                                 </span>
-                                <a
-                                  href={absoluteUrl}
-                                  download={fileName}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:underline text-sm"
-                                >
-                                  Download
-                                </a>
+                                {absoluteUrl && (
+                                  <a
+                                    href={absoluteUrl}
+                                    download={fileName}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 hover:underline text-sm"
+                                  >
+                                    Download
+                                  </a>
+                                )}
                               </div>
                             </div>
                           </div>
@@ -1203,6 +1223,7 @@ export default function Agencies() {
           </div>
         )}
       </Modal>
+
       {/* Delete Confirmation Modal */}
       <Modal
         isOpen={isDeleteModalOpen}
@@ -1225,9 +1246,7 @@ export default function Agencies() {
             <Button
               variant="default"
               onClick={() => {
-                if (agencyToDelete) {
-                  handleImmediateDelete(agencyToDelete.id);
-                }
+                if (agencyToDelete) handleImmediateDelete(agencyToDelete.id);
               }}
               aria-label="Confirm deletion"
             >
@@ -1246,7 +1265,9 @@ export default function Agencies() {
             <Button
               size="sm"
               variant="outline"
-              onClick={() => handleRecoverAccount(agencyToDelete.id)}
+              onClick={() =>
+                agencyToDelete && handleRecoverAccount(agencyToDelete.id)
+              }
               aria-label="Recover account"
             >
               <Undo2 className="h-4 w-4 mr-2" />
@@ -1258,49 +1279,126 @@ export default function Agencies() {
           </div>
         )}
       </Modal>
-      {/* Bottom Section - Agency Cards Grid */}
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold mb-3">Agencies</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {agencies
-            .filter(
-              (agency) =>
-                agency.user.status === AccountStatus.VERIFIED ||
-                agency.user.status === AccountStatus.REJECTED
-            )
-            .map((agency) => (
-              <div key={agency.id} className="relative">
-                <AgencyCardContent
-                  agencyName={agency.agencyName}
-                  location={`${agency.country} • ${agency.registrationNo}`}
-                  logoUrl={agency.profilePicture || ""}
-                  email={agency.user.email}
-                  registerNo={agency.registrationNo}
-                  time={
-                    agency.user.status === AccountStatus.REJECTED &&
-                    agency.user.deleteAt
-                      ? getRemainingTime(new Date(agency.user.deleteAt))
-                      : formatTimeAgo(new Date(agency.createdAt))
-                  }
-                  onClick={() =>
-                    router.push(`/dashboard/admin/agencies/${agency.id}`)
-                  }
-                  aria-label={`View details for ${agency.agencyName}`}
-                />
 
-                {/* Status indicators container */}
-                <div className="absolute bottom-3 left-2 right-2 flex justify-between items-start">
-                  {/* Rejected status */}
-                  {agency.user.status === AccountStatus.REJECTED && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      Rejected
-                    </span>
-                  )}
+      {/* NEW: Agency Info Modal (for card click) */}
+      <Modal
+        isOpen={isInfoModalOpen}
+        onClose={() => {
+          setIsInfoModalOpen(false);
+          setInfoAgency(null);
+        }}
+        title={
+          infoAgency
+            ? `Agency Details — ${infoAgency.agencyName}`
+            : "Agency Details"
+        }
+        size="3xl"
+        showFooter
+        footerContent={
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={() => setIsInfoModalOpen(false)}>
+              Close
+            </Button>
+          </div>
+        }
+      >
+        {infoAgency && (
+          <div className="space-y-4 mb-8">
+            {/* Header area */}
+            <div className="flex items-start gap-4">
+              <Image
+                src={infoAgency.profilePicture || ""}
+                alt={infoAgency.agencyName}
+                width={56}
+                height={56}
+                className="h-14 w-14 rounded-xl object-cover border border-[#2C0053]/15 bg-white"
+              />
+              <div className="flex-1">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h3 className="text-lg font-semibold text-[#2C0053] m-0">
+                    {infoAgency.agencyName}
+                  </h3>
+                  {getStatusBadge(infoAgency.user.status)}
                 </div>
+                <p className="text-sm text-[#150B3D]/70">
+                  Registered: {new Date(infoAgency.createdAt).toLocaleString()}
+                </p>
               </div>
-            ))}
-        </div>
-      </div>
+            </div>
+
+            {/* Body grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#EFEBF2] rounded-lg p-4">
+              <div>
+                <p className="text-xs text-[#70528A]">Registration No</p>
+                <p className="text-sm text-[#150B3D]">
+                  {infoAgency.registrationNo || "—"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-[#70528A]">License Expiry</p>
+                <p className="text-sm text-[#150B3D]">
+                  {infoAgency.licenseExpiry
+                    ? new Date(infoAgency.licenseExpiry).toLocaleDateString()
+                    : "—"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-[#70528A]">Country</p>
+                <p className="text-sm text-[#150B3D]">
+                  {infoAgency.country || "—"}
+                </p>
+              </div>
+              {infoAgency.licenseNumber ? (
+                <div>
+                  <p className="text-xs text-[#70528A]">License Number</p>
+                  <p className="text-sm text-[#150B3D]">
+                    {infoAgency.licenseNumber}
+                  </p>
+                </div>
+              ) : null}
+              <div className="sm:col-span-2 h-[1px] bg-[#2C0053]/15 my-1" />
+              <div>
+                <p className="text-xs text-[#70528A]">Contact Person</p>
+                <p className="text-sm text-[#150B3D]">
+                  {infoAgency.contactPerson || "—"}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-[#70528A]">Email</p>
+                <p className="text-sm text-[#150B3D]">
+                  {infoAgency.user.email}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-[#70528A]">Phone</p>
+                <p className="text-sm text-[#150B3D]">
+                  {infoAgency.phone || "—"}
+                </p>
+              </div>
+              {infoAgency.address ? (
+                <div>
+                  <p className="text-xs text-[#70528A]">Address</p>
+                  <p className="text-sm text-[#150B3D]">{infoAgency.address}</p>
+                </div>
+              ) : null}
+              {infoAgency.city ? (
+                <div>
+                  <p className="text-xs text-[#70528A]">City</p>
+                  <p className="text-sm text-[#150B3D]">{infoAgency.city}</p>
+                </div>
+              ) : null}
+              {infoAgency.postalCode ? (
+                <div>
+                  <p className="text-xs text-[#70528A]">Postal Code</p>
+                  <p className="text-sm text-[#150B3D]">
+                    {infoAgency.postalCode}
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

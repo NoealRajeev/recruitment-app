@@ -233,7 +233,10 @@ export default function RegisterPage() {
   }, [emailOtpResendTime, phoneOtpResendTime]);
 
   const sendOtp = useCallback(
-    async (type: "email" | "phone", value: string): Promise<boolean> => {
+    async (
+      type: "email" | "phone",
+      value: string
+    ): Promise<{ success: boolean; message: string; otp?: string }> => {
       try {
         const response = await fetch("/api/auth/send-otp", {
           method: "POST",
@@ -243,17 +246,15 @@ export default function RegisterPage() {
         const data = await response.json();
         if (response.ok) {
           toast({ type: "success", message: data.message });
-          return true;
+          return { success: true, message: data.message, otp: data.otp };
         } else {
           throw new Error(data.message || "Failed to send OTP");
         }
       } catch (error) {
-        toast({
-          type: "error",
-          message:
-            error instanceof Error ? error.message : "Failed to send OTP",
-        });
-        return false;
+        const msg =
+          error instanceof Error ? error.message : "Failed to send OTP";
+        toast({ type: "error", message: msg });
+        return { success: false, message: msg };
       }
     },
     [toast]
@@ -388,6 +389,10 @@ export default function RegisterPage() {
       if (success) {
         setPhoneOtpSent(true);
         setPhoneOtpResendTime(60); // 60 seconds countdown
+        toast({
+          type: "success",
+          message: `Your OTP: ${success.otp}`,
+        });
       }
     } finally {
       setIsSendingOtp((prev) => ({ ...prev, phone: false }));

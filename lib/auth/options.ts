@@ -93,6 +93,23 @@ export const authOptions: AuthOptions = {
       }
       return session;
     },
+    async redirect({ url, baseUrl }) {
+      try {
+        // Allow relative redirects
+        if (url.startsWith("/")) return `${baseUrl}${url}`;
+
+        const parsed = new URL(url);
+        const base = new URL(baseUrl);
+
+        // Allow same-origin absolute redirects
+        if (parsed.origin === base.origin) return url;
+
+        // Otherwise, drop to a safe default
+        return `${baseUrl}/dashboard`;
+      } catch {
+        return `${baseUrl}/dashboard`;
+      }
+    },
   },
   events: {
     async signIn({ user }) {

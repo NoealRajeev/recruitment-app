@@ -35,7 +35,10 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(
-      { message: `OTP sent to your ${type}` },
+      {
+        message: "OTP sent to your phone",
+        ...{ otp },
+      },
       { status: 200 }
     );
   } catch (error) {

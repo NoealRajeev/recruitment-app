@@ -156,12 +156,30 @@ function LoginForm({
   );
 }
 
-function LoginFormWrapper({ onErrorOccurred }: { onErrorOccurred?: () => void }) {
+function LoginFormWrapper({
+  onErrorOccurred,
+}: {
+  onErrorOccurred?: () => void;
+}) {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams?.get("callbackUrl") ?? "/dashboard";
+  const raw = searchParams?.get("callbackUrl") ?? "/dashboard";
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [formError, setFormError] = useState("");
+
+  let callbackUrl = "/dashboard";
+  try {
+    const url = new URL(raw, window.location.origin);
+    const isSameOrigin = url.origin === window.location.origin;
+    const isSafePath = url.pathname.startsWith("/");
+    // allow same-origin absolute or any relative path; otherwise fallback
+    callbackUrl =
+      isSameOrigin || isSafePath
+        ? url.pathname + url.search + url.hash
+        : "/dashboard";
+  } catch {
+    callbackUrl = "/dashboard";
+  }
 
   const handleSubmit = async () => {
     setLoading(true);
@@ -225,7 +243,7 @@ export default function LoginPage() {
   const handleRegisterRedirect = () => {
     router.push("/auth/register");
   };
-  
+
   // Reset isSubmitting when an error occurs
   const handleErrorOccurred = () => {
     setIsSubmitting(false);

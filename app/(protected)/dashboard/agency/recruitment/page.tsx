@@ -1370,9 +1370,7 @@ export default function AgencyRecruitment() {
       />
       <div className="w-5/6 rounded-lg p-6 overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <div className="font-bold text-lg text-[#150B3D]">
-            Recruitment Tracker
-          </div>
+          <div className="font-bold text-lg text-[#150B3D]"></div>
           <select
             className="border rounded px-2 py-1 text-sm"
             value={stageFilter}

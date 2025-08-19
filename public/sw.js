@@ -42,33 +42,35 @@ self.addEventListener("activate", (event) => {
 
 // Fetch event - handle offline scenarios
 self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
+  const req = event.request;
+  const url = new URL(req.url);
 
-  // Handle notification API requests
-  if (url.pathname.startsWith("/api/notifications")) {
-    event.respondWith(handleNotificationRequest(request));
+  // Let the browser/Next.js handle real page navigations
+  if (req.mode === "navigate") {
+    return; // do NOT event.respondWith for navigations
+  }
+
+  // Never touch API/auth
+  if (url.pathname.startsWith("/api/")) {
     return;
   }
 
-  // Handle other requests with cache-first strategy
-  event.respondWith(
-    caches.match(request).then((response) => {
-      if (response) {
-        return response;
-      }
-      return fetch(request).then((response) => {
-        if (!response || response.status !== 200 || response.type !== "basic") {
-          return response;
-        }
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(request, responseToCache);
-        });
-        return response;
-      });
-    })
-  );
+  // Example: cache-only for immutable build assets
+  if (
+    url.origin === self.location.origin &&
+    url.pathname.startsWith("/_next/static/")
+  ) {
+    event.respondWith(
+      (async () => {
+        const cache = await caches.open("static-v2");
+        const hit = await cache.match(req);
+        if (hit) return hit;
+        const res = await fetch(req);
+        cache.put(req, res.clone());
+        return res;
+      })()
+    );
+  }
 });
 
 // Handle notification requests with offline support

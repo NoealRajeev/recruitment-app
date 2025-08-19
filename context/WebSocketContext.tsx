@@ -1,10 +1,17 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { io, Socket } from "socket.io-client";
 import { useSession } from "next-auth/react";
-import offlineNotificationService from "@/lib/offline-notifications";
 import { publicEnv } from "@/lib/env.public";
+import { getOfflineNotificationService } from "@/lib/offline-notifications";
+import { usePathname } from "next/navigation";
 
 interface Notification {
   id: string;
@@ -16,10 +23,7 @@ interface Notification {
   createdAt: string;
   actionUrl?: string;
   actionText?: string;
-  sender?: {
-    name: string;
-    role: string;
-  };
+  sender?: { name: string; role: string };
 }
 
 interface WebSocketContextType {
@@ -39,11 +43,10 @@ const WebSocketContext = createContext<WebSocketContextType | undefined>(
 );
 
 export const useWebSocket = () => {
-  const context = useContext(WebSocketContext);
-  if (context === undefined) {
+  const ctx = useContext(WebSocketContext);
+  if (!ctx)
     throw new Error("useWebSocket must be used within a WebSocketProvider");
-  }
-  return context;
+  return ctx;
 };
 
 interface WebSocketProviderProps {
@@ -54,76 +57,86 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
   children,
 }) => {
   const { data: session } = useSession();
+  const pathname = usePathname();
+  const isAuthArea = pathname?.startsWith("/auth");
+
+  // Lazily init the offline service; never on /auth/*
+  const serviceRef = useRef<ReturnType<
+    typeof getOfflineNotificationService
+  > | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (isAuthArea) return;
+    if (!serviceRef.current) {
+      serviceRef.current = getOfflineNotificationService();
+    }
+  }, [isAuthArea]);
+
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOnline, setIsOnline] = useState(
-    offlineNotificationService.isOnlineMode()
+    typeof window !== "undefined" ? navigator.onLine : true
   );
 
+  // Socket lifecycle (skip on /auth/*)
   useEffect(() => {
     if (!session?.user?.id) return;
+    if (isAuthArea) return;
 
-    // Create socket connection
-    const newSocket = io(publicEnv.NEXT_PUBLIC_WEBSOCKET_URL || "", {
+    const url = publicEnv.NEXT_PUBLIC_WEBSOCKET_URL || "";
+    if (!url) {
+      console.warn(
+        "NEXT_PUBLIC_WEBSOCKET_URL is not set; skipping socket init."
+      );
+      return;
+    }
+
+    const newSocket = io(url, {
       transports: ["websocket", "polling"],
       autoConnect: true,
     });
-
     setSocket(newSocket);
 
-    // Connection events
     newSocket.on("connect", () => {
-      console.log("Connected to WebSocket server");
       setIsConnected(true);
-
-      // Authenticate with the server
       newSocket.emit("authenticate", {
         userId: session.user.id,
-        token: "your-auth-token", // In a real app, you'd pass the actual token
+        token: "your-auth-token", // TODO: pass a real token if needed
       });
     });
 
-    newSocket.on("disconnect", () => {
-      console.log("Disconnected from WebSocket server");
-      setIsConnected(false);
-    });
-
-    // Notification events
-    newSocket.on("unreadCount", (data) => {
-      setUnreadCount(data.count);
-    });
-
-    newSocket.on("notifications", (data) => {
-      setNotifications(data.notifications);
-    });
-
-    newSocket.on("newNotification", (notification) => {
-      setNotifications((prev) => [notification, ...prev]);
+    newSocket.on("disconnect", () => setIsConnected(false));
+    newSocket.on("unreadCount", (data) => setUnreadCount(data.count));
+    newSocket.on("notifications", (data) =>
+      setNotifications(data.notifications)
+    );
+    newSocket.on("newNotification", (n) => {
+      setNotifications((prev) => [n, ...prev]);
       setUnreadCount((prev) => prev + 1);
     });
-
     newSocket.on("allMarkedAsRead", () => {
-      setNotifications((prev) =>
-        prev.map((notif) => ({ ...notif, isRead: true }))
-      );
+      setNotifications((prev) => prev.map((x) => ({ ...x, isRead: true })));
     });
-
     newSocket.on("notificationArchived", (data) => {
       setNotifications((prev) =>
-        prev.filter((notif) => notif.id !== data.notificationId)
+        prev.filter((x) => x.id !== data.notificationId)
       );
     });
+    newSocket.on("error", (err) => console.error("WebSocket error:", err));
 
-    newSocket.on("error", (error) => {
-      console.error("WebSocket error:", error);
-    });
-
+    // ✅ Cleanup must return void (not the Socket).
     return () => {
-      newSocket.close();
+      try {
+        newSocket.close(); // or newSocket.disconnect();
+      } finally {
+        setIsConnected(false);
+        setSocket(null);
+      }
     };
-  }, [session?.user?.id]);
+  }, [session?.user?.id, isAuthArea]);
 
   const fetchNotifications = async () => {
     if (isOnline && socket && session?.user?.id) {
@@ -133,24 +146,21 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
         includeRead: false,
       });
     } else {
-      // Use offline service
-      const offlineNotifications =
-        await offlineNotificationService.fetchNotifications(20, false);
-      setNotifications(offlineNotifications);
-      const count = await offlineNotificationService.getUnreadCount();
+      const svc = serviceRef.current;
+      if (!svc) return;
+      const offline = await svc.fetchNotifications(20, false);
+      setNotifications(offline);
+      const count = await svc.getUnreadCount();
       setUnreadCount(count);
     }
   };
 
   const markAsRead = async (notificationId: string) => {
     if (isOnline && socket && session?.user?.id) {
-      socket.emit("markAsRead", {
-        notificationId,
-        userId: session.user.id,
-      });
+      socket.emit("markAsRead", { notificationId, userId: session.user.id });
     } else {
-      // Use offline service
-      await offlineNotificationService.markAsRead(notificationId);
+      const svc = serviceRef.current;
+      if (svc) await svc.markAsRead(notificationId);
       setNotifications((prev) =>
         prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n))
       );
@@ -160,12 +170,10 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
   const markAllAsRead = async () => {
     if (isOnline && socket && session?.user?.id) {
-      socket.emit("markAllAsRead", {
-        userId: session.user.id,
-      });
+      socket.emit("markAllAsRead", { userId: session.user.id });
     } else {
-      // Use offline service
-      await offlineNotificationService.markAllAsRead();
+      const svc = serviceRef.current;
+      if (svc) await svc.markAllAsRead();
       setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
     }
@@ -178,26 +186,27 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
         userId: session.user.id,
       });
     } else {
-      // Use offline service
-      await offlineNotificationService.archiveNotification(notificationId);
+      const svc = serviceRef.current;
+      if (svc) await svc.archiveNotification(notificationId);
       setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
     }
   };
 
-  // Update online status when it changes
+  // Update online status using service when present
   useEffect(() => {
-    const updateOnlineStatus = () => {
-      const online = offlineNotificationService.isOnlineMode();
+    const update = () => {
+      const online = serviceRef.current
+        ? serviceRef.current.isOnlineMode()
+        : navigator.onLine;
       setIsOnline(online);
-      setIsConnected(online);
+      setIsConnected((prev) => (online ? prev : false));
     };
-
-    window.addEventListener("online", updateOnlineStatus);
-    window.addEventListener("offline", updateOnlineStatus);
-
+    window.addEventListener("online", update);
+    window.addEventListener("offline", update);
+    update();
     return () => {
-      window.removeEventListener("online", updateOnlineStatus);
-      window.removeEventListener("offline", updateOnlineStatus);
+      window.removeEventListener("online", update);
+      window.removeEventListener("offline", update);
     };
   }, []);
 

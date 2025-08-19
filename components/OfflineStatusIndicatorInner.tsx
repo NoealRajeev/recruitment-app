@@ -1,30 +1,42 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Wifi, WifiOff } from "lucide-react";
-import offlineNotificationService from "@/lib/offline-notifications";
+import { getOfflineNotificationService } from "@/lib/offline-notifications";
 
 export default function OfflineStatusIndicatorInner() {
-  const [isOnline, setIsOnline] = useState(true);
+  const svcRef = useRef<ReturnType<
+    typeof getOfflineNotificationService
+  > | null>(null);
+  const [isOnline, setIsOnline] = useState(
+    typeof window !== "undefined" ? navigator.onLine : true
+  );
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    const updateOnlineStatus = () => {
-      const online = offlineNotificationService.isOnlineMode();
-      setIsOnline(online);
+    // Lazily init on client
+    if (typeof window === "undefined") return;
+    if (!svcRef.current) {
+      svcRef.current = getOfflineNotificationService();
+    }
 
+    const updateOnlineStatus = () => {
+      const svc = svcRef.current;
+      const online = svc ? svc.isOnlineMode() : navigator.onLine;
+      setIsOnline(online);
       if (!online) {
         setShowBanner(true);
       } else {
+        // Hide after a short delay when back online
         setTimeout(() => setShowBanner(false), 3000);
       }
     };
 
+    // Initial sync
     updateOnlineStatus();
 
     window.addEventListener("online", updateOnlineStatus);
     window.addEventListener("offline", updateOnlineStatus);
-
     return () => {
       window.removeEventListener("online", updateOnlineStatus);
       window.removeEventListener("offline", updateOnlineStatus);
@@ -50,20 +62,20 @@ export default function OfflineStatusIndicatorInner() {
           {isOnline ? (
             <>
               <Wifi className="h-4 w-4" />
-              <span>Back online - syncing data...</span>
+              <span>Back online — syncing data…</span>
             </>
           ) : (
             <>
               <WifiOff className="h-4 w-4" />
               <span>
-                You are offline - notifications will be synced when you
-                reconnect
+                You’re offline — notifications will sync when you reconnect
               </span>
             </>
           )}
           <button
             onClick={() => setShowBanner(false)}
             className="ml-2 text-gray-500 hover:text-gray-700"
+            aria-label="Close offline banner"
           >
             ×
           </button>

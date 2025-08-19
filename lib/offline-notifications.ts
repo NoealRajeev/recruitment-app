@@ -27,21 +27,29 @@ class OfflineNotificationService {
   private syncInProgress = false;
 
   constructor() {
-    this.initializeServiceWorker();
     this.setupEventListeners();
     this.loadOfflineNotifications();
+    this.initializeServiceWorker();
   }
 
   private async initializeServiceWorker() {
-    if ("serviceWorker" in navigator) {
+    if (typeof window === "undefined") return;
+    if (!("serviceWorker" in navigator)) return;
+    if (process.env.NEXT_PUBLIC_ENABLE_SW !== "true") return;
+    if (process.env.NODE_ENV !== "production") return;
+    const path = window.location.pathname;
+    if (path.startsWith("/auth")) return;
+
+    window.addEventListener("load", async () => {
       try {
-        this.serviceWorkerRegistration =
-          await navigator.serviceWorker.register("/sw.js");
+        this.serviceWorkerRegistration = await navigator.serviceWorker.register(
+          "/sw.js",
+          { scope: "/" }
+        );
         console.log(
           "Service Worker registered:",
           this.serviceWorkerRegistration
         );
-
         // Handle service worker updates
         this.serviceWorkerRegistration.addEventListener("updatefound", () => {
           const newWorker = this.serviceWorkerRegistration!.installing;
@@ -60,7 +68,7 @@ class OfflineNotificationService {
       } catch (error) {
         console.error("Service Worker registration failed:", error);
       }
-    }
+    });
   }
 
   private setupEventListeners() {
@@ -388,7 +396,13 @@ class OfflineNotificationService {
   }
 }
 
-// Create singleton instance
-const offlineNotificationService = new OfflineNotificationService();
-
-export default offlineNotificationService;
+let __offlineNotificationService: OfflineNotificationService | null = null;
+export function getOfflineNotificationService() {
+  if (!__offlineNotificationService) {
+    __offlineNotificationService = new OfflineNotificationService();
+  }
+  return __offlineNotificationService;
+}
+export type OfflineNotificationServiceType = ReturnType<
+  typeof getOfflineNotificationService
+>;

@@ -15,7 +15,10 @@ export default function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams?.get("token");
-  const callbackUrl = searchParams?.get("callbackUrl") || "/dashboard";
+  const rawCallback = searchParams?.get("callbackUrl") || "/dashboard";
+  const isSafePath = (p: string) =>
+    typeof p === "string" && p.startsWith("/") && !p.startsWith("//");
+  const safeCallback = isSafePath(rawCallback) ? rawCallback : "/dashboard";
   const { data: session, status } = useSession();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -106,9 +109,12 @@ export default function ResetPasswordForm() {
             email: session!.user!.email!,
             password: formData.newPassword,
             redirect: false,
-            callbackUrl,
           });
-          if (signInResult?.url) router.push(signInResult.url);
+          if (signInResult?.error) {
+            toast({ type: "error", message: signInResult.error });
+          } else {
+            router.replace("/dashboard"); // Let middleware route by role
+          }
         }
       } else {
         // token‐based forgot-password

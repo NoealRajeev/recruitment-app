@@ -152,6 +152,14 @@ function LoginForm({
           </p>
         </div>
       </div>
+
+      {/* Invisible submit so Enter works without changing layout */}
+      <button
+        type="submit"
+        className="hidden"
+        tabIndex={-1}
+        aria-hidden="true"
+      />
     </form>
   );
 }
@@ -214,7 +222,6 @@ function LoginFormWrapper({
         router.push(result.url);
       }
     } catch (error) {
-      setLoading(false);
       setFormError("An unexpected error occurred. Please try again.");
       // Call the callback when an error occurs
       if (onErrorOccurred) onErrorOccurred();
@@ -268,9 +275,10 @@ export default function LoginPage() {
             </Suspense>
           </Card>
 
+          {/* Buttons remain OUTSIDE the form to preserve your original layout */}
           <div className="mt-6 flex justify-center gap-4">
             <Button
-              type="submit"
+              type="button"
               onClick={() => {
                 setIsSubmitting(true);
                 document.querySelector("form")?.requestSubmit();
@@ -306,6 +314,7 @@ export default function LoginPage() {
                 t.signIn
               )}
             </Button>
+
             <Button
               type="button"
               onClick={handleRegisterRedirect}

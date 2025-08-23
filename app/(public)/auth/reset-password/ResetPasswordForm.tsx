@@ -1,3 +1,4 @@
+// app/(public)/auth/reset-password/ResetPasswordForm.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,7 +10,13 @@ import { resetPassword } from "@/lib/auth/actions";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/shared/Card";
-import LanguageSelector from "@/components/ui/LanguageSelector";
+import dynamic from "next/dynamic";
+
+// Language selector should be client-only
+const LanguageSelector = dynamic(
+  () => import("@/components/ui/LanguageSelector"),
+  { ssr: false }
+);
 
 export default function ResetPasswordForm() {
   const router = useRouter();
@@ -19,6 +26,7 @@ export default function ResetPasswordForm() {
   const isSafePath = (p: string) =>
     typeof p === "string" && p.startsWith("/") && !p.startsWith("//");
   const safeCallback = isSafePath(rawCallback) ? rawCallback : "/dashboard";
+
   const { data: session, status } = useSession();
   const { toast } = useToast();
   const { t } = useLanguage();
@@ -92,6 +100,17 @@ export default function ResetPasswordForm() {
     if (errors[name]) setErrors((e) => ({ ...e, [name]: "" }));
   }
 
+  // Type‑safe helper to submit by form id (keeps buttons outside the form)
+  function submitFormById(id: string) {
+    const form = document.getElementById(id) as HTMLFormElement | null;
+    if (!form) return;
+    if (typeof form.requestSubmit === "function") {
+      form.requestSubmit();
+    } else {
+      form.submit();
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validateForm()) return;
@@ -113,7 +132,8 @@ export default function ResetPasswordForm() {
           if (signInResult?.error) {
             toast({ type: "error", message: signInResult.error });
           } else {
-            router.replace("/dashboard"); // Let middleware route by role
+            // Let middleware route to the correct role dashboard
+            router.replace("/dashboard");
           }
         }
       } else {
@@ -128,7 +148,7 @@ export default function ResetPasswordForm() {
           throw new Error(err.error || "Reset failed");
         }
         toast({ type: "success", message: t.passwordResetSuccess });
-        router.push("/auth/login");
+        router.push(safeCallback || "/auth/login");
       }
     } catch (err: any) {
       toast({ type: "error", message: err.message });
@@ -241,7 +261,12 @@ export default function ResetPasswordForm() {
               )}
             </div>
 
-            <form onSubmit={handleSubmit} className="grid gap-8 mt-6">
+            {/* Wrap fields in a form to enable Enter submit without changing layout */}
+            <form
+              id="reset-password-form"
+              onSubmit={handleSubmit}
+              className="grid gap-8 mt-6"
+            >
               <div className="col-span-5 space-y-4">
                 <h2 className="text-lg font-semibold mb-2">
                   {t.passwordDetails}
@@ -302,12 +327,22 @@ export default function ResetPasswordForm() {
                   id="confirmPassword"
                 />
               </div>
+
+              {/* hidden submit so Enter works, without altering UI */}
+              <button
+                type="submit"
+                className="hidden"
+                tabIndex={-1}
+                aria-hidden="true"
+              />
             </form>
           </Card>
+
+          {/* Action buttons remain outside to preserve your layout */}
           <div className="col-span-12 mt-6 flex justify-center gap-12">
             <Button
-              type="submit"
-              onClick={() => document.querySelector("form")?.requestSubmit()}
+              type="button"
+              onClick={() => submitFormById("reset-password-form")}
               disabled={
                 isLoading ||
                 !hasLowercase ||

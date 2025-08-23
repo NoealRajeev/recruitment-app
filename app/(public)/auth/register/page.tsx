@@ -591,6 +591,17 @@ export default function RegisterPage() {
     router.push("/auth/login");
   };
 
+  // Helper to submit a form by id with TS-safe fallbacks
+  function submitFormById(id: string) {
+    const form = document.getElementById(id) as HTMLFormElement | null;
+    if (!form) return;
+    if (typeof form.requestSubmit === "function") {
+      form.requestSubmit();
+    } else {
+      form.submit();
+    }
+  }
+
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
@@ -608,355 +619,372 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            {/* grid becomes single column on mobile */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 mt-6">
-              <div className="md:col-span-5 space-y-4">
-                <h2 className="text-base sm:text-lg font-semibold mb-2">
-                  {t.companyDetails}
-                </h2>
-                <Input
-                  label={t.companyName}
-                  name="companyName"
-                  value={formData.companyName}
-                  onChange={handleChange}
-                  error={errors.companyName}
-                  required
-                  placeholder={t.companyNamePlaceholder}
-                  id="companyName"
-                />
-                <Input
-                  label={t.registrationNumber}
-                  name="registrationNumber"
-                  value={formData.registrationNumber}
-                  onChange={handleChange}
-                  error={errors.registrationNumber}
-                  required
-                  placeholder={t.registrationNumberPlaceholder}
-                  id="registrationNumber"
-                />
-                <Select
-                  label={t.sector}
-                  name="sector"
-                  value={formData.sector}
-                  onChange={handleChange}
-                  error={errors.sector}
-                  required
-                  options={sectorOptions}
-                  id="sector"
-                  className="!bg-white"
-                />
-                <Select
-                  label={t.companySize}
-                  name="companySize"
-                  value={formData.companySize}
-                  onChange={handleChange}
-                  error={errors.companySize}
-                  required
-                  options={companySizeOptions}
-                  id="companySize"
-                  className="!bg-white"
-                />
-                <Input
-                  label={t.address || "Company Address"}
-                  name="address"
-                  value={formData.address}
-                  onChange={handleChange}
-                  error={errors.address}
-                  required
-                  placeholder={t.addressPlaceholder || "Enter company address"}
-                  id="address"
-                />
-                <Select
-                  label={t.country || "Country"}
-                  name="country"
-                  value={formData.country}
-                  onChange={handleChange}
-                  error={errors.country}
-                  required
-                  options={countryOptions}
-                  id="country"
-                  className="!bg-white"
-                />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Wrap step 1 fields in a form to enable Enter submit (no layout change) */}
+            <form id="register-step1-form" onSubmit={handleNextStep}>
+              {/* grid becomes single column on mobile */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 mt-6">
+                <div className="md:col-span-5 space-y-4">
+                  <h2 className="text-base sm:text-lg font-semibold mb-2">
+                    {t.companyDetails}
+                  </h2>
                   <Input
-                    label={t.city || "City"}
-                    name="city"
-                    value={formData.city}
+                    label={t.companyName}
+                    name="companyName"
+                    value={formData.companyName}
                     onChange={handleChange}
-                    error={errors.city}
+                    error={errors.companyName}
                     required
-                    placeholder="Enter city"
-                    id="city"
+                    placeholder={t.companyNamePlaceholder}
+                    id="companyName"
                   />
                   <Input
-                    label={t.postcode || "Postcode"}
-                    name="postcode"
-                    value={formData.postcode}
-                    onChange={handlePostcodeChange}
-                    error={errors.postcode}
+                    label={t.registrationNumber}
+                    name="registrationNumber"
+                    value={formData.registrationNumber}
+                    onChange={handleChange}
+                    error={errors.registrationNumber}
                     required
-                    placeholder="Enter postcode"
-                    id="postcode"
+                    placeholder={t.registrationNumberPlaceholder}
+                    id="registrationNumber"
+                  />
+                  <Select
+                    label={t.sector}
+                    name="sector"
+                    value={formData.sector}
+                    onChange={handleChange}
+                    error={errors.sector}
+                    required
+                    options={sectorOptions}
+                    id="sector"
+                    className="!bg-white"
+                  />
+                  <Select
+                    label={t.companySize}
+                    name="companySize"
+                    value={formData.companySize}
+                    onChange={handleChange}
+                    error={errors.companySize}
+                    required
+                    options={companySizeOptions}
+                    id="companySize"
+                    className="!bg-white"
+                  />
+                  <Input
+                    label={t.address || "Company Address"}
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    error={errors.address}
+                    required
+                    placeholder={
+                      t.addressPlaceholder || "Enter company address"
+                    }
+                    id="address"
+                  />
+                  <Select
+                    label={t.country || "Country"}
+                    name="country"
+                    value={formData.country}
+                    onChange={handleChange}
+                    error={errors.country}
+                    required
+                    options={countryOptions}
+                    id="country"
+                    className="!bg-white"
+                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Input
+                      label={t.city || "City"}
+                      name="city"
+                      value={formData.city}
+                      onChange={handleChange}
+                      error={errors.city}
+                      required
+                      placeholder="Enter city"
+                      id="city"
+                    />
+                    <Input
+                      label={t.postcode || "Postcode"}
+                      name="postcode"
+                      value={formData.postcode}
+                      onChange={handlePostcodeChange}
+                      error={errors.postcode}
+                      required
+                      placeholder="Enter postcode"
+                      id="postcode"
+                    />
+                  </div>
+                  <Input
+                    label={t.website}
+                    name="website"
+                    value={formData.website}
+                    onChange={handleChange}
+                    placeholder={t.websitePlaceholder}
+                    type="url"
+                    id="website"
                   />
                 </div>
-                <Input
-                  label={t.website}
-                  name="website"
-                  value={formData.website}
-                  onChange={handleChange}
-                  placeholder={t.websitePlaceholder}
-                  type="url"
-                  id="website"
-                />
-              </div>
 
-              {/* vertical divider hides on mobile */}
-              <div className="hidden md:flex md:col-span-2 justify-center items-center">
-                <div className="w-[2px] h-2/3 bg-[#2C0053]/30 rounded-full"></div>
-              </div>
+                {/* vertical divider hides on mobile */}
+                <div className="hidden md:flex md:col-span-2 justify-center items-center">
+                  <div className="w-[2px] h-2/3 bg-[#2C0053]/30 rounded-full"></div>
+                </div>
 
-              <div className="md:col-span-5 space-y-4">
-                <h2 className="text-base sm:text-lg font-semibold mb-2">
-                  {t.contactPerson}
-                </h2>
-                <Input
-                  label={t.fullName}
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  error={errors.fullName}
-                  required
-                  placeholder={t.fullNamePlaceholder}
-                  id="fullName"
-                />
-                <Input
-                  label={t.jobTitle}
-                  name="jobTitle"
-                  value={formData.jobTitle}
-                  onChange={handleChange}
-                  error={errors.jobTitle}
-                  required
-                  placeholder={t.jobTitlePlaceholder}
-                  id="jobTitle"
-                />
-
-                {/* Email with OTP verification */}
-                <div>
+                <div className="md:col-span-5 space-y-4">
+                  <h2 className="text-base sm:text-lg font-semibold mb-2">
+                    {t.contactPerson}
+                  </h2>
                   <Input
-                    label={t.email}
-                    name="email"
-                    value={formData.email}
+                    label={t.fullName}
+                    name="fullName"
+                    value={formData.fullName}
                     onChange={handleChange}
-                    error={errors.email}
+                    error={errors.fullName}
                     required
-                    placeholder={t.emailPlaceholder}
-                    type="email"
-                    id="email"
-                    loading={emailCheckInProgress}
-                    disabled={formData.emailVerified}
+                    placeholder={t.fullNamePlaceholder}
+                    id="fullName"
                   />
-                  {formData.email && !formData.emailVerified && (
-                    <div className="mt-2">
-                      {!emailOtpSent ? (
-                        <Button
-                          type="button"
-                          onClick={handleSendEmailOtp}
-                          variant="outline"
-                          size="sm"
-                          disabled={emailCheckInProgress || isSendingOtp.email}
-                        >
-                          {isSendingOtp.email ? "Sending..." : "Send OTP"}
-                        </Button>
-                      ) : (
-                        <div className="flex flex-wrap gap-2 items-center">
-                          <Input
-                            name="emailOtp"
-                            value={formData.emailOtp}
-                            onChange={handleChange}
-                            placeholder="Enter 6-digit OTP"
-                            className="w-32"
-                            maxLength={6}
-                            error={errors.emailOtp}
-                          />
-                          <Button
-                            type="button"
-                            onClick={handleVerifyEmailOtp}
-                            variant="outline"
-                            size="sm"
-                          >
-                            Verify
-                          </Button>
+                  <Input
+                    label={t.jobTitle}
+                    name="jobTitle"
+                    value={formData.jobTitle}
+                    onChange={handleChange}
+                    error={errors.jobTitle}
+                    required
+                    placeholder={t.jobTitlePlaceholder}
+                    id="jobTitle"
+                  />
+
+                  {/* Email with OTP verification */}
+                  <div>
+                    <Input
+                      label={t.email}
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      error={errors.email}
+                      required
+                      placeholder={t.emailPlaceholder}
+                      type="email"
+                      id="email"
+                      loading={emailCheckInProgress}
+                      disabled={formData.emailVerified}
+                    />
+                    {formData.email && !formData.emailVerified && (
+                      <div className="mt-2">
+                        {!emailOtpSent ? (
                           <Button
                             type="button"
                             onClick={handleSendEmailOtp}
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
                             disabled={
-                              emailOtpResendTime > 0 || isSendingOtp.email
+                              emailCheckInProgress || isSendingOtp.email
                             }
                           >
-                            {isSendingOtp.email
-                              ? "Sending..."
-                              : emailOtpResendTime > 0
-                                ? `Resend (${emailOtpResendTime}s)`
-                                : "Resend"}
+                            {isSendingOtp.email ? "Sending..." : "Send OTP"}
                           </Button>
-                        </div>
-                      )}
-                      {errors.emailVerification && (
-                        <p className="text-sm text-red-500 mt-1">
-                          {errors.emailVerification}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  {formData.emailVerified && (
-                    <p className="text-sm text-green-600 mt-1">
-                      Email verified successfully
-                    </p>
-                  )}
-                </div>
+                        ) : (
+                          <div className="flex flex-wrap gap-2 items-center">
+                            <Input
+                              name="emailOtp"
+                              value={formData.emailOtp}
+                              onChange={handleChange}
+                              placeholder="Enter 6-digit OTP"
+                              className="w-32"
+                              maxLength={6}
+                              error={errors.emailOtp}
+                            />
+                            <Button
+                              type="button"
+                              onClick={handleVerifyEmailOtp}
+                              variant="outline"
+                              size="sm"
+                            >
+                              Verify
+                            </Button>
+                            <Button
+                              type="button"
+                              onClick={handleSendEmailOtp}
+                              variant="ghost"
+                              size="sm"
+                              disabled={
+                                emailOtpResendTime > 0 || isSendingOtp.email
+                              }
+                            >
+                              {isSendingOtp.email
+                                ? "Sending..."
+                                : emailOtpResendTime > 0
+                                  ? `Resend (${emailOtpResendTime}s)`
+                                  : "Resend"}
+                            </Button>
+                          </div>
+                        )}
+                        {errors.emailVerification && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {errors.emailVerification}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {formData.emailVerified && (
+                      <p className="text-sm text-green-600 mt-1">
+                        Email verified successfully
+                      </p>
+                    )}
+                  </div>
 
-                {/* Phone with country code and OTP verification */}
-                <div className="space-y-1">
+                  {/* Phone with country code and OTP verification */}
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="phone"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      {t.phone}
+                      {true && <span className="text-[#FF0404] ml-1">*</span>}
+                    </label>
+
+                    <div className="flex gap-2 w-full">
+                      <Select
+                        name="countryCode"
+                        value={formData.countryCode}
+                        onChange={handleChange}
+                        options={countryCodes.map((cc) => ({
+                          value: cc.code,
+                          label: `${cc.code} (${cc.name})`,
+                        }))}
+                        className="w-28 sm:w-32 !bg-white"
+                        disabled={formData.phoneVerified}
+                      />
+                      <div className="flex-1">
+                        <Input
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleChange}
+                          error={errors.phone}
+                          required
+                          placeholder={t.phonePlaceholder}
+                          type="tel"
+                          id="phone"
+                          loading={phoneCheckInProgress}
+                          disabled={formData.phoneVerified}
+                          className="w-full"
+                        />
+                      </div>
+                    </div>
+
+                    {errors.phone && (
+                      <p className="text-sm text-[#FF0404]" role="alert">
+                        {errors.phone}
+                      </p>
+                    )}
+
+                    {formData.phone && !formData.phoneVerified && (
+                      <div className="mt-2">
+                        {!phoneOtpSent ? (
+                          <Button
+                            type="button"
+                            onClick={handleSendPhoneOtp}
+                            variant="outline"
+                            size="sm"
+                            disabled={
+                              phoneCheckInProgress || isSendingOtp.phone
+                            }
+                          >
+                            {isSendingOtp.phone ? "Sending..." : "Send OTP"}
+                          </Button>
+                        ) : (
+                          <div className="flex flex-wrap gap-2 items-center">
+                            <Input
+                              name="phoneOtp"
+                              value={formData.phoneOtp}
+                              onChange={handleChange}
+                              placeholder="Enter 6-digit OTP"
+                              className="w-32"
+                              maxLength={6}
+                              error={errors.phoneOtp}
+                            />
+                            <Button
+                              type="button"
+                              onClick={handleVerifyPhoneOtp}
+                              variant="outline"
+                              size="sm"
+                            >
+                              Verify
+                            </Button>
+                            <Button
+                              type="button"
+                              onClick={handleSendPhoneOtp}
+                              variant="ghost"
+                              size="sm"
+                              disabled={
+                                phoneOtpResendTime > 0 || isSendingOtp.phone
+                              }
+                            >
+                              {isSendingOtp.phone
+                                ? "Sending..."
+                                : phoneOtpResendTime > 0
+                                  ? `Resend (${phoneOtpResendTime}s)`
+                                  : "Resend"}
+                            </Button>
+                          </div>
+                        )}
+                        {errors.phoneVerification && (
+                          <p className="text-sm text-red-500 mt-1">
+                            {errors.phoneVerification}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {formData.phoneVerified && (
+                      <p className="text-sm text-green-600 mt-1">
+                        Phone verified successfully
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Alternate contact */}
                   <label
                     htmlFor="phone"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    {t.phone}
-                    {true && <span className="text-[#FF0404] ml-1">*</span>}
+                    {t.altContact}
                   </label>
 
                   <div className="flex gap-2 w-full">
                     <Select
-                      name="countryCode"
-                      value={formData.countryCode}
+                      name="altCountryCode"
+                      value={formData.altCountryCode}
                       onChange={handleChange}
                       options={countryCodes.map((cc) => ({
                         value: cc.code,
                         label: `${cc.code} (${cc.name})`,
                       }))}
                       className="w-28 sm:w-32 !bg-white"
-                      disabled={formData.phoneVerified}
                     />
                     <div className="flex-1">
                       <Input
-                        name="phone"
-                        value={formData.phone}
+                        name="altContact"
+                        value={formData.altContact}
                         onChange={handleChange}
-                        error={errors.phone}
-                        required
-                        placeholder={t.phonePlaceholder}
+                        placeholder={t.altContactPlaceholder}
                         type="tel"
-                        id="phone"
-                        loading={phoneCheckInProgress}
-                        disabled={formData.phoneVerified}
+                        id="altContact"
                         className="w-full"
                       />
                     </div>
                   </div>
-
-                  {errors.phone && (
-                    <p className="text-sm text-[#FF0404]" role="alert">
-                      {errors.phone}
-                    </p>
-                  )}
-
-                  {formData.phone && !formData.phoneVerified && (
-                    <div className="mt-2">
-                      {!phoneOtpSent ? (
-                        <Button
-                          type="button"
-                          onClick={handleSendPhoneOtp}
-                          variant="outline"
-                          size="sm"
-                          disabled={phoneCheckInProgress || isSendingOtp.phone}
-                        >
-                          {isSendingOtp.phone ? "Sending..." : "Send OTP"}
-                        </Button>
-                      ) : (
-                        <div className="flex flex-wrap gap-2 items-center">
-                          <Input
-                            name="phoneOtp"
-                            value={formData.phoneOtp}
-                            onChange={handleChange}
-                            placeholder="Enter 6-digit OTP"
-                            className="w-32"
-                            maxLength={6}
-                            error={errors.phoneOtp}
-                          />
-                          <Button
-                            type="button"
-                            onClick={handleVerifyPhoneOtp}
-                            variant="outline"
-                            size="sm"
-                          >
-                            Verify
-                          </Button>
-                          <Button
-                            type="button"
-                            onClick={handleSendPhoneOtp}
-                            variant="ghost"
-                            size="sm"
-                            disabled={
-                              phoneOtpResendTime > 0 || isSendingOtp.phone
-                            }
-                          >
-                            {isSendingOtp.phone
-                              ? "Sending..."
-                              : phoneOtpResendTime > 0
-                                ? `Resend (${phoneOtpResendTime}s)`
-                                : "Resend"}
-                          </Button>
-                        </div>
-                      )}
-                      {errors.phoneVerification && (
-                        <p className="text-sm text-red-500 mt-1">
-                          {errors.phoneVerification}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  {formData.phoneVerified && (
-                    <p className="text-sm text-green-600 mt-1">
-                      Phone verified successfully
-                    </p>
-                  )}
-                </div>
-
-                {/* Alternate contact */}
-                <label
-                  htmlFor="phone"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  {t.altContact}
-                </label>
-
-                <div className="flex gap-2 w-full">
-                  <Select
-                    name="altCountryCode"
-                    value={formData.altCountryCode}
-                    onChange={handleChange}
-                    options={countryCodes.map((cc) => ({
-                      value: cc.code,
-                      label: `${cc.code} (${cc.name})`,
-                    }))}
-                    className="w-28 sm:w-32 !bg-white"
-                  />
-                  <div className="flex-1">
-                    <Input
-                      name="altContact"
-                      value={formData.altContact}
-                      onChange={handleChange}
-                      placeholder={t.altContactPlaceholder}
-                      type="tel"
-                      id="altContact"
-                      className="w-full"
-                    />
-                  </div>
                 </div>
               </div>
-            </div>
+
+              {/* Hidden submit so pressing Enter submits step 1 without changing layout */}
+              <button
+                type="submit"
+                className="hidden"
+                tabIndex={-1}
+                aria-hidden="true"
+              />
+            </form>
           </Card>
         );
 
@@ -976,56 +1004,73 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            <div className="mt-6 space-y-6">
-              <div className="space-y-4">
-                <Input
-                  label="Company Registration Document (Required)"
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={(e) => handleFileChange("crFile", e.target.files)}
-                  required
-                  id="crFile"
-                />
-                {documents.crFile && (
-                  <p className="text-sm text-green-600">
-                    {documents.crFile.name} uploaded
-                  </p>
-                )}
-                <Input
-                  label="Business License (Required)"
-                  type="file"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={(e) =>
-                    handleFileChange("licenseFile", e.target.files)
-                  }
-                  required
-                  id="licenseFile"
-                />
-                {documents.licenseFile && (
-                  <p className="text-sm text-green-600">
-                    {documents.licenseFile.name} uploaded
-                  </p>
-                )}
+            {/* Wrap step 2 in a form so Enter can trigger register (no layout change) */}
+            <form
+              id="register-step2-form"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleRegister();
+              }}
+            >
+              <div className="mt-6 space-y-6">
+                <div className="space-y-4">
+                  <Input
+                    label="Company Registration Document (Required)"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => handleFileChange("crFile", e.target.files)}
+                    required
+                    id="crFile"
+                  />
+                  {documents.crFile && (
+                    <p className="text-sm text-green-600">
+                      {documents.crFile.name} uploaded
+                    </p>
+                  )}
+                  <Input
+                    label="Business License (Required)"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) =>
+                      handleFileChange("licenseFile", e.target.files)
+                    }
+                    required
+                    id="licenseFile"
+                  />
+                  {documents.licenseFile && (
+                    <p className="text-sm text-green-600">
+                      {documents.licenseFile.name} uploaded
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <Input
+                    label="Other Supporting Documents (Optional)"
+                    type="file"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) =>
+                      handleFileChange("otherDocuments", e.target.files)
+                    }
+                    id="otherDocuments"
+                  />
+                  {documents.otherDocuments.length > 0 && (
+                    <div className="text-sm text-green-600">
+                      {documents.otherDocuments.length} files uploaded
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="space-y-4">
-                <Input
-                  label="Other Supporting Documents (Optional)"
-                  type="file"
-                  multiple
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={(e) =>
-                    handleFileChange("otherDocuments", e.target.files)
-                  }
-                  id="otherDocuments"
-                />
-                {documents.otherDocuments.length > 0 && (
-                  <div className="text-sm text-green-600">
-                    {documents.otherDocuments.length} files uploaded
-                  </div>
-                )}
-              </div>
-            </div>
+              {/* Hidden submit so Enter can trigger handleRegister */}
+              <button
+                type="submit"
+                className="hidden"
+                tabIndex={-1}
+                aria-hidden="true"
+              />
+            </form>
           </Card>
         );
 
@@ -1126,13 +1171,13 @@ export default function RegisterPage() {
         <div className="flex-1 px-3 sm:px-6 lg:mx-16 rounded-lg py-6 sm:py-8 flex flex-col justify-between">
           {renderStepContent()}
 
-          {/* Actions: stack on mobile */}
+          {/* Actions: stack on mobile (buttons remain outside forms to preserve layout) */}
           <div className="col-span-12 mt-6 flex flex-col sm:flex-row justify-center gap-3 sm:gap-6 lg:gap-12">
             {currentStep === 1 ? (
               <>
                 <Button
                   type="button"
-                  onClick={handleNextStep}
+                  onClick={() => submitFormById("register-step1-form")}
                   disabled={isSubmitting}
                   className="px-6 sm:px-8 py-2 w-full sm:w-auto"
                 >
@@ -1186,7 +1231,7 @@ export default function RegisterPage() {
                 </Button>
                 <Button
                   type="button"
-                  onClick={handleRegister}
+                  onClick={() => submitFormById("register-step2-form")}
                   disabled={
                     isSubmitting || !documents.crFile || !documents.licenseFile
                   }

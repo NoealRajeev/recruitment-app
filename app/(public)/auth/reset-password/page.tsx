@@ -1,3 +1,4 @@
+// app/(public)/auth/reset-password/page.tsx
 "use client";
 
 import dynamic from "next/dynamic";

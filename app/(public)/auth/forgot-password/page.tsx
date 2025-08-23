@@ -239,6 +239,14 @@ export default function ForgotPasswordPage() {
                 autoFocus
               />
 
+              {/* Hidden submit so pressing Enter always submits without changing layout */}
+              <button
+                type="submit"
+                className="hidden"
+                tabIndex={-1}
+                aria-hidden="true"
+              />
+
               <div className="space-y-4">
                 <Button type="submit" disabled={isLoading} className="w-full">
                   {isLoading ? (

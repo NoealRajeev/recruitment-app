@@ -1,4 +1,3 @@
-// components/dashboard/StatsOverview.tsx
 "use client";
 
 import {
@@ -16,23 +15,16 @@ import { useEffect, useState } from "react";
 
 interface StatsOverviewProps {
   stats: {
-    // Common stats
     total?: number;
     lastMonth?: number;
-
-    // Admin dashboard stats
     totalRequests?: number;
     pendingReviews?: number;
     clientsRegistered?: number;
     agenciesActive?: number;
-
-    // Agency dashboard stats
     totalProfiles?: number;
     pendingVerification?: number;
     approvedProfiles?: number;
     deployedProfiles?: number;
-
-    // Client dashboard stats
     openRequirements?: number;
     filledPositions?: number;
     activeWorkers?: number;
@@ -46,10 +38,13 @@ const StatsOverview = ({ stats, variant = "admin" }: StatsOverviewProps) => {
     Record<string, number>
   >({});
 
-  // Calculate percentage changes
   useEffect(() => {
-    const changes: Record<string, number> = {};
+    const calculateChange = (current?: number, lastMonth?: number) => {
+      if (current == null || lastMonth == null || lastMonth === 0) return 0;
+      return Math.round(((current - lastMonth) / lastMonth) * 100);
+    };
 
+    const changes: Record<string, number> = {};
     if (variant === "admin") {
       changes.totalRequests = calculateChange(
         stats.totalRequests,
@@ -84,7 +79,7 @@ const StatsOverview = ({ stats, variant = "admin" }: StatsOverviewProps) => {
         stats.deployedProfiles,
         stats.lastMonth
       );
-    } else if (variant === "client") {
+    } else {
       changes.openRequirements = calculateChange(
         stats.openRequirements,
         stats.lastMonth
@@ -102,27 +97,16 @@ const StatsOverview = ({ stats, variant = "admin" }: StatsOverviewProps) => {
         stats.lastMonth
       );
     }
-
     setPercentageChanges(changes);
   }, [stats, variant]);
 
-  const calculateChange = (current?: number, lastMonth?: number): number => {
-    if (!current || !lastMonth || lastMonth === 0) return 0;
-    return Math.round(((current - lastMonth) / lastMonth) * 100);
-  };
+  const getTrendText = (change: number) =>
+    change > 0
+      ? `${change}% increase from last month`
+      : change < 0
+        ? `${Math.abs(change)}% decrease from last month`
+        : "No change from last month";
 
-  const getTrendText = (change: number): string => {
-    if (change > 0) return `${change}% increase from last month`;
-    if (change < 0) return `${Math.abs(change)}% decrease from last month`;
-    return "No change from last month";
-  };
-
-  const getPercentageOfTotal = (value?: number, total?: number): string => {
-    if (!value || !total || total === 0) return "0% of total";
-    return `${Math.round((value / total) * 100)}% of total`;
-  };
-
-  // Admin dashboard stats configuration
   const adminStats = [
     {
       icon: <BarChart className="text-white w-6 h-6" />,
@@ -135,7 +119,7 @@ const StatsOverview = ({ stats, variant = "admin" }: StatsOverviewProps) => {
     {
       icon: <Clock className="text-white w-6 h-6" />,
       label: "Pending Reviews",
-      value: `${stats.pendingReviews || 0} / ${stats.totalRequests || 0}`,
+      value: `${stats.pendingReviews ?? 0} / ${stats.totalRequests ?? 0}`,
       footer: getTrendText(percentageChanges.pendingReviews || 0),
       trend: (percentageChanges.pendingReviews || 0) >= 0 ? "up" : "down",
       bg: "bg-orange-300",
@@ -158,7 +142,6 @@ const StatsOverview = ({ stats, variant = "admin" }: StatsOverviewProps) => {
     },
   ];
 
-  // Agency dashboard stats configuration
   const agencyStats = [
     {
       icon: <Users className="text-white w-6 h-6" />,
@@ -172,10 +155,10 @@ const StatsOverview = ({ stats, variant = "admin" }: StatsOverviewProps) => {
       icon: <Clock className="text-white w-6 h-6" />,
       label: "Pending Verification",
       value: stats.pendingVerification?.toString() || "0",
-      footer: getPercentageOfTotal(
-        stats.pendingVerification,
-        stats.totalProfiles
-      ),
+      footer:
+        stats.totalProfiles && stats.totalProfiles > 0
+          ? `${Math.round(((stats.pendingVerification ?? 0) / stats.totalProfiles) * 100)}% of total`
+          : "0% of total",
       trend: (percentageChanges.pendingVerification || 0) >= 0 ? "up" : "down",
       bg: "bg-orange-300",
     },
@@ -183,7 +166,10 @@ const StatsOverview = ({ stats, variant = "admin" }: StatsOverviewProps) => {
       icon: <CheckCircle className="text-white w-6 h-6" />,
       label: "Approved Profiles",
       value: stats.approvedProfiles?.toString() || "0",
-      footer: getPercentageOfTotal(stats.approvedProfiles, stats.totalProfiles),
+      footer:
+        stats.totalProfiles && stats.totalProfiles > 0
+          ? `${Math.round(((stats.approvedProfiles ?? 0) / stats.totalProfiles) * 100)}% of total`
+          : "0% of total",
       trend: (percentageChanges.approvedProfiles || 0) >= 0 ? "up" : "down",
       bg: "bg-blue-300",
     },
@@ -191,13 +177,15 @@ const StatsOverview = ({ stats, variant = "admin" }: StatsOverviewProps) => {
       icon: <Plane className="text-white w-6 h-6" />,
       label: "Deployed Profiles",
       value: stats.deployedProfiles?.toString() || "0",
-      footer: getPercentageOfTotal(stats.deployedProfiles, stats.totalProfiles),
+      footer:
+        stats.totalProfiles && stats.totalProfiles > 0
+          ? `${Math.round(((stats.deployedProfiles ?? 0) / stats.totalProfiles) * 100)}% of total`
+          : "0% of total",
       trend: (percentageChanges.deployedProfiles || 0) >= 0 ? "up" : "down",
       bg: "bg-green-300",
     },
   ];
 
-  // Client dashboard stats configuration
   const clientStats = [
     {
       icon: <FileText className="text-white w-6 h-6" />,
@@ -233,7 +221,6 @@ const StatsOverview = ({ stats, variant = "admin" }: StatsOverviewProps) => {
     },
   ];
 
-  // Select the appropriate stats based on variant
   const statsData =
     variant === "agency"
       ? agencyStats
@@ -242,7 +229,7 @@ const StatsOverview = ({ stats, variant = "admin" }: StatsOverviewProps) => {
         : adminStats;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       {statsData.map((stat, i) => (
         <div
           key={i}

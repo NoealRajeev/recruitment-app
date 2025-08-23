@@ -1,4 +1,3 @@
-// components/shared/Cards/AgencyCardContent.tsx;
 import Image from "next/image";
 import { Card, CardContent } from "@/components/shared/Card";
 import { MoreVertical } from "lucide-react";
@@ -24,30 +23,37 @@ export default function AgencyCardContent({
 }: AgencyCardContentProps) {
   return (
     <Card variant="agency" className="cursor-pointer" onClick={onClick}>
-      <CardContent className="p-0 flex items-start gap-8">
+      <CardContent className="p-4 flex items-start gap-4">
         {/* Logo */}
-        <div className="relative h-15 w-15 rounded-full overflow-hidden">
-          <Image src={logoUrl} alt="Agency Logo" fill />
+        <div className="relative h-12 w-12 rounded-full overflow-hidden bg-gray-100 shrink-0">
+          <Image
+            src={logoUrl}
+            alt={`${agencyName} logo`}
+            fill
+            className="object-cover"
+          />
         </div>
+
         {/* Info */}
-        <div className="flex-1">
-          <h4 className="text-sm font-medium text-[#150B3D] leading-tight">
+        <div className="flex-1 min-w-0">
+          <h4 className="text-sm font-medium text-[#150B3D] leading-tight truncate">
             {agencyName}
           </h4>
-          <p className="text-[12px] text-[#524B6B] mt-[2px] leading-snug">
+          <p className="text-[12px] text-[#524B6B] mt-[2px] leading-snug truncate">
             {email}
           </p>
-          <p className="text-[12px] text-[#524B6B] mt-[2px] leading-snug">
+          <p className="text-[12px] text-[#524B6B] mt-[2px] leading-snug truncate">
             {registerNo}
           </p>
-          <p className="text-[12px] text-[#524B6B] mt-[2px] leading-snug">
+          <p className="text-[12px] text-[#524B6B] mt-[2px] leading-snug truncate">
             {location}
           </p>
           <p className="text-[11px] text-[#AAA6B9] mt-1 leading-snug">{time}</p>
         </div>
-        {/* Menu Icon */}
-        <div className="mt-0.5">
-          <MoreVertical size={20} className="text-black hover:text-gray-600" />
+
+        {/* Menu Icon (decorative) */}
+        <div className="mt-0.5 text-gray-500" aria-hidden>
+          <MoreVertical size={18} />
         </div>
       </CardContent>
     </Card>

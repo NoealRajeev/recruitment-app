@@ -1,4 +1,3 @@
-// app/(protected)/dashboard/admin/page.tsx
 "use client";
 
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
@@ -175,11 +174,7 @@ export default function Dashboard() {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (file.size > 5 * 1024 * 1024) {
-        // 5MB limit
-        toast({
-          type: "error",
-          message: "File size should be less than 5MB",
-        });
+        toast({ type: "error", message: "File size should be less than 5MB" });
         return;
       }
       if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
@@ -189,21 +184,13 @@ export default function Dashboard() {
         });
         return;
       }
-      setAdminUser((prev) => ({
-        ...prev,
-        profilePicture: file,
-      }));
+      setAdminUser((prev) => ({ ...prev, profilePicture: file }));
     }
   };
 
   const handleRemoveProfilePicture = () => {
-    setAdminUser((prev) => ({
-      ...prev,
-      profilePicture: null,
-    }));
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+    setAdminUser((prev) => ({ ...prev, profilePicture: null }));
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleDownloadReport = useCallback(async (reportType: string) => {
@@ -244,10 +231,7 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error("Error generating report:", error);
-      toast({
-        type: "error",
-        message: "Failed to generate report",
-      });
+      toast({ type: "error", message: "Failed to generate report" });
     } finally {
       setGeneratingReport(false);
     }
@@ -270,22 +254,22 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="pb-6 px-6 space-y-6">
+    <div className="pb-6 px-3 sm:px-6 space-y-6">
       {/* Header Row */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div />
         {/* Action Buttons */}
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 sm:gap-4">
           <button
             onClick={() => setIsReportModalOpen(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors w-full xs:w-auto"
           >
             <Download className="w-5 h-5" />
             <span>Generate Report</span>
           </button>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-[#2C0053] text-white rounded-lg hover:bg-[#3C006F] transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#2C0053] text-white rounded-lg hover:bg-[#3C006F] transition-colors w-full xs:w-auto"
           >
             <Plus className="w-5 h-5" />
             <span>New Account</span>
@@ -476,7 +460,7 @@ export default function Dashboard() {
         cancelText="Cancel"
         isConfirmLoading={generatingReport}
         footerContent={
-          <div className="flex gap-2 w-full">
+          <div className="flex flex-col sm:flex-row gap-2 w-full">
             <Button
               type="button"
               className="w-full"
@@ -529,7 +513,7 @@ export default function Dashboard() {
           </div>
         }
       >
-        <div className="space-y-4">
+        <div className="space-y-4 mb-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Report Type

@@ -129,10 +129,7 @@ export const AutocompleteInput = React.forwardRef<
             updateDropdownPosition();
           }}
           onKeyDown={handleKeyDown}
-          className={cn(
-            "pr-10 !bg-transparent !border-none shadow-sm",
-            className
-          )}
+          className={cn("pr-10 !bg-transparent", className)}
         />
         <ChevronDown
           className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500"

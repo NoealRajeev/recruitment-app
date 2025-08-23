@@ -1,4 +1,3 @@
-// app/(protected)/dashboard/admin/agencies/page.tsx
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -33,21 +32,20 @@ interface Agency {
   id: string;
   agencyName: string;
   registrationNo: string;
-  licenseExpiry: Date;
+  licenseExpiry: Date | string;
   country: string;
   contactPerson: string;
   phone: string;
   profilePicture?: string;
-  createdAt: Date;
+  createdAt: Date | string;
   status: AccountStatus;
   user: {
     id: string;
     email: string;
     status: AccountStatus | string | null;
-    deleteAt?: Date | null;
+    deleteAt?: Date | string | null;
     deletionType?: string | null;
   };
-  // Some installs may include these (guarded in UI):
   address?: string | null;
   city?: string | null;
   postalCode?: string | null;
@@ -134,7 +132,6 @@ export default function Agencies() {
     const label = String(status || "UNKNOWN")
       .replace(/_/g, " ")
       .toLowerCase();
-
     return <Badge variant={variantMap[status] ?? "outline"}>{label}</Badge>;
   };
 
@@ -179,30 +176,39 @@ export default function Agencies() {
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
 
-  // NEW: Info modal (card click)
+  // Info modal (card click)
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [infoAgency, setInfoAgency] = useState<Agency | null>(null);
 
   // ---------- Utils ----------
-  const isOlderThan12Hours = useCallback((date: Date) => {
+  const toDate = (d: string | Date | null | undefined) =>
+    d ? new Date(d) : null;
+
+  const isOlderThan12Hours = useCallback((dateLike: Date | string) => {
+    const date = toDate(dateLike) || new Date();
     const now = new Date();
     const twelveHoursAgo = new Date(now.getTime() - 12 * 60 * 60 * 1000);
     return date < twelveHoursAgo;
   }, []);
 
-  const getRemainingTime = useCallback((deleteAt?: Date | null): string => {
-    if (!deleteAt) return "No deletion scheduled";
-    const now = new Date();
-    const diffInMs = deleteAt.getTime() - now.getTime();
-    if (diffInMs <= 0) return "Pending deletion";
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-    const diffInMinutes = Math.floor(
-      (diffInMs % (1000 * 60 * 60)) / (1000 * 60)
-    );
-    return `${diffInHours}h ${diffInMinutes}m remaining`;
-  }, []);
+  const getRemainingTime = useCallback(
+    (deleteAt?: Date | string | null): string => {
+      const del = toDate(deleteAt);
+      if (!del) return "No deletion scheduled";
+      const now = new Date();
+      const diffInMs = del.getTime() - now.getTime();
+      if (diffInMs <= 0) return "Pending deletion";
+      const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+      const diffInMinutes = Math.floor(
+        (diffInMs % (1000 * 60 * 60)) / (1000 * 60)
+      );
+      return `${diffInHours}h ${diffInMinutes}m remaining`;
+    },
+    []
+  );
 
-  const formatTimeAgo = useCallback((date: Date) => {
+  const formatTimeAgo = useCallback((dateLike: Date | string) => {
+    const date = toDate(dateLike) || new Date();
     const now = new Date();
     const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
     if (diffInSeconds < 60) return `${diffInSeconds} sec ago`;
@@ -264,7 +270,7 @@ export default function Agencies() {
       const statusNorm = normalizeStatus(agency?.user?.status);
       if (
         statusNorm === AccountStatus.VERIFIED &&
-        isOlderThan12Hours(new Date(agency.createdAt))
+        isOlderThan12Hours(agency.createdAt)
       ) {
         return false;
       }
@@ -488,7 +494,6 @@ export default function Agencies() {
     }
   };
 
-  // NEW: open/close info popup from card click
   const openInfoModal = (agency: Agency) => {
     setInfoAgency(agency);
     setIsInfoModalOpen(true);
@@ -508,386 +513,506 @@ export default function Agencies() {
 
   // ---------- Render ----------
   return (
-    <div className="px-6 space-y-6">
+    <div className="px-4 sm:px-6 space-y-6">
       {/* Top Section - Registration and Verification */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-0">
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="h-[1.5rem] w-[2px] bg-[#635372]/37 rounded-full" />
-          <h2 className="text-xl font-semibold text-[#2C0053]">Registration</h2>
-        </div>
-        <div className="flex items-center space-x-3 mb-4">
-          <div className="h-[1.5rem] w-[2px] bg-[#635372]/37 rounded-full" />
-          <h2 className="text-xl font-semibold text-[#2C0053]">Verification</h2>
-        </div>
-      </div>
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Registration Card */}
-        <Card className="p-6 bg-[#EDDDF3]">
-          <div className="space-y-4">
-            <Input
-              variant="horizontal"
-              label="Agency Name :"
-              name="agencyName"
-              value={registrationData.agencyName}
-              onChange={handleRegistrationChange}
-              placeholder="Enter agency name"
-              required
-              aria-required="true"
-            />
-            <Input
-              variant="horizontal"
-              label="Registration Number :"
-              name="registrationNo"
-              value={registrationData.registrationNo}
-              onChange={handleRegistrationChange}
-              placeholder="Enter registration number"
-              required
-              aria-required="true"
-            />
-            <Input
-              variant="horizontal"
-              label="License Number :"
-              name="licenseNumber"
-              value={registrationData.licenseNumber}
-              onChange={handleRegistrationChange}
-              placeholder="Enter license number"
-              required
-              aria-required="true"
-            />
-            <Input
-              variant="horizontal"
-              label="License Expiry Date :"
-              name="licenseExpiry"
-              type="date"
-              value={registrationData.licenseExpiry}
-              onChange={handleRegistrationChange}
-              required
-              aria-required="true"
-            />
-            <Input
-              variant="horizontal"
-              label="Email Address :"
-              name="email"
-              type="email"
-              value={registrationData.email}
-              onChange={handleRegistrationChange}
-              placeholder="Enter email address"
-              required
-              aria-required="true"
-            />
+        <div>
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="h-[1.5rem] w-[2px] bg-[#635372]/37 rounded-full" />
+            <h2 className="text-lg sm:text-xl font-semibold text-[#2C0053]">
+              Registration
+            </h2>
+          </div>
 
-            {/* Phone with country code */}
-            <div className="flex items-center gap-14">
-              <label
-                htmlFor="phone"
-                className="w-1/4 text-sm font-medium text-gray-700"
-              >
-                Phone Number :<span className="text-red-500 ml-1">*</span>
-              </label>
+          {/* Registration Card */}
+          <Card className="p-4 sm:p-6 bg-[#EDDDF3]">
+            <div className="space-y-4">
+              <Input
+                variant="horizontal"
+                label="Agency Name :"
+                name="agencyName"
+                value={registrationData.agencyName}
+                onChange={handleRegistrationChange}
+                placeholder="Enter agency name"
+                required
+                aria-required="true"
+              />
+              <Input
+                variant="horizontal"
+                label="Registration Number :"
+                name="registrationNo"
+                value={registrationData.registrationNo}
+                onChange={handleRegistrationChange}
+                placeholder="Enter registration number"
+                required
+                aria-required="true"
+              />
+              <Input
+                variant="horizontal"
+                label="License Number :"
+                name="licenseNumber"
+                value={registrationData.licenseNumber}
+                onChange={handleRegistrationChange}
+                placeholder="Enter license number"
+                required
+                aria-required="true"
+              />
+              <Input
+                variant="horizontal"
+                label="License Expiry Date :"
+                name="licenseExpiry"
+                type="date"
+                value={registrationData.licenseExpiry}
+                onChange={handleRegistrationChange}
+                required
+                aria-required="true"
+              />
+              <Input
+                variant="horizontal"
+                label="Email Address :"
+                name="email"
+                type="email"
+                value={registrationData.email}
+                onChange={handleRegistrationChange}
+                placeholder="Enter email address"
+                required
+                aria-required="true"
+              />
 
-              <div className="flex-1">
-                <div className="flex border rounded-md overflow-hidden">
-                  <select
-                    name="countryCode"
-                    value={registrationData.countryCode}
-                    onChange={(e) =>
-                      setRegistrationData((prev) => ({
-                        ...prev,
-                        countryCode: e.target.value,
-                      }))
-                    }
-                    className="px-3 py-2 text-sm text-gray-700 outline-none"
-                    required
-                    aria-required="true"
+              {/* Phone with country code — responsive */}
+              <div className="space-y-1">
+                <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2">
+                  <label
+                    htmlFor="phone"
+                    className="sm:col-span-4 text-sm font-medium text-gray-700"
                   >
-                    {COUNTRY_CODES.map((cc) => (
-                      <option key={cc.code} value={cc.code}>
-                        {cc.code} ({cc.name})
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={registrationData.phone}
-                    onChange={handleRegistrationChange}
-                    placeholder="Enter phone number"
-                    className="flex-1 px-3 py-2 text-sm outline-none"
-                    required
-                    aria-required="true"
-                  />
+                    Phone Number :<span className="text-red-500 ml-1">*</span>
+                  </label>
+                  <div className="sm:col-span-8">
+                    <div className="flex border rounded-md overflow-hidden">
+                      <select
+                        name="countryCode"
+                        value={registrationData.countryCode}
+                        onChange={(e) =>
+                          setRegistrationData((prev) => ({
+                            ...prev,
+                            countryCode: e.target.value,
+                          }))
+                        }
+                        className="px-3 py-2 text-sm text-gray-700 outline-none"
+                        required
+                        aria-required="true"
+                      >
+                        {COUNTRY_CODES.map((cc) => (
+                          <option key={cc.code} value={cc.code}>
+                            {cc.code} ({cc.name})
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        value={registrationData.phone}
+                        onChange={handleRegistrationChange}
+                        placeholder="Enter phone number"
+                        className="flex-1 px-3 py-2 text-sm outline-none"
+                        required
+                        aria-required="true"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              <Input
+                variant="horizontal"
+                label="Address :"
+                name="address"
+                value={registrationData.address}
+                onChange={handleRegistrationChange}
+                placeholder="Enter full address"
+                required
+                aria-required="true"
+              />
+              <Input
+                variant="horizontal"
+                label="City :"
+                name="city"
+                value={registrationData.city}
+                onChange={handleRegistrationChange}
+                placeholder="Enter city"
+                required
+                aria-required="true"
+              />
+              <HorizontalSelect
+                label="Country :"
+                name="country"
+                value={registrationData.country}
+                onChange={(e) =>
+                  setRegistrationData((prev) => ({
+                    ...prev,
+                    country: e.target.value,
+                  }))
+                }
+                options={
+                  t.nationalityOptions?.map((nat) => ({
+                    value: nat,
+                    label: nat,
+                  })) ?? []
+                }
+                required
+                aria-required="true"
+              />
+              <Input
+                variant="horizontal"
+                label="Postal Code :"
+                name="postalCode"
+                value={registrationData.postalCode}
+                onChange={handleRegistrationChange}
+                placeholder="Enter postal code"
+              />
+
+              <div className="flex justify-center mt-2">
+                <Button
+                  onClick={handleRegistration}
+                  disabled={isRegistering}
+                  className="w-full sm:w-1/2 bg-[#3D1673] hover:bg-[#2b0e54] text-white py-2 px-4 rounded-md disabled:opacity-60 disabled:cursor-not-allowed"
+                  aria-label="Register agency"
+                >
+                  {isRegistering ? (
+                    <>
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      Processing…
+                    </>
+                  ) : (
+                    "Register"
+                  )}
+                </Button>
+              </div>
             </div>
+          </Card>
+        </div>
 
-            <Input
-              variant="horizontal"
-              label="Address :"
-              name="address"
-              value={registrationData.address}
-              onChange={handleRegistrationChange}
-              placeholder="Enter full address"
-              required
-              aria-required="true"
-            />
-            <Input
-              variant="horizontal"
-              label="City :"
-              name="city"
-              value={registrationData.city}
-              onChange={handleRegistrationChange}
-              placeholder="Enter city"
-              required
-              aria-required="true"
-            />
-            <HorizontalSelect
-              label="Country :"
-              name="country"
-              value={registrationData.country}
-              onChange={(e) =>
-                setRegistrationData((prev) => ({
-                  ...prev,
-                  country: e.target.value,
-                }))
-              }
-              options={
-                t.nationalityOptions?.map((nat) => ({
-                  value: nat,
-                  label: nat,
-                })) ?? []
-              }
-              required
-              aria-required="true"
-            />
-            <Input
-              variant="horizontal"
-              label="Postal Code :"
-              name="postalCode"
-              value={registrationData.postalCode}
-              onChange={handleRegistrationChange}
-              placeholder="Enter postal code"
-            />
+        {/* Verification column */}
+        <div>
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="h-[1.5rem] w-[2px] bg-[#635372]/37 rounded-full" />
+            <h2 className="text-lg sm:text-xl font-semibold text-[#2C0053]">
+              Verification
+            </h2>
+          </div>
 
-            <div className="flex justify-center mt-4">
+          <Card className="p-4 sm:p-6 bg-[#EDDDF3]">
+            {/* Tabs */}
+            <div className="flex flex-wrap gap-2 mb-4" role="tablist">
               <Button
-                onClick={handleRegistration}
-                disabled={isRegistering}
-                className="w-1/3 bg-[#3D1673] hover:bg-[#2b0e54] text-white py-2 px-4 rounded-md disabled:opacity-60 disabled:cursor-not-allowed"
-                aria-label="Register agency"
+                variant={activeTab === "all" ? "default" : "outline"}
+                onClick={() => setActiveTab("all")}
+                role="tab"
+                aria-selected={activeTab === "all"}
               >
-                {isRegistering ? (
-                  <>
-                    <svg
-                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      />
-                    </svg>
-                    Processing…
-                  </>
-                ) : (
-                  "Register"
-                )}
+                All
+              </Button>
+              <Button
+                variant={activeTab === "pending" ? "default" : "outline"}
+                onClick={() => setActiveTab("pending")}
+                role="tab"
+                aria-selected={activeTab === "pending"}
+              >
+                Pending
+              </Button>
+              <Button
+                variant={activeTab === "verified" ? "default" : "outline"}
+                onClick={() => setActiveTab("verified")}
+                role="tab"
+                aria-selected={activeTab === "verified"}
+              >
+                Verified
+              </Button>
+              <Button
+                variant={activeTab === "rejected" ? "default" : "outline"}
+                onClick={() => setActiveTab("rejected")}
+                role="tab"
+                aria-selected={activeTab === "rejected"}
+              >
+                Rejected
               </Button>
             </div>
-          </div>
-        </Card>
 
-        {/* Verification Card */}
-        <Card className="p-6 bg-[#EDDDF3]">
-          <div className="flex space-x-4 mb-4" role="tablist">
-            <Button
-              variant={activeTab === "all" ? "default" : "outline"}
-              onClick={() => setActiveTab("all")}
-              role="tab"
-              aria-selected={activeTab === "all"}
-            >
-              All
-            </Button>
-            <Button
-              variant={activeTab === "pending" ? "default" : "outline"}
-              onClick={() => setActiveTab("pending")}
-              role="tab"
-              aria-selected={activeTab === "pending"}
-            >
-              Pending
-            </Button>
-            <Button
-              variant={activeTab === "verified" ? "default" : "outline"}
-              onClick={() => setActiveTab("verified")}
-              role="tab"
-              aria-selected={activeTab === "verified"}
-            >
-              Verified
-            </Button>
-            <Button
-              variant={activeTab === "rejected" ? "default" : "outline"}
-              onClick={() => setActiveTab("rejected")}
-              role="tab"
-              aria-selected={activeTab === "rejected"}
-            >
-              Rejected
-            </Button>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="min-w-full">
-              <thead>
-                <tr className="border-b border-[#635372]/40">
-                  <th className="text-left py-2 px-3 text-sm font-medium text-[#150B3D]">
-                    Agency Name
-                  </th>
-                  <th className="text-left py-2 px-3 text-sm font-medium text-[#150B3D]">
-                    Email Address
-                  </th>
-                  <th className="text-left py-2 px-3 text-sm font-medium text-[#150B3D]">
-                    Status
-                  </th>
-                  <th className="text-left py-2 px-3 text-sm font-medium text-[#150B3D]">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-transparent">
-                {paginatedAgencies.map((agency) => {
-                  const statusNorm = normalizeStatus(agency?.user?.status);
-                  return (
-                    <tr
-                      key={agency.id}
-                      className={`hover:bg-blue-25 ${
-                        statusNorm === AccountStatus.NOT_VERIFIED
-                          ? "cursor-pointer hover:bg-[#EDDDF3]"
-                          : ""
-                      }`}
-                      onClick={() => handleRowClick(agency)}
-                      aria-label={`Agency ${agency.agencyName}`}
-                    >
-                      <td className="py-2 px-3 text-sm text-[#150B3D]/70">
-                        {agency.agencyName}
-                        {agency.user.deleteAt && (
-                          <span className="text-xs text-red-500 ml-2">
-                            (Deletion Pending)
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-2 px-3 text-sm text-[#150B3D]/70">
-                        {agency.user.email}
-                      </td>
-                      <td
-                        className={`py-2 px-3 text-sm font-medium ${getStatusColor(
-                          statusNorm
-                        )}`}
+            {/* Desktop table */}
+            <div className="overflow-x-auto hidden md:block">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="border-b border-[#635372]/40">
+                    <th className="text-left py-2 px-3 text-sm font-medium text-[#150B3D]">
+                      Agency Name
+                    </th>
+                    <th className="text-left py-2 px-3 text-sm font-medium text-[#150B3D]">
+                      Email Address
+                    </th>
+                    <th className="text-left py-2 px-3 text-sm font-medium text-[#150B3D]">
+                      Status
+                    </th>
+                    <th className="text-left py-2 px-3 text-sm font-medium text-[#150B3D]">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-transparent">
+                  {paginatedAgencies.map((agency) => {
+                    const statusNorm = normalizeStatus(agency?.user?.status);
+                    return (
+                      <tr
+                        key={agency.id}
+                        className={`hover:bg-blue-25 ${statusNorm === AccountStatus.NOT_VERIFIED ? "cursor-pointer hover:bg-[#EDDDF3]" : ""}`}
+                        onClick={() => handleRowClick(agency)}
+                        aria-label={`Agency ${agency.agencyName}`}
                       >
-                        {getStatusBadge(statusNorm)}
-                      </td>
-                      <td className="py-2 px-3 text-sm text-[#150B3D]/70 space-x-2">
-                        {statusNorm === AccountStatus.NOT_VERIFIED && (
-                          <>
+                        <td className="py-2 px-3 text-sm text-[#150B3D]/70">
+                          {agency.agencyName}
+                          {agency.user.deleteAt && (
+                            <span className="text-xs text-red-500 ml-2">
+                              (Deletion Pending)
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-2 px-3 text-sm text-[#150B3D]/70">
+                          {agency.user.email}
+                        </td>
+                        <td
+                          className={`py-2 px-3 text-sm font-medium ${getStatusColor(statusNorm)}`}
+                        >
+                          {getStatusBadge(statusNorm)}
+                        </td>
+                        <td className="py-2 px-3 text-sm text-[#150B3D]/70 space-x-2">
+                          {statusNorm === AccountStatus.NOT_VERIFIED && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleStatusUpdate(
+                                    agency.id,
+                                    AccountStatus.VERIFIED
+                                  );
+                                }}
+                                aria-label={`Approve ${agency.agencyName}`}
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedAgency(agency);
+                                  setIsModalOpen(true);
+                                }}
+                                aria-label={`Reject ${agency.agencyName}`}
+                              >
+                                Reject
+                              </Button>
+                            </>
+                          )}
+
+                          {(statusNorm === AccountStatus.REJECTED ||
+                            statusNorm === AccountStatus.NOT_VERIFIED ||
+                            statusNorm === AccountStatus.VERIFIED) && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setAgencyToDelete(agency);
+                                setIsDeleteModalOpen(true);
+                              }}
+                              className="text-red-500 hover:text-red-700"
+                              title="Delete account"
+                              aria-label={`Delete ${agency.agencyName}`}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
+
+                          {statusNorm === AccountStatus.REJECTED && (
                             <Button
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleStatusUpdate(
                                   agency.id,
-                                  AccountStatus.VERIFIED
+                                  AccountStatus.NOT_VERIFIED
                                 );
                               }}
-                              aria-label={`Approve ${agency.agencyName}`}
+                              aria-label={`Re-review ${agency.agencyName}`}
                             >
-                              Approve
+                              Re-review
                             </Button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+
+              {filteredAgencies.length > ITEMS_PER_PAGE && (
+                <div className="mt-4 flex justify-center">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={Math.ceil(
+                      filteredAgencies.length / ITEMS_PER_PAGE
+                    )}
+                    onPageChange={setCurrentPage}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Mobile list (cards per row) */}
+            <div className="md:hidden space-y-3">
+              {paginatedAgencies.map((agency) => {
+                const statusNorm = normalizeStatus(agency?.user?.status);
+                return (
+                  <div
+                    key={agency.id}
+                    className="rounded-lg bg-white p-3 shadow hover:bg-[#f7f0fb] transition"
+                    onClick={() => handleRowClick(agency)}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-100">
+                        <Image
+                          src={
+                            agency.profilePicture ||
+                            "/assets/avatar-placeholder.png"
+                          }
+                          alt={agency.agencyName}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="font-medium text-sm truncate">
+                            {agency.agencyName}
+                          </p>
+                          <span className="shrink-0">
+                            {getStatusBadge(statusNorm)}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-600 truncate">
+                          {agency.user.email}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {statusNorm === AccountStatus.REJECTED &&
+                          agency.user.deleteAt
+                            ? getRemainingTime(agency.user.deleteAt)
+                            : formatTimeAgo(agency.createdAt)}
+                        </p>
+                        <div className="flex gap-2 mt-3">
+                          {statusNorm === AccountStatus.NOT_VERIFIED && (
+                            <>
+                              <Button
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleStatusUpdate(
+                                    agency.id,
+                                    AccountStatus.VERIFIED
+                                  );
+                                }}
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedAgency(agency);
+                                  setIsModalOpen(true);
+                                }}
+                              >
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                          {(statusNorm === AccountStatus.REJECTED ||
+                            statusNorm === AccountStatus.NOT_VERIFIED ||
+                            statusNorm === AccountStatus.VERIFIED) && (
                             <Button
                               size="sm"
-                              variant="destructive"
+                              variant="outline"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setSelectedAgency(agency);
-                                setIsModalOpen(true);
+                                setAgencyToDelete(agency);
+                                setIsDeleteModalOpen(true);
                               }}
-                              aria-label={`Reject ${agency.agencyName}`}
                             >
-                              Reject
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Delete
                             </Button>
-                          </>
-                        )}
+                          )}
+                          {statusNorm === AccountStatus.REJECTED && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStatusUpdate(
+                                  agency.id,
+                                  AccountStatus.NOT_VERIFIED
+                                );
+                              }}
+                            >
+                              Re-review
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
 
-                        {(statusNorm === AccountStatus.REJECTED ||
-                          statusNorm === AccountStatus.NOT_VERIFIED ||
-                          statusNorm === AccountStatus.VERIFIED) && (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setAgencyToDelete(agency);
-                              setIsDeleteModalOpen(true);
-                            }}
-                            className="text-red-500 hover:text-red-700"
-                            title="Delete account"
-                            aria-label={`Delete ${agency.agencyName}`}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        )}
-
-                        {statusNorm === AccountStatus.REJECTED && (
-                          <Button
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStatusUpdate(
-                                agency.id,
-                                AccountStatus.NOT_VERIFIED
-                              );
-                            }}
-                            aria-label={`Re-review ${agency.agencyName}`}
-                          >
-                            Re-review
-                          </Button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-
-            {filteredAgencies.length > ITEMS_PER_PAGE && (
-              <div className="mt-4 flex justify-center">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={Math.ceil(
-                    filteredAgencies.length / ITEMS_PER_PAGE
-                  )}
-                  onPageChange={setCurrentPage}
-                />
-              </div>
-            )}
-          </div>
-        </Card>
+              {filteredAgencies.length > ITEMS_PER_PAGE && (
+                <div className="mt-3 flex justify-center">
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={Math.ceil(
+                      filteredAgencies.length / ITEMS_PER_PAGE
+                    )}
+                    onPageChange={setCurrentPage}
+                  />
+                </div>
+              )}
+            </div>
+          </Card>
+        </div>
       </div>
 
-      {/* ===========================
-          Bottom Section - Agency Cards Grid
-          (Now opens Info Modal on click)
-      ============================ */}
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold mb-3">Agencies</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {/* Agencies cards grid */}
+      <div className="mt-4">
+        <h2 className="text-lg sm:text-xl font-semibold mb-3">Agencies</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {agencies
             .filter((agency) => {
               const statusNorm = normalizeStatus(agency?.user?.status);
@@ -901,25 +1026,23 @@ export default function Agencies() {
                 <AgencyCardContent
                   agencyName={agency.agencyName}
                   location={`${agency.country} • ${agency.registrationNo}`}
-                  logoUrl={agency.profilePicture || ""}
+                  logoUrl={
+                    agency.profilePicture || "/assets/avatar-placeholder.png"
+                  }
                   email={agency.user.email}
                   registerNo={agency.registrationNo}
                   time={
                     normalizeStatus(agency.user.status) ===
                       AccountStatus.REJECTED && agency.user.deleteAt
-                      ? getRemainingTime(
-                          agency.user.deleteAt
-                            ? new Date(agency.user.deleteAt)
-                            : null
-                        )
-                      : formatTimeAgo(new Date(agency.createdAt))
+                      ? getRemainingTime(agency.user.deleteAt)
+                      : formatTimeAgo(agency.createdAt)
                   }
-                  onClick={() => openInfoModal(agency)} // <-- OPEN MODAL
+                  onClick={() => openInfoModal(agency)}
                   aria-label={`View details for ${agency.agencyName}`}
                 />
 
                 {/* Status indicator */}
-                <div className="absolute bottom-3 left-2 right-2 flex justify-between items-start">
+                <div className="absolute bottom-3 left-2 right-2 flex justify-between items-start pointer-events-none">
                   {normalizeStatus(agency.user.status) ===
                     AccountStatus.REJECTED && (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
@@ -932,11 +1055,9 @@ export default function Agencies() {
         </div>
       </div>
 
-      {/* ===========================
-          Modals
-      ============================ */}
+      {/* =========================== Modals =========================== */}
 
-      {/* Document Reviewer Modal (unchanged behavior) */}
+      {/* Document Reviewer Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => {
@@ -944,11 +1065,9 @@ export default function Agencies() {
           setSelectedAgency(null);
           setRejectionReason("");
         }}
-        title={`Review Documents - ${
-          selectedAgency ? selectedAgency.agencyName : ""
-        }`}
+        title={`Review Documents - ${selectedAgency ? selectedAgency.agencyName : ""}`}
         size="5xl"
-        showFooter={true}
+        showFooter
         footerContent={
           <div className="w-full">
             <div className="mb-4">
@@ -962,7 +1081,7 @@ export default function Agencies() {
                 onChange={(e) => setRejectionReason(e.target.value)}
               />
             </div>
-            <div className="flex justify-end space-x-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
               <Button
                 variant="outline"
                 onClick={() => setIsModalOpen(false)}
@@ -1019,9 +1138,7 @@ export default function Agencies() {
                   </p>
                   <p>
                     <span className="font-medium">License Expiry:</span>{" "}
-                    {new Date(
-                      selectedAgency.licenseExpiry
-                    ).toLocaleDateString()}
+                    {toDate(selectedAgency.licenseExpiry)?.toLocaleDateString()}
                   </p>
                   <p>
                     <span className="font-medium">Country:</span>{" "}
@@ -1117,9 +1234,7 @@ export default function Agencies() {
                       return (
                         <div
                           key={doc.id}
-                          className={`border rounded-lg p-4 space-y-2 ${
-                            isImportant ? "border-l-4 border-blue-500" : ""
-                          }`}
+                          className={`border rounded-lg p-4 space-y-2 ${isImportant ? "border-l-4 border-blue-500" : ""}`}
                         >
                           <div className="flex justify-between items-center">
                             <h4 className="font-medium capitalize">
@@ -1147,9 +1262,7 @@ export default function Agencies() {
                                     e.target.value as AccountStatus
                                   )
                                 }
-                                className={`text-sm border rounded px-2 py-1 ${
-                                  isImportant ? "font-semibold" : ""
-                                }`}
+                                className={`text-sm border rounded px-2 py-1 ${isImportant ? "font-semibold" : ""}`}
                               >
                                 <option value="NOT_VERIFIED">
                                   Not Verified
@@ -1159,7 +1272,7 @@ export default function Agencies() {
                               </select>
                             </div>
 
-                            <div className="border rounded-md p-2 h-64 flex flex-col">
+                            <div className="border rounded-md p-2 h-64 flex flex-col bg-white">
                               <div className="flex-1 overflow-hidden flex items-center justify-center">
                                 {isImage && absoluteUrl ? (
                                   // eslint-disable-next-line @next/next/no-img-element
@@ -1233,9 +1346,9 @@ export default function Agencies() {
         }}
         title={`Delete Account - ${agencyToDelete?.agencyName || ""}`}
         size="md"
-        showFooter={true}
+        showFooter
         footerContent={
-          <div className="flex justify-end space-x-4">
+          <div className="flex flex-col sm:flex-row sm:justify-end gap-3">
             <Button
               variant="outline"
               onClick={() => setIsDeleteModalOpen(false)}
@@ -1261,7 +1374,7 @@ export default function Agencies() {
           it within this window.
         </p>
         {agencyToDelete?.user.deleteAt && (
-          <div className="mt-4 flex items-center space-x-2">
+          <div className="mt-4 flex items-center gap-2">
             <Button
               size="sm"
               variant="outline"
@@ -1280,7 +1393,7 @@ export default function Agencies() {
         )}
       </Modal>
 
-      {/* NEW: Agency Info Modal (for card click) */}
+      {/* Info Modal (card click) */}
       <Modal
         isOpen={isInfoModalOpen}
         onClose={() => {
@@ -1304,10 +1417,11 @@ export default function Agencies() {
       >
         {infoAgency && (
           <div className="space-y-4 mb-8">
-            {/* Header area */}
             <div className="flex items-start gap-4">
               <Image
-                src={infoAgency.profilePicture || ""}
+                src={
+                  infoAgency.profilePicture || "/assets/avatar-placeholder.png"
+                }
                 alt={infoAgency.agencyName}
                 width={56}
                 height={56}
@@ -1321,12 +1435,11 @@ export default function Agencies() {
                   {getStatusBadge(infoAgency.user.status)}
                 </div>
                 <p className="text-sm text-[#150B3D]/70">
-                  Registered: {new Date(infoAgency.createdAt).toLocaleString()}
+                  Registered: {toDate(infoAgency.createdAt)?.toLocaleString()}
                 </p>
               </div>
             </div>
 
-            {/* Body grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#EFEBF2] rounded-lg p-4">
               <div>
                 <p className="text-xs text-[#70528A]">Registration No</p>
@@ -1338,7 +1451,7 @@ export default function Agencies() {
                 <p className="text-xs text-[#70528A]">License Expiry</p>
                 <p className="text-sm text-[#150B3D]">
                   {infoAgency.licenseExpiry
-                    ? new Date(infoAgency.licenseExpiry).toLocaleDateString()
+                    ? toDate(infoAgency.licenseExpiry)?.toLocaleDateString()
                     : "—"}
                 </p>
               </div>

@@ -66,7 +66,6 @@ export default function ClientLabourReview() {
       if (!response.ok) throw new Error("Failed to fetch requirements");
 
       const data = await response.json();
-      console.log("Client labour page received data:", data);
       setRequirements(data);
 
       // Select first requirement by default if none selected
@@ -178,7 +177,7 @@ export default function ClientLabourReview() {
       toast({
         type: "success",
         message: isBulk
-          ? `${assignmentId.length} profiles ${status.toLowerCase()} successfully`
+          ? `${(assignmentId as string[]).length} profiles ${status.toLowerCase()} successfully`
           : `Labour profile ${status.toLowerCase()} successfully`,
       });
     } catch (error) {
@@ -298,17 +297,16 @@ export default function ClientLabourReview() {
           <div className="flex flex-col items-end">
             <span
               className={`text-xs px-2 py-1 rounded-full ${
-                statusColors[profile.status as keyof typeof statusColors] ||
-                "bg-gray-100 text-gray-800"
+                // @ts-ignore
+                statusColors[profile.status] || "bg-gray-100 text-gray-800"
               }`}
             >
               {profile.status.replace("_", " ")}
             </span>
             <span
               className={`text-xs px-2 py-1 rounded-full mt-1 ${
-                verificationColors[
-                  profile.verificationStatus as keyof typeof verificationColors
-                ]
+                // @ts-ignore
+                verificationColors[profile.verificationStatus]
               }`}
             >
               <div className="flex items-center gap-1">
@@ -448,9 +446,9 @@ export default function ClientLabourReview() {
   };
 
   return (
-    <div className="px-6 flex gap-6">
+    <div className="flex flex-col md:flex-row gap-4 md:gap-6 px-4 md:px-6">
       {/* Left Sidebar - Requirements */}
-      <div className="w-1/6 rounded-lg overflow-y-auto">
+      <div className="w-full md:w-1/6 rounded-lg md:overflow-y-auto md:max-h-[calc(100vh-2rem)]">
         {loadingRequirements ? (
           <div className="space-y-2">
             {[...Array(3)].map((_, i) => (
@@ -475,7 +473,7 @@ export default function ClientLabourReview() {
                     : "bg-gray-50 hover:bg-[#EDDDF3]/50 border-l-gray-200"
                 }`}
               >
-                <h3 className="font-medium text-[#150B3D]">
+                <h3 className="font-medium text-[#150B3D] truncate">
                   {requirement.id.slice(0, 8).toUpperCase()}
                 </h3>
                 <div className="flex justify-between items-center mt-1">
@@ -495,7 +493,7 @@ export default function ClientLabourReview() {
       </div>
 
       {/* Main Content Area */}
-      <div className="w-5/6 rounded-lg overflow-y-auto">
+      <div className="w-full md:w-5/6 rounded-lg md:overflow-y-auto md:max-h-[calc(100vh-2rem)]">
         {loadingRequirements ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(3)].map((_, i) => (
@@ -510,8 +508,8 @@ export default function ClientLabourReview() {
             {viewingProfiles ? (
               // Individual job role labor assignments view
               <div className="space-y-4">
-                <div className="flex items-center justify-between bg-[#EDDDF3]/50 p-4 rounded-2xl">
-                  <div className="flex items-center space-x-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 bg-[#EDDDF3]/50 p-4 rounded-2xl">
+                  <div className="flex items-center gap-2">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -523,7 +521,7 @@ export default function ClientLabourReview() {
                       {currentJobRole?.title} - Labor Assignments
                     </h2>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm">
                       {currentJobRole?.LabourAssignment?.filter(
                         (a) => a.clientStatus === "ACCEPTED"

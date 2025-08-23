@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown, LogOut, Search, Settings, User } from "lucide-react";
 import NotificationBell from "../ui/NotificationBell";
+import MobileSidebar from "./MobileSidebar"; // <<< add
 
 interface DashboardHeaderProps {
   role: UserRole;
@@ -23,22 +24,12 @@ export default function DashboardHeader({
   const pathname = rawPath ?? "";
   const router = useRouter();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  console.log("Current pathname:", pathname);
-  console.log("Router object:", router);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Map paths to their display names
   const getPageTitle = () => {
     const pathSegments = pathname.split("/").filter((segment) => segment);
-
-    // If we're at the base dashboard path (e.g., /dashboard/admin)
-    if (pathSegments.length === 2) {
-      return "Dashboard";
-    }
-
-    const currentPath = pathSegments[2]; // Get the section after /dashboard/[role]
-
+    if (pathSegments.length === 2) return "Dashboard";
+    const currentPath = pathSegments[2];
     const pageTitles: Record<string, string> = {
       company: "Client",
       agencies: "Agencies",
@@ -48,11 +39,11 @@ export default function DashboardHeader({
       audit: "Audit Logs",
       documents: "Documents",
     };
-
-    // Default to capitalized path if no mapping exists
     return (
       pageTitles[currentPath] ||
-      currentPath.charAt(0).toUpperCase() + currentPath.slice(1)
+      (currentPath
+        ? currentPath[0].toUpperCase() + currentPath.slice(1)
+        : "Dashboard")
     );
   };
 
@@ -67,7 +58,6 @@ export default function DashboardHeader({
         setIsDropdownOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -76,18 +66,21 @@ export default function DashboardHeader({
     <header className="bg-transparent py-4">
       <div className="px-5">
         <div className="flex items-center justify-between">
-          {/* Title Section */}
-          <h1 className="text-3xl font-bold text-[#0B0016]">
-            {getPageTitle()}
-          </h1>
+          {/* LEFT: mobile menu button + title */}
+          <div className="flex items-center gap-3">
+            <div className="md:hidden">
+              <MobileSidebar role={role} /> {/* <<< menu button here */}
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold text-[#0B0016]">
+              {getPageTitle()}
+            </h1>
+          </div>
 
-          {/* Search and Profile Section */}
+          {/* RIGHT: search + notifications + profile */}
           <div className="flex items-center gap-4">
-            {/* Search Bar - Hidden on small screens */}
+            {/* Search Bar (hidden on small) */}
             <div className="hidden md:block">
               <div className="relative w-[800px]">
-                {" "}
-                {/* Increased width */}
                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
                   <Search className="text-gray-400 h-5 w-5" />
                 </div>
@@ -99,15 +92,14 @@ export default function DashboardHeader({
               </div>
             </div>
 
-            {/* Search Icon - Visible on small screens */}
+            {/* Search icon (mobile) */}
             <button className="md:hidden w-9 h-9 rounded-full bg-[#0B0016] flex items-center justify-center">
               <Search className="text-white h-5 w-5" />
             </button>
 
-            {/* Notification Bell */}
             <NotificationBell />
 
-            {/* User Profile Dropdown */}
+            {/* Profile dropdown */}
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={toggleDropdown}
@@ -139,15 +131,12 @@ export default function DashboardHeader({
                 <ChevronDown className="hidden md:inline text-white h-4 w-4" />
               </button>
 
-              {/* Dropdown Menu */}
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 py-1">
                   <button
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log("Profile button clicked");
-                      alert("Profile button clicked!");
                       router.push("/dashboard/profile");
                       setIsDropdownOpen(false);
                     }}
@@ -160,8 +149,6 @@ export default function DashboardHeader({
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      console.log("Settings button clicked");
-                      alert("Settings button clicked!");
                       window.location.href = "/dashboard/settings";
                       setIsDropdownOpen(false);
                     }}
@@ -172,7 +159,6 @@ export default function DashboardHeader({
                   </button>
                   <button
                     onClick={() => {
-                      console.log("Logout button clicked");
                       signOut();
                       setIsDropdownOpen(false);
                     }}

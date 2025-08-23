@@ -1,17 +1,16 @@
-// app/(protected)/dashboard/admin/company/page.tsx
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/context/toast-provider";
 import { updateCompanyStatus } from "@/lib/api/client";
 import CompanyCardContent from "@/components/shared/Cards/CompanyCardContent";
-import { Modal } from "@/components/ui/Modal";
-import { Button } from "@/components/ui/Button";
 import { AccountStatus, DocumentCategory } from "@/lib/generated/prisma";
-import { Badge, BadgeProps } from "@/components/ui/Badge";
+import { Badge, type BadgeProps } from "@/components/ui/Badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PDFViewer } from "@/components/shared/PDFViewer";
 import { FileIcon } from "lucide-react";
+import { Modal } from "@/components/ui/Modal";
+import { Button } from "@/components/ui/Button";
 
 interface ClientUser {
   id: string;
@@ -19,7 +18,7 @@ interface ClientUser {
   email: string;
   phone: string | null;
   status: AccountStatus;
-  profilePicture?: string;
+  profilePicture?: string | null;
 }
 
 interface ClientWithUser {
@@ -82,7 +81,6 @@ export default function ClientReviewPage() {
         pendingRes.json(),
         verifiedRes.json(),
       ]);
-
       setPendingClients(pendingData);
       setVerifiedClients(verifiedData);
     } catch (error) {
@@ -102,23 +100,15 @@ export default function ClientReviewPage() {
       setDocumentsLoading(true);
       setDocumentsError(null);
       const res = await fetch(`/api/clients/${clientId}/documents`);
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
 
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
-
-      const docs = await res.json();
-
-      if (!Array.isArray(docs)) {
-        throw new Error("Invalid documents format");
-      }
+      const docs = (await res.json()) as ClientDocument[];
+      if (!Array.isArray(docs)) throw new Error("Invalid documents format");
 
       setClientDocuments(docs);
 
       const statuses: Record<string, AccountStatus> = {};
-      docs.forEach((doc: ClientDocument) => {
-        statuses[doc.id] = doc.status;
-      });
+      docs.forEach((doc) => (statuses[doc.id] = doc.status));
       setDocumentStatuses(statuses);
     } catch (error) {
       console.error("Error fetching documents:", error);
@@ -139,13 +129,9 @@ export default function ClientReviewPage() {
   };
 
   const handleDocumentStatusChange = (docId: string, status: AccountStatus) => {
-    setDocumentStatuses((prev) => ({
-      ...prev,
-      [docId]: status,
-    }));
+    setDocumentStatuses((prev) => ({ ...prev, [docId]: status }));
   };
 
-  // Check if all important documents are verified
   const allImportantDocumentsVerified = clientDocuments.every((doc) => {
     if (doc.category === DocumentCategory.IMPORTANT) {
       return (
@@ -167,7 +153,7 @@ export default function ClientReviewPage() {
           ? "Approved by admin"
           : rejectionReason || "Rejected by admin";
 
-      // First update individual document statuses if needed
+      // Auto-verify important docs when approving
       if (status === "VERIFIED") {
         await Promise.all(
           clientDocuments.map(async (doc) => {
@@ -178,19 +164,14 @@ export default function ClientReviewPage() {
             ) {
               await fetch(`/api/documents/${doc.id}`, {
                 method: "PATCH",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  status: "VERIFIED",
-                }),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status: "VERIFIED" }),
               });
             }
           })
         );
       }
 
-      // Then update the client status
       const res = await updateCompanyStatus(
         selectedClient.id,
         status,
@@ -220,7 +201,6 @@ export default function ClientReviewPage() {
       [AccountStatus.SUBMITTED]: "outline",
       [AccountStatus.SUSPENDED]: "destructive",
     };
-
     return (
       <Badge variant={variantMap[status]}>
         {status.replace("_", " ").toLowerCase()}
@@ -228,9 +208,8 @@ export default function ClientReviewPage() {
     );
   };
 
-  const getFileExtension = (filename: string) => {
-    return filename.split(".").pop()?.toLowerCase() || "";
-  };
+  const getFileExtension = (filename: string) =>
+    filename.split(".").pop()?.toLowerCase() || "";
 
   if (loading) {
     return (
@@ -250,25 +229,28 @@ export default function ClientReviewPage() {
   }
 
   return (
-    <div className="px-6 py-8 space-y-12">
+    <div className="px-4 sm:px-6 py-8 space-y-12">
       {/* Pending Review Section */}
       <section>
-        <h2 className="text-2xl font-semibold mb-4">Pending Review</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+          Pending Review
+        </h2>
         {pendingClients.length === 0 ? (
           <p className="text-gray-500">No clients pending review.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {pendingClients.map((client) => (
               <div
                 key={client.id}
                 onClick={() => handleClientClick(client)}
                 className="cursor-pointer hover:shadow-md transition-shadow"
+                aria-label={`Review ${client.companyName}`}
               >
                 <CompanyCardContent
                   companyName={client.companyName}
                   email={client.user.email}
                   phoneNo={client.user.phone || "N/A"}
-                  logoUrl={client.user.profilePicture}
+                  logoUrl={client.user.profilePicture || undefined}
                   noSub={""}
                 />
               </div>
@@ -279,18 +261,20 @@ export default function ClientReviewPage() {
 
       {/* Verified Companies Section */}
       <section>
-        <h2 className="text-2xl font-semibold mb-4">Verified Companies</h2>
+        <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+          Verified Companies
+        </h2>
         {verifiedClients.length === 0 ? (
           <p className="text-gray-500">No verified companies found.</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {verifiedClients.map((client) => (
               <CompanyCardContent
                 key={client.id}
                 companyName={client.companyName}
                 email={client.user.email}
                 phoneNo={client.user.phone || "N/A"}
-                logoUrl={client.user.profilePicture}
+                logoUrl={client.user.profilePicture || undefined}
                 noSub={""}
               />
             ))}
@@ -310,7 +294,7 @@ export default function ClientReviewPage() {
         }}
         title={`Review Client - ${selectedClient?.companyName || ""}`}
         size="5xl"
-        showFooter={true}
+        showFooter
         footerContent={
           <div className="w-full">
             {showRejectInput && (
@@ -327,7 +311,7 @@ export default function ClientReviewPage() {
                 />
               </div>
             )}
-            <div className="flex justify-end space-x-3">
+            <div className="flex flex-col sm:flex-row sm:justify-end gap-2">
               <Button
                 variant="outline"
                 onClick={() => setIsModalOpen(false)}
@@ -430,9 +414,11 @@ export default function ClientReviewPage() {
                 </div>
               </div>
             </div>
+
             {/* Documents */}
             <div className="space-y-4">
               <h3 className="font-semibold text-lg">Submitted Documents</h3>
+
               {!allImportantDocumentsVerified && (
                 <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
                   <div className="flex">
@@ -459,6 +445,7 @@ export default function ClientReviewPage() {
                   </div>
                 </div>
               )}
+
               {documentsLoading ? (
                 <div className="flex justify-center items-center h-32">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-500" />
@@ -468,17 +455,16 @@ export default function ClientReviewPage() {
               ) : clientDocuments.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {clientDocuments.map((doc) => {
-                    const fileExt = getFileExtension(doc.url);
+                    const ext = getFileExtension(doc.url);
                     const isImage = [
                       "jpg",
                       "jpeg",
                       "png",
                       "gif",
                       "webp",
-                    ].includes(fileExt);
-                    const isPdf = fileExt === "pdf";
+                    ].includes(ext);
+                    const isPdf = ext === "pdf";
                     const fileName = doc.url.split("/").pop() || "document";
-
                     const currentStatus =
                       documentStatuses[doc.id] || doc.status;
                     const isImportant =
@@ -487,9 +473,7 @@ export default function ClientReviewPage() {
                     return (
                       <div
                         key={doc.id}
-                        className={`border rounded-lg p-4 space-y-2 ${
-                          isImportant ? "border-l-4 border-blue-500" : ""
-                        }`}
+                        className={`border rounded-lg p-4 space-y-2 ${isImportant ? "border-l-4 border-blue-500" : ""}`}
                       >
                         <div className="flex justify-between items-center">
                           <h4 className="font-medium capitalize">
@@ -501,6 +485,7 @@ export default function ClientReviewPage() {
                             )}
                           </h4>
                         </div>
+
                         <div className="mt-2">
                           <div className="flex items-center space-x-2 mb-2">
                             <span className="text-sm font-medium">Status:</span>
@@ -512,9 +497,7 @@ export default function ClientReviewPage() {
                                   e.target.value as AccountStatus
                                 )
                               }
-                              className={`text-sm border rounded px-2 py-1 ${
-                                isImportant ? "font-semibold" : ""
-                              }`}
+                              className={`text-sm border rounded px-2 py-1 ${isImportant ? "font-semibold" : ""}`}
                             >
                               <option value="NOT_VERIFIED">Not Verified</option>
                               <option value="VERIFIED">Verified</option>
@@ -523,9 +506,10 @@ export default function ClientReviewPage() {
                           </div>
 
                           {/* Document Viewer */}
-                          <div className="border rounded-md p-2 h-64 flex flex-col">
+                          <div className="border rounded-md p-2 h-64 flex flex-col bg-white">
                             <div className="flex-1 overflow-hidden flex items-center justify-center">
                               {isImage ? (
+                                // eslint-disable-next-line @next/next/no-img-element
                                 <img
                                   src={doc.url}
                                   alt={doc.type}

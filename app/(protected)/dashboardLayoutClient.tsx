@@ -16,7 +16,7 @@ export default function DashboardLayoutClient({
   avatarUrl,
   userName,
 }: {
-  children: ReactNode;
+  children: React.ReactNode;
   role: UserRole;
   avatarUrl: string;
   userName: string;
@@ -25,7 +25,6 @@ export default function DashboardLayoutClient({
   const pathname = usePathname() ?? "";
   const routes = getRoutes(role);
 
-  // Check if it's a valid route or a global page (profile, settings, test-notifications)
   const isValidRoute =
     routes.some((route) => pathname.startsWith(route.path)) ||
     pathname.startsWith("/dashboard/profile") ||
@@ -34,21 +33,21 @@ export default function DashboardLayoutClient({
 
   return (
     <div className="flex h-screen bg-gray-50 relative">
-      {/* Sidebar */}
-      <SideBar role={role} isExpanded={isExpanded} />
+      {/* Desktop sidebar only */}
+      <div className="hidden md:block">
+        <SideBar role={role} isExpanded={isExpanded} />
+      </div>
 
       {/* Main content area */}
-      <div
-        className={`flex-1 flex flex-col overflow-hidden transition-all duration-350`}
-      >
+      <div className="flex-1 flex flex-col overflow-hidden transition-all duration-350">
+        {/* Header now contains the mobile menu trigger */}
         <DashboardHeader
           role={role}
           avatarUrl={avatarUrl}
           userName={userName}
         />
 
-        {/* Main content container */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto px-6">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto px-4 md:px-6">
           {isValidRoute ? (
             children
           ) : (
@@ -62,8 +61,10 @@ export default function DashboardLayoutClient({
         </main>
       </div>
 
-      {/* Toggle Button */}
-      <SidebarToggleButton />
+      {/* Desktop-only toggle button */}
+      <div className="hidden md:block">
+        <SidebarToggleButton />
+      </div>
     </div>
   );
 }

@@ -438,7 +438,7 @@ const ForwardRequirementModal = ({
       confirmDisabled={mode === "SPLIT" && !allRolesAssigned}
     >
       <div className="space-y-6">
-        <div className="flex space-x-4">
+        <div className="flex gap-2 sm:gap-4">
           <Button
             variant={mode === "SINGLE" ? "default" : "outline"}
             onClick={() => setMode("SINGLE")}
@@ -459,7 +459,7 @@ const ForwardRequirementModal = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Select Agency
               </label>
-              <div className="flex space-x-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <select
                   value={selectedAgency}
                   onChange={(e) => setSelectedAgency(e.target.value)}
@@ -485,7 +485,7 @@ const ForwardRequirementModal = ({
                         Original Requirement: {role.originalQuantity}
                       </span>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-2">
                       <label className="text-sm text-gray-600">
                         Forward Quantity:
                       </label>
@@ -553,7 +553,7 @@ const ForwardRequirementModal = ({
                         {role.forwarded.map((assignment, index) => (
                           <div
                             key={`${role.id}-${index}`}
-                            className="flex items-center space-x-4"
+                            className="flex flex-col sm:flex-row sm:items-center gap-3"
                           >
                             <select
                               value={assignment.agencyId}
@@ -576,7 +576,7 @@ const ForwardRequirementModal = ({
                               ))}
                             </select>
 
-                            <div className="flex items-center space-x-2 w-48">
+                            <div className="flex items-center gap-2 w-full sm:w-48">
                               <Input
                                 type="number"
                                 min="0"
@@ -960,8 +960,12 @@ export default function Requirements() {
       specialRequirements: role.specialRequirements,
     })) || [];
 
-  const RequirementSection = ({ section }: { section: RequirementSection }) => {
-    const jobRole = currentRequirement.jobRoles.find(
+  const RequirementSectionCard = ({
+    section,
+  }: {
+    section: RequirementSection;
+  }) => {
+    const jobRole = currentRequirement!.jobRoles.find(
       (r) => r.id === section.id
     );
     const rejectedList = rejectedAssignmentsByJobRole[section.id] || [];
@@ -979,7 +983,7 @@ export default function Requirements() {
 
     return (
       <div className="p-6 rounded-lg shadow-sm mb-4 border border-[#EDDDF3] bg-white">
-        <div className="flex justify-between items-start mb-4">
+        <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-start mb-4">
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-semibold text-[#150B3D]">
               {section.title}
@@ -990,12 +994,12 @@ export default function Requirements() {
               </span>
             )}
           </div>
-          <div className="flex space-x-2">
+          <div className="flex gap-2 flex-wrap">
             <Button onClick={handleForwardClick} size="sm">
               Forward
             </Button>
             <Button
-              onClick={() => handleReject(currentRequirement.id)}
+              onClick={() => handleReject(currentRequirement!.id)}
               variant="outline"
               size="sm"
             >
@@ -1168,8 +1172,9 @@ export default function Requirements() {
   };
 
   return (
-    <div className="flex">
-      <div className="w-1/6 rounded-lg p-4 overflow-y-auto">
+    <div className="flex flex-col md:flex-row min-h-screen">
+      {/* Left Sidebar */}
+      <div className="w-full md:w-1/6 rounded-lg p-4 md:overflow-y-auto md:max-h-[calc(100vh-2rem)]">
         {loadingCompanies ? (
           <div className="space-y-2">
             {[...Array(5)].map((_, i) => (
@@ -1212,13 +1217,14 @@ export default function Requirements() {
         )}
       </div>
 
-      <div className="w-5/6 overflow-y-auto p-6">
+      {/* Right Content */}
+      <div className="w-full md:w-5/6 p-4 md:p-6 md:overflow-y-auto md:max-h-[calc(100vh-2rem)]">
         {loadingRequirements ? (
           <div className="bg-[#EDDDF3]/50 rounded-xl p-6 shadow-sm mb-6 animate-pulse h-64" />
         ) : currentRequirement ? (
           <>
-            <div className="bg-[#EDDDF3]/50 rounded-xl p-6 shadow-sm mb-6">
-              <div className="flex justify-between items-center mb-6">
+            <div className="bg-[#EDDDF3]/50 rounded-xl p-4 md:p-6 shadow-sm mb-6">
+              <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center mb-6">
                 <div>
                   <h1 className="text-2xl font-bold text-[#150B3D]">
                     {currentRequirement.id.slice(0, 8).toUpperCase()}
@@ -1231,7 +1237,7 @@ export default function Requirements() {
                     )}
                   </p>
                 </div>
-                <div className="flex space-x-2">
+                <div className="flex gap-2 flex-wrap md:flex-nowrap">
                   <Button
                     onClick={handlePrevRequirement}
                     disabled={currentRequirementIndex === 0}
@@ -1253,13 +1259,14 @@ export default function Requirements() {
                   </span>
                 </div>
               </div>
+
               <div className="space-y-4">
                 {requirementSections.map((section, index) => (
-                  <RequirementSection key={index} section={section} />
+                  <RequirementSectionCard key={index} section={section} />
                 ))}
               </div>
 
-              <div className="flex justify-end space-x-4 mt-6 pt-4 border-t">
+              <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6 pt-4 border-t">
                 <Button
                   onClick={() => handleForwardClick()}
                   className="bg-[#150B3D] text-white py-2 px-6 rounded-md hover:bg-[#150B3D]/90 transition-colors"

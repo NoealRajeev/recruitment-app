@@ -71,15 +71,11 @@ export const ONBOARDING_STEPS = [
     owner: "Client",
     action: "Confirm Arrival",
   },
-  {
-    key: "DEPLOYED",
-    label: "Deployed",
-    owner: "System",
-    action: "",
-  },
-];
+  { key: "DEPLOYED", label: "Deployed", owner: "System", action: "" },
+] as const;
 
-// Types for props
+type StepKey = (typeof ONBOARDING_STEPS)[number]["key"];
+
 interface ProgressTrackerProps {
   currentStage: string; // LabourStage
   statuses: Record<string, string>; // { [stageKey]: statusValue }
@@ -91,7 +87,7 @@ interface ProgressTrackerProps {
 }
 
 const failedStatuses = ["REFUSED", "UNFIT", "FAILED", "CANCELED", "REJECTED"];
-const uploadSteps = ["VISA_PRINTING"];
+const uploadSteps: StepKey[] = ["VISA_PRINTING"];
 const completedStatuses = [
   "COMPLETED",
   "PAID",
@@ -104,7 +100,7 @@ const completedStatuses = [
   "VERIFIED",
 ];
 
-export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
+const ProgressTracker: React.FC<ProgressTrackerProps> = ({
   currentStage,
   statuses,
   userRole,
@@ -113,11 +109,9 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
   replacementNeeded,
   documents,
 }) => {
-  // Find the current step index
   const currentIndex = ONBOARDING_STEPS.findIndex(
     (step) => step.key === currentStage
   );
-
   const hasFailed = Object.entries(statuses).some(([, status]) =>
     failedStatuses.includes(status?.toUpperCase?.())
   );
@@ -133,15 +127,19 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
           </span>
         </div>
       ) : null}
+
       {ONBOARDING_STEPS.map((step, idx) => {
         const isActive = idx === currentIndex;
         const isCompleted = idx < currentIndex;
-        const status = statuses[step.key]?.toUpperCase?.() || "PENDING";
+        const rawStatus = statuses[step.key] ?? "PENDING";
+        const status = rawStatus.toUpperCase?.() || "PENDING";
         const isFailed = failedStatuses.includes(status);
         const isCompletedStatus = completedStatuses.includes(status);
+
         const isOwner =
           (userRole === "CLIENT_ADMIN" && step.owner === "Client") ||
           (userRole === "RECRUITMENT_AGENCY" && step.owner === "Agency");
+
         const showAction =
           isActive &&
           isOwner &&
@@ -150,41 +148,37 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
           !isCompletedStatus &&
           status !== "SIGNED" &&
           step.key !== "READY_TO_TRAVEL";
-        const showUpload = showAction && uploadSteps.includes(step.key);
+
+        const showUpload =
+          showAction && uploadSteps.includes(step.key as StepKey);
         const showOfferLetterUpload =
           showAction &&
           step.key === "OFFER_LETTER_SIGN" &&
           userRole === "RECRUITMENT_AGENCY";
-
         const showOfferLetterVerify =
           step.key === "OFFER_LETTER_SIGN" &&
           status === "SIGNED" &&
           userRole === "CLIENT_ADMIN";
-
         const showContractActions =
           step.key === "CONTRACT_SIGN" &&
           status === "PENDING" &&
           userRole === "RECRUITMENT_AGENCY" &&
           currentStage === "CONTRACT_SIGN";
-
         const showMedicalActions =
           step.key === "MEDICAL_STATUS" &&
           status === "PENDING" &&
           userRole === "RECRUITMENT_AGENCY" &&
           currentStage === "MEDICAL_STATUS";
-
         const showFingerprintActions =
           step.key === "FINGERPRINT" &&
           status === "PENDING" &&
           userRole === "RECRUITMENT_AGENCY" &&
           currentStage === "FINGERPRINT";
-
         const showTravelConfirmationActions =
           step.key === "TRAVEL_CONFIRMATION" &&
           (status === "PENDING" || status === "RESCHEDULED") &&
           userRole === "RECRUITMENT_AGENCY" &&
           currentStage === "TRAVEL_CONFIRMATION";
-
         const showArrivalConfirmationActions =
           step.key === "ARRIVAL_CONFIRMATION" &&
           status === "PENDING" &&
@@ -199,12 +193,12 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
           currentStage === "VISA_PRINTING";
 
         const showVisaDocument =
-          step.key === "VISA_PRINTING" && documents?.[step.key];
+          step.key === "VISA_PRINTING" && !!documents?.[step.key];
 
         return (
           <div
             key={step.key}
-            className={`flex items-center gap-4 p-3 rounded-lg border transition-colors relative ${
+            className={`flex flex-col md:flex-row items-start md:items-center gap-3 p-3 rounded-lg border transition-colors relative ${
               isFailed
                 ? "bg-red-50 border-red-400"
                 : showVisaDocument
@@ -226,31 +220,18 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
               <span className="font-semibold text-sm">{step.label}</span>
               <span className="text-xs text-gray-500">{step.owner}</span>
             </div>
+
             <div className="flex-1 flex items-center gap-2">
-              {(() => {
-                if ((isCompleted || isCompletedStatus) && !isFailed) {
-                  return <CheckCircle className="w-4 h-4 text-green-500" />;
-                }
-                return null;
-              })()}
-              {(() => {
-                if (isFailed) {
-                  return <XCircle className="w-4 h-4 text-red-500" />;
-                }
-                return null;
-              })()}
-              {(() => {
-                if (
-                  (status === "UPLOADED" ||
-                    status === "VERIFIED" ||
-                    status === "SIGNED") &&
-                  !isFailed &&
-                  !isCompletedStatus
-                ) {
-                  return <CheckCircle className="w-4 h-4 text-blue-500" />;
-                }
-                return null;
-              })()}
+              {(isCompleted || isCompletedStatus) && !isFailed && (
+                <CheckCircle className="w-4 h-4 text-green-500" />
+              )}
+              {isFailed && <XCircle className="w-4 h-4 text-red-500" />}
+              {status &&
+                ["UPLOADED", "VERIFIED", "SIGNED"].includes(status) &&
+                !isFailed &&
+                !isCompletedStatus && (
+                  <CheckCircle className="w-4 h-4 text-blue-500" />
+                )}
               <span
                 className={`text-xs font-medium ${
                   isFailed
@@ -259,9 +240,7 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                       ? "text-green-600"
                       : isCompletedStatus
                         ? "text-green-600"
-                        : status === "UPLOADED" ||
-                            status === "VERIFIED" ||
-                            status === "SIGNED"
+                        : ["UPLOADED", "VERIFIED", "SIGNED"].includes(status)
                           ? "text-blue-600"
                           : isCompleted
                             ? "text-green-600"
@@ -272,10 +251,10 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
               >
                 {showVisaDocument
                   ? "Visa Available"
-                  : status.replace("_", " ").toLowerCase()}
+                  : status.replaceAll("_", " ").toLowerCase()}
               </span>
             </div>
-            {/* Action button or upload field for the responsible party */}
+
             {(showAction ||
               showOfferLetterVerify ||
               showContractActions ||
@@ -293,9 +272,8 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                       type="file"
                       className="hidden"
                       onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          onUpload && onUpload(step.key, e.target.files[0]);
-                        }
+                        const f = e.target.files?.[0];
+                        if (f) onUpload?.(step.key, f);
                       }}
                     />
                   </label>
@@ -308,9 +286,8 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                       accept="application/pdf"
                       className="hidden"
                       onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          onUpload && onUpload(step.key, e.target.files[0]);
-                        }
+                        const f = e.target.files?.[0];
+                        if (f) onUpload?.(step.key, f);
                       }}
                     />
                   </label>
@@ -323,16 +300,15 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                       accept="application/pdf"
                       className="hidden"
                       onChange={(e) => {
-                        if (e.target.files && e.target.files[0]) {
-                          onUpload && onUpload(step.key, e.target.files[0]);
-                        }
+                        const f = e.target.files?.[0];
+                        if (f) onUpload?.(step.key, f);
                       }}
                     />
                   </label>
                 ) : showOfferLetterVerify ? (
                   <button
                     className="px-3 py-1 bg-green-600 text-white rounded text-xs shadow hover:bg-green-700"
-                    onClick={() => onAction && onAction(step.key)}
+                    onClick={() => onAction?.(step.key)}
                   >
                     Verify
                   </button>
@@ -340,15 +316,13 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                   <div className="flex gap-2">
                     <button
                       className="px-3 py-1 bg-green-600 text-white rounded text-xs shadow hover:bg-green-700"
-                      onClick={() =>
-                        onAction && onAction(`${step.key}_APPROVE`)
-                      }
+                      onClick={() => onAction?.(`${step.key}_APPROVE`)}
                     >
                       Approve
                     </button>
                     <button
                       className="px-3 py-1 bg-red-600 text-white rounded text-xs shadow hover:bg-red-700"
-                      onClick={() => onAction && onAction(`${step.key}_REFUSE`)}
+                      onClick={() => onAction?.(`${step.key}_REFUSE`)}
                     >
                       Refuse
                     </button>
@@ -357,13 +331,13 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                   <div className="flex gap-2">
                     <button
                       className="px-3 py-1 bg-green-600 text-white rounded text-xs shadow hover:bg-green-700"
-                      onClick={() => onAction && onAction(`${step.key}_FIT`)}
+                      onClick={() => onAction?.(`${step.key}_FIT`)}
                     >
                       Fit
                     </button>
                     <button
                       className="px-3 py-1 bg-red-600 text-white rounded text-xs shadow hover:bg-red-700"
-                      onClick={() => onAction && onAction(`${step.key}_UNFIT`)}
+                      onClick={() => onAction?.(`${step.key}_UNFIT`)}
                     >
                       Unfit
                     </button>
@@ -372,13 +346,13 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                   <div className="flex gap-2">
                     <button
                       className="px-3 py-1 bg-green-600 text-white rounded text-xs shadow hover:bg-green-700"
-                      onClick={() => onAction && onAction(`${step.key}_PASS`)}
+                      onClick={() => onAction?.(`${step.key}_PASS`)}
                     >
                       Pass
                     </button>
                     <button
                       className="px-3 py-1 bg-red-600 text-white rounded text-xs shadow hover:bg-red-700"
-                      onClick={() => onAction && onAction(`${step.key}_FAIL`)}
+                      onClick={() => onAction?.(`${step.key}_FAIL`)}
                     >
                       Fail
                     </button>
@@ -386,70 +360,72 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
                 ) : showTravelConfirmationActions ? (
                   <button
                     className="px-3 py-1 bg-purple-600 text-white rounded text-xs shadow hover:bg-purple-700"
-                    onClick={() => onAction && onAction(`${step.key}_MODAL`)}
+                    onClick={() => onAction?.(`${step.key}_MODAL`)}
                   >
                     Update Travel Status
                   </button>
                 ) : showArrivalConfirmationActions ? (
                   <button
                     className="px-3 py-1 bg-green-600 text-white rounded text-xs shadow hover:bg-green-700"
-                    onClick={() => onAction && onAction(`${step.key}_MODAL`)}
+                    onClick={() => onAction?.(`${step.key}_MODAL`)}
                   >
                     Confirm Labour Arrived
                   </button>
                 ) : (
-                  <button
-                    className="px-3 py-1 bg-purple-600 text-white rounded text-xs shadow hover:bg-purple-700"
-                    onClick={() => onAction && onAction(step.key)}
-                  >
-                    {step.action}
-                  </button>
+                  step.action && (
+                    <button
+                      className="px-3 py-1 bg-purple-600 text-white rounded text-xs shadow hover:bg-purple-700"
+                      onClick={() => onAction?.(step.key)}
+                    >
+                      {step.action}
+                    </button>
+                  )
                 )}
 
-                {/* Show download/view buttons for other uploaded documents (not visa) */}
-                {documents?.[step.key] && step.key !== "VISA_PRINTING" ? (
-                  <div className="flex gap-2">
+                {/* Generic view/download for non-visa uploaded docs */}
+                {documents?.[step.key] && step.key !== "VISA_PRINTING" && (
+                  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                     <a
                       href={documents[step.key]}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="px-3 py-1 bg-blue-600 text-white rounded text-xs shadow hover:bg-blue-700 flex items-center gap-1"
+                      className="w-full sm:w-auto px-3 py-2 bg-blue-600 text-white rounded text-xs shadow hover:bg-blue-700 flex items-center justify-center sm:justify-start gap-1"
                     >
                       <Eye className="w-3 h-3" />
-                      View
+                      <span className="whitespace-nowrap">View</span>
                     </a>
                     <a
                       href={documents[step.key]}
                       download
-                      className="px-3 py-1 bg-green-600 text-white rounded text-xs shadow hover:bg-green-700 flex items-center gap-1"
+                      className="w-full sm:w-auto px-3 py-2 bg-green-600 text-white rounded text-xs shadow hover:bg-green-700 flex items-center justify-center sm:justify-start gap-1"
                     >
                       <Download className="w-3 h-3" />
-                      Download
+                      <span className="whitespace-nowrap">Download</span>
                     </a>
                   </div>
-                ) : null}
+                )}
               </div>
             )}
 
-            {/* Separate section for visa document buttons - shows for both client and agency */}
+            {/* Visa doc controls */}
             {showVisaDocument && (
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <a
-                  href={documents[step.key]}
+                  href={documents![step.key]}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1 bg-blue-600 text-white rounded text-xs shadow hover:bg-blue-700 flex items-center gap-1"
+                  className="w-full sm:w-auto px-3 py-2 bg-blue-600 text-white rounded text-xs shadow hover:bg-blue-700 flex items-center justify-center sm:justify-start gap-1"
                 >
                   <Eye className="w-3 h-3" />
-                  View Visa
+                  <span className="whitespace-nowrap">View Visa</span>
                 </a>
                 <a
-                  href={documents[step.key]}
+                  href={documents![step.key]}
                   download
-                  className="px-3 py-1 bg-green-600 text-white rounded text-xs shadow hover:bg-green-700 flex items-center gap-1"
+                  className="w-full sm:w-auto px-3 py-2 bg-green-600 text-white rounded text-xs shadow hover:bg-green-700 flex items-center justify-center sm:justify-start gap-1"
                 >
                   <Download className="w-3 h-3" />
-                  Download Visa
+                  <span className="whitespace-nowrap">Download Visa</span>
                 </a>
               </div>
             )}

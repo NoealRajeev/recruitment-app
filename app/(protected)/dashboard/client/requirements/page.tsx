@@ -79,15 +79,10 @@ async function getRequirements(): Promise<Requirement[]> {
   try {
     const response = await fetch("/api/requirements", {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
     });
-
-    if (!response.ok) {
+    if (!response.ok)
       throw new Error(`Failed to fetch requirements: ${response.statusText}`);
-    }
-
     const data = await response.json();
     return Array.isArray(data) ? data : [];
   } catch (error) {
@@ -100,15 +95,10 @@ async function getRequirementById(id: string): Promise<Requirement> {
   try {
     const response = await fetch(`/api/requirements/${id}`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
     });
-
-    if (!response.ok) {
+    if (!response.ok)
       throw new Error(`Failed to fetch requirement: ${response.statusText}`);
-    }
-
     return await response.json();
   } catch (error) {
     console.error(`Error fetching requirement ${id}:`, error);
@@ -123,20 +113,13 @@ async function createRequirement(
   try {
     const response = await fetch("/api/requirements", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        jobRoles,
-        status,
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jobRoles, status }),
     });
-
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.error || "Failed to create requirement");
     }
-
     return await response.json();
   } catch (error) {
     console.error("Error creating requirement:", error);
@@ -146,25 +129,18 @@ async function createRequirement(
 
 async function updateRequirement(
   id: string,
-  data: {
-    jobRoles: JobRoleFormData[];
-    status: RequirementStatus;
-  }
+  data: { jobRoles: JobRoleFormData[]; status: RequirementStatus }
 ): Promise<Requirement> {
   try {
     const response = await fetch(`/api/requirements/${id}`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.error || "Failed to update requirement");
     }
-
     return await response.json();
   } catch (error) {
     console.error("Error updating requirement:", error);
@@ -181,23 +157,15 @@ async function saveAsDraft(
       ? `/api/requirements/${existingId}`
       : "/api/requirements";
     const method = existingId ? "PATCH" : "POST";
-
     const response = await fetch(url, {
       method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        jobRoles,
-        status: "DRAFT",
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jobRoles, status: "DRAFT" }),
     });
-
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.error || "Failed to save draft");
     }
-
     return await response.json();
   } catch (error) {
     console.error("Error saving draft:", error);
@@ -255,10 +223,11 @@ export default function Requirements() {
       const data = await getRequirements();
       setRequirements(data);
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to load requirements";
       toast({
-        message: errorMessage,
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to load requirements",
         type: "error",
       });
     }
@@ -276,7 +245,7 @@ export default function Requirements() {
   const solidWidths = {
     1: "20%",
     2: "100%",
-  };
+  } as const;
 
   const contractDurationMapping = useMemo(
     () => getContractDurationEnumMapping(language),
@@ -331,8 +300,8 @@ export default function Requirements() {
   const getMinStartDate = () => {
     const today = new Date();
     const minDate = new Date(today);
-    minDate.setDate(minDate.getDate() + 15); // Add 2 weeks (15 days)
-    return minDate.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+    minDate.setDate(minDate.getDate() + 15);
+    return minDate.toISOString().split("T")[0];
   };
 
   const handleOpenModal = async (requirement?: Requirement) => {
@@ -370,12 +339,11 @@ export default function Requirements() {
           });
         }
       } catch (error: unknown) {
-        const errorMessage =
-          error instanceof Error
-            ? error.message
-            : "Failed to load requirement details";
         toast({
-          message: errorMessage,
+          message:
+            error instanceof Error
+              ? error.message
+              : "Failed to load requirement details",
           type: "error",
         });
       }
@@ -435,7 +403,6 @@ export default function Requirements() {
       const confirmClose = window.confirm(
         "You have unsaved changes. Do you want to save as draft before closing?"
       );
-
       if (confirmClose) {
         try {
           setIsSubmitting(true);
@@ -443,23 +410,17 @@ export default function Requirements() {
             ...role,
             startDate: role.startDate,
           }));
-
           if (editingRequirement) {
             await saveAsDraft(jobRoles, editingRequirement.id);
           } else {
             await saveAsDraft(jobRoles);
           }
-
           await fetchRequirements();
-          toast({
-            message: "Draft saved successfully",
-            type: "success",
-          });
+          toast({ message: "Draft saved successfully", type: "success" });
         } catch (error: unknown) {
-          const errorMessage =
-            error instanceof Error ? error.message : "Failed to save draft";
           toast({
-            message: errorMessage,
+            message:
+              error instanceof Error ? error.message : "Failed to save draft",
             type: "error",
           });
         } finally {
@@ -467,44 +428,33 @@ export default function Requirements() {
         }
       }
     }
-
     setIsModalOpen(false);
     setErrors({});
   };
 
   const handleNext = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep((prev) => prev + 1);
-    }
+    if (validateStep(currentStep)) setCurrentStep((prev) => prev + 1);
   };
-
-  const handleBack = () => {
-    setCurrentStep((prev) => Math.max(1, prev - 1));
-  };
+  const handleBack = () => setCurrentStep((prev) => Math.max(1, prev - 1));
 
   const validateStep = (step: number): boolean => {
     const newErrors: Record<string, string> = {};
-
     if (step === 1) {
       formData.jobRoles.forEach((role, index) => {
-        if (!role.title) {
+        if (!role.title)
           newErrors[`jobRoles[${index}].title`] = "Job title is required";
-        }
-        if (!role.quantity || role.quantity < 1) {
+        if (!role.quantity || role.quantity < 1)
           newErrors[`jobRoles[${index}].quantity`] =
             "Valid quantity is required";
-        }
-        if (!role.nationality) {
+        if (!role.nationality)
           newErrors[`jobRoles[${index}].nationality`] =
             "Nationality is required";
-        }
         if (!role.startDate) {
           newErrors[`jobRoles[${index}].startDate`] = "Start date is required";
         } else if (role.startDate) {
           const minStartDate = new Date();
           minStartDate.setDate(minStartDate.getDate() + 14);
           const selectedDate = new Date(role.startDate);
-
           if (selectedDate < minStartDate) {
             newErrors[`jobRoles[${index}].startDate`] =
               "Start date must be at least 2 weeks from today";
@@ -512,44 +462,34 @@ export default function Requirements() {
         } else if (isNaN(new Date(role.startDate).getTime())) {
           newErrors[`jobRoles[${index}].startDate`] = "Invalid date format";
         }
-        if (!role.contractDuration) {
+        if (!role.contractDuration)
           newErrors[`jobRoles[${index}].contractDuration`] =
             "Contract duration is required";
-        }
-        if (role.basicSalary !== undefined && role.basicSalary < 0) {
+        if (role.basicSalary !== undefined && role.basicSalary < 0)
           newErrors[`jobRoles[${index}].basicSalary`] =
             "Salary cannot be negative";
-        }
-        if (!role.ticketFrequency) {
+        if (!role.ticketFrequency)
           newErrors[`jobRoles[${index}].ticketFrequency`] =
             "Ticket frequency is required";
-        }
-        if (!role.workLocations) {
+        if (!role.workLocations)
           newErrors[`jobRoles[${index}].workLocations`] =
             "Work location is required";
-        }
-        if (!role.previousExperience) {
+        if (!role.previousExperience)
           newErrors[`jobRoles[${index}].previousExperience`] =
             "Previous experience is required";
-        }
-        // Only validate totalExperienceYears if not a fresher
         if (role.previousExperience !== "FRESHER") {
-          if (!role.totalExperienceYears || role.totalExperienceYears <= 0) {
+          if (!role.totalExperienceYears || role.totalExperienceYears <= 0)
             newErrors[`jobRoles[${index}].totalExperienceYears`] =
               "Total experience years is required";
-          }
         }
-        if (!role.preferredAge || role.preferredAge <= 0) {
+        if (!role.preferredAge || role.preferredAge <= 0)
           newErrors[`jobRoles[${index}].preferredAge`] =
             "Preferred age is required";
-        }
-        if (role.languageRequirements.length === 0) {
+        if (role.languageRequirements.length === 0)
           newErrors[`jobRoles[${index}].languageRequirements`] =
             "At least one language is required";
-        }
       });
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -564,9 +504,7 @@ export default function Requirements() {
     const checked =
       type === "checkbox" ? (e.target as HTMLInputElement).checked : undefined;
 
-    if (type === "number" && parseFloat(value) < 0) {
-      return;
-    }
+    if (type === "number" && parseFloat(value) < 0) return;
 
     if (
       name === `jobRoles[${index}].previousExperience` &&
@@ -579,13 +517,11 @@ export default function Requirements() {
           previousExperience: value,
           totalExperienceYears: 0,
         };
-        return {
-          ...prev,
-          jobRoles: updatedJobRoles,
-        };
+        return { ...prev, jobRoles: updatedJobRoles };
       });
       return;
     }
+
     setFormData((prev) => {
       const updatedJobRoles = [...prev.jobRoles];
       const key = name.replace(
@@ -597,23 +533,19 @@ export default function Requirements() {
         updatedJobRoles[index] = {
           ...updatedJobRoles[index],
           [key]: checked,
-        };
+        } as any;
       } else if (type === "number") {
         updatedJobRoles[index] = {
           ...updatedJobRoles[index],
           [key]: value === "" ? undefined : Math.max(0, parseFloat(value)),
-        };
+        } as any;
       } else {
         updatedJobRoles[index] = {
           ...updatedJobRoles[index],
           [key]: value,
-        };
+        } as any;
       }
-
-      return {
-        ...prev,
-        jobRoles: updatedJobRoles,
-      };
+      return { ...prev, jobRoles: updatedJobRoles };
     });
 
     if (errors[name]) {
@@ -630,18 +562,13 @@ export default function Requirements() {
       setFormData((prev) => {
         const updatedJobRoles = [...prev.jobRoles];
         const currentLanguages = updatedJobRoles[index].languageRequirements;
-
         updatedJobRoles[index] = {
           ...updatedJobRoles[index],
           languageRequirements: currentLanguages.includes(language)
             ? currentLanguages.filter((lang) => lang !== language)
             : [...currentLanguages, language],
         };
-
-        return {
-          ...prev,
-          jobRoles: updatedJobRoles,
-        };
+        return { ...prev, jobRoles: updatedJobRoles };
       });
 
       if (errors[`jobRoles[${index}].languageRequirements`]) {
@@ -667,10 +594,7 @@ export default function Requirements() {
               newLanguage.trim(),
             ],
           };
-          return {
-            ...prev,
-            jobRoles: updatedJobRoles,
-          };
+          return { ...prev, jobRoles: updatedJobRoles };
         });
         setNewLanguage("");
       }
@@ -720,10 +644,7 @@ export default function Requirements() {
         setFormData((prev) => {
           const updatedJobRoles = [...prev.jobRoles];
           updatedJobRoles.splice(index, 1);
-          return {
-            ...prev,
-            jobRoles: updatedJobRoles,
-          };
+          return { ...prev, jobRoles: updatedJobRoles };
         });
       }
     },
@@ -739,11 +660,8 @@ export default function Requirements() {
         return e.returnValue;
       }
     };
-
     window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [isModalOpen, isViewMode, hasValidData]);
 
   const calculateTotalSalary = useCallback((role: JobRoleFormData) => {
@@ -758,13 +676,11 @@ export default function Requirements() {
     const mobile = role.mobileProvidedByCompany ? 0 : role.mobileAllowance || 0;
     const nature = role.natureOfWorkAllowance || 0;
     const other = role.otherAllowance || 0;
-
     return basic + food + housing + transport + mobile + nature + other;
   }, []);
 
   const handleSubmit = async () => {
     if (!validateStep(currentStep)) return;
-
     setIsSubmitting(true);
     try {
       const submissionData = {
@@ -801,17 +717,14 @@ export default function Requirements() {
       } else {
         await createRequirement(submissionData.jobRoles, "SUBMITTED");
       }
-
       toast({
         message: editingRequirement
           ? "Requirement updated successfully"
           : "Requirement submitted successfully",
         type: "success",
       });
-
       await fetchRequirements();
-
-      // Clear the form and close modal without triggering save as draft
+      // reset
       setFormData({
         jobRoles: [
           {
@@ -846,10 +759,11 @@ export default function Requirements() {
       setIsModalOpen(false);
       setEditingRequirement(null);
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to submit requirement";
       toast({
-        message: errorMessage,
+        message:
+          error instanceof Error
+            ? error.message
+            : "Failed to submit requirement",
         type: "error",
       });
     } finally {
@@ -861,10 +775,12 @@ export default function Requirements() {
     switch (currentStep) {
       case 1:
         return (
-          <Card className="p-6">
+          <Card className="p-4 md:p-6">
             <div className="text-center mb-2">
-              <h1 className="text-2xl font-semibold mb-1">{t.jobDetails}</h1>
-              <p className="text-base text-gray-700 mb-2">
+              <h1 className="text-xl md:text-2xl font-semibold mb-1">
+                {t.jobDetails}
+              </h1>
+              <p className="text-sm md:text-base text-gray-700 mb-2">
                 {t.positionsNeeded}
               </p>
               <p className="text-xs text-gray-500 italic text-left">
@@ -873,646 +789,669 @@ export default function Requirements() {
             </div>
 
             <div className="mt-6">
-              <h2 className="text-3xl font-semibold mb-4 text-center">
+              <h2 className="text-2xl md:text-3xl font-semibold mb-4 text-center">
                 {t.jobRoles}
               </h2>
+
+              {/* Mobile-friendly scroll container; desktop unchanged */}
               <div className="rounded-lg shadow-sm overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-[#4C187A]/85">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/4">
-                        {t.jobRole}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/8">
-                        {t.quantity}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/8">
-                        {t.nationality}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/8">
-                        Start Date
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/8">
-                        Duration
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                        {t.actions}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-[#2C0053]/10 divide-y divide-gray-200">
-                    {formData.jobRoles.map((role, index) => {
-                      const totalSalary = calculateTotalSalary(role);
-                      return (
-                        <React.Fragment key={index}>
-                          <tr>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <select
-                                name={`jobRoles[${index}].title`}
-                                value={role.title}
-                                onChange={(e) => handleJobRoleChange(index, e)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                                disabled={isViewMode}
-                                aria-label="Job title"
-                              >
-                                <option value="">{t.selectOption}</option>
-                                {t.jobPositions?.map((job: string) => (
-                                  <option key={job} value={job}>
-                                    {job}
-                                  </option>
-                                ))}
-                              </select>
-                              {errors[`jobRoles[${index}].title`] && (
-                                <p className="text-xs text-red-500 mt-1">
-                                  {errors[`jobRoles[${index}].title`]}
-                                </p>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <input
-                                type="number"
-                                min="1"
-                                name={`jobRoles[${index}].quantity`}
-                                value={role.quantity}
-                                onChange={(e) => handleJobRoleChange(index, e)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                                disabled={isViewMode}
-                                aria-label="Quantity"
-                              />
-                              {errors[`jobRoles[${index}].quantity`] && (
-                                <p className="text-xs text-red-500 mt-1">
-                                  {errors[`jobRoles[${index}].quantity`]}
-                                </p>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <AutocompleteInput
-                                name={`jobRoles[${index}].nationality`}
-                                value={role.nationality || ""}
-                                onChangeValue={(val: string) =>
-                                  handleJobRoleChange(index, {
-                                    target: {
-                                      name: `jobRoles[${index}].nationality`,
-                                      value: val,
-                                    },
-                                  } as React.ChangeEvent<HTMLInputElement>)
-                                }
-                                options={t.nationalityOptions || []}
-                                placeholder="Type nationality..."
-                                className="w-full"
-                                disabled={isViewMode}
-                                aria-label="Nationality"
-                              />
-                              {errors[`jobRoles[${index}].nationality`] && (
-                                <p className="text-xs text-red-500 mt-1">
-                                  {errors[`jobRoles[${index}].nationality`]}
-                                </p>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="mt-1 text-xs text-gray-500">
-                                Earliest available start date:{" "}
-                                {format(
-                                  new Date(getMinStartDate()),
-                                  "MMM d, yyyy"
-                                )}
-                              </div>
-                              <input
-                                type="date"
-                                name={`jobRoles[${index}].startDate`}
-                                value={role.startDate}
-                                onChange={(e) => handleJobRoleChange(index, e)}
-                                min={getMinStartDate()}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                                disabled={isViewMode}
-                                aria-label="Start date"
-                              />
-                              {errors[`jobRoles[${index}].startDate`] && (
-                                <p className="text-xs text-red-500 mt-1">
-                                  {errors[`jobRoles[${index}].startDate`]}
-                                </p>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <select
-                                name={`jobRoles[${index}].contractDuration`}
-                                value={role.contractDuration || ""}
-                                onChange={(e) => handleJobRoleChange(index, e)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                                disabled={isViewMode}
-                                aria-label="Contract duration"
-                              >
-                                <option value="">Select duration</option>
-                                {contractDurationOptions.map((option) => (
-                                  <option
-                                    key={option.value}
-                                    value={option.value}
-                                  >
-                                    {option.label}
-                                  </option>
-                                ))}
-                              </select>
-                              {errors[
-                                `jobRoles[${index}].contractDuration`
-                              ] && (
-                                <p className="text-xs text-red-500 mt-1">
-                                  {
-                                    errors[
-                                      `jobRoles[${index}].contractDuration`
-                                    ]
+                <div className="overflow-x-auto md:overflow-x-visible">
+                  <table className="min-w-[860px] md:min-w-full divide-y divide-gray-200">
+                    <thead className="bg-[#4C187A]/85 sticky top-0">
+                      <tr>
+                        <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/4">
+                          {t.jobRole}
+                        </th>
+                        <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/8">
+                          {t.quantity}
+                        </th>
+                        <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/8">
+                          {t.nationality}
+                        </th>
+                        <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/8">
+                          Start Date
+                        </th>
+                        <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-1/8">
+                          Duration
+                        </th>
+                        <th className="px-4 md:px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                          {t.actions}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-[#2C0053]/10 divide-y divide-gray-200">
+                      {formData.jobRoles.map((role, index) => {
+                        const totalSalary = calculateTotalSalary(role);
+                        return (
+                          <React.Fragment key={index}>
+                            <tr>
+                              <td className="px-4 md:px-6 py-4 whitespace-nowrap">
+                                <select
+                                  name={`jobRoles[${index}].title`}
+                                  value={role.title}
+                                  onChange={(e) =>
+                                    handleJobRoleChange(index, e)
                                   }
-                                </p>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              {!isViewMode && (
-                                <button
-                                  onClick={() => removeJobRole(index)}
-                                  className="text-red-500 hover:text-red-700"
-                                  disabled={formData.jobRoles.length <= 1}
-                                  aria-label="Remove job role"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                                  disabled={isViewMode}
+                                  aria-label="Job title"
                                 >
-                                  <Trash2 className="w-5 h-5" />
-                                </button>
-                              )}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td colSpan={7} className="px-6 py-4">
-                              <div className="p-4 rounded-lg shadow">
-                                <div className="flex justify-between items-center mb-4">
-                                  <h3 className="text-lg font-semibold">
-                                    Salary Details (Monthly)
-                                  </h3>
-                                  <div className="p-2 rounded-md">
-                                    <span className="font-medium">
-                                      Total Salary:{" "}
-                                    </span>
-                                    <span className="font-bold">
-                                      {totalSalary.toFixed(2)}{" "}
-                                      {role.salaryCurrency}
-                                    </span>
-                                  </div>
+                                  <option value="">{t.selectOption}</option>
+                                  {t.jobPositions?.map((job: string) => (
+                                    <option key={job} value={job}>
+                                      {job}
+                                    </option>
+                                  ))}
+                                </select>
+                                {errors[`jobRoles[${index}].title`] && (
+                                  <p className="text-xs text-red-500 mt-1">
+                                    {errors[`jobRoles[${index}].title`]}
+                                  </p>
+                                )}
+                              </td>
+                              <td className="px-4 md:px-6 py-4 whitespace-nowrap">
+                                <input
+                                  type="number"
+                                  min="1"
+                                  name={`jobRoles[${index}].quantity`}
+                                  value={role.quantity}
+                                  onChange={(e) =>
+                                    handleJobRoleChange(index, e)
+                                  }
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                                  disabled={isViewMode}
+                                  aria-label="Quantity"
+                                />
+                                {errors[`jobRoles[${index}].quantity`] && (
+                                  <p className="text-xs text-red-500 mt-1">
+                                    {errors[`jobRoles[${index}].quantity`]}
+                                  </p>
+                                )}
+                              </td>
+                              <td className="px-4 md:px-6 py-4 whitespace-nowrap">
+                                <AutocompleteInput
+                                  name={`jobRoles[${index}].nationality`}
+                                  value={role.nationality || ""}
+                                  onChangeValue={(val: string) =>
+                                    handleJobRoleChange(index, {
+                                      target: {
+                                        name: `jobRoles[${index}].nationality`,
+                                        value: val,
+                                      },
+                                    } as React.ChangeEvent<HTMLInputElement>)
+                                  }
+                                  options={t.nationalityOptions || []}
+                                  placeholder="Type nationality..."
+                                  className="w-full"
+                                  disabled={isViewMode}
+                                  aria-label="Nationality"
+                                />
+                                {errors[`jobRoles[${index}].nationality`] && (
+                                  <p className="text-xs text-red-500 mt-1">
+                                    {errors[`jobRoles[${index}].nationality`]}
+                                  </p>
+                                )}
+                              </td>
+                              <td className="px-4 md:px-6 py-4 whitespace-nowrap">
+                                <div className="mt-1 text-[10px] md:text-xs text-gray-500">
+                                  Earliest available start date:{" "}
+                                  {format(
+                                    new Date(getMinStartDate()),
+                                    "MMM d, yyyy"
+                                  )}
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                  <div>
-                                    <div className="mb-4">
-                                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Basic Salary
-                                      </label>
-                                      <div className="flex">
-                                        <input
-                                          type="number"
-                                          min="0"
-                                          name={`jobRoles[${index}].basicSalary`}
-                                          value={role.basicSalary || ""}
-                                          onChange={(e) =>
-                                            handleJobRoleChange(index, e)
-                                          }
-                                          className="w-full px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                                          placeholder="Amount"
-                                          disabled={isViewMode}
-                                          aria-label="Basic salary"
-                                        />
-                                        <select
-                                          name={`jobRoles[${index}].salaryCurrency`}
-                                          value={role.salaryCurrency || "QAR"}
-                                          onChange={(e) =>
-                                            handleJobRoleChange(index, e)
-                                          }
-                                          className="px-2 py-2 border border-gray-300 rounded-r-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                                          disabled={isViewMode}
-                                          aria-label="Salary currency"
-                                        >
-                                          <option value="QAR">QAR</option>
-                                          <option value="USD">USD</option>
-                                          <option value="EUR">EUR</option>
-                                        </select>
-                                      </div>
-                                      {errors[
-                                        `jobRoles[${index}].basicSalary`
-                                      ] && (
-                                        <p className="text-xs text-red-500 mt-1">
-                                          {
-                                            errors[
-                                              `jobRoles[${index}].basicSalary`
-                                            ]
-                                          }
-                                        </p>
-                                      )}
-                                    </div>
-                                    <div className="mb-4">
-                                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Food Allowance
-                                      </label>
-                                      <div className="flex items-center">
-                                        <input
-                                          type="number"
-                                          min="0"
-                                          name={`jobRoles[${index}].foodAllowance`}
-                                          value={
-                                            role.foodProvidedByCompany
-                                              ? 0
-                                              : role.foodAllowance || ""
-                                          }
-                                          onChange={(e) =>
-                                            handleJobRoleChange(index, e)
-                                          }
-                                          className="w-1/2 px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                                          placeholder="Amount"
-                                          disabled={
-                                            isViewMode ||
-                                            role.foodProvidedByCompany
-                                          }
-                                          aria-label="Food allowance"
-                                        />
-                                        <div className="flex items-center ml-4">
-                                          <input
-                                            type="checkbox"
-                                            name={`jobRoles[${index}].foodProvidedByCompany`}
-                                            checked={
-                                              role.foodProvidedByCompany ||
-                                              false
-                                            }
-                                            onChange={(e) => {
-                                              handleJobRoleChange(index, e);
-                                              if (e.target.checked) {
-                                                setFormData((prev) => {
-                                                  const updatedJobRoles = [
-                                                    ...prev.jobRoles,
-                                                  ];
-                                                  updatedJobRoles[index] = {
-                                                    ...updatedJobRoles[index],
-                                                    foodAllowance: 0,
-                                                  };
-                                                  return {
-                                                    ...prev,
-                                                    jobRoles: updatedJobRoles,
-                                                  };
-                                                });
-                                              }
-                                            }}
-                                            className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
-                                            disabled={isViewMode}
-                                            aria-label="Food provided by company"
-                                          />
-                                          <label className="ml-2 block text-sm text-gray-700">
-                                            Provided by Company
-                                          </label>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div className="mb-4">
-                                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Housing Allowance
-                                      </label>
-                                      <div className="flex items-center">
-                                        <input
-                                          type="number"
-                                          min="0"
-                                          name={`jobRoles[${index}].housingAllowance`}
-                                          value={
-                                            role.housingProvidedByCompany
-                                              ? 0
-                                              : role.housingAllowance || ""
-                                          }
-                                          onChange={(e) =>
-                                            handleJobRoleChange(index, e)
-                                          }
-                                          className="w-1/2 px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                                          placeholder="Amount"
-                                          disabled={
-                                            isViewMode ||
-                                            role.housingProvidedByCompany
-                                          }
-                                          aria-label="Housing allowance"
-                                        />
-                                        <div className="flex items-center ml-4">
-                                          <input
-                                            type="checkbox"
-                                            name={`jobRoles[${index}].housingProvidedByCompany`}
-                                            checked={
-                                              role.housingProvidedByCompany ||
-                                              false
-                                            }
-                                            onChange={(e) => {
-                                              handleJobRoleChange(index, e);
-                                              if (e.target.checked) {
-                                                setFormData((prev) => {
-                                                  const updatedJobRoles = [
-                                                    ...prev.jobRoles,
-                                                  ];
-                                                  updatedJobRoles[index] = {
-                                                    ...updatedJobRoles[index],
-                                                    housingAllowance: 0,
-                                                  };
-                                                  return {
-                                                    ...prev,
-                                                    jobRoles: updatedJobRoles,
-                                                  };
-                                                });
-                                              }
-                                            }}
-                                            className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
-                                            disabled={isViewMode}
-                                            aria-label="Housing provided by company"
-                                          />
-                                          <label className="ml-2 block text-sm text-gray-700">
-                                            Provided by Company
-                                          </label>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    <div className="mb-4">
-                                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Transportation Allowance
-                                      </label>
-                                      <div className="flex items-center">
-                                        <input
-                                          type="number"
-                                          min="0"
-                                          name={`jobRoles[${index}].transportationAllowance`}
-                                          value={
-                                            role.transportationProvidedByCompany
-                                              ? 0
-                                              : role.transportationAllowance ||
-                                                ""
-                                          }
-                                          onChange={(e) =>
-                                            handleJobRoleChange(index, e)
-                                          }
-                                          className="w-1/2 px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                                          placeholder="Amount"
-                                          disabled={
-                                            isViewMode ||
-                                            role.transportationProvidedByCompany
-                                          }
-                                          aria-label="Transportation allowance"
-                                        />
-                                        <div className="flex items-center ml-4">
-                                          <input
-                                            type="checkbox"
-                                            name={`jobRoles[${index}].transportationProvidedByCompany`}
-                                            checked={
-                                              role.transportationProvidedByCompany ||
-                                              false
-                                            }
-                                            onChange={(e) => {
-                                              handleJobRoleChange(index, e);
-                                              if (e.target.checked) {
-                                                setFormData((prev) => {
-                                                  const updatedJobRoles = [
-                                                    ...prev.jobRoles,
-                                                  ];
-                                                  updatedJobRoles[index] = {
-                                                    ...updatedJobRoles[index],
-                                                    transportationAllowance: 0,
-                                                  };
-                                                  return {
-                                                    ...prev,
-                                                    jobRoles: updatedJobRoles,
-                                                  };
-                                                });
-                                              }
-                                            }}
-                                            className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
-                                            disabled={isViewMode}
-                                            aria-label="Transportation provided by company"
-                                          />
-                                          <label className="ml-2 block text-sm text-gray-700">
-                                            Provided by Company
-                                          </label>
-                                        </div>
-                                      </div>
+                                <input
+                                  type="date"
+                                  name={`jobRoles[${index}].startDate`}
+                                  value={role.startDate}
+                                  onChange={(e) =>
+                                    handleJobRoleChange(index, e)
+                                  }
+                                  min={getMinStartDate()}
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                                  disabled={isViewMode}
+                                  aria-label="Start date"
+                                />
+                                {errors[`jobRoles[${index}].startDate`] && (
+                                  <p className="text-xs text-red-500 mt-1">
+                                    {errors[`jobRoles[${index}].startDate`]}
+                                  </p>
+                                )}
+                              </td>
+                              <td className="px-4 md:px-6 py-4 whitespace-nowrap">
+                                <select
+                                  name={`jobRoles[${index}].contractDuration`}
+                                  value={role.contractDuration || ""}
+                                  onChange={(e) =>
+                                    handleJobRoleChange(index, e)
+                                  }
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                                  disabled={isViewMode}
+                                  aria-label="Contract duration"
+                                >
+                                  <option value="">Select duration</option>
+                                  {contractDurationOptions.map((option) => (
+                                    <option
+                                      key={option.value}
+                                      value={option.value}
+                                    >
+                                      {option.label}
+                                    </option>
+                                  ))}
+                                </select>
+                                {errors[
+                                  `jobRoles[${index}].contractDuration`
+                                ] && (
+                                  <p className="text-xs text-red-500 mt-1">
+                                    {
+                                      errors[
+                                        `jobRoles[${index}].contractDuration`
+                                      ]
+                                    }
+                                  </p>
+                                )}
+                              </td>
+                              <td className="px-4 md:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                {!isViewMode && (
+                                  <button
+                                    onClick={() => removeJobRole(index)}
+                                    className="text-red-500 hover:text-red-700"
+                                    disabled={formData.jobRoles.length <= 1}
+                                    aria-label="Remove job role"
+                                  >
+                                    <Trash2 className="w-5 h-5" />
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td colSpan={7} className="px-4 md:px-6 py-4">
+                                <div className="p-4 rounded-lg shadow bg-white">
+                                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
+                                    <h3 className="text-lg font-semibold">
+                                      Salary Details (Monthly)
+                                    </h3>
+                                    <div className="p-2 rounded-md bg-gray-50">
+                                      <span className="font-medium">
+                                        Total Salary:{" "}
+                                      </span>
+                                      <span className="font-bold">
+                                        {totalSalary.toFixed(2)}{" "}
+                                        {role.salaryCurrency}
+                                      </span>
                                     </div>
                                   </div>
-                                  <div>
-                                    <div className="mb-4">
-                                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Health Insurance
-                                      </label>
-                                      <div className="flex items-center space-x-4">
-                                        <div className="flex items-center">
-                                          <input
-                                            type="radio"
-                                            name={`jobRoles[${index}].healthInsurance`}
-                                            value="asPerLaw"
-                                            checked={
-                                              role.healthInsurance ===
-                                              "asPerLaw"
-                                            }
-                                            onChange={(e) =>
-                                              handleJobRoleChange(index, e)
-                                            }
-                                            className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300"
-                                            disabled={isViewMode}
-                                            aria-label="Health insurance as per law"
-                                          />
-                                          <label className="ml-2 block text-sm text-gray-700">
-                                            As per Qatar Labor law
-                                          </label>
-                                        </div>
-                                        <div className="flex items-center">
-                                          <input
-                                            type="radio"
-                                            name={`jobRoles[${index}].healthInsurance`}
-                                            value="providedByCompany"
-                                            checked={
-                                              role.healthInsurance ===
-                                              "providedByCompany"
-                                            }
-                                            onChange={(e) =>
-                                              handleJobRoleChange(index, e)
-                                            }
-                                            className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300"
-                                            disabled={isViewMode}
-                                            aria-label="Health insurance provided by company"
-                                          />
-                                          <label className="ml-2 block text-sm text-gray-700">
-                                            Provided by Company
-                                          </label>
-                                        </div>
-                                      </div>
-                                    </div>
 
-                                    <div className="mb-4">
-                                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Mobile Allowance
-                                      </label>
-                                      <div className="flex items-center">
-                                        <input
-                                          type="number"
-                                          min="0"
-                                          name={`jobRoles[${index}].mobileAllowance`}
-                                          value={
-                                            role.mobileProvidedByCompany
-                                              ? 0
-                                              : role.mobileAllowance || ""
-                                          }
-                                          onChange={(e) =>
-                                            handleJobRoleChange(index, e)
-                                          }
-                                          className="w-1/2 px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                                          placeholder="Amount"
-                                          disabled={
-                                            isViewMode ||
-                                            role.mobileProvidedByCompany
-                                          }
-                                          aria-label="Mobile allowance"
-                                        />
-                                        <div className="flex items-center ml-4">
-                                          <input
-                                            type="checkbox"
-                                            name={`jobRoles[${index}].mobileProvidedByCompany`}
-                                            checked={
-                                              role.mobileProvidedByCompany ||
-                                              false
-                                            }
-                                            onChange={(e) => {
-                                              handleJobRoleChange(index, e);
-                                              if (e.target.checked) {
-                                                setFormData((prev) => {
-                                                  const updatedJobRoles = [
-                                                    ...prev.jobRoles,
-                                                  ];
-                                                  updatedJobRoles[index] = {
-                                                    ...updatedJobRoles[index],
-                                                    mobileAllowance: 0,
-                                                  };
-                                                  return {
-                                                    ...prev,
-                                                    jobRoles: updatedJobRoles,
-                                                  };
-                                                });
-                                              }
-                                            }}
-                                            className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
-                                            disabled={isViewMode}
-                                            aria-label="Mobile provided by company"
-                                          />
-                                          <label className="ml-2 block text-sm text-gray-700">
-                                            Provided by Company
-                                          </label>
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                    <div className="mb-4">
-                                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Nature of Work Allowance
-                                      </label>
-                                      <div className="flex">
-                                        <input
-                                          type="number"
-                                          min="0"
-                                          name={`jobRoles[${index}].natureOfWorkAllowance`}
-                                          value={
-                                            role.natureOfWorkAllowance || ""
-                                          }
-                                          onChange={(e) =>
-                                            handleJobRoleChange(index, e)
-                                          }
-                                          className="w-full px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                                          placeholder="Amount"
-                                          disabled={isViewMode}
-                                          aria-label="Nature of work allowance"
-                                        />
-                                      </div>
-                                    </div>
-
-                                    <div className="mb-4">
-                                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Other Allowance
-                                      </label>
-                                      <div className="flex">
-                                        <input
-                                          type="number"
-                                          min="0"
-                                          name={`jobRoles[${index}].otherAllowance`}
-                                          value={role.otherAllowance || ""}
-                                          onChange={(e) =>
-                                            handleJobRoleChange(index, e)
-                                          }
-                                          className="w-full px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                                          placeholder="Amount"
-                                          disabled={isViewMode}
-                                          aria-label="Other allowance"
-                                        />
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Additional Job Role Details */}
-                                <div className="mt-8">
-                                  <h3 className="text-lg font-semibold mb-4">
-                                    Additional Job Details
-                                  </h3>
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {/* left column */}
                                     <div>
+                                      {/* Basic salary */}
                                       <div className="mb-4">
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                          Ticket Frequency
-                                          <span className="text-[#FF0404] ml-1">
-                                            *
-                                          </span>
+                                          Basic Salary
                                         </label>
+                                        <div className="flex">
+                                          <input
+                                            type="number"
+                                            min="0"
+                                            name={`jobRoles[${index}].basicSalary`}
+                                            value={role.basicSalary || ""}
+                                            onChange={(e) =>
+                                              handleJobRoleChange(index, e)
+                                            }
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                                            placeholder="Amount"
+                                            disabled={isViewMode}
+                                            aria-label="Basic salary"
+                                          />
+                                          <select
+                                            name={`jobRoles[${index}].salaryCurrency`}
+                                            value={role.salaryCurrency || "QAR"}
+                                            onChange={(e) =>
+                                              handleJobRoleChange(index, e)
+                                            }
+                                            className="px-2 py-2 border border-gray-300 rounded-r-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                                            disabled={isViewMode}
+                                            aria-label="Salary currency"
+                                          >
+                                            <option value="QAR">QAR</option>
+                                            <option value="USD">USD</option>
+                                            <option value="EUR">EUR</option>
+                                          </select>
+                                        </div>
                                         {errors[
-                                          `jobRoles[${index}].ticketFrequency`
+                                          `jobRoles[${index}].basicSalary`
                                         ] && (
-                                          <p className="text-xs text-red-500 mb-2">
+                                          <p className="text-xs text-red-500 mt-1">
                                             {
                                               errors[
-                                                `jobRoles[${index}].ticketFrequency`
+                                                `jobRoles[${index}].basicSalary`
                                               ]
                                             }
                                           </p>
                                         )}
-                                        <div className="space-y-2">
-                                          {ticketFrequencyOptions.map(
-                                            (option) => (
-                                              <div
-                                                key={option.value}
-                                                className="flex items-center"
-                                              >
-                                                <input
-                                                  type="radio"
-                                                  id={`ticketFrequency-${index}-${option.value}`}
-                                                  name={`jobRoles[${index}].ticketFrequency`}
-                                                  value={option.value}
-                                                  checked={
-                                                    role.ticketFrequency ===
-                                                    option.value
-                                                  }
-                                                  onChange={(e) =>
-                                                    handleJobRoleChange(
-                                                      index,
-                                                      e
-                                                    )
-                                                  }
-                                                  className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300"
-                                                  disabled={isViewMode}
-                                                  aria-label={`Ticket frequency ${option.label}`}
-                                                />
-                                                <label
-                                                  htmlFor={`ticketFrequency-${index}-${option.value}`}
-                                                  className="ml-2 block text-sm text-gray-700"
-                                                >
-                                                  {option.label}
-                                                </label>
-                                              </div>
-                                            )
-                                          )}
-                                        </div>
                                       </div>
-
+                                      {/* Food */}
                                       <div className="mb-4">
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                          Work Locations
-                                          <span className="text-[#FF0404] ml-1">
-                                            *
-                                          </span>
+                                          Food Allowance
                                         </label>
+                                        <div className="flex items-center">
+                                          <input
+                                            type="number"
+                                            min="0"
+                                            name={`jobRoles[${index}].foodAllowance`}
+                                            value={
+                                              role.foodProvidedByCompany
+                                                ? 0
+                                                : role.foodAllowance || ""
+                                            }
+                                            onChange={(e) =>
+                                              handleJobRoleChange(index, e)
+                                            }
+                                            className="w-1/2 px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                                            placeholder="Amount"
+                                            disabled={
+                                              isViewMode ||
+                                              role.foodProvidedByCompany
+                                            }
+                                            aria-label="Food allowance"
+                                          />
+                                          <div className="flex items-center ml-4">
+                                            <input
+                                              type="checkbox"
+                                              name={`jobRoles[${index}].foodProvidedByCompany`}
+                                              checked={
+                                                role.foodProvidedByCompany ||
+                                                false
+                                              }
+                                              onChange={(e) => {
+                                                handleJobRoleChange(index, e);
+                                                if (e.target.checked) {
+                                                  setFormData((prev) => {
+                                                    const updatedJobRoles = [
+                                                      ...prev.jobRoles,
+                                                    ];
+                                                    updatedJobRoles[index] = {
+                                                      ...updatedJobRoles[index],
+                                                      foodAllowance: 0,
+                                                    };
+                                                    return {
+                                                      ...prev,
+                                                      jobRoles: updatedJobRoles,
+                                                    };
+                                                  });
+                                                }
+                                              }}
+                                              className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
+                                              disabled={isViewMode}
+                                              aria-label="Food provided by company"
+                                            />
+                                            <label className="ml-2 block text-sm text-gray-700">
+                                              Provided by Company
+                                            </label>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      {/* Housing */}
+                                      <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                          Housing Allowance
+                                        </label>
+                                        <div className="flex items-center">
+                                          <input
+                                            type="number"
+                                            min="0"
+                                            name={`jobRoles[${index}].housingAllowance`}
+                                            value={
+                                              role.housingProvidedByCompany
+                                                ? 0
+                                                : role.housingAllowance || ""
+                                            }
+                                            onChange={(e) =>
+                                              handleJobRoleChange(index, e)
+                                            }
+                                            className="w-1/2 px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                                            placeholder="Amount"
+                                            disabled={
+                                              isViewMode ||
+                                              role.housingProvidedByCompany
+                                            }
+                                            aria-label="Housing allowance"
+                                          />
+                                          <div className="flex items-center ml-4">
+                                            <input
+                                              type="checkbox"
+                                              name={`jobRoles[${index}].housingProvidedByCompany`}
+                                              checked={
+                                                role.housingProvidedByCompany ||
+                                                false
+                                              }
+                                              onChange={(e) => {
+                                                handleJobRoleChange(index, e);
+                                                if (e.target.checked) {
+                                                  setFormData((prev) => {
+                                                    const updatedJobRoles = [
+                                                      ...prev.jobRoles,
+                                                    ];
+                                                    updatedJobRoles[index] = {
+                                                      ...updatedJobRoles[index],
+                                                      housingAllowance: 0,
+                                                    };
+                                                    return {
+                                                      ...prev,
+                                                      jobRoles: updatedJobRoles,
+                                                    };
+                                                  });
+                                                }
+                                              }}
+                                              className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
+                                              disabled={isViewMode}
+                                              aria-label="Housing provided by company"
+                                            />
+                                            <label className="ml-2 block text-sm text-gray-700">
+                                              Provided by Company
+                                            </label>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      {/* Transport */}
+                                      <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                          Transportation Allowance
+                                        </label>
+                                        <div className="flex items-center">
+                                          <input
+                                            type="number"
+                                            min="0"
+                                            name={`jobRoles[${index}].transportationAllowance`}
+                                            value={
+                                              role.transportationProvidedByCompany
+                                                ? 0
+                                                : role.transportationAllowance ||
+                                                  ""
+                                            }
+                                            onChange={(e) =>
+                                              handleJobRoleChange(index, e)
+                                            }
+                                            className="w-1/2 px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                                            placeholder="Amount"
+                                            disabled={
+                                              isViewMode ||
+                                              role.transportationProvidedByCompany
+                                            }
+                                            aria-label="Transportation allowance"
+                                          />
+                                          <div className="flex items-center ml-4">
+                                            <input
+                                              type="checkbox"
+                                              name={`jobRoles[${index}].transportationProvidedByCompany`}
+                                              checked={
+                                                role.transportationProvidedByCompany ||
+                                                false
+                                              }
+                                              onChange={(e) => {
+                                                handleJobRoleChange(index, e);
+                                                if (e.target.checked) {
+                                                  setFormData((prev) => {
+                                                    const updatedJobRoles = [
+                                                      ...prev.jobRoles,
+                                                    ];
+                                                    updatedJobRoles[index] = {
+                                                      ...updatedJobRoles[index],
+                                                      transportationAllowance: 0,
+                                                    };
+                                                    return {
+                                                      ...prev,
+                                                      jobRoles: updatedJobRoles,
+                                                    };
+                                                  });
+                                                }
+                                              }}
+                                              className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
+                                              disabled={isViewMode}
+                                              aria-label="Transportation provided by company"
+                                            />
+                                            <label className="ml-2 block text-sm text-gray-700">
+                                              Provided by Company
+                                            </label>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* right column */}
+                                    <div>
+                                      {/* Health Insurance */}
+                                      <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                          Health Insurance
+                                        </label>
+                                        <div className="flex items-center space-x-4">
+                                          <div className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`jobRoles[${index}].healthInsurance`}
+                                              value="asPerLaw"
+                                              checked={
+                                                role.healthInsurance ===
+                                                "asPerLaw"
+                                              }
+                                              onChange={(e) =>
+                                                handleJobRoleChange(index, e)
+                                              }
+                                              className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300"
+                                              disabled={isViewMode}
+                                              aria-label="Health insurance as per law"
+                                            />
+                                            <label className="ml-2 block text-sm text-gray-700">
+                                              As per Qatar Labor law
+                                            </label>
+                                          </div>
+                                          <div className="flex items-center">
+                                            <input
+                                              type="radio"
+                                              name={`jobRoles[${index}].healthInsurance`}
+                                              value="providedByCompany"
+                                              checked={
+                                                role.healthInsurance ===
+                                                "providedByCompany"
+                                              }
+                                              onChange={(e) =>
+                                                handleJobRoleChange(index, e)
+                                              }
+                                              className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300"
+                                              disabled={isViewMode}
+                                              aria-label="Health insurance provided by company"
+                                            />
+                                            <label className="ml-2 block text-sm text-gray-700">
+                                              Provided by Company
+                                            </label>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      {/* Mobile */}
+                                      <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                          Mobile Allowance
+                                        </label>
+                                        <div className="flex items-center">
+                                          <input
+                                            type="number"
+                                            min="0"
+                                            name={`jobRoles[${index}].mobileAllowance`}
+                                            value={
+                                              role.mobileProvidedByCompany
+                                                ? 0
+                                                : role.mobileAllowance || ""
+                                            }
+                                            onChange={(e) =>
+                                              handleJobRoleChange(index, e)
+                                            }
+                                            className="w-1/2 px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                                            placeholder="Amount"
+                                            disabled={
+                                              isViewMode ||
+                                              role.mobileProvidedByCompany
+                                            }
+                                            aria-label="Mobile allowance"
+                                          />
+                                          <div className="flex items-center ml-4">
+                                            <input
+                                              type="checkbox"
+                                              name={`jobRoles[${index}].mobileProvidedByCompany`}
+                                              checked={
+                                                role.mobileProvidedByCompany ||
+                                                false
+                                              }
+                                              onChange={(e) => {
+                                                handleJobRoleChange(index, e);
+                                                if (e.target.checked) {
+                                                  setFormData((prev) => {
+                                                    const updatedJobRoles = [
+                                                      ...prev.jobRoles,
+                                                    ];
+                                                    updatedJobRoles[index] = {
+                                                      ...updatedJobRoles[index],
+                                                      mobileAllowance: 0,
+                                                    };
+                                                    return {
+                                                      ...prev,
+                                                      jobRoles: updatedJobRoles,
+                                                    };
+                                                  });
+                                                }
+                                              }}
+                                              className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
+                                              disabled={isViewMode}
+                                              aria-label="Mobile provided by company"
+                                            />
+                                            <label className="ml-2 block text-sm text-gray-700">
+                                              Provided by Company
+                                            </label>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      {/* Nature of work */}
+                                      <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                          Nature of Work Allowance
+                                        </label>
+                                        <div className="flex">
+                                          <input
+                                            type="number"
+                                            min="0"
+                                            name={`jobRoles[${index}].natureOfWorkAllowance`}
+                                            value={
+                                              role.natureOfWorkAllowance || ""
+                                            }
+                                            onChange={(e) =>
+                                              handleJobRoleChange(index, e)
+                                            }
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                                            placeholder="Amount"
+                                            disabled={isViewMode}
+                                            aria-label="Nature of work allowance"
+                                          />
+                                        </div>
+                                      </div>
+                                      {/* Other */}
+                                      <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                          Other Allowance
+                                        </label>
+                                        <div className="flex">
+                                          <input
+                                            type="number"
+                                            min="0"
+                                            name={`jobRoles[${index}].otherAllowance`}
+                                            value={role.otherAllowance || ""}
+                                            onChange={(e) =>
+                                              handleJobRoleChange(index, e)
+                                            }
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-l-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                                            placeholder="Amount"
+                                            disabled={isViewMode}
+                                            aria-label="Other allowance"
+                                          />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Additional Job Role Details */}
+                                  <div className="mt-8">
+                                    <h3 className="text-lg font-semibold mb-4">
+                                      Additional Job Details
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                      <div>
+                                        {/* Ticket Frequency */}
+                                        <div className="mb-4">
+                                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Ticket Frequency
+                                            <span className="text-[#FF0404] ml-1">
+                                              *
+                                            </span>
+                                          </label>
+                                          {errors[
+                                            `jobRoles[${index}].ticketFrequency`
+                                          ] && (
+                                            <p className="text-xs text-red-500 mb-2">
+                                              {
+                                                errors[
+                                                  `jobRoles[${index}].ticketFrequency`
+                                                ]
+                                              }
+                                            </p>
+                                          )}
+                                          <div className="space-y-2">
+                                            {ticketFrequencyOptions.map(
+                                              (option) => (
+                                                <div
+                                                  key={option.value}
+                                                  className="flex items-center"
+                                                >
+                                                  <input
+                                                    type="radio"
+                                                    id={`ticketFrequency-${index}-${option.value}`}
+                                                    name={`jobRoles[${index}].ticketFrequency`}
+                                                    value={option.value}
+                                                    checked={
+                                                      role.ticketFrequency ===
+                                                      option.value
+                                                    }
+                                                    onChange={(e) =>
+                                                      handleJobRoleChange(
+                                                        index,
+                                                        e
+                                                      )
+                                                    }
+                                                    className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300"
+                                                    disabled={isViewMode}
+                                                    aria-label={`Ticket frequency ${option.label}`}
+                                                  />
+                                                  <label
+                                                    htmlFor={`ticketFrequency-${index}-${option.value}`}
+                                                    className="ml-2 block text-sm text-gray-700"
+                                                  >
+                                                    {option.label}
+                                                  </label>
+                                                </div>
+                                              )
+                                            )}
+                                          </div>
+                                        </div>
+
+                                        {/* Work Locations */}
+                                        <div className="mb-4">
+                                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Work Locations
+                                            <span className="text-[#FF0404] ml-1">
+                                              *
+                                            </span>
+                                          </label>
+                                        </div>
                                         {errors[
                                           `jobRoles[${index}].workLocations`
                                         ] && (
@@ -1556,275 +1495,276 @@ export default function Requirements() {
                                           ))}
                                         </div>
                                       </div>
-                                    </div>
 
-                                    <div>
-                                      <div className="mb-4">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                          Previous Experience
-                                          <span className="text-[#FF0404] ml-1">
-                                            *
-                                          </span>
-                                        </label>
-                                        {errors[
-                                          `jobRoles[${index}].previousExperience`
-                                        ] && (
-                                          <p className="text-xs text-red-500 mb-2">
-                                            {
-                                              errors[
-                                                `jobRoles[${index}].previousExperience`
-                                              ]
-                                            }
-                                          </p>
-                                        )}
-                                        <div className="space-y-2">
-                                          {previousExperienceOptions.map(
-                                            (option) => (
-                                              <div
-                                                key={option.value}
-                                                className="flex items-center"
-                                              >
-                                                <input
-                                                  type="radio"
-                                                  id={`previousExperience-${index}-${option.value}`}
-                                                  name={`jobRoles[${index}].previousExperience`}
-                                                  value={option.value}
-                                                  checked={
-                                                    role.previousExperience ===
-                                                    option.value
-                                                  }
-                                                  onChange={(e) =>
-                                                    handleJobRoleChange(
-                                                      index,
-                                                      e
-                                                    )
-                                                  }
-                                                  className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300"
-                                                  disabled={isViewMode}
-                                                  aria-label={`Previous experience ${option.label}`}
-                                                />
-                                                <label
-                                                  htmlFor={`previousExperience-${index}-${option.value}`}
-                                                  className="ml-2 block text-sm text-gray-700"
-                                                >
-                                                  {option.label}
-                                                </label>
-                                              </div>
-                                            )
+                                      <div>
+                                        {/* Previous Experience */}
+                                        <div className="mb-4">
+                                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Previous Experience
+                                            <span className="text-[#FF0404] ml-1">
+                                              *
+                                            </span>
+                                          </label>
+                                          {errors[
+                                            `jobRoles[${index}].previousExperience`
+                                          ] && (
+                                            <p className="text-xs text-red-500 mb-2">
+                                              {
+                                                errors[
+                                                  `jobRoles[${index}].previousExperience`
+                                                ]
+                                              }
+                                            </p>
                                           )}
-                                        </div>
-                                      </div>
-
-                                      <div className="mb-4">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                          Total Experience Years
-                                          <span className="text-[#FF0404] ml-1">
-                                            *
-                                          </span>
-                                        </label>
-                                        {errors[
-                                          `jobRoles[${index}].totalExperienceYears`
-                                        ] && (
-                                          <p className="text-xs text-red-500 mb-1">
-                                            {
-                                              errors[
-                                                `jobRoles[${index}].totalExperienceYears`
-                                              ]
-                                            }
-                                          </p>
-                                        )}
-                                        <input
-                                          type="number"
-                                          name={`jobRoles[${index}].totalExperienceYears`}
-                                          value={
-                                            role.totalExperienceYears || ""
-                                          }
-                                          onChange={(e) =>
-                                            handleJobRoleChange(index, e)
-                                          }
-                                          required={
-                                            role.previousExperience !==
-                                            "FRESHER"
-                                          }
-                                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                                          placeholder="e.g., 5"
-                                          disabled={
-                                            isViewMode ||
-                                            role.previousExperience ===
-                                              "FRESHER"
-                                          }
-                                          aria-label="Total experience years"
-                                        />
-                                      </div>
-                                      <div className="mb-4">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                          Preferred Age (±5 years)
-                                          <span className="text-[#FF0404] ml-1">
-                                            *
-                                          </span>
-                                        </label>
-                                        {errors[
-                                          `jobRoles[${index}].preferredAge`
-                                        ] && (
-                                          <p className="text-xs text-red-500 mb-1">
-                                            {
-                                              errors[
-                                                `jobRoles[${index}].preferredAge`
-                                              ]
-                                            }
-                                          </p>
-                                        )}
-                                        <input
-                                          type="number"
-                                          name={`jobRoles[${index}].preferredAge`}
-                                          value={role.preferredAge || ""}
-                                          onChange={(e) =>
-                                            handleJobRoleChange(index, e)
-                                          }
-                                          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
-                                          placeholder="e.g., 30"
-                                          disabled={isViewMode}
-                                          aria-label="Preferred age"
-                                        />
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* Language Requirements and Special Notes */}
-                                <div className="mt-8">
-                                  <h3 className="text-lg font-semibold mb-4">
-                                    Language & Special Requirements
-                                  </h3>
-                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div>
-                                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                                        {t.languageRequirements}
-                                        <span className="text-[#FF0404] ml-1">
-                                          *
-                                        </span>
-                                      </label>
-
-                                      {errors[
-                                        `jobRoles[${index}].languageRequirements`
-                                      ] && (
-                                        <p className="text-sm text-[#FF0404] mb-2">
-                                          {
-                                            errors[
-                                              `jobRoles[${index}].languageRequirements`
-                                            ]
-                                          }
-                                        </p>
-                                      )}
-
-                                      <div className="space-y-2 mb-3">
-                                        {languageOptions.map((language) => (
-                                          <div
-                                            key={language}
-                                            className="flex items-center"
-                                          >
-                                            <input
-                                              type="checkbox"
-                                              id={`lang-${index}-${language}`}
-                                              checked={
-                                                role.languageRequirements?.includes(
-                                                  language
-                                                ) || false
-                                              }
-                                              onChange={() =>
-                                                toggleLanguageRequirement(
-                                                  language,
-                                                  index
-                                                )
-                                              }
-                                              className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
-                                              disabled={isViewMode}
-                                              aria-label={`Language requirement ${language}`}
-                                            />
-                                            <label
-                                              htmlFor={`lang-${index}-${language}`}
-                                              className="ml-2 text-sm text-gray-700"
-                                            >
-                                              {language}
-                                            </label>
+                                          <div className="space-y-2">
+                                            {previousExperienceOptions.map(
+                                              (option) => (
+                                                <div
+                                                  key={option.value}
+                                                  className="flex items-center"
+                                                >
+                                                  <input
+                                                    type="radio"
+                                                    id={`previousExperience-${index}-${option.value}`}
+                                                    name={`jobRoles[${index}].previousExperience`}
+                                                    value={option.value}
+                                                    checked={
+                                                      role.previousExperience ===
+                                                      option.value
+                                                    }
+                                                    onChange={(e) =>
+                                                      handleJobRoleChange(
+                                                        index,
+                                                        e
+                                                      )
+                                                    }
+                                                    className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300"
+                                                    disabled={isViewMode}
+                                                    aria-label={`Previous experience ${option.label}`}
+                                                  />
+                                                  <label
+                                                    htmlFor={`previousExperience-${index}-${option.value}`}
+                                                    className="ml-2 block text-sm text-gray-700"
+                                                  >
+                                                    {option.label}
+                                                  </label>
+                                                </div>
+                                              )
+                                            )}
                                           </div>
-                                        ))}
+                                        </div>
+
+                                        {/* Total Experience */}
+                                        <div className="mb-4">
+                                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Total Experience Years
+                                            <span className="text-[#FF0404] ml-1">
+                                              *
+                                            </span>
+                                          </label>
+                                          {errors[
+                                            `jobRoles[${index}].totalExperienceYears`
+                                          ] && (
+                                            <p className="text-xs text-red-500 mb-1">
+                                              {
+                                                errors[
+                                                  `jobRoles[${index}].totalExperienceYears`
+                                                ]
+                                              }
+                                            </p>
+                                          )}
+                                          <input
+                                            type="number"
+                                            name={`jobRoles[${index}].totalExperienceYears`}
+                                            value={
+                                              role.totalExperienceYears || ""
+                                            }
+                                            onChange={(e) =>
+                                              handleJobRoleChange(index, e)
+                                            }
+                                            required={
+                                              role.previousExperience !==
+                                              "FRESHER"
+                                            }
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                                            placeholder="e.g., 5"
+                                            disabled={
+                                              isViewMode ||
+                                              role.previousExperience ===
+                                                "FRESHER"
+                                            }
+                                            aria-label="Total experience years"
+                                          />
+                                        </div>
+
+                                        {/* Preferred age */}
+                                        <div className="mb-4">
+                                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Preferred Age (±5 years)
+                                            <span className="text-[#FF0404] ml-1">
+                                              *
+                                            </span>
+                                          </label>
+                                          {errors[
+                                            `jobRoles[${index}].preferredAge`
+                                          ] && (
+                                            <p className="text-xs text-red-500 mb-1">
+                                              {
+                                                errors[
+                                                  `jobRoles[${index}].preferredAge`
+                                                ]
+                                              }
+                                            </p>
+                                          )}
+                                          <input
+                                            type="number"
+                                            name={`jobRoles[${index}].preferredAge`}
+                                            value={role.preferredAge || ""}
+                                            onChange={(e) =>
+                                              handleJobRoleChange(index, e)
+                                            }
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#2C0053] focus:border-[#2C0053] sm:text-sm"
+                                            placeholder="e.g., 30"
+                                            disabled={isViewMode}
+                                            aria-label="Preferred age"
+                                          />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Language & Notes */}
+                                  <div className="mt-8">
+                                    <h3 className="text-lg font-semibold mb-4">
+                                      Language & Special Requirements
+                                    </h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                      <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                          {t.languageRequirements}
+                                          <span className="text-[#FF0404] ml-1">
+                                            *
+                                          </span>
+                                        </label>
+                                        {errors[
+                                          `jobRoles[${index}].languageRequirements`
+                                        ] && (
+                                          <p className="text-sm text-[#FF0404] mb-2">
+                                            {
+                                              errors[
+                                                `jobRoles[${index}].languageRequirements`
+                                              ]
+                                            }
+                                          </p>
+                                        )}
+                                        <div className="space-y-2 mb-3">
+                                          {languageOptions.map((language) => (
+                                            <div
+                                              key={language}
+                                              className="flex items-center"
+                                            >
+                                              <input
+                                                type="checkbox"
+                                                id={`lang-${index}-${language}`}
+                                                checked={
+                                                  role.languageRequirements?.includes(
+                                                    language
+                                                  ) || false
+                                                }
+                                                onChange={() =>
+                                                  toggleLanguageRequirement(
+                                                    language,
+                                                    index
+                                                  )
+                                                }
+                                                className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
+                                                disabled={isViewMode}
+                                                aria-label={`Language requirement ${language}`}
+                                              />
+                                              <label
+                                                htmlFor={`lang-${index}-${language}`}
+                                                className="ml-2 text-sm text-gray-700"
+                                              >
+                                                {language}
+                                              </label>
+                                            </div>
+                                          ))}
+                                        </div>
+
+                                        {!isViewMode && (
+                                          <div className="flex items-center gap-2">
+                                            <Input
+                                              type="text"
+                                              value={newLanguage}
+                                              onChange={(e) =>
+                                                setNewLanguage(e.target.value)
+                                              }
+                                              onKeyDown={(e) => {
+                                                if (e.key === "Enter") {
+                                                  e.preventDefault();
+                                                  handleAddLanguage(index);
+                                                }
+                                              }}
+                                              placeholder="Add another language"
+                                              className="w-full"
+                                              aria-label="Add custom language"
+                                            />
+                                            <Button
+                                              type="button"
+                                              variant="outline"
+                                              onClick={() =>
+                                                handleAddLanguage(index)
+                                              }
+                                            >
+                                              Add
+                                            </Button>
+                                          </div>
+                                        )}
                                       </div>
 
-                                      {!isViewMode && (
-                                        <div className="flex items-center gap-2">
-                                          <Input
-                                            type="text"
-                                            value={newLanguage}
-                                            onChange={(e) =>
-                                              setNewLanguage(e.target.value)
-                                            }
-                                            onKeyDown={(e) => {
-                                              if (e.key === "Enter") {
-                                                e.preventDefault();
-                                                handleAddLanguage(index);
-                                              }
-                                            }}
-                                            placeholder="Add another language"
-                                            className="w-full"
-                                            aria-label="Add custom language"
-                                          />
-                                          <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() =>
-                                              handleAddLanguage(index)
-                                            }
-                                            aria-label="Add language button"
-                                          >
-                                            Add
-                                          </Button>
-                                        </div>
-                                      )}
-                                    </div>
-
-                                    <div>
-                                      <label
-                                        htmlFor={`specialRequirements-${index}`}
-                                        className="block text-sm font-medium text-gray-700 mb-1"
-                                      >
-                                        {t.specialRequirements}
-                                      </label>
-                                      <textarea
-                                        id={`specialRequirements-${index}`}
-                                        name={`jobRoles[${index}].specialRequirements`}
-                                        value={role.specialRequirements || ""}
-                                        onChange={(e) =>
-                                          handleJobRoleChange(index, e)
-                                        }
-                                        rows={5}
-                                        className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C0053] focus:border-[#2C0053] "
-                                        placeholder={
-                                          t.specialRequirementsPlaceholder
-                                        }
-                                        disabled={isViewMode}
-                                        aria-label="Special requirements"
-                                      />
+                                      <div>
+                                        <label
+                                          htmlFor={`specialRequirements-${index}`}
+                                          className="block text-sm font-medium text-gray-700 mb-1"
+                                        >
+                                          {t.specialRequirements}
+                                        </label>
+                                        <textarea
+                                          id={`specialRequirements-${index}`}
+                                          name={`jobRoles[${index}].specialRequirements`}
+                                          value={role.specialRequirements || ""}
+                                          onChange={(e) =>
+                                            handleJobRoleChange(index, e)
+                                          }
+                                          rows={5}
+                                          className="w-full px-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C0053] focus:border-[#2C0053]"
+                                          placeholder={
+                                            t.specialRequirementsPlaceholder
+                                          }
+                                          disabled={isViewMode}
+                                          aria-label="Special requirements"
+                                        />
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
-                              </div>
-                            </td>
-                          </tr>
-                        </React.Fragment>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                              </td>
+                            </tr>
+                          </React.Fragment>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-              <div className="px-6 py-3 text-left">
+
+              <div className="px-4 md:px-6 py-3 text-left">
                 {!isViewMode && (
                   <Button
                     type="button"
                     variant="default"
                     onClick={addJobRole}
-                    className="mr-4"
-                    aria-label="Add another job role"
+                    className="mr-0 md:mr-4"
                   >
                     {t.addAnotherRole}
                   </Button>
@@ -1833,13 +1773,16 @@ export default function Requirements() {
             </div>
           </Card>
         );
-
       case 2:
         return (
-          <Card className="p-6">
+          <Card className="p-4 md:p-6">
             <div className="text-center mb-0">
-              <h1 className="text-2xl font-semibold mb-1">{t.reviewTitle}</h1>
-              <p className="text-base text-gray-700 mb-2">{t.verifyInfo}</p>
+              <h1 className="text-xl md:text-2xl font-semibold mb-1">
+                {t.reviewTitle}
+              </h1>
+              <p className="text-sm md:text-base text-gray-700 mb-2">
+                {t.verifyInfo}
+              </p>
             </div>
 
             <div className="mt-6 space-y-6">
@@ -1940,7 +1883,6 @@ export default function Requirements() {
             </div>
           </Card>
         );
-
       default:
         return null;
     }
@@ -2076,7 +2018,8 @@ export default function Requirements() {
         cancelText={currentStep > 1 && !isViewMode ? "Back" : undefined}
       >
         <div className="flex flex-col h-full relative">
-          <div className="absolute top-4 right-4 z-20">
+          {/* Language switcher */}
+          <div className="absolute top-3 right-3 md:top-4 md:right-4 z-20">
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value as "en" | "ar")}
@@ -2088,7 +2031,8 @@ export default function Requirements() {
             </select>
           </div>
 
-          <div className="relative px-16 pt-10 pb-6">
+          {/* Stepper */}
+          <div className="relative px-4 md:px-16 pt-10 pb-4 md:pb-6">
             <div className="absolute inset-x-0 top-1/2 h-0.5 z-0">
               <div className="absolute -left-44 right-0 h-full flex w-full max-w-[1100px] mx-auto">
                 <div
@@ -2097,9 +2041,7 @@ export default function Requirements() {
                     width:
                       currentStep === 1
                         ? "calc(20%)"
-                        : solidWidths[
-                            currentStep as keyof typeof solidWidths
-                          ] || "100%",
+                        : solidWidths[currentStep as 1 | 2] || "100%",
                   }}
                 />
                 <div
@@ -2107,10 +2049,8 @@ export default function Requirements() {
                   style={{
                     width:
                       currentStep === 1
-                        ? `calc(100%`
-                        : `calc(${
-                            100 - ((currentStep - 1) / (steps.length - 1)) * 100
-                          }%)`,
+                        ? "calc(80%)"
+                        : `calc(${100 - ((currentStep - 1) / (steps.length - 1)) * 100}%)`,
                   }}
                 />
               </div>
@@ -2123,7 +2063,7 @@ export default function Requirements() {
                   className="text-center flex-1 max-w-[200px] relative"
                 >
                   <div
-                    className={`w-12 h-12 mx-auto rounded-full text-lg font-bold mb-3 flex items-center justify-center ${
+                    className={`w-10 h-10 md:w-12 md:h-12 mx-auto rounded-full text-base md:text-lg font-bold mb-2 md:mb-3 flex items-center justify-center ${
                       currentStep >= step.id
                         ? "bg-[#2C0053] text-white"
                         : "bg-gray-200 text-gray-600"
@@ -2133,7 +2073,7 @@ export default function Requirements() {
                     {step.id}
                   </div>
                   <span
-                    className={`text-sm font-medium ${
+                    className={`text-xs md:text-sm font-medium ${
                       currentStep >= step.id
                         ? "text-[#2C0053]"
                         : "text-gray-500"
@@ -2146,7 +2086,8 @@ export default function Requirements() {
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 md:px-8 pt-2">
+          {/* Body */}
+          <div className="flex-1 overflow-y-auto px-2 md:px-8 pt-2">
             {renderStepContent()}
           </div>
         </div>

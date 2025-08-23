@@ -2,7 +2,7 @@
 // app/(protected)/dashboard/client/recruitment/page.tsx
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -26,7 +26,7 @@ import ArrivalConfirmationModal from "@/components/ui/ArrivalConfirmationModal";
 interface Requirement {
   id: string;
   status: RequirementStatus;
-  createdAt: Date;
+  createdAt: Date | string;
   jobRoles: JobRole[];
 }
 
@@ -53,8 +53,8 @@ interface LabourAssignment {
       stage: LabourStage;
       status: string;
       notes?: string | null;
-      createdAt: Date;
-      completedAt?: Date | null;
+      createdAt: Date | string;
+      completedAt?: Date | string | null;
     }[];
   };
 }
@@ -65,7 +65,7 @@ interface LabourProfile {
   nationality: string;
   age: number;
   gender: string;
-  status: LabourProfileStatus;
+  status: LabourProfileStatus | string;
   verificationStatus: string;
   profileImage?: string;
   currentStage: LabourStage;
@@ -74,8 +74,8 @@ interface LabourProfile {
     stage: LabourStage;
     status: string;
     notes?: string | null;
-    createdAt: Date;
-    completedAt?: Date | null;
+    createdAt: Date | string;
+    completedAt?: Date | string | null;
   }[];
 }
 
@@ -97,23 +97,28 @@ export default function ClientRecruitment() {
   const [requirements, setRequirements] = useState<Requirement[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
+
   const [timelineLabour, setTimelineLabour] = useState<LabourProfile | null>(
     null
   );
   const [timelineAssignment, setTimelineAssignment] =
     useState<LabourAssignment | null>(null);
+
   const [documentsLabour, setDocumentsLabour] = useState<LabourProfile | null>(
     null
   );
   const [documentsAssignment, setDocumentsAssignment] =
     useState<LabourAssignment | null>(null);
+
   const [offerLetterDetails, setOfferLetterDetails] =
     useState<OfferLetterDetails | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showDocumentViewer, setShowDocumentViewer] = useState(false);
+
   const [showArrivalConfirmation, setShowArrivalConfirmation] = useState(false);
   const [arrivalConfirmationLabour, setArrivalConfirmationLabour] =
     useState<LabourProfile | null>(null);
+
   const [detailsForm, setDetailsForm] = useState({
     workingHours: "",
     workingDays: "",
@@ -137,20 +142,41 @@ export default function ClientRecruitment() {
     "TRAVEL_CONFIRMATION",
     "ARRIVAL_CONFIRMATION",
     "DEPLOYED",
-  ];
+  ] as const;
+
   const [stageFilter, setStageFilter] = useState<string>("ALL");
 
-  // Function to refresh requirements data
-  const refreshRequirements = async () => {
+  // ------- helpers -------
+  const formatRequirementId = (id: string) => id.slice(0, 8).toUpperCase();
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "PENDING":
+        return "text-[#C86300]";
+      case "REJECTED":
+        return "text-[#ED1C24]";
+      case "NOT_VERIFIED":
+        return "text-[#150B3D]/70";
+      case "VERIFIED":
+      case "COMPLETED":
+        return "text-[#00C853]";
+      default:
+        return "text-[#150B3D]/70";
+    }
+  };
+
+  const formatStage = (s: string) => s.replace(/_/g, " ");
+
+  // ------- data fetching -------
+  const refreshRequirements = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch("/api/clients/requirements/accepted");
       if (!response.ok) throw new Error("Failed to fetch requirements");
-
       const data = await response.json();
       setRequirements(data);
 
-      // Update timeline labour if it exists
+      // Update open timeline card with latest assignment info
       if (timelineLabour) {
         const updatedAssignment = data
           .flatMap((req: Requirement) => req.jobRoles)
@@ -159,82 +185,43 @@ export default function ClientRecruitment() {
             (assignment: LabourAssignment) =>
               assignment.labour.id === timelineLabour.id
           );
-
         if (updatedAssignment) {
-          console.log(
-            "Updated labour current stage:",
-            updatedAssignment.labour.currentStage
-          );
           setTimelineLabour(updatedAssignment.labour);
           setTimelineAssignment(updatedAssignment);
         }
       }
 
-      // Force a re-render by updating the selected requirement
-      if (selectedRequirement) {
-        setSelectedRequirement(selectedRequirement);
-      }
+      if (selectedRequirement) setSelectedRequirement(selectedRequirement); // force reselect
     } catch (error) {
       console.error("Error refreshing requirements:", error);
-      toast({
-        type: "error",
-        message: "Failed to refresh data",
-      });
+      toast({ type: "error", message: "Failed to refresh data" });
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedRequirement, timelineLabour, toast]);
 
-  // Fetch client requirements with their job roles and labour assignments
   useEffect(() => {
     const fetchRequirements = async () => {
       try {
         setLoading(true);
         const response = await fetch("/api/clients/requirements/accepted");
         if (!response.ok) throw new Error("Failed to fetch requirements");
-
         const data = await response.json();
         setRequirements(data);
-
-        // Select first requirement by default if none selected
         if (data.length > 0 && !selectedRequirement) {
           setSelectedRequirement(data[0].id);
         }
       } catch (error) {
         console.error("Error fetching requirements:", error);
-        toast({
-          type: "error",
-          message: "Failed to load requirements",
-        });
+        toast({ type: "error", message: "Failed to load requirements" });
       } finally {
         setLoading(false);
       }
     };
-
     fetchRequirements();
   }, [selectedRequirement, toast]);
 
-  // Pagination logic
-  const paginatedRequirements = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    return requirements.slice(startIndex, startIndex + itemsPerPage);
-  }, [requirements, currentPage]);
-
-  const totalPages = Math.ceil(requirements.length / itemsPerPage);
-
-  // Memoize selected requirement data
-  const selectedRequirementData = useMemo(
-    () => requirements.find((r) => r.id === selectedRequirement),
-    [requirements, selectedRequirement]
-  );
-
-  // Memoize current job role
-  const currentJobRole = useMemo(
-    () => selectedRequirementData?.jobRoles[currentJobRoleIndex],
-    [selectedRequirementData, currentJobRoleIndex]
-  );
-
-  // Fetch offer letter details for the selected requirement
+  // Offer letter details fetch
   useEffect(() => {
     const fetchDetails = async () => {
       if (!selectedRequirement) return setOfferLetterDetails(null);
@@ -246,9 +233,6 @@ export default function ClientRecruitment() {
         if (res.ok) {
           const data = await res.json();
           setOfferLetterDetails(data);
-        } else if (res.status === 404) {
-          setShowDetailsModal(true);
-          setOfferLetterDetails(null);
         } else {
           setShowDetailsModal(true);
           setOfferLetterDetails(null);
@@ -260,7 +244,30 @@ export default function ClientRecruitment() {
     fetchDetails();
   }, [selectedRequirement]);
 
-  // Handler to open modal for editing
+  // ------- pagination -------
+  const paginatedRequirements = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return requirements.slice(startIndex, startIndex + itemsPerPage);
+  }, [requirements, currentPage]);
+
+  const totalPages =
+    Math.ceil(Math.max(0, requirements.length) / itemsPerPage) || 1;
+
+  // ------- current selections -------
+  const selectedRequirementData = useMemo(
+    () => requirements.find((r) => r.id === selectedRequirement),
+    [requirements, selectedRequirement]
+  );
+
+  const currentJobRole = useMemo(
+    () =>
+      selectedRequirementData
+        ? selectedRequirementData.jobRoles[currentJobRoleIndex]
+        : undefined,
+    [selectedRequirementData, currentJobRoleIndex]
+  );
+
+  // ------- details modal handlers -------
   const handleEditDetails = () => {
     setDetailsForm({
       workingHours: offerLetterDetails?.workingHours
@@ -279,17 +286,14 @@ export default function ClientRecruitment() {
   const handleDetailsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     let newValue = value;
-    // Only allow numbers for workingHours and workingDays
-    if (name === "workingHours" || name === "workingDays") {
+    if (name === "workingHours" || name === "workingDays")
       newValue = value.replace(/[^\d]/g, "");
-    }
-    setDetailsForm({ ...detailsForm, [name]: newValue });
+    setDetailsForm((prev) => ({ ...prev, [name]: newValue }));
   };
 
   const handleDetailsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError(null);
-    // Validate workingHours and workingDays
     const hours = Number(detailsForm.workingHours);
     const days = Number(detailsForm.workingDays);
     if (
@@ -319,56 +323,28 @@ export default function ClientRecruitment() {
         setShowDetailsModal(false);
         toast({ type: "success", message: "Offer letter details saved." });
       } else {
-        toast({
-          type: "error",
-          message: "Failed to save details",
-        });
+        toast({ type: "error", message: "Failed to save details" });
       }
     } finally {
       setDetailsLoading(false);
     }
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "PENDING":
-        return "text-[#C86300]";
-      case "REJECTED":
-        return "text-[#ED1C24]";
-      case "NOT_VERIFIED":
-        return "text-[#150B3D]/70";
-      case "VERIFIED":
-      case "COMPLETED":
-        return "text-[#00C853]";
-      default:
-        return "text-[#150B3D]/70";
-    }
-  };
-
-  const handlePreviousJobRole = () => {
-    if (currentJobRoleIndex > 0) {
-      setCurrentJobRoleIndex(currentJobRoleIndex - 1);
-    }
-  };
-
-  const handleNextJobRole = () => {
-    if (
-      selectedRequirementData &&
-      currentJobRoleIndex < selectedRequirementData.jobRoles.length - 1
-    ) {
-      setCurrentJobRoleIndex(currentJobRoleIndex + 1);
-    }
-  };
+  // ------- navigation -------
+  const handlePreviousJobRole = () =>
+    setCurrentJobRoleIndex((i) => Math.max(0, i - 1));
+  const handleNextJobRole = () =>
+    selectedRequirementData &&
+    setCurrentJobRoleIndex((i) =>
+      Math.min(i + 1, selectedRequirementData.jobRoles.length - 1)
+    );
 
   const handleRequirementSelect = (requirementId: string) => {
     setSelectedRequirement(requirementId);
     setCurrentJobRoleIndex(0);
   };
 
-  const formatRequirementId = (id: string) => {
-    return id.slice(0, 8).toUpperCase();
-  };
-
+  // ------- timeline & docs -------
   const handleViewTimeline = (
     labour: LabourProfile,
     assignment: LabourAssignment
@@ -381,8 +357,6 @@ export default function ClientRecruitment() {
     labour: LabourProfile,
     assignment: LabourAssignment
   ) => {
-    console.log("View Documents - Labour:", labour);
-    console.log("View Documents - Assignment:", assignment);
     setDocumentsLabour(labour);
     setDocumentsAssignment(assignment);
     setShowDocumentViewer(true);
@@ -390,11 +364,9 @@ export default function ClientRecruitment() {
 
   const handleTimelineUpload = async (stageKey: string, file: File) => {
     if (!timelineAssignment) return;
-
     try {
       let endpoint = "";
       let successMessage = "";
-
       switch (stageKey) {
         case "VISA_PRINTING":
           endpoint = `/api/clients/assignments/${timelineAssignment.id}/upload-visa`;
@@ -407,20 +379,13 @@ export default function ClientRecruitment() {
           });
           return;
       }
-
       const formData = new FormData();
       formData.append("file", file);
-
-      const res = await fetch(endpoint, {
-        method: "POST",
-        body: formData,
-      });
-
+      const res = await fetch(endpoint, { method: "POST", body: formData });
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || "Failed to upload file");
       }
-
       toast({ type: "success", message: successMessage });
       await refreshRequirements();
     } catch (error) {
@@ -435,11 +400,9 @@ export default function ClientRecruitment() {
 
   const handleTimelineAction = async (stageKey: string) => {
     if (!timelineAssignment) return;
-
     try {
       let endpoint = "";
       let successMessage = "";
-
       switch (stageKey) {
         case "OFFER_LETTER_SIGN":
           endpoint = `/api/clients/assignments/${timelineAssignment.id}/verify-offer-letter`;
@@ -454,7 +417,6 @@ export default function ClientRecruitment() {
           successMessage = "QVC payment marked as completed successfully";
           break;
         case "ARRIVAL_CONFIRMATION_MODAL":
-          // Open arrival confirmation modal instead of making API call
           setArrivalConfirmationLabour(timelineLabour);
           setShowArrivalConfirmation(true);
           return;
@@ -465,16 +427,11 @@ export default function ClientRecruitment() {
           });
           return;
       }
-
-      const res = await fetch(endpoint, {
-        method: "POST",
-      });
-
+      const res = await fetch(endpoint, { method: "POST" });
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || "Failed to update stage");
       }
-
       toast({ type: "success", message: successMessage });
       await refreshRequirements();
     } catch (error) {
@@ -492,38 +449,26 @@ export default function ClientRecruitment() {
     notes?: string
   ) => {
     if (!arrivalConfirmationLabour || !timelineAssignment) return;
-
     try {
-      const requestBody: {
-        status: string;
-        notes?: string;
-      } = { status, notes };
-
       const res = await fetch(
         `/api/clients/assignments/${timelineAssignment.id}/confirm-arrival`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status, notes }),
         }
       );
-
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(
           errorData.error || "Failed to update arrival confirmation"
         );
       }
-
-      const successMessage = `Arrival status updated to ${status} successfully`;
-      toast({ type: "success", message: successMessage });
-
-      // Refresh requirements to update the UI
+      toast({
+        type: "success",
+        message: `Arrival status updated to ${status} successfully`,
+      });
       await refreshRequirements();
-
-      // Close modal
       setShowArrivalConfirmation(false);
       setArrivalConfirmationLabour(null);
     } catch (error) {
@@ -538,6 +483,7 @@ export default function ClientRecruitment() {
     }
   };
 
+  // ------- child card -------
   const LabourCard = ({
     labour,
     jobRoleId,
@@ -551,6 +497,7 @@ export default function ClientRecruitment() {
     const [downloading, setDownloading] = useState(false);
     const [verifying, setVerifying] = useState(false);
     const { toast } = useToast();
+
     const offerLetterBlocked =
       !offerLetterDetails ||
       !offerLetterDetails.workingHours ||
@@ -559,13 +506,11 @@ export default function ClientRecruitment() {
       !offerLetterDetails.endOfService ||
       !offerLetterDetails.probationPeriod;
 
-    // Check if OFFER_LETTER_SIGN stage is completed
     const offerLetterStageCompleted = labour.stages?.some(
       (stage) =>
         stage.stage === "OFFER_LETTER_SIGN" && stage.status === "COMPLETED"
     );
 
-    // Check if signed offer letter exists and stage is not completed
     const canVerifyOfferLetter =
       assignment.signedOfferLetterUrl && !offerLetterStageCompleted;
 
@@ -573,10 +518,8 @@ export default function ClientRecruitment() {
       setViewing(true);
       try {
         if (assignment.signedOfferLetterUrl) {
-          // View signed offer letter
           window.open(assignment.signedOfferLetterUrl, "_blank");
         } else {
-          // View generated offer letter
           const url = `/api/offer-letter/generate?labourId=${labour.id}&jobRoleId=${jobRoleId}`;
           window.open(url, "_blank");
         }
@@ -587,14 +530,10 @@ export default function ClientRecruitment() {
       }
     };
 
-    // Download handler
-
-    // Download handler
     const handleDownloadOfferLetter = async () => {
       setDownloading(true);
       try {
         if (assignment.signedOfferLetterUrl) {
-          // Download signed offer letter
           const response = await fetch(assignment.signedOfferLetterUrl);
           if (!response.ok)
             throw new Error("Failed to download signed offer letter");
@@ -608,7 +547,6 @@ export default function ClientRecruitment() {
           a.remove();
           window.URL.revokeObjectURL(downloadUrl);
         } else {
-          // Download generated offer letter
           const url = `/api/offer-letter/generate?labourId=${labour.id}&jobRoleId=${jobRoleId}&download=1`;
           const res = await fetch(url);
           if (!res.ok) throw new Error("Failed to download offer letter PDF");
@@ -637,22 +575,17 @@ export default function ClientRecruitment() {
         toast({ type: "error", message: "No signed offer letter to verify" });
         return;
       }
-
       setVerifying(true);
       try {
         const res = await fetch(
           `/api/clients/assignments/${assignment.id}/verify-offer-letter`,
-          {
-            method: "POST",
-          }
+          { method: "POST" }
         );
         if (!res.ok) throw new Error("Failed to verify offer letter");
-
         toast({
           type: "success",
           message: "Signed offer letter verified successfully",
         });
-        // Refresh the requirements to update the UI
         await refreshRequirements();
       } catch {
         toast({
@@ -673,7 +606,6 @@ export default function ClientRecruitment() {
         }`}
       >
         {labour.currentStage === "DEPLOYED" ? (
-          // Modern card design for deployed labour
           <>
             <div className="relative h-40 bg-gray-100">
               {labour.profileImage ? (
@@ -687,7 +619,6 @@ export default function ClientRecruitment() {
                   <User className="w-16 h-16 text-gray-400" />
                 </div>
               )}
-              {/* Deployed badge overlay */}
               <div className="absolute top-2 right-2">
                 <span className="inline-flex items-center px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full font-medium">
                   Deployed
@@ -706,9 +637,9 @@ export default function ClientRecruitment() {
                 </p>
                 <div className="flex gap-2 mt-2">
                   <span
-                    className={`text-xs px-2 py-1 rounded-full ${getStatusColor(labour.status)}`}
+                    className={`text-xs px-2 py-1 rounded-full ${getStatusColor(labour.status as string)}`}
                   >
-                    {labour.status.replace("_", " ").toLowerCase()}
+                    {String(labour.status).replace("_", " ").toLowerCase()}
                   </span>
                   <span
                     className={`text-xs px-2 py-1 rounded-full ${getStatusColor(labour.verificationStatus)}`}
@@ -729,9 +660,8 @@ export default function ClientRecruitment() {
 
               <button
                 className="w-full py-2 px-3 bg-[#150B3D] hover:bg-[#0e0726] text-white text-sm rounded flex items-center justify-center gap-2 mb-2"
-                onClick={() => {
-                  handleViewTimeline(labour, assignment);
-                }}
+                onClick={() => handleViewTimeline(labour, assignment)}
+                title="View onboarding timeline"
               >
                 <Clock className="w-4 h-4" />
                 View Timeline
@@ -740,6 +670,7 @@ export default function ClientRecruitment() {
               <button
                 className="w-full py-2 px-3 bg-[#150B3D] hover:bg-[#0e0726] text-white text-sm rounded flex items-center justify-center gap-2"
                 onClick={() => handleViewDocuments(labour, assignment)}
+                title="View travel documents"
               >
                 <FileText className="w-4 h-4" />
                 View Documents
@@ -747,7 +678,6 @@ export default function ClientRecruitment() {
             </div>
           </>
         ) : (
-          // Legacy design for non-deployed labour
           <>
             <div className="flex items-center gap-3 mb-3">
               {labour.profileImage ? (
@@ -766,8 +696,10 @@ export default function ClientRecruitment() {
                   {labour.name}
                 </h3>
                 <div className="flex gap-2">
-                  <span className={`text-xs ${getStatusColor(labour.status)}`}>
-                    {labour.status.replace("_", " ").toLowerCase()}
+                  <span
+                    className={`text-xs ${getStatusColor(labour.status as string)}`}
+                  >
+                    {String(labour.status).replace("_", " ").toLowerCase()}
                   </span>
                   <span
                     className={`text-xs ${getStatusColor(labour.verificationStatus)}`}
@@ -793,20 +725,20 @@ export default function ClientRecruitment() {
                   Current Stage:
                 </span>
                 <span className="text-sm font-medium">
-                  {labour.currentStage.replace(/_/g, " ")}
+                  {formatStage(labour.currentStage)}
                 </span>
               </div>
             </div>
             <button
               className="mt-3 w-full py-1.5 px-3 bg-[#3D1673] hover:bg-[#2b0e54] text-white text-xs rounded flex items-center justify-center gap-1"
-              onClick={() => {
-                handleViewTimeline(labour, assignment);
-              }}
+              onClick={() => handleViewTimeline(labour, assignment)}
+              title="View onboarding timeline"
             >
               View Timeline
             </button>
           </>
         )}
+
         {labour.currentStage !== "DEPLOYED" && (
           <button
             className="mt-2 w-full py-1.5 px-3 bg-[#150B3D] hover:bg-[#0e0726] text-white text-xs rounded flex items-center justify-center gap-1 disabled:opacity-50"
@@ -821,7 +753,13 @@ export default function ClientRecruitment() {
             title={
               offerLetterBlocked
                 ? "Offer letter details not filled by client"
-                : ""
+                : labour.currentStage === "READY_TO_TRAVEL" ||
+                    labour.currentStage === "TRAVEL_CONFIRMATION" ||
+                    labour.currentStage === "ARRIVAL_CONFIRMATION"
+                  ? "View travel documents"
+                  : assignment.signedOfferLetterUrl
+                    ? "View signed offer letter"
+                    : "View generated offer letter"
             }
           >
             {labour.currentStage === "READY_TO_TRAVEL" ||
@@ -833,6 +771,7 @@ export default function ClientRecruitment() {
                 : "View Offer Letter"}
           </button>
         )}
+
         {labour.currentStage !== "READY_TO_TRAVEL" &&
           labour.currentStage !== "TRAVEL_CONFIRMATION" &&
           labour.currentStage !== "ARRIVAL_CONFIRMATION" &&
@@ -844,7 +783,7 @@ export default function ClientRecruitment() {
               title={
                 offerLetterBlocked
                   ? "Offer letter details not filled by client"
-                  : ""
+                  : "Download offer letter"
               }
             >
               {downloading ? (
@@ -857,7 +796,7 @@ export default function ClientRecruitment() {
                     stroke="currentColor"
                     strokeWidth="4"
                     fill="none"
-                  ></circle>
+                  />
                   <path
                     className="opacity-75"
                     fill="currentColor"
@@ -876,6 +815,7 @@ export default function ClientRecruitment() {
             className="mt-2 w-full py-1.5 px-3 bg-[#00C853] hover:bg-[#009e3c] text-white text-xs rounded flex items-center justify-center gap-1 disabled:opacity-50"
             onClick={handleVerifyOfferLetter}
             disabled={verifying}
+            title="Verify signed offer letter"
           >
             {verifying ? "Verifying..." : "Verify Signed Offer Letter"}
           </button>
@@ -884,25 +824,28 @@ export default function ClientRecruitment() {
     );
   };
 
-  // Filter and sort labours before rendering
-  const getSortedFilteredAssignments = (assignments: LabourAssignment[]) => {
-    let filtered = assignments;
-    if (stageFilter !== "ALL") {
-      filtered = assignments.filter(
-        (a) => a.labour.currentStage === stageFilter
-      );
-    }
-    return filtered.slice().sort((a, b) => {
-      const aIdx = STAGE_ORDER.indexOf(a.labour.currentStage);
-      const bIdx = STAGE_ORDER.indexOf(b.labour.currentStage);
-      return aIdx - bIdx;
-    });
-  };
+  // ------- filtered/sorted assignments (memoized) -------
+  const getSortedFilteredAssignments = useCallback(
+    (assignments: LabourAssignment[]) => {
+      const filtered =
+        stageFilter === "ALL"
+          ? assignments
+          : assignments.filter((a) => a.labour.currentStage === stageFilter);
+      return filtered
+        .slice()
+        .sort(
+          (a, b) =>
+            STAGE_ORDER.indexOf(a.labour.currentStage) -
+            STAGE_ORDER.indexOf(b.labour.currentStage)
+        );
+    },
+    [stageFilter]
+  );
 
   return (
-    <div className="px-6 flex gap-6 h-screen">
-      {/* Left Sidebar - Requirements (1/6 width) */}
-      <div className="w-1/6 rounded-lg p-4 overflow-y-auto">
+    <div className="px-4 md:px-6 flex flex-col md:flex-row gap-4 md:gap-6 h-screen">
+      {/* Left Sidebar */}
+      <aside className="w-full md:w-1/6 rounded-lg p-4 overflow-y-auto md:max-h-[calc(100vh-1rem)] bg-white">
         {loading ? (
           <div className="space-y-2">
             {[...Array(5)].map((_, i) => (
@@ -923,6 +866,7 @@ export default function ClientRecruitment() {
                     ? "bg-[#EDDDF3] border-l-[#150B3D]"
                     : "bg-gray-50 hover:bg-[#EDDDF3]/50 border-l-gray-200"
                 }`}
+                title={`Open requirement #${formatRequirementId(requirement.id)}`}
               >
                 <div className="flex justify-between items-start">
                   <span className="font-medium text-[#150B3D]">
@@ -943,7 +887,7 @@ export default function ClientRecruitment() {
               </div>
             ))}
 
-            {/* Pagination Controls */}
+            {/* Pagination */}
             {totalPages > 1 && (
               <div className="flex justify-between items-center mt-4">
                 <button
@@ -956,6 +900,7 @@ export default function ClientRecruitment() {
                       ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                       : "bg-[#150B3D] text-white hover:bg-[#150B3D]/80"
                   }`}
+                  title="Previous page"
                 >
                   Prev
                 </button>
@@ -972,6 +917,7 @@ export default function ClientRecruitment() {
                       ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                       : "bg-[#150B3D] text-white hover:bg-[#150B3D]/80"
                   }`}
+                  title="Next page"
                 >
                   Next
                 </button>
@@ -979,10 +925,10 @@ export default function ClientRecruitment() {
             )}
           </div>
         )}
-      </div>
+      </aside>
 
-      {/* Right Content - Job Role Details (5/6 width) */}
-      <div className="w-5/6 rounded-lg p-6 overflow-y-auto">
+      {/* Right Content */}
+      <section className="w-full md:w-5/6 rounded-lg p-4 md:p-6 overflow-y-auto md:max-h-[calc(100vh-1rem)] bg-white">
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {[...Array(8)].map((_, i) => (
@@ -994,109 +940,118 @@ export default function ClientRecruitment() {
           </div>
         ) : selectedRequirementData && currentJobRole ? (
           <>
-            {/* Job Role Header */}
-            <div className="flex justify-between items-center mb-6 bg-[#EDDDF3]/50 p-4 rounded-2xl">
-              <div className="flex items-center gap-3">
-                <Building className="w-6 h-6 text-[#150B3D]" />
-                <div>
-                  <h2 className="text-xl font-semibold text-[#150B3D]">
-                    Requirement #
-                    {formatRequirementId(selectedRequirementData.id)}
-                  </h2>
-                  <p className="text-sm text-[#150B3D]/70">
-                    Created:{" "}
-                    {new Date(
-                      selectedRequirementData.createdAt
-                    ).toLocaleDateString()}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <h3 className="text-lg font-semibold text-[#150B3D]">
-                    {currentJobRole.title}
-                  </h3>
-                  <p className="text-sm text-[#150B3D]/70">
-                    Filled: {currentJobRole.LabourAssignment.length}/
-                    {currentJobRole.quantity}
-                  </p>
-                </div>
-
-                {/* Navigation Arrows */}
-                {selectedRequirementData.jobRoles.length > 1 && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={handlePreviousJobRole}
-                      disabled={currentJobRoleIndex === 0}
-                      className={`p-2 rounded-full ${
-                        currentJobRoleIndex === 0
-                          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                          : "bg-[#150B3D] text-white hover:bg-[#150B3D]/80"
-                      }`}
-                    >
-                      <ChevronLeft className="w-4 h-4" />
-                    </button>
-
-                    <span className="text-sm text-[#150B3D]/70 px-2">
-                      {currentJobRoleIndex + 1} of{" "}
-                      {selectedRequirementData.jobRoles.length}
-                    </span>
-
-                    <button
-                      onClick={handleNextJobRole}
-                      disabled={
-                        currentJobRoleIndex ===
-                        selectedRequirementData.jobRoles.length - 1
-                      }
-                      className={`p-2 rounded-full ${
-                        currentJobRoleIndex ===
-                        selectedRequirementData.jobRoles.length - 1
-                          ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                          : "bg-[#150B3D] text-white hover:bg-[#150B3D]/80"
-                      }`}
-                    >
-                      <ChevronRight className="w-4 h-4" />
-                    </button>
+            {/* Sticky role header */}
+            <div className="sticky top-0 z-10 bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
+              <div className="flex justify-between items-center mb-4 bg-[#EDDDF3]/50 p-4 rounded-2xl">
+                <div className="flex items-center gap-3">
+                  <Building className="w-6 h-6 text-[#150B3D]" />
+                  <div>
+                    <h2 className="text-lg md:text-xl font-semibold text-[#150B3D]">
+                      Requirement #
+                      {formatRequirementId(selectedRequirementData.id)}
+                    </h2>
+                    <p className="text-sm text-[#150B3D]/70">
+                      Created:{" "}
+                      {new Date(
+                        selectedRequirementData.createdAt
+                      ).toLocaleDateString()}
+                    </p>
                   </div>
-                )}
-              </div>
-            </div>
-            {offerLetterDetails && (
-              <div className="mb-4 flex justify-end">
-                <Button onClick={handleEditDetails} variant="outline">
-                  Edit Offer Letter Details
-                </Button>
-              </div>
-            )}
+                </div>
 
-            <div className="flex justify-between items-center mb-4">
-              <div className="font-bold text-lg text-[#150B3D]">
-                Recruitment Tracker
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <h3 className="text-base md:text-lg font-semibold text-[#150B3D]">
+                      {currentJobRole.title}
+                    </h3>
+                    <p className="text-sm text-[#150B3D]/70">
+                      Filled: {currentJobRole.LabourAssignment.length}/
+                      {currentJobRole.quantity}
+                    </p>
+                  </div>
+
+                  {selectedRequirementData.jobRoles.length > 1 && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handlePreviousJobRole}
+                        disabled={currentJobRoleIndex === 0}
+                        className={`p-2 rounded-full ${
+                          currentJobRoleIndex === 0
+                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                            : "bg-[#150B3D] text-white hover:bg-[#150B3D]/80"
+                        }`}
+                        title="Previous role"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+
+                      <span className="text-sm text-[#150B3D]/70 px-2">
+                        {currentJobRoleIndex + 1} of{" "}
+                        {selectedRequirementData.jobRoles.length}
+                      </span>
+
+                      <button
+                        onClick={handleNextJobRole}
+                        disabled={
+                          currentJobRoleIndex ===
+                          selectedRequirementData.jobRoles.length - 1
+                        }
+                        className={`p-2 rounded-full ${
+                          currentJobRoleIndex ===
+                          selectedRequirementData.jobRoles.length - 1
+                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                            : "bg-[#150B3D] text-white hover:bg-[#150B3D]/80"
+                        }`}
+                        title="Next role"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-              <select
-                className="border rounded px-2 py-1 text-sm"
-                value={stageFilter}
-                onChange={(e) => setStageFilter(e.target.value)}
-              >
-                <option value="ALL">All Stages</option>
-                {STAGE_ORDER.map((stage) => (
-                  <option key={stage} value={stage}>
-                    {stage.replace(/_/g, " ")}
-                  </option>
-                ))}
-              </select>
+
+              {offerLetterDetails && (
+                <div className="mb-4 flex justify-end">
+                  <Button
+                    onClick={handleEditDetails}
+                    variant="outline"
+                    size="sm"
+                    title="Edit offer letter details"
+                  >
+                    Edit Offer Letter Details
+                  </Button>
+                </div>
+              )}
+
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-3">
+                <div className="font-bold text-lg text-[#150B3D]">
+                  Recruitment Tracker
+                </div>
+                <select
+                  className="border rounded px-2 py-1 text-sm"
+                  value={stageFilter}
+                  onChange={(e) => setStageFilter(e.target.value)}
+                  title="Filter by stage"
+                >
+                  <option value="ALL">All Stages</option>
+                  {STAGE_ORDER.map((stage) => (
+                    <option key={stage} value={stage}>
+                      {formatStage(stage)}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
+
             {/* Labour Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {currentJobRole &&
-              getSortedFilteredAssignments(currentJobRole.LabourAssignment)
+              {getSortedFilteredAssignments(currentJobRole.LabourAssignment)
                 .length === 0 ? (
                 <div className="col-span-full text-center text-[#150B3D]/50 py-8">
                   No labours found for this stage.
                 </div>
               ) : (
-                currentJobRole &&
                 getSortedFilteredAssignments(
                   currentJobRole.LabourAssignment
                 ).map((assignment) => (
@@ -1119,6 +1074,7 @@ export default function ClientRecruitment() {
             </p>
           </div>
         )}
+
         {/* Timeline Modal */}
         <Modal
           isOpen={!!timelineLabour}
@@ -1132,25 +1088,22 @@ export default function ClientRecruitment() {
           size="2xl"
         >
           {timelineLabour && (
-            <>
-              {/* Debug info */}
-              {console.log("Timeline Assignment:", timelineAssignment)}
-              {console.log("Visa URL:", timelineAssignment?.visaUrl)}
-              <ProgressTracker
-                currentStage={timelineLabour.currentStage}
-                statuses={Object.fromEntries(
-                  (timelineLabour.stages || []).map((s) => [s.stage, s.status])
-                )}
-                userRole="CLIENT_ADMIN"
-                onAction={handleTimelineAction}
-                onUpload={handleTimelineUpload}
-                documents={{
-                  VISA_PRINTING: timelineAssignment?.visaUrl || "",
-                }}
-              />
-            </>
+            <ProgressTracker
+              currentStage={timelineLabour.currentStage}
+              statuses={Object.fromEntries(
+                (timelineLabour.stages || []).map((s) => [s.stage, s.status])
+              )}
+              userRole="CLIENT_ADMIN"
+              onAction={handleTimelineAction}
+              onUpload={handleTimelineUpload}
+              documents={{
+                VISA_PRINTING: timelineAssignment?.visaUrl || "",
+              }}
+            />
           )}
         </Modal>
+
+        {/* Offer letter details modal */}
         <Modal
           isOpen={showDetailsModal}
           onClose={() => setShowDetailsModal(false)}
@@ -1251,28 +1204,27 @@ export default function ClientRecruitment() {
           visaUrl={documentsAssignment?.visaUrl || ""}
           existingTravelDate={
             documentsAssignment?.travelDate
-              ? (() => {
-                  const travelDate = documentsAssignment.travelDate;
-                  if (
-                    travelDate &&
-                    typeof travelDate === "object" &&
-                    "toISOString" in travelDate
-                  ) {
-                    return (travelDate as Date).toISOString();
-                  }
-                  if (typeof travelDate === "string") {
-                    return travelDate;
-                  }
-                  return "";
-                })()
+              ? typeof documentsAssignment.travelDate === "string"
+                ? documentsAssignment.travelDate
+                : (documentsAssignment.travelDate as Date).toISOString()
               : ""
           }
           existingDocuments={
             documentsLabour && documentsAssignment
               ? (() => {
-                  const documents = [];
+                  const documents: Array<{
+                    id: string;
+                    name: string;
+                    type:
+                      | "flight-ticket"
+                      | "medical-certificate"
+                      | "police-clearance"
+                      | "employment-contract"
+                      | "additional-documents";
+                    url: string;
+                    uploadedAt: string;
+                  }> = [];
 
-                  // Add flight ticket if available
                   if (documentsAssignment.flightTicketUrl) {
                     documents.push({
                       id: "flight-ticket-1",
@@ -1282,8 +1234,6 @@ export default function ClientRecruitment() {
                       uploadedAt: new Date().toISOString(),
                     });
                   }
-
-                  // Add medical certificate if available
                   if (documentsAssignment.medicalCertificateUrl) {
                     documents.push({
                       id: "medical-certificate-1",
@@ -1293,8 +1243,6 @@ export default function ClientRecruitment() {
                       uploadedAt: new Date().toISOString(),
                     });
                   }
-
-                  // Add police clearance if available
                   if (documentsAssignment.policeClearanceUrl) {
                     documents.push({
                       id: "police-clearance-1",
@@ -1304,8 +1252,6 @@ export default function ClientRecruitment() {
                       uploadedAt: new Date().toISOString(),
                     });
                   }
-
-                  // Add employment contract if available
                   if (documentsAssignment.employmentContractUrl) {
                     documents.push({
                       id: "employment-contract-1",
@@ -1315,25 +1261,19 @@ export default function ClientRecruitment() {
                       uploadedAt: new Date().toISOString(),
                     });
                   }
-
-                  // Add additional documents if available
-                  if (
-                    documentsAssignment.additionalDocumentsUrls &&
-                    documentsAssignment.additionalDocumentsUrls.length > 0
-                  ) {
+                  if (documentsAssignment.additionalDocumentsUrls?.length) {
                     documentsAssignment.additionalDocumentsUrls.forEach(
                       (url, index) => {
                         documents.push({
                           id: `additional-documents-${index + 1}`,
                           name: `Additional Document ${index + 1}`,
                           type: "additional-documents",
-                          url: url,
+                          url,
                           uploadedAt: new Date().toISOString(),
                         });
                       }
                     );
                   }
-
                   return documents;
                 })()
               : []
@@ -1350,7 +1290,7 @@ export default function ClientRecruitment() {
           onConfirm={handleArrivalConfirmation}
           labourName={arrivalConfirmationLabour?.name || ""}
         />
-      </div>
+      </section>
     </div>
   );
 }

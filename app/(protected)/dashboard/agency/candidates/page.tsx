@@ -1,7 +1,8 @@
 // app/(protected)/dashboard/agency/candidates/page.tsx
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import {
   Plus,
   MoreVertical,
@@ -188,6 +189,38 @@ export default function Candidates() {
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // ---- NEW: responsive container metrics for virtual grid ----
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [containerWidth, setContainerWidth] = useState<number>(0);
+  const [viewportH, setViewportH] = useState<number>(0);
+
+  const recomputeLayout = useCallback(() => {
+    if (typeof window === "undefined") return;
+    setViewportH(window.innerHeight || 800);
+    if (containerRef.current) {
+      setContainerWidth(containerRef.current.clientWidth);
+    }
+  }, []);
+
+  useEffect(() => {
+    // measure on mount
+    recomputeLayout();
+    if (typeof window !== "undefined") {
+      const onResize = () => recomputeLayout();
+      window.addEventListener("resize", onResize);
+      // ResizeObserver for container width changes
+      const ro =
+        typeof ResizeObserver !== "undefined"
+          ? new ResizeObserver(() => recomputeLayout())
+          : null;
+      if (ro && containerRef.current) ro.observe(containerRef.current);
+      return () => {
+        window.removeEventListener("resize", onResize);
+        if (ro && containerRef.current) ro.unobserve(containerRef.current);
+      };
+    }
+  }, [recomputeLayout]);
+
   // Fetch labour profiles from API
   useEffect(() => {
     const fetchLabourProfiles = async () => {
@@ -214,44 +247,41 @@ export default function Candidates() {
     fetchLabourProfiles();
   }, [toast]);
 
-  const columnCount = 4;
-  const CARD_WIDTH = 300; // px
-  const CARD_HEIGHT = 500; // px
-
-  const GridVirtual = () => {
-    const items = [null, ...filteredProfiles]; // index 0 reserved for AddCard
-    const rowCount = Math.ceil(items.length / columnCount);
-
-    return (
-      <div className="overflow-auto">
-        <Grid
-          columnCount={columnCount}
-          columnWidth={CARD_WIDTH}
-          height={window.innerHeight - 160} // or container height
-          rowCount={rowCount}
-          rowHeight={CARD_HEIGHT}
-          width={columnCount * CARD_WIDTH + 40}
-        >
-          {({ columnIndex, rowIndex, style }) => {
-            const index = rowIndex * columnCount + columnIndex;
-            const profile = items[index];
-
-            return (
-              <div style={style}>
-                <div className="px-2 py-2 h-full w-full">
-                  {index === 0 ? (
-                    <AddCard />
-                  ) : profile ? (
-                    <LabourProfileCard profile={profile} />
-                  ) : null}
-                </div>
-              </div>
-            );
-          }}
-        </Grid>
-      </div>
-    );
+  // ---- NEW: responsive column logic for react-window grid ----
+  const getColumnCount = (width: number): 1 | 2 | 3 | 4 => {
+    if (width < 640) return 1;
+    if (width < 1024) return 2;
+    if (width < 1280) return 3;
+    return 4;
   };
+
+  const columnCount = useMemo(
+    () => getColumnCount(containerWidth),
+    [containerWidth]
+  );
+
+  // keep card aspect ~ original (300x500). Clamp widths to avoid giant/super-narrow cards.
+  const columnWidth = useMemo(() => {
+    if (containerWidth === 0) return 320;
+    const padding = 16; // grid gutter compensation
+    const raw = Math.floor(
+      (containerWidth - padding * (columnCount + 1)) / columnCount
+    );
+    return Math.max(280, Math.min(raw, 360));
+  }, [columnCount, containerWidth]);
+
+  const CARD_HEIGHT = useMemo(() => {
+    // Scale height proportionally, slightly taller on desktop
+    const ratio = 1.6; // 300x480-ish
+    return Math.round(columnWidth * ratio);
+  }, [columnWidth]);
+
+  const gridHeight = useMemo(() => {
+    // viewport minus header/filters/modal padding (approx)
+    const headerOffset = 220; // keeps bottom padding and avoids hidden content
+    const h = Math.max(320, viewportH - headerOffset);
+    return h;
+  }, [viewportH]);
 
   // Delete a labour profile
   const handleDeleteProfile = async (id: string) => {
@@ -338,7 +368,6 @@ export default function Candidates() {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "LabourProfiles");
 
-    // Auto-size columns
     const columnWidths = [
       { wch: 20 },
       { wch: 5 },
@@ -412,7 +441,7 @@ export default function Candidates() {
     }
   };
 
-  // Filter profiles based on search and filters
+  // Filter profiles
   const filteredProfiles = labourProfiles.filter((profile) => {
     return (
       (!filters.status || profile.status === filters.status) &&
@@ -438,9 +467,8 @@ export default function Candidates() {
     }
   };
 
-  // Handle next step in modal
+  // Steps handlers (unchanged)
   const handleNext = () => {
-    // Validate current step
     const stepErrors = validateStep(currentStep);
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
@@ -450,19 +478,12 @@ export default function Candidates() {
       });
       return;
     }
-
     setCurrentStep((prev) => Math.min(prev + 1, 3));
   };
+  const handleBack = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
-  // Handle previous step in modal
-  const handleBack = () => {
-    setCurrentStep((prev) => Math.max(prev - 1, 1));
-  };
-
-  // Validate current step
   const validateStep = (step: number): Record<string, string> => {
     const newErrors: Record<string, string> = {};
-
     if (step === 1) {
       if (!formData.name) newErrors.name = "Name is required";
       if (!formData.age || formData.age < 18 || formData.age > 70)
@@ -475,29 +496,24 @@ export default function Candidates() {
         newErrors.passportExpiry = "Passport expiry is required";
       if (!formData.jobRole) newErrors.jobRole = "Job role is required";
     }
-
     if (step === 2 && !isEditMode) {
       if (!formData.profileImage)
         newErrors.profileImage = "Profile image is required";
       if (!formData.passportCopy)
         newErrors.passportCopy = "Passport copy is required";
     }
-
     return newErrors;
   };
 
-  // Handle form submission
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
       const formDataToSend = new FormData();
       formDataToSend.append("name", formData.name);
-      if (formData.profileImage) {
+      if (formData.profileImage)
         formDataToSend.append("profileImage", formData.profileImage);
-      }
-      if (formData.passportCopy) {
+      if (formData.passportCopy)
         formDataToSend.append("passportCopy", formData.passportCopy);
-      }
       formDataToSend.append("age", formData.age.toString());
       formDataToSend.append("gender", formData.gender);
       formDataToSend.append("nationality", formData.nationality);
@@ -520,10 +536,7 @@ export default function Candidates() {
 
       const method = isEditMode ? "PUT" : "POST";
 
-      const response = await fetch(url, {
-        method,
-        body: formDataToSend,
-      });
+      const response = await fetch(url, { method, body: formDataToSend });
 
       if (response.ok) {
         const updatedProfile = await response.json();
@@ -561,7 +574,6 @@ export default function Candidates() {
     }
   };
 
-  // Reset form
   const resetForm = () => {
     setFormData({
       name: "",
@@ -589,12 +601,8 @@ export default function Candidates() {
     setIsConfirmed(false);
   };
 
-  // Handle file upload
   const handleFileChange = (field: keyof FormData, file: File | null) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: file,
-    }));
+    setFormData((prev) => ({ ...prev, [field]: file }));
     if (errors[field]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -642,43 +650,37 @@ export default function Candidates() {
     </div>
   );
 
-  const renderModalFooter = () => {
-    return (
-      <div className="flex justify-end gap-3">
-        {currentStep > 1 && (
-          <Button variant="outline" onClick={handleBack}>
-            Back
-          </Button>
-        )}
-        {currentStep < 3 && (
-          <Button
-            variant="default"
-            onClick={handleNext}
-            disabled={isSubmitting}
-          >
-            Next
-          </Button>
-        )}
-        {currentStep === 3 && (
-          <Button
-            variant="default"
-            onClick={handleSubmit}
-            disabled={isSubmitting || !isConfirmed}
-          >
-            {isSubmitting
-              ? isEditMode
-                ? "Updating..."
-                : "Submitting..."
-              : isEditMode
-                ? "Update"
-                : "Submit"}
-          </Button>
-        )}
-      </div>
-    );
-  };
+  const renderModalFooter = () => (
+    <div className="flex justify-end gap-3">
+      {currentStep > 1 && (
+        <Button variant="outline" onClick={handleBack}>
+          Back
+        </Button>
+      )}
+      {currentStep < 3 && (
+        <Button variant="default" onClick={handleNext} disabled={isSubmitting}>
+          Next
+        </Button>
+      )}
+      {currentStep === 3 && (
+        <Button
+          variant="default"
+          onClick={handleSubmit}
+          disabled={isSubmitting || !isConfirmed}
+        >
+          {isSubmitting
+            ? isEditMode
+              ? "Updating..."
+              : "Submitting..."
+            : isEditMode
+              ? "Update"
+              : "Submit"}
+        </Button>
+      )}
+    </div>
+  );
 
-  // Labour Profile Card Component
+  // Labour Profile Card (unchanged UI)
   const LabourProfileCard = ({ profile }: { profile: LabourProfile }) => {
     const statusColors = {
       RECEIVED: "bg-blue-100 text-blue-800",
@@ -688,7 +690,6 @@ export default function Candidates() {
       SHORTLISTED: "bg-purple-100 text-purple-800",
       DEPLOYED: "bg-indigo-100 text-indigo-800",
     };
-
     const verificationColors = {
       PENDING: "bg-gray-100 text-gray-800",
       PARTIALLY_VERIFIED: "bg-yellow-100 text-yellow-800",
@@ -713,21 +714,21 @@ export default function Candidates() {
         </div>
 
         <div className="p-4 flex justify-between items-start border-b border-gray-200">
-          <div>
-            <h3 className="font-semibold text-lg text-gray-900">
+          <div className="min-w-0">
+            <h3 className="font-semibold text-lg text-gray-900 truncate">
               {profile.name}
             </h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 truncate">
               {profile.nationality} • {profile.age} years •{" "}
               {profile.gender.toLowerCase()}
             </p>
             {profile.jobRole && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 mt-1 truncate">
                 Job Role: {profile.jobRole}
               </p>
             )}
             {profile.requirement?.jobRoles?.length > 0 && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 mt-1 truncate">
                 For:{" "}
                 {profile.requirement.jobRoles.map((r) => r.title).join(", ")}
               </p>
@@ -758,12 +759,19 @@ export default function Candidates() {
         <div className="p-4 space-y-3">
           <div className="flex justify-between items-center">
             <span
-              className={`text-xs px-2 py-1 rounded-full ${statusColors[profile.status as keyof typeof statusColors] || "bg-gray-100 text-gray-800"}`}
+              className={`text-xs px-2 py-1 rounded-full ${
+                statusColors[profile.status as keyof typeof statusColors] ||
+                "bg-gray-100 text-gray-800"
+              }`}
             >
               {profile.status.replace("_", " ")}
             </span>
             <span
-              className={`text-xs px-2 py-1 rounded-full ${verificationColors[profile.verificationStatus as keyof typeof verificationColors]}`}
+              className={`text-xs px-2 py-1 rounded-full ${
+                verificationColors[
+                  profile.verificationStatus as keyof typeof verificationColors
+                ]
+              }`}
             >
               <div className="flex items-center gap-1">
                 <VerificationStatusIcon status={profile.verificationStatus} />
@@ -780,7 +788,9 @@ export default function Candidates() {
               ) : (
                 <X className="w-3 h-3 text-red-500" />
               )}
-              <span>{profile.passportNumber || "Not provided"}</span>
+              <span className="truncate">
+                {profile.passportNumber || "Not provided"}
+              </span>
             </div>
           </div>
 
@@ -837,9 +847,9 @@ export default function Candidates() {
     );
   };
 
-  // Add Card with Import/Export options
+  // Add Card with Import/Export options (unchanged UI)
   const AddCard = () => (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 h-full">
       <div
         onClick={() => {
           setIsEditMode(false);
@@ -875,10 +885,73 @@ export default function Candidates() {
     </div>
   );
 
+  // ---- NEW: Responsive virtual grid component ----
+  const GridVirtual = () => {
+    const items = useMemo(
+      () => [null, ...filteredProfiles],
+      [filteredProfiles]
+    ); // index 0 = AddCard
+    const rowCount = Math.ceil(items.length / Math.max(1, columnCount));
+
+    // guard while measuring first time
+    if (containerWidth === 0) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <AddCard />
+          {filteredProfiles.slice(0, 7).map((_, i) => (
+            <LabourProfileSkeleton key={i} />
+          ))}
+        </div>
+      );
+    }
+
+    return (
+      <div className="overflow-auto">
+        <Grid
+          columnCount={Math.max(1, columnCount)}
+          columnWidth={columnWidth}
+          height={gridHeight}
+          rowCount={rowCount}
+          rowHeight={CARD_HEIGHT}
+          width={Math.min(
+            containerWidth,
+            columnWidth * columnCount + 16 * (columnCount + 1)
+          )}
+        >
+          {({ columnIndex, rowIndex, style }) => {
+            const index = rowIndex * Math.max(1, columnCount) + columnIndex;
+            const profile = items[index];
+
+            return (
+              <div
+                style={{
+                  ...style,
+                  left: (style as any).left + 16,
+                  top: (style as any).top + 16,
+                }}
+              >
+                <div
+                  className="px-2 py-2 h-full w-full"
+                  style={{ width: columnWidth }}
+                >
+                  {index === 0 ? (
+                    <AddCard />
+                  ) : profile ? (
+                    <LabourProfileCard profile={profile as LabourProfile} />
+                  ) : null}
+                </div>
+              </div>
+            );
+          }}
+        </Grid>
+      </div>
+    );
+  };
+
   return (
-    <div className="p-6 bg-gray-50">
+    <div className="p-4 sm:p-6 bg-gray-50">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Filter controls */}
+        {/* Filter controls (already responsive) */}
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="flex gap-2 w-full md:w-auto flex-wrap">
             <select
@@ -942,20 +1015,21 @@ export default function Candidates() {
             </select>
           </div>
         </div>
+
         {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
             {[...Array(8)].map((_, i) => (
               <LabourProfileSkeleton key={i} />
             ))}
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div ref={containerRef} className="w-full">
             <GridVirtual />
           </div>
         )}
       </div>
 
-      {/* Add/Edit Profile Modal */}
+      {/* Add/Edit Profile Modal (unchanged, just keeps your layout) */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => {
@@ -966,13 +1040,13 @@ export default function Candidates() {
         size="7xl"
         showFooter={true}
         footerContent={renderModalFooter()}
-        className="w-full max-w-[90vw] h-[calc(100vh-40px)] flex flex-col"
+        className="w-full max-w-[95vw] h-[calc(100vh-40px)] flex flex-col"
       >
         <div className="flex flex-col h-full relative">
           {/* Progress bar with steps */}
-          <div className="relative px-16 pt-10 pb-6">
+          <div className="relative px-6 sm:px-12 md:px-16 pt-8 pb-6">
             <div className="absolute inset-x-0 top-1/2 h-0.5 z-0">
-              <div className="absolute -left-44 right-0 h-full flex w-full max-w-[1555px] mx-auto">
+              <div className="absolute -left-10 sm:-left-20 md:-left-44 right-0 h-full flex w-full max-w-[1555px] mx-auto">
                 <div
                   className="h-full bg-[#2C0053] transition-all duration-300"
                   style={{
@@ -1004,7 +1078,7 @@ export default function Candidates() {
                   className="text-center flex-1 max-w-[200px] relative"
                 >
                   <div
-                    className={`w-12 h-12 mx-auto rounded-full text-lg font-bold mb-3 flex items-center justify-center ${
+                    className={`w-10 h-10 sm:w-12 sm:h-12 mx-auto rounded-full text-base sm:text-lg font-bold mb-3 flex items-center justify-center ${
                       currentStep >= step
                         ? "bg-[#2C0053] text-white"
                         : "bg-gray-200 text-gray-600"
@@ -1014,7 +1088,7 @@ export default function Candidates() {
                     {step}
                   </div>
                   <span
-                    className={`text-sm font-medium ${
+                    className={`text-xs sm:text-sm font-medium ${
                       currentStep >= step ? "text-[#2C0053]" : "text-gray-500"
                     }`}
                   >
@@ -1043,8 +1117,8 @@ export default function Candidates() {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-12 gap-8 mt-6">
-                  <div className="col-span-5 space-y-4">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6">
+                  <div className="lg:col-span-5 space-y-4">
                     <Input
                       label="Full Name"
                       name="name"
@@ -1150,11 +1224,11 @@ export default function Candidates() {
                     </div>
                   </div>
 
-                  <div className="col-span-2 flex justify-center items-center">
+                  <div className="hidden lg:flex lg:col-span-2 justify-center items-center">
                     <div className="w-[2px] h-2/3 bg-[#2C0053]/30 rounded-full"></div>
                   </div>
 
-                  <div className="col-span-5 space-y-4">
+                  <div className="lg:col-span-5 space-y-4">
                     <Input
                       label="Email"
                       name="email"
@@ -1166,7 +1240,7 @@ export default function Candidates() {
                       placeholder="Enter email address"
                     />
 
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Select
                         label="Country Code"
                         name="countryCode"
@@ -1181,7 +1255,7 @@ export default function Candidates() {
                           value: cc.code,
                           label: `${cc.code} (${cc.name})`,
                         }))}
-                        className="w-32"
+                        className="sm:w-40"
                       />
                       <Input
                         label="Phone"
@@ -1296,14 +1370,14 @@ export default function Candidates() {
                         <span className="text-red-500 ml-1">*</span>
                       )}
                     </label>
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
                       <div className="relative w-24 h-24 rounded-full bg-gray-100 overflow-hidden border-2 border-dashed border-gray-300">
                         {formData.profileImage ? (
                           <Image
                             src={URL.createObjectURL(formData.profileImage)}
                             alt="Profile preview"
-                            layout="fill"
-                            objectFit="cover"
+                            fill
+                            style={{ objectFit: "cover" }}
                           />
                         ) : isEditMode && formData.id ? (
                           <img
@@ -1320,7 +1394,7 @@ export default function Candidates() {
                           </div>
                         )}
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 w-full">
                         <input
                           type="file"
                           accept="image/*"
@@ -1335,7 +1409,7 @@ export default function Candidates() {
                         />
                         <label
                           htmlFor="profileImage"
-                          className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                          className="inline-block px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
                         >
                           {formData.profileImage || (isEditMode && formData.id)
                             ? "Change Photo"
@@ -1360,11 +1434,11 @@ export default function Candidates() {
                         <span className="text-red-500 ml-1">*</span>
                       )}
                     </label>
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
                       <div className="relative w-24 h-24 rounded-md bg-gray-100 overflow-hidden border-2 border-dashed border-gray-300 flex items-center justify-center">
                         {formData.passportCopy ? (
                           <div className="p-2 text-center">
-                            <FileText className="w-8 h-8 text-blue-500" />
+                            <FileText className="w-8 h-8 text-blue-500 mx-auto" />
                             <p className="text-xs mt-1 text-gray-600 truncate w-20">
                               {formData.passportCopy.name}
                             </p>
@@ -1375,7 +1449,7 @@ export default function Candidates() {
                           </div>
                         )}
                       </div>
-                      <div className="flex-1">
+                      <div className="flex-1 w-full">
                         <input
                           type="file"
                           accept=".pdf"
@@ -1390,7 +1464,7 @@ export default function Candidates() {
                         />
                         <label
                           htmlFor="passportCopy"
-                          className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                          className="inline-block px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
                         >
                           {formData.passportCopy
                             ? "Change Passport"
@@ -1487,7 +1561,7 @@ export default function Candidates() {
                             : "Not provided"
                         }
                       />
-                      <div className="flex items-center gap-4">
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
                         <Select
                           label="Status"
                           name="status"
@@ -1594,18 +1668,15 @@ export default function Candidates() {
                 </div>
 
                 <div className="mt-6">
-                  <div className="flex items-center">
+                  <div className="flex items-start sm:items-center gap-2">
                     <input
                       type="checkbox"
                       id="confirm"
                       checked={isConfirmed}
                       onChange={(e) => setIsConfirmed(e.target.checked)}
-                      className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded"
+                      className="h-4 w-4 text-[#2C0053] focus:ring-[#2C0053] border-gray-300 rounded mt-1 sm:mt-0"
                     />
-                    <label
-                      htmlFor="confirm"
-                      className="ml-2 text-sm text-gray-700"
-                    >
+                    <label htmlFor="confirm" className="text-sm text-gray-700">
                       I confirm all information is accurate and documents are
                       genuine
                     </label>

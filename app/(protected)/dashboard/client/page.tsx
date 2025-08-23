@@ -1,4 +1,3 @@
-// app/(protected)/dashboard/client/page.tsx
 "use client";
 
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
@@ -37,9 +36,7 @@ interface DashboardData {
     action: string;
     description: string;
     performedAt: Date;
-    performedBy: {
-      name: string;
-    };
+    performedBy: { name: string };
   }>;
 }
 
@@ -65,10 +62,7 @@ export default function ClientDashboard() {
         }
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
-        toast({
-          type: "error",
-          message: "Failed to load dashboard data",
-        });
+        toast({ type: "error", message: "Failed to load dashboard data" });
       } finally {
         setLoading(false);
       }
@@ -136,22 +130,21 @@ export default function ClientDashboard() {
   }
 
   return (
-    <div className="pb-6 px-6 space-y-6">
+    <div className="pb-6 px-3 sm:px-6 space-y-6">
       {/* Header Row */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div />
-        {/* Action Buttons */}
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2 sm:gap-4">
           <button
             onClick={() => setIsReportModalOpen(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors w-full xs:w-auto"
           >
             <Download className="w-5 h-5" />
             <span>Generate Report</span>
           </button>
           <Link
             href="/dashboard/client/requirements/new"
-            className="flex items-center space-x-2 px-4 py-2 bg-[#2C0053] text-white rounded-lg hover:bg-[#3C006F] transition-colors"
+            className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#2C0053] text-white rounded-lg hover:bg-[#3C006F] transition-colors w-full xs:w-auto"
           >
             <Plus className="w-5 h-5" />
             <span>New Requirement</span>
@@ -196,7 +189,7 @@ export default function ClientDashboard() {
         cancelText="Cancel"
         isConfirmLoading={generatingReport}
         footerContent={
-          <div className="flex gap-2 w-full">
+          <div className="flex flex-col sm:flex-row gap-2 w-full">
             <Button
               type="button"
               className="w-full"

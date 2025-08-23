@@ -1,4 +1,3 @@
-// components/ui/HorizontalSelect.tsx
 "use client";
 
 import * as React from "react";
@@ -15,18 +14,22 @@ const HorizontalSelect = React.forwardRef<
   HTMLSelectElement,
   HorizontalSelectProps
 >(({ className, label, error, options, ...props }, ref) => {
+  const id =
+    props.id || props.name || `hs-${label.replace(/\s+/g, "-").toLowerCase()}`;
+
   return (
     <div className="space-y-1">
-      <div className="grid grid-cols-12 items-center">
+      <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2">
         <label
-          htmlFor={props.id}
-          className="col-span-4 text-sm font-medium text-gray-700 text-left"
+          htmlFor={id}
+          className="sm:col-span-4 text-sm font-medium text-gray-700 text-left"
         >
           {label}
           {props.required && <span className="text-[#FF0404] ml-1">*</span>}
         </label>
-        <div className="relative col-span-8">
+        <div className="relative sm:col-span-8">
           <select
+            id={id}
             ref={ref}
             className={cn(
               "flex h-10 w-full rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
@@ -48,7 +51,7 @@ const HorizontalSelect = React.forwardRef<
         </div>
       </div>
       {error && (
-        <p className="text-sm text-[#FF0404] ml-36" role="alert">
+        <p className="text-sm text-[#FF0404] sm:ml-36" role="alert">
           {error}
         </p>
       )}

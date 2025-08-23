@@ -38,9 +38,11 @@ const RequirementsTable = ({ requirements }: RequirementsTableProps) => {
   };
 
   return (
-    <div className="bg-purple-100 p-6 rounded-xl shadow">
+    <div className="bg-purple-100 p-4 sm:p-6 rounded-xl shadow">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg font-semibold">Recent Requirements</h2>
+        <h2 className="text-base sm:text-lg font-semibold">
+          Recent Requirements
+        </h2>
         <Link
           href="/dashboard/client/requirements"
           className="text-sm text-purple-700 hover:underline"
@@ -48,7 +50,66 @@ const RequirementsTable = ({ requirements }: RequirementsTableProps) => {
           View All
         </Link>
       </div>
-      <div className="overflow-x-auto">
+
+      {/* Mobile: cards */}
+      <div className="md:hidden space-y-3">
+        {requirements.flatMap((req) =>
+          req.jobRoles.map((role) => {
+            const status = getStatusColor(req.status);
+            return (
+              <Link
+                key={`${req.id}-${role.id}`}
+                href={`/dashboard/client/requirements/${req.id}`}
+                className="block rounded-lg bg-white/60 hover:bg-white transition p-3"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="text-[#2C0053] font-medium">{role.title}</div>
+                  <span
+                    className={`px-2 py-0.5 text-[10px] rounded-full ${
+                      status.color === "green"
+                        ? "bg-green-100 text-green-700"
+                        : status.color === "yellow"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : status.color === "red"
+                            ? "bg-red-100 text-red-700"
+                            : status.color === "blue"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-gray-100 text-gray-700"
+                    }`}
+                  >
+                    {status.text}
+                  </span>
+                </div>
+                <div className="mt-2 flex items-center justify-between text-xs text-gray-600">
+                  <div>
+                    {role.filled}/{role.quantity} filled
+                  </div>
+                  <div className="w-24 bg-gray-200 rounded-full h-2 ml-3">
+                    <div
+                      className={`h-2 rounded-full ${
+                        role.progress >= 75
+                          ? "bg-green-500"
+                          : role.progress >= 50
+                            ? "bg-blue-500"
+                            : role.progress >= 25
+                              ? "bg-yellow-500"
+                              : "bg-red-500"
+                      }`}
+                      style={{ width: `${role.progress}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="mt-1 text-[11px] text-gray-500">
+                  Updated {format(new Date(req.updatedAt), "MMM d, yyyy")}
+                </div>
+              </Link>
+            );
+          })
+        )}
+      </div>
+
+      {/* Desktop: table */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-sm text-left">
           <thead>
             <tr className="text-gray-600 border-b">
@@ -89,7 +150,7 @@ const RequirementsTable = ({ requirements }: RequirementsTableProps) => {
                                   : "bg-red-500"
                           }`}
                           style={{ width: `${role.progress}%` }}
-                        ></div>
+                        />
                       </div>
                     </td>
                     <td>

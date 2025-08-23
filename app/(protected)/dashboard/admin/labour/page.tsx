@@ -3,7 +3,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/context/toast-provider";
-import { Button } from "@/components/ui/Button";
 import {
   Check,
   X,
@@ -19,6 +18,7 @@ import { Card, CardContent, CardHeader } from "@/components/shared/Card";
 import { RequirementStatus } from "@/lib/generated/prisma";
 import { LabourProfile } from "@prisma/client";
 import TravelDocumentsViewerModal from "@/components/shared/TravelDocumentsViewerModal";
+import { Button } from "@/components/ui/Button";
 
 interface Agency {
   id: string;
@@ -99,26 +99,16 @@ export default function LabourAssignmentReview() {
       const response = await fetch("/api/agencies/assignments");
       if (!response.ok) throw new Error("Failed to fetch agencies");
 
-      const data = await response.json();
+      const data: AgencyWithAssignments[] = await response.json();
       setAgencies(data);
 
-      if (
-        selectedAgency &&
-        data.some((a: AgencyWithAssignments) => a.id === selectedAgency)
-      ) {
-        return;
-      }
-
-      // Select first agency by default if none selected
-      if (data.length > 0 && !selectedAgency) {
+      // Keep selection if still present, otherwise default to first
+      if (!selectedAgency && data.length > 0) {
         setSelectedAgency(data[0].id);
       }
     } catch (error) {
       console.error("Error fetching agencies:", error);
-      toast({
-        type: "error",
-        message: "Failed to load agencies",
-      });
+      toast({ type: "error", message: "Failed to load agencies" });
     } finally {
       setLoadingAgencies(false);
     }
@@ -128,27 +118,23 @@ export default function LabourAssignmentReview() {
   const fetchAssignments = useCallback(
     async (agencyId: string) => {
       if (!agencyId) return;
-
       try {
         setLoadingAssignments(true);
         const response = await fetch(`/api/agencies/${agencyId}/assignments`);
         if (!response.ok) throw new Error("Failed to fetch assignments");
 
-        const data = await response.json();
+        const data: JobRoleWithAssignments[] = await response.json();
         setAssignments(data);
 
-        // Update the agencies state to include the assignments
-        setAgencies((prev: AgencyWithAssignments[]) =>
-          prev.map((agency: AgencyWithAssignments) =>
+        // sync into agencies cache
+        setAgencies((prev) =>
+          prev.map((agency) =>
             agency.id === agencyId ? { ...agency, JobRole: data } : agency
           )
         );
       } catch (error) {
         console.error("Error fetching assignments:", error);
-        toast({
-          type: "error",
-          message: "Failed to load agency assignments",
-        });
+        toast({ type: "error", message: "Failed to load agency assignments" });
       } finally {
         setLoadingAssignments(false);
       }
@@ -156,19 +142,15 @@ export default function LabourAssignmentReview() {
     [toast]
   );
 
-  // Initial load and refresh handling
   useEffect(() => {
     fetchAgencies();
   }, [fetchAgencies]);
 
-  // Fetch assignments when selected agency changes
   useEffect(() => {
-    if (selectedAgency) {
-      fetchAssignments(selectedAgency);
-    }
+    if (selectedAgency) fetchAssignments(selectedAgency);
   }, [selectedAgency, fetchAssignments]);
 
-  // Status color helper
+  // Status helpers
   const getStatusColor = (status: string) => {
     switch (status) {
       case "PENDING_REVIEW":
@@ -184,7 +166,6 @@ export default function LabourAssignmentReview() {
     }
   };
 
-  // Status text helper
   const getStatusText = (status: string) => {
     switch (status) {
       case "PENDING_REVIEW":
@@ -200,7 +181,7 @@ export default function LabourAssignmentReview() {
     }
   };
 
-  // Date formatting
+  // Formatting helpers
   const formatDate = (date: Date | string | null | undefined) => {
     if (!date) return "Flexible";
     const dateObj = typeof date === "string" ? new Date(date) : date;
@@ -209,9 +190,9 @@ export default function LabourAssignmentReview() {
       month: "short",
       day: "numeric",
     });
+    // NOTE: if you want locale-aware TZ, pass timeZone to options.
   };
 
-  // Duration formatting
   const getDuration = (duration: string | null) => {
     switch (duration) {
       case "ONE_MONTH":
@@ -233,7 +214,7 @@ export default function LabourAssignmentReview() {
     }
   };
 
-  // Determine job role status
+  // Determine job role status (bug fixed: check proceeded.length)
   const getJobRoleStatus = (jobRole: JobRoleWithAssignments) => {
     if (!jobRole.LabourAssignment?.length) return "NO_SUBMISSIONS";
 
@@ -245,28 +226,22 @@ export default function LabourAssignmentReview() {
     ).length;
 
     const proceeded = jobRole.LabourAssignment.filter(
-      (a: {
-        adminStatus: string;
-        agencyStatus: string;
-        clientStatus: string;
-      }) =>
+      (a) =>
         a.adminStatus === "ACCEPTED" &&
         a.agencyStatus === "ACCEPTED" &&
         a.clientStatus === "SUBMITTED"
     );
 
-    // If any assignments are rejected, status should be NEEDS_REVISION
     if (rejectedCount > 0) return "NEEDS_REVISION";
-
     if (acceptedCount === 0) return "NO_SUBMISSIONS";
     if (acceptedCount < jobRole.quantity) return "PARTIAL_SUBMISSIONS";
     if (jobRole.LabourAssignment.every((a) => a.adminStatus === "ACCEPTED"))
       return "FULLY_ACCEPTED";
-    if (proceeded) return "PROCEEDED";
+    if (proceeded.length > 0) return "PROCEEDED";
     return "UNDER_REVIEW";
   };
 
-  // Document Verification Status Component
+  // Verification status glyph
   const VerificationStatusIcon = ({ status }: { status: string }) => {
     switch (status) {
       case "VERIFIED":
@@ -280,14 +255,13 @@ export default function LabourAssignmentReview() {
     }
   };
 
-  // Handle labor status updates
+  // Update status (single/bulk)
   const handleUpdateLabourStatus = async (
     assignmentId: string | string[],
     status: "ACCEPTED" | "REJECTED",
     feedback?: string
   ) => {
     try {
-      // Set updating status to indicate processing
       setUpdatingStatus(
         Array.isArray(assignmentId) ? "bulk-update" : assignmentId
       );
@@ -309,7 +283,6 @@ export default function LabourAssignmentReview() {
 
       if (!response.ok) throw new Error("Failed to update assignment status");
 
-      // Refresh the assignments
       await fetchAssignments(selectedAgency!);
 
       toast({
@@ -332,13 +305,12 @@ export default function LabourAssignmentReview() {
     }
   };
 
-  // Get current agency and job role data
   const currentAgency = agencies.find((a) => a.id === selectedAgency);
   const currentJobRole = viewingProfiles
     ? assignments.find((jr) => jr.id === viewingProfiles)
     : null;
 
-  // Labour Profile Card Component
+  // Labour Profile Card
   const LabourProfileCard = ({
     profile,
     assignment,
@@ -370,14 +342,14 @@ export default function LabourAssignmentReview() {
       REJECTED: "bg-red-100 text-red-800",
       SHORTLISTED: "bg-purple-100 text-purple-800",
       DEPLOYED: "bg-indigo-100 text-indigo-800",
-    };
+    } as const;
 
     const verificationColors = {
       PENDING: "bg-gray-100 text-gray-800",
       PARTIALLY_VERIFIED: "bg-yellow-100 text-yellow-800",
       VERIFIED: "bg-green-100 text-green-800",
       REJECTED: "bg-red-100 text-red-800",
-    };
+    } as const;
 
     const [feedback, setFeedback] = useState("");
     const [isUpdating, setIsUpdating] = useState(false);
@@ -428,7 +400,7 @@ export default function LabourAssignmentReview() {
             </h3>
             <p className="text-sm text-gray-500">
               {profile.nationality} • {profile.age} years •{" "}
-              {profile.gender.toLowerCase()}
+              {String(profile.gender || "").toLowerCase()}
             </p>
             {profile.jobRole && (
               <p className="text-xs text-gray-500 mt-1">
@@ -439,23 +411,22 @@ export default function LabourAssignmentReview() {
           <div className="flex flex-col items-end">
             <span
               className={`text-xs px-2 py-1 rounded-full ${
-                statusColors[profile.status as keyof typeof statusColors] ||
-                "bg-gray-100 text-gray-800"
+                statusColors[profile.status] || "bg-gray-100 text-gray-800"
               }`}
             >
-              {profile.status.replace("_", " ")}
+              {profile.status.replaceAll("_", " ")}
             </span>
             <span
               className={`text-xs px-2 py-1 rounded-full mt-1 ${
-                verificationColors[
-                  profile.verificationStatus as keyof typeof verificationColors
-                ]
+                verificationColors[profile.verificationStatus]
               }`}
             >
-              <div className="flex items-center gap-1">
-                <VerificationStatusIcon status={profile.verificationStatus} />
-                {profile.verificationStatus.replace("_", " ")}
-              </div>
+              <span className="inline-flex items-center gap-1">
+                <VerificationStatusIcon
+                  status={profile.verificationStatus as unknown as string}
+                />
+                {String(profile.verificationStatus).replaceAll("_", " ")}
+              </span>
             </span>
           </div>
         </div>
@@ -473,7 +444,7 @@ export default function LabourAssignmentReview() {
             </div>
           </div>
 
-          {profile.skills?.length > 0 && (
+          {Array.isArray(profile.skills) && profile.skills.length > 0 && (
             <div className="mt-2">
               <p className="text-xs text-gray-500 mb-1">Skills</p>
               <div className="flex flex-wrap gap-1">
@@ -520,7 +491,6 @@ export default function LabourAssignmentReview() {
         </div>
 
         <div className="p-4 border-t border-gray-200">
-          {/* View Documents Button - Show when labour is in Ready to Travel stage or beyond */}
           {(profile.currentStage === "READY_TO_TRAVEL" ||
             profile.currentStage === "TRAVEL_CONFIRMATION" ||
             profile.currentStage === "ARRIVAL_CONFIRMATION" ||
@@ -534,13 +504,13 @@ export default function LabourAssignmentReview() {
                 setDocumentViewerAssignment(assignment);
                 setShowDocumentViewer(true);
               }}
+              aria-label={`View travel documents for ${profile.name}`}
             >
               <FileText className="w-3 h-3" />
               View Documents
             </Button>
           )}
 
-          {/* View CV Button - Always visible */}
           <Button
             variant="outline"
             size="sm"
@@ -548,6 +518,7 @@ export default function LabourAssignmentReview() {
             onClick={() => {
               window.open(`/api/cv/generate?labourId=${profile.id}`, "_blank");
             }}
+            aria-label={`Open CV for ${profile.name}`}
           >
             <FileText className="w-3 h-3" />
             View CV
@@ -601,308 +572,317 @@ export default function LabourAssignmentReview() {
   };
 
   return (
-    <div className="px-6 flex gap-6">
-      {/* Left Sidebar - Agencies */}
-      <div className="w-1/6 rounded-lg overflow-y-auto">
-        {loadingAgencies ? (
-          <div className="space-y-2">
-            {[...Array(5)].map((_, i) => (
-              <div
-                key={i}
-                className="p-3 rounded-lg bg-gray-100 animate-pulse h-16"
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {agencies.map((agency) => (
-              <div
-                key={agency.id}
-                onClick={() => {
-                  setSelectedAgency(agency.id);
-                  setViewingProfiles(null);
-                }}
-                className={`p-3 rounded-lg cursor-pointer transition-colors border-l-4 ${
-                  selectedAgency === agency.id
-                    ? "bg-[#EDDDF3] border-l-[#150B3D]"
-                    : "bg-gray-50 hover:bg-[#EDDDF3]/50 border-l-gray-200"
-                }`}
-              >
-                <div className="flex justify-between items-start">
-                  <h3 className="font-medium text-[#150B3D]">
-                    {agency.agencyName}
-                  </h3>
-                  {agency.pendingAssignmentsCount ? (
-                    <Badge className="bg-blue-500">
-                      {agency.pendingAssignmentsCount}
-                    </Badge>
-                  ) : null}
-                </div>
-                <div className="flex justify-between items-center mt-1">
-                  <span
-                    className={`text-xs ${getStatusColor(agency.user.status)}`}
-                  >
-                    {getStatusText(agency.user.status)}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Main Content Area */}
-      <div className="w-5/6 rounded-lg overflow-y-auto">
-        {loadingAssignments ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(3)].map((_, i) => (
-              <Card
-                key={i}
-                className="border border-[#EDDDF3] bg-[#EDDDF3]/20 h-64 animate-pulse"
-              />
-            ))}
-          </div>
-        ) : selectedAgency ? (
-          <>
-            {viewingProfiles ? (
-              // Individual job role labor assignments view
-              <div className="space-y-4">
-                <div className="flex items-center justify-between bg-[#EDDDF3]/50 p-4 rounded-2xl">
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setViewingProfiles(null)}
-                    >
-                      &larr; Back
-                    </Button>
-                    <h2 className="text-xl font-semibold text-[#150B3D]">
-                      {currentJobRole?.title} - Labor Assignments
-                    </h2>
+    <div className="px-4 md:px-6 py-4 md:py-6">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+        {/* Left Sidebar - Agencies */}
+        <aside className="md:col-span-2 lg:col-span-2 xl:col-span-2 rounded-lg">
+          {loadingAgencies ? (
+            <div className="space-y-2">
+              {[...Array(5)].map((_, i) => (
+                <div
+                  key={i}
+                  className="p-3 rounded-lg bg-gray-100 animate-pulse h-16"
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {agencies.map((agency) => (
+                <button
+                  key={agency.id}
+                  onClick={() => {
+                    setSelectedAgency(agency.id);
+                    setViewingProfiles(null);
+                  }}
+                  className={`w-full text-left p-3 rounded-lg cursor-pointer transition-colors border-l-4 ${
+                    selectedAgency === agency.id
+                      ? "bg-[#EDDDF3] border-l-[#150B3D]"
+                      : "bg-gray-50 hover:bg-[#EDDDF3]/50 border-l-gray-200"
+                  }`}
+                  aria-label={`Select ${agency.agencyName}`}
+                >
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-medium text-[#150B3D]">
+                      {agency.agencyName}
+                    </h3>
+                    {agency.pendingAssignmentsCount ? (
+                      <Badge className="bg-blue-500">
+                        {agency.pendingAssignmentsCount}
+                      </Badge>
+                    ) : null}
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-sm">
-                      {currentJobRole?.LabourAssignment?.filter(
-                        (a) => a.adminStatus === "ACCEPTED"
-                      ).length ?? 0}{" "}
-                      /{currentJobRole?.quantity ?? 0} Accepted
+                  <div className="flex justify-between items-center mt-1">
+                    <span
+                      className={`text-xs ${getStatusColor(agency.user.status)}`}
+                    >
+                      {getStatusText(agency.user.status)}
                     </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </aside>
 
-                    {/* Add Accept/Reject All buttons */}
-                    <div className="flex gap-2">
+        {/* Main Content */}
+        <main className="md:col-span-4 lg:col-span-4 xl:col-span-4">
+          {loadingAssignments ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(3)].map((_, i) => (
+                <Card
+                  key={i}
+                  className="border border-[#EDDDF3] bg-[#EDDDF3]/20 h-64 animate-pulse"
+                />
+              ))}
+            </div>
+          ) : selectedAgency ? (
+            <>
+              {viewingProfiles ? (
+                // Individual job role labour assignments
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between bg-[#EDDDF3]/50 p-4 rounded-2xl">
+                    <div className="flex items-center space-x-2">
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
-                        onClick={() => {
-                          const unaccepted =
-                            currentJobRole?.LabourAssignment?.filter(
-                              (a) => a.adminStatus !== "ACCEPTED"
-                            );
-                          if (unaccepted && unaccepted.length > 0) {
-                            if (
-                              confirm(
-                                `Accept all ${unaccepted.length} unaccepted profiles?`
-                              )
-                            ) {
-                              handleUpdateLabourStatus(
-                                unaccepted.map((a) => a.id),
-                                "ACCEPTED"
-                              );
-                            }
-                          }
-                        }}
-                        disabled={updatingStatus === "bulk-update"}
+                        onClick={() => setViewingProfiles(null)}
+                        aria-label="Back to job roles"
                       >
-                        {updatingStatus === "bulk-update"
-                          ? "Processing..."
-                          : "Accept All"}
+                        &larr; Back
                       </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          const unrejected =
-                            currentJobRole?.LabourAssignment?.filter(
-                              (a) => a.adminStatus !== "REJECTED"
-                            );
-                          if (unrejected && unrejected.length > 0) {
-                            const feedback = prompt(
-                              `Enter rejection reason for all ${unrejected.length} profiles:`
-                            );
-                            if (feedback) {
-                              handleUpdateLabourStatus(
-                                unrejected.map((a) => a.id),
-                                "REJECTED",
-                                feedback
+                      <h2 className="text-xl font-semibold text-[#150B3D]">
+                        {currentJobRole?.title} - Labor Assignments
+                      </h2>
+                    </div>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <span className="text-sm">
+                        {currentJobRole?.LabourAssignment?.filter(
+                          (a) => a.adminStatus === "ACCEPTED"
+                        ).length ?? 0}{" "}
+                        /{currentJobRole?.quantity ?? 0} Accepted
+                      </span>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const unaccepted =
+                              currentJobRole?.LabourAssignment?.filter(
+                                (a) => a.adminStatus !== "ACCEPTED"
                               );
+                            if (unaccepted && unaccepted.length > 0) {
+                              if (
+                                confirm(
+                                  `Accept all ${unaccepted.length} unaccepted profiles?`
+                                )
+                              ) {
+                                handleUpdateLabourStatus(
+                                  unaccepted.map((a) => a.id),
+                                  "ACCEPTED"
+                                );
+                              }
                             }
-                          }
-                        }}
-                        disabled={updatingStatus === "bulk-update"}
-                      >
-                        {updatingStatus === "bulk-update"
-                          ? "Processing..."
-                          : "Reject All"}
-                      </Button>
+                          }}
+                          disabled={updatingStatus === "bulk-update"}
+                        >
+                          {updatingStatus === "bulk-update"
+                            ? "Processing..."
+                            : "Accept All"}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const unrejected =
+                              currentJobRole?.LabourAssignment?.filter(
+                                (a) => a.adminStatus !== "REJECTED"
+                              );
+                            if (unrejected && unrejected.length > 0) {
+                              const feedback = prompt(
+                                `Enter rejection reason for all ${unrejected.length} profiles:`
+                              );
+                              if (feedback) {
+                                handleUpdateLabourStatus(
+                                  unrejected.map((a) => a.id),
+                                  "REJECTED",
+                                  feedback
+                                );
+                              }
+                            }
+                          }}
+                          disabled={updatingStatus === "bulk-update"}
+                        >
+                          {updatingStatus === "bulk-update"
+                            ? "Processing..."
+                            : "Reject All"}
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {currentJobRole?.LabourAssignment?.map((assignment) => (
-                    <LabourProfileCard
-                      key={assignment.id}
-                      profile={assignment.labour}
-                      assignment={assignment}
-                      onStatusUpdate={handleUpdateLabourStatus}
-                    />
-                  ))}
-                </div>
-              </div>
-            ) : (
-              // All job roles view
-              <>
-                <div className="flex justify-between items-center mb-6 bg-[#EDDDF3]/50 p-4 rounded-2xl">
-                  <h2 className="text-xl font-semibold text-[#150B3D]">
-                    Assignments from {currentAgency?.agencyName}
-                  </h2>
-                </div>
-
-                {assignments.length === 0 ? (
-                  <div className="text-center py-12">
-                    <h2 className="text-xl font-medium text-gray-500">
-                      No assignments found for this agency
-                    </h2>
-                    <p className="mt-2 text-gray-400">
-                      Approved assignments will appear here
-                    </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {currentJobRole?.LabourAssignment?.map((assignment) => (
+                      <LabourProfileCard
+                        key={assignment.id}
+                        profile={assignment.labour}
+                        assignment={assignment}
+                        onStatusUpdate={handleUpdateLabourStatus}
+                      />
+                    ))}
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {assignments.map((jobRole) => {
-                      const status = getJobRoleStatus(jobRole);
-                      const acceptedCount =
-                        jobRole.LabourAssignment?.filter(
-                          (a) => a.adminStatus === "ACCEPTED"
-                        ).length ?? 0;
+                </div>
+              ) : (
+                // All job roles
+                <>
+                  <div className="flex justify-between items-center mb-6 bg-[#EDDDF3]/50 p-4 rounded-2xl">
+                    <h2 className="text-xl font-semibold text-[#150B3D]">
+                      Assignments from {currentAgency?.agencyName}
+                    </h2>
+                  </div>
 
-                      return (
-                        <Card
-                          key={jobRole.id}
-                          className="hover:shadow-lg transition-shadow border border-[#EDDDF3] bg-[#EDDDF3]/20"
-                        >
-                          <CardHeader>
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h3 className="font-medium">{jobRole.title}</h3>
-                                <p className="text-sm text-gray-500 mt-1">
-                                  For:{" "}
-                                  {jobRole.requirement.id
-                                    .slice(0, 8)
-                                    .toUpperCase()}
-                                </p>
-                              </div>
-                              <Badge
-                                variant={
-                                  status === "FULLY_ACCEPTED"
-                                    ? "success"
-                                    : status === "NEEDS_REVISION"
-                                      ? "warning"
-                                      : status === "PARTIAL_SUBMISSIONS"
+                  {assignments.length === 0 ? (
+                    <div className="text-center py-12">
+                      <h2 className="text-xl font-medium text-gray-500">
+                        No assignments found for this agency
+                      </h2>
+                      <p className="mt-2 text-gray-400">
+                        Approved assignments will appear here
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {assignments.map((jobRole) => {
+                        const status = getJobRoleStatus(jobRole);
+                        const acceptedCount =
+                          jobRole.LabourAssignment?.filter(
+                            (a) => a.adminStatus === "ACCEPTED"
+                          ).length ?? 0;
+
+                        return (
+                          <Card
+                            key={jobRole.id}
+                            className="hover:shadow-lg transition-shadow border border-[#EDDDF3] bg-[#EDDDF3]/20"
+                          >
+                            <CardHeader>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h3 className="font-medium">
+                                    {jobRole.title}
+                                  </h3>
+                                  <p className="text-sm text-gray-500 mt-1">
+                                    For:{" "}
+                                    {jobRole.requirement.id
+                                      .slice(0, 8)
+                                      .toUpperCase()}
+                                  </p>
+                                </div>
+                                <Badge
+                                  variant={
+                                    status === "FULLY_ACCEPTED"
+                                      ? "success"
+                                      : status === "NEEDS_REVISION"
                                         ? "warning"
-                                        : status === "PROCEEDED" // New status check
-                                          ? "success" // You can choose a different variant if you prefer
-                                          : "default"
-                                }
-                              >
-                                {status === "FULLY_ACCEPTED"
-                                  ? "Ready for Client"
-                                  : status === "NEEDS_REVISION"
-                                    ? "Needs Revision"
-                                    : status === "PARTIAL_SUBMISSIONS"
-                                      ? "Partial Submissions"
-                                      : status === "PROCEEDED" // New status text
-                                        ? "Proceeded" // Or whatever text you want to display
-                                        : "Under Review"}
-                              </Badge>
-                            </div>
-                          </CardHeader>
-                          <CardContent>
-                            <div className="space-y-4">
-                              <div className="border-t border-[#EDDDF3] pt-4">
-                                <div className="pl-3 border-l-2 border-[#EDDDF3]">
-                                  <div className="flex justify-between items-start">
-                                    <div>
-                                      <div className="flex items-center text-sm text-gray-500 mt-1">
-                                        <Flag className="h-4 w-4 mr-1" />
-                                        {jobRole.nationality}
-                                      </div>
-                                    </div>
-                                    <div className="text-right">
-                                      <span className="text-sm font-medium">
-                                        {acceptedCount} / {jobRole.quantity}{" "}
-                                        Accepted
-                                      </span>
-                                      <div className="text-sm text-gray-500">
-                                        {jobRole.basicSalary}{" "}
-                                        {jobRole.salaryCurrency}
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  <div className="mt-3 space-y-2 text-sm">
-                                    <div className="flex items-start space-x-2">
-                                      <Calendar className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                                        : status === "PARTIAL_SUBMISSIONS"
+                                          ? "warning"
+                                          : status === "PROCEEDED"
+                                            ? "success"
+                                            : "default"
+                                  }
+                                >
+                                  {status === "FULLY_ACCEPTED"
+                                    ? "Ready for Client"
+                                    : status === "NEEDS_REVISION"
+                                      ? "Needs Revision"
+                                      : status === "PARTIAL_SUBMISSIONS"
+                                        ? "Partial Submissions"
+                                        : status === "PROCEEDED"
+                                          ? "Proceeded"
+                                          : "Under Review"}
+                                </Badge>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-4">
+                                <div className="border-t border-[#EDDDF3] pt-4">
+                                  <div className="pl-3 border-l-2 border-[#EDDDF3]">
+                                    <div className="flex justify-between items-start">
                                       <div>
-                                        <span className="font-medium">
-                                          Start:{" "}
+                                        <div className="flex items-center text-sm text-gray-500 mt-1">
+                                          <Flag className="h-4 w-4 mr-1" />
+                                          {jobRole.nationality}
+                                        </div>
+                                      </div>
+                                      <div className="text-right">
+                                        <span className="text-sm font-medium">
+                                          {acceptedCount} / {jobRole.quantity}{" "}
+                                          Accepted
                                         </span>
-                                        {formatDate(jobRole.startDate)}
+                                        <div className="text-sm text-gray-500">
+                                          {jobRole.basicSalary}{" "}
+                                          {jobRole.salaryCurrency}
+                                        </div>
                                       </div>
                                     </div>
 
-                                    <div className="flex items-start space-x-2">
-                                      <Clock className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
-                                      <div>
-                                        <span className="font-medium">
-                                          Duration:{" "}
-                                        </span>
-                                        {getDuration(jobRole.contractDuration)}
+                                    <div className="mt-3 space-y-2 text-sm">
+                                      <div className="flex items-start space-x-2">
+                                        <Calendar className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                          <span className="font-medium">
+                                            Start:{" "}
+                                          </span>
+                                          {formatDate(jobRole.startDate)}
+                                        </div>
+                                      </div>
+
+                                      <div className="flex items-start space-x-2">
+                                        <Clock className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                          <span className="font-medium">
+                                            Duration:{" "}
+                                          </span>
+                                          {getDuration(
+                                            jobRole.contractDuration
+                                          )}
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
-                              </div>
 
-                              <div className="pt-4">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="w-full"
-                                  onClick={() => setViewingProfiles(jobRole.id)}
-                                >
-                                  <Users className="h-4 w-4 mr-2" />
-                                  View Labor Assignments (
-                                  {jobRole.LabourAssignment?.length ?? 0})
-                                </Button>
+                                <div className="pt-4">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="w-full"
+                                    onClick={() =>
+                                      setViewingProfiles(jobRole.id)
+                                    }
+                                    aria-label={`View labour assignments for ${jobRole.title}`}
+                                  >
+                                    <Users className="h-4 w-4 mr-2" />
+                                    View Labor Assignments (
+                                    {jobRole.LabourAssignment?.length ?? 0})
+                                  </Button>
+                                </div>
                               </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                )}
-              </>
-            )}
-          </>
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <p className="text-[#150B3D]/50">
-              Select an agency to view assignments
-            </p>
-          </div>
-        )}
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
+              )}
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-[#150B3D]/50">
+                Select an agency to view assignments
+              </p>
+            </div>
+          )}
+        </main>
       </div>
 
       {/* Travel Documents Viewer Modal */}
@@ -918,8 +898,6 @@ export default function LabourAssignmentReview() {
           documentViewerAssignment
             ? (() => {
                 const documents = [];
-
-                // Add flight ticket if available
                 if (documentViewerAssignment.flightTicketUrl) {
                   documents.push({
                     id: "flight-ticket-1",
@@ -929,8 +907,6 @@ export default function LabourAssignmentReview() {
                     uploadedAt: new Date().toISOString(),
                   });
                 }
-
-                // Add medical certificate if available
                 if (documentViewerAssignment.medicalCertificateUrl) {
                   documents.push({
                     id: "medical-certificate-1",
@@ -940,8 +916,6 @@ export default function LabourAssignmentReview() {
                     uploadedAt: new Date().toISOString(),
                   });
                 }
-
-                // Add police clearance if available
                 if (documentViewerAssignment.policeClearanceUrl) {
                   documents.push({
                     id: "police-clearance-1",
@@ -951,7 +925,6 @@ export default function LabourAssignmentReview() {
                     uploadedAt: new Date().toISOString(),
                   });
                 }
-
                 return documents;
               })()
             : []
@@ -968,9 +941,7 @@ export default function LabourAssignmentReview() {
                 ) {
                   return (travelDate as Date).toISOString();
                 }
-                if (typeof travelDate === "string") {
-                  return travelDate;
-                }
+                if (typeof travelDate === "string") return travelDate;
                 return "";
               })()
             : ""

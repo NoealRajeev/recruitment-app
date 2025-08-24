@@ -128,7 +128,7 @@ export async function POST(request: Request) {
         data: {
           name: validation.data.fullName,
           email,
-          phone: `${countryCode}${phone}`,
+          phone: `${countryCode} " " ${phone}`,
           altContact: validation.data.altContact
             ? `${validation.data.altCountryCode || countryCode}${validation.data.altContact}`
             : null,
@@ -181,7 +181,7 @@ export async function POST(request: Request) {
       for (const doc of otherDocuments) {
         await processDocument(doc, DocumentType.OTHER);
       }
-      
+
       // Send notifications for document uploads
       try {
         // Find a recruitment admin to notify
@@ -189,7 +189,7 @@ export async function POST(request: Request) {
           where: { role: UserRole.RECRUITMENT_ADMIN },
           select: { id: true },
         });
-        
+
         // Send notifications for each document type
         await notifyDocumentUploaded(
           "Company Registration",
@@ -197,14 +197,14 @@ export async function POST(request: Request) {
           user.id,
           adminUser?.id
         );
-        
+
         await notifyDocumentUploaded(
           "License",
           user.name,
           user.id,
           adminUser?.id
         );
-        
+
         if (otherDocuments.length > 0) {
           await notifyDocumentUploaded(
             "Supporting Documents",

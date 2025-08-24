@@ -11,6 +11,7 @@ import { PDFViewer } from "@/components/shared/PDFViewer";
 import { FileIcon } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
+import { useRouter } from "next/navigation";
 
 interface ClientUser {
   id: string;
@@ -47,6 +48,7 @@ interface ClientDocument {
 }
 
 export default function ClientReviewPage() {
+  const router = useRouter();
   const { toast } = useToast();
   const [pendingClients, setPendingClients] = useState<ClientWithUser[]>([]);
   const [verifiedClients, setVerifiedClients] = useState<ClientWithUser[]>([]);
@@ -192,6 +194,81 @@ export default function ClientReviewPage() {
       setIsUpdating(false);
     }
   };
+  const confirmDelete = async (clientId: string, companyName: string) => {
+    // First, a lightweight confirmation
+    if (!window.confirm(`Delete “${companyName}”? This cannot be undone.`))
+      return;
+
+    try {
+      const res = await fetch(`/api/clients/${clientId}`, { method: "DELETE" });
+
+      if (res.ok) {
+        toast({ type: "success", message: "Company deleted" });
+        await fetchClients();
+        return;
+      }
+
+      // Parse server response if available
+      const data = await res.json().catch(() => ({}) as any);
+
+      // 409 = related records exist; offer cascade
+      if (res.status === 409 && data?.related) {
+        const {
+          requirements = 0,
+          labourProfiles = 0,
+          assignments = 0,
+        } = data.related || {};
+
+        const msg =
+          `“${companyName}” can’t be deleted because related records exist:\n\n` +
+          `• Requirements: ${requirements}\n` +
+          `• Labour Profiles: ${labourProfiles}\n` +
+          `• Assignments: ${assignments}\n\n` +
+          `Do you want to cascade delete these and the company?`;
+
+        const doCascade = window.confirm(msg);
+        if (!doCascade) {
+          toast({
+            type: "info",
+            message:
+              "Delete cancelled. Remove related records or choose cascade.",
+          });
+          return;
+        }
+
+        const alsoDeleteUser = window.confirm(
+          "Also delete the associated login/user account? (This will remove their documents & notifications.)"
+        );
+
+        const forceUrl = `/api/clients/${clientId}?force=true${
+          alsoDeleteUser ? "&deleteUser=true" : ""
+        }`;
+        const res2 = await fetch(forceUrl, { method: "DELETE" });
+        if (!res2.ok) {
+          const d2 = await res2.json().catch(() => ({}));
+          throw new Error(d2?.error || "Force delete failed");
+        }
+
+        toast({
+          type: "success",
+          message: `Company deleted${
+            alsoDeleteUser ? " (user account removed)" : ""
+          }.`,
+        });
+        await fetchClients();
+        return;
+      }
+
+      // Any other non-OK
+      throw new Error(data?.error || "Failed to delete company");
+    } catch (e: any) {
+      console.error(e);
+      toast({
+        type: "error",
+        message: e?.message || "Failed to delete company",
+      });
+    }
+  };
 
   const getStatusBadge = (status: AccountStatus) => {
     const variantMap: Record<AccountStatus, BadgeProps["variant"]> = {
@@ -240,20 +317,20 @@ export default function ClientReviewPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {pendingClients.map((client) => (
-              <div
+              <CompanyCardContent
                 key={client.id}
+                companyName={client.companyName}
+                email={client.user.email}
+                phoneNo={client.user.phone || "N/A"}
+                logoUrl={client.user.profilePicture || undefined}
+                noSub={""}
                 onClick={() => handleClientClick(client)}
-                className="cursor-pointer hover:shadow-md transition-shadow"
-                aria-label={`Review ${client.companyName}`}
-              >
-                <CompanyCardContent
-                  companyName={client.companyName}
-                  email={client.user.email}
-                  phoneNo={client.user.phone || "N/A"}
-                  logoUrl={client.user.profilePicture || undefined}
-                  noSub={""}
-                />
-              </div>
+                onViewDocuments={() => handleClientClick(client)}
+                onEdit={() =>
+                  router.push(`/dashboard/admin/company/${client.id}/edit`)
+                }
+                onDelete={() => confirmDelete(client.id, client.companyName)}
+              />
             ))}
           </div>
         )}
@@ -276,6 +353,12 @@ export default function ClientReviewPage() {
                 phoneNo={client.user.phone || "N/A"}
                 logoUrl={client.user.profilePicture || undefined}
                 noSub={""}
+                onClick={() => handleClientClick(client)}
+                onViewDocuments={() => handleClientClick(client)}
+                onEdit={() =>
+                  router.push(`/dashboard/admin/company/${client.id}/edit`)
+                }
+                onDelete={() => confirmDelete(client.id, client.companyName)}
               />
             ))}
           </div>

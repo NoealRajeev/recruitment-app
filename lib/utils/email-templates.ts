@@ -654,3 +654,112 @@ The Findly Team`,
 </div>
 `,
 });
+
+// lib/email-templates.ts
+
+export const getClientDeletionEmail = ({
+  recipientName,
+  companyName,
+  loginDeleted,
+  helpUrl = `${env.NEXTAUTH_URL}/support`,
+}: {
+  recipientName: string;
+  companyName: string;
+  loginDeleted: boolean;
+  helpUrl?: string;
+}): EmailTemplate => ({
+  subject: loginDeleted
+    ? `Important Notice: Your Findly Account Has Been Deleted`
+    : `Important Notice: ${companyName} Profile Has Been Deleted`,
+  text: `Dear ${recipientName},
+
+We regret to inform you that ${loginDeleted ? "your Findly account" : `the client profile for ${companyName}`} has been deleted by the Findly team. 
+
+We are truly sorry for any inconvenience this may cause.
+
+If you believe this was a mistake or would like further clarification, please do not hesitate to reach out to our support team:
+
+${helpUrl}
+
+Thank you for your understanding.
+
+Sincerely,  
+The Findly Team`,
+
+  html: `
+<div style="${Object.entries(baseEmailStyles)
+    .map(([k, v]) => `${k}: ${v};`)
+    .join("")}">
+  ${headerTemplate("Account Deletion Notice")}
+  
+  <p>Dear ${recipientName},</p>
+  
+  <p>
+    We regret to inform you that 
+    <strong>${
+      loginDeleted
+        ? "your Findly account"
+        : `the client profile for ${companyName}`
+    }</strong> has been deleted by the Findly team.
+  </p>
+
+  <p>We sincerely apologize for any inconvenience this may cause.</p>
+
+  <div style="background: ${lightBackground}; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid ${primaryColor};">
+    <p style="margin: 0; color: ${secondaryColor};">
+      If you believe this was a mistake, or if you would like further clarification, please contact our support team.
+    </p>
+  </div>
+
+  <div style="text-align: center; margin: 24px 0;">
+    ${actionButton("Contact Support", helpUrl)}
+  </div>
+
+  <p style="font-size: 14px; color: ${secondaryColor}; text-align: center;">
+    Our team will be happy to assist you with any enquiries.
+  </p>
+
+  ${footerTemplate}
+</div>
+`,
+});
+
+export const getAgencyDeletionEmail = (agencyName: string): EmailTemplate => ({
+  subject: `Your Findly Agency Account Has Been Deleted`,
+  text: `Dear ${agencyName},
+
+We're sorry to inform you that your Findly agency account has been deleted by our team.
+
+If this was unexpected or you have any questions, please contact our support team:
+${env.NEXTAUTH_URL}/support
+
+We sincerely apologize for any inconvenience this may cause.
+
+Best regards,
+The Findly Team`,
+
+  html: `
+<div style="${Object.entries(baseEmailStyles)
+    .map(([k, v]) => `${k}: ${v};`)
+    .join("")}">
+  ${headerTemplate("Account Deleted")}
+
+  <p>Dear ${agencyName},</p>
+  <p>We’re sorry to inform you that your <strong>Findly agency account</strong> has been deleted by our team.</p>
+
+  <div style="background: ${warningBackground}; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+    <p style="margin: 0;">
+      If this was unexpected or you have any questions, please reach out to our support team.
+    </p>
+  </div>
+
+  <div style="text-align:center; margin: 20px 0;">
+    ${actionButton("Contact Support", `${env.NEXTAUTH_URL}/support`)}
+  </div>
+
+  <p>We sincerely apologize for any inconvenience this may cause.</p>
+
+  ${footerTemplate}
+</div>
+`,
+});

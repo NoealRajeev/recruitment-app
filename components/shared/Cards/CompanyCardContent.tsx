@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/shared/Card";
 import { MoreVertical } from "lucide-react";
 
@@ -9,6 +10,11 @@ interface CompanyCardContentProps {
   phoneNo: string;
   noSub: string;
   onClick?: () => void;
+
+  /** New: actions for the kebab menu */
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onViewDocuments?: () => void;
 }
 
 export default function CompanyCardContent({
@@ -18,8 +24,23 @@ export default function CompanyCardContent({
   phoneNo,
   noSub,
   onClick,
+  onEdit,
+  onDelete,
+  onViewDocuments,
 }: CompanyCardContentProps) {
   const initial = (companyName || "?").charAt(0).toUpperCase();
+
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      if (!menuRef.current) return;
+      if (!menuRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, []);
 
   return (
     <Card
@@ -64,9 +85,60 @@ export default function CompanyCardContent({
           )}
         </div>
 
-        {/* Menu Icon (decorative) */}
-        <div className="mt-0.5 text-black/70" aria-hidden>
-          <MoreVertical size={18} />
+        {/* Actions menu */}
+        <div className="relative" ref={menuRef}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation(); // don’t trigger card onClick
+              setOpen((s) => !s);
+            }}
+            className="mt-0.5 rounded-md p-1 text-black/70 hover:bg-gray-100"
+            aria-haspopup="menu"
+            aria-expanded={open}
+            aria-label="Company actions"
+          >
+            <MoreVertical size={18} />
+          </button>
+
+          {open && (
+            <div
+              role="menu"
+              className="absolute right-0 mt-2 w-44 rounded-md border bg-white shadow-md z-50 overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                role="menuitem"
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                onClick={() => {
+                  setOpen(false);
+                  onViewDocuments?.();
+                }}
+              >
+                View documents
+              </button>
+              <button
+                role="menuitem"
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                onClick={() => {
+                  setOpen(false);
+                  onEdit?.();
+                }}
+              >
+                Edit company
+              </button>
+              <button
+                role="menuitem"
+                className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                onClick={() => {
+                  setOpen(false);
+                  onDelete?.();
+                }}
+              >
+                Delete company
+              </button>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

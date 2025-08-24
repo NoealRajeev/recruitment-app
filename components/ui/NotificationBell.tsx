@@ -1,3 +1,4 @@
+// components/ui/NotificationBell.tsx
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
@@ -7,20 +8,21 @@ import { formatDistanceToNow } from "date-fns";
 import { useNotifications } from "@/hooks/use-notifications";
 import { useRouter } from "next/navigation";
 
+/** Match the hook's shape (message can be null) */
 interface Notification {
   id: string;
   type: string;
   title: string;
-  message: string;
+  message?: string | null;
   isRead: boolean;
   priority: "LOW" | "NORMAL" | "HIGH" | "URGENT" | string;
   createdAt: string;
-  actionUrl?: string;
-  actionText?: string;
+  actionUrl?: string | null;
+  actionText?: string | null;
   sender?: {
-    name: string;
-    role: string;
-  };
+    name?: string | null;
+    role?: string | null;
+  } | null;
 }
 
 interface NotificationBellProps {
@@ -148,14 +150,26 @@ export default function NotificationBell({
         )}
       </button>
 
-      {/* panel */}
+      {/* panel: fixed & smaller on mobile; absolute on md+ */}
       {isOpen && (
         <div
           role="menu"
-          className="absolute right-0 mt-2 w-[26rem] rounded-2xl border bg-white shadow-lg z-50 overflow-hidden"
+          className={[
+            "isolate z-50 overflow-hidden rounded-2xl border bg-white shadow-lg",
+            // Mobile: fixed so it never overflows parent; tuck to top-right with safe spacing
+            "fixed right-2 top-14 w-[min(20rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)]",
+            // Desktop+: restore original anchored dropdown
+            "md:absolute md:right-0 md:top-auto md:mt-2 md:w-[26rem] md:max-w-none",
+          ].join(" ")}
+          style={{
+            WebkitOverflowScrolling: "touch",
+            // iOS notch safe-area guards:
+            paddingLeft: "env(safe-area-inset-left, 0px)",
+            paddingRight: "env(safe-area-inset-right, 0px)",
+          }}
         >
           {/* header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b bg-white/70 backdrop-blur">
+          <div className="sticky top-0 flex items-center justify-between px-4 py-3 border-b bg-white/80 backdrop-blur supports-[backdrop-filter]:bg-white/60">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-semibold tracking-tight text-gray-900">
                 Notifications
@@ -188,7 +202,7 @@ export default function NotificationBell({
           </div>
 
           {/* list */}
-          <div className="max-h-96 overflow-y-auto">
+          <div className="overscroll-contain max-h-[65vh] md:max-h-96 overflow-y-auto">
             {!hasItems ? (
               <div className="flex flex-col items-center justify-center gap-2 py-10 text-gray-500">
                 <div className="rounded-full border p-3">
@@ -198,7 +212,7 @@ export default function NotificationBell({
               </div>
             ) : (
               <ul className="divide-y">
-                {notifications.map((n) => (
+                {notifications.map((n: Notification) => (
                   <li
                     key={n.id}
                     className={`group relative cursor-pointer bg-white transition-colors hover:bg-gray-50 ${
@@ -242,9 +256,11 @@ export default function NotificationBell({
                             </div>
                           </div>
 
-                          <p className="mb-2 line-clamp-2 text-sm text-gray-600">
-                            {n.message}
-                          </p>
+                          {n.message && (
+                            <p className="mb-2 line-clamp-2 text-sm text-gray-600">
+                              {n.message ?? ""}
+                            </p>
+                          )}
 
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -305,7 +321,7 @@ export default function NotificationBell({
                             size="sm"
                             className="h-8 rounded-md bg-[#3D1673] px-3 text-xs hover:bg-[#2b0e54]"
                           >
-                            {n.actionText || "Open"}
+                            {n.actionText ?? "Open"}
                           </Button>
                         </div>
                       )}
@@ -317,7 +333,7 @@ export default function NotificationBell({
           </div>
 
           {/* footer */}
-          <div className="flex items-center justify-between border-t bg-white px-4 py-2.5">
+          <div className="sticky bottom-0 flex items-center justify-between border-t bg-white/80 px-4 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-white/60">
             <div className="text-[11px] text-gray-500">
               {unreadCount > 0 ? (
                 <span>

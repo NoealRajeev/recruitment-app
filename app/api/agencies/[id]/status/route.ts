@@ -4,9 +4,13 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { z } from "zod";
-import { AuditAction } from "@prisma/client";
+import crypto from "crypto";
+import { AuditAction, AccountStatus, DocumentCategory } from "@prisma/client";
 import { sendTemplateEmail } from "@/lib/utils/email-service";
-import { getAgencyWelcomeEmail } from "@/lib/utils/email-templates";
+import {
+  getAgencyWelcomeEmail,
+  getAccountDeletionEmail,
+} from "@/lib/utils/email-templates";
 import { notifyDocumentVerified } from "@/lib/notification-helpers";
 
 const StatusUpdateSchema = z.object({
@@ -19,17 +23,13 @@ export async function PUT(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
-  // according to the Next.js docs, params is a Promise that you must await
   const { id } = await context.params;
+  if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
-  if (!id) {
-    return NextResponse.json({ error: "Missing id" }, { status: 400 });
-  }
   const traceId = crypto.randomUUID();
   const headers = { "Content-Type": "application/json" };
 
   try {
-    // Authentication & Authorization
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== "RECRUITMENT_ADMIN") {
       return NextResponse.json(
@@ -38,112 +38,102 @@ export async function PUT(
       );
     }
 
-    if (!id || typeof id !== "string" || !/^[0-9a-f-]{36}$/.test(id)) {
+    if (!/^[0-9a-f-]{36}$/.test(id)) {
       return NextResponse.json(
         { error: "Invalid agency ID format" },
         { status: 400, headers }
       );
     }
 
-    // Parse and validate request body
-    const requestBody = await request.json();
-    const validation = StatusUpdateSchema.safeParse(requestBody);
+    const body = await request.json();
+    const validation = StatusUpdateSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
-        {
-          error: "Validation failed",
-          details: validation.error.errors,
-        },
+        { error: "Validation failed", details: validation.error.errors },
         { status: 400, headers }
       );
     }
-
     const { status, reason, deletionType } = validation.data;
 
-    // Database operations
     const result = await prisma.$transaction(async (tx) => {
-      // Get agency with user and documents
+      // Load current state
       const agency = await tx.agency.findUnique({
         where: { id },
         include: {
           user: {
-            include: {
-              Document: true, // Changed from 'documents' to 'Document' to match Prisma model
-            },
+            include: { Document: true },
           },
         },
       });
-
-      if (!agency || !agency.user) {
+      if (!agency || !agency.user)
         throw new Error("Agency or associated user not found");
-      }
 
-      // Set deletion time based on type
-      let deleteAt = null;
-      if (status === "REJECTED" && deletionType === "SCHEDULED") {
-        deleteAt = new Date();
-        deleteAt.setDate(deleteAt.getDate() + 1); // 24 hours later
-      }
-
-      // If verifying, also verify all important documents
+      // If verifying, mark all IMPORTANT docs as VERIFIED and notify
       if (status === "VERIFIED") {
-        // Get documents before updating them
-        const documentsToVerify = await tx.document.findMany({
+        const docsToVerify = await tx.document.findMany({
           where: {
             ownerId: agency.userId,
-            status: { not: "VERIFIED" },
-            category: "IMPORTANT", // Only verify important documents
+            status: { not: AccountStatus.VERIFIED },
+            category: DocumentCategory.IMPORTANT,
           },
-          select: {
-            id: true,
-            type: true,
-          },
+          select: { id: true, type: true },
         });
 
-        // Update documents
-        await tx.document.updateMany({
-          where: {
-            ownerId: agency.userId,
-            status: { not: "VERIFIED" },
-            category: "IMPORTANT", // Only verify important documents
-          },
-          data: {
-            status: "VERIFIED",
-          },
-        });
+        if (docsToVerify.length) {
+          await tx.document.updateMany({
+            where: {
+              ownerId: agency.userId,
+              status: { not: AccountStatus.VERIFIED },
+              category: DocumentCategory.IMPORTANT,
+            },
+            data: { status: AccountStatus.VERIFIED },
+          });
 
-        // Send notifications for each verified document
-        try {
-          for (const doc of documentsToVerify) {
-            await notifyDocumentVerified(doc.type, agency.user.name, agency.id);
+          // best-effort notifications
+          for (const d of docsToVerify) {
+            try {
+              await notifyDocumentVerified(d.type, agency.user.name, agency.id);
+            } catch (e) {
+              console.error("notifyDocumentVerified failed:", e);
+            }
           }
-        } catch (notificationError) {
-          console.error(
-            "Failed to send document verification notifications:",
-            notificationError
-          );
-          // Continue even if notification fails
         }
       }
 
-      // Send approval email if verifying and temp password exists
+      // If verified and tempPassword present, send welcome email and clear temp
       if (status === "VERIFIED" && agency.user.tempPassword) {
-        const emailTemplate = getAgencyWelcomeEmail(
-          agency.agencyName, // agencyName
-          agency.user.email, // email
-          agency.user.tempPassword // password
-          // Optionally add loginLink as 4th parameter if needed
+        await sendTemplateEmail(
+          getAgencyWelcomeEmail(
+            agency.agencyName,
+            agency.user.email,
+            agency.user.tempPassword
+          ),
+          agency.user.email
         );
-        await sendTemplateEmail(emailTemplate, agency.user.email);
       }
 
-      // Update agency status
+      // If rejected + scheduled, set deleteAt and send apology email
+      let deleteAt: Date | null = null;
+      if (status === "REJECTED" && deletionType === "SCHEDULED") {
+        deleteAt = new Date();
+        deleteAt.setDate(deleteAt.getDate() + 1);
+        await sendTemplateEmail(
+          getAccountDeletionEmail({
+            recipientName: agency.agencyName || agency.user.name || "there",
+            supportUrl: `${process.env.NEXTAUTH_URL}/support`,
+            whenText: "in the next 24 hours",
+          }),
+          agency.user.email
+        );
+      }
+
+      // Update status + housekeeping
       const updatedAgency = await tx.agency.update({
         where: { id },
         data: {
           user: {
             update: {
-              status,
+              status: status as AccountStatus,
               deleteAt: status === "REJECTED" ? deleteAt : null,
               deletionType: status === "REJECTED" ? deletionType : null,
               tempPassword: status === "VERIFIED" ? null : undefined,
@@ -153,30 +143,13 @@ export async function PUT(
             },
           },
         },
-        include: {
-          user: true,
-        },
+        include: { user: true },
       });
 
-      // Create audit log
-      let auditAction: AuditAction;
-      switch (status) {
-        case "VERIFIED":
-          auditAction = "AGENCY_UPDATE"; // Use existing action
-          break;
-        case "REJECTED":
-          auditAction = "AGENCY_UPDATE"; // Use existing action
-          break;
-        case "NOT_VERIFIED":
-          auditAction = "AGENCY_UPDATE";
-          break;
-        default:
-          auditAction = "AGENCY_UPDATE";
-      }
-
+      // Audit log
       await tx.auditLog.create({
         data: {
-          action: auditAction,
+          action: AuditAction.AGENCY_UPDATE,
           entityType: "AGENCY",
           entityId: id,
           performedById: session.user.id,
@@ -186,7 +159,7 @@ export async function PUT(
             deleteAt: status === "REJECTED" ? deleteAt : null,
             deletionType: status === "REJECTED" ? deletionType : null,
           },
-          description: `Status changed to ${status}. For ${agency.agencyName}`,
+          description: `Status changed to ${status}. Reason: ${reason}`,
           affectedFields: ["status"],
         },
       });
@@ -200,11 +173,7 @@ export async function PUT(
       error instanceof Error ? error.message : "Unknown error";
     console.error(`[${traceId}] Error updating agency status:`, error);
     return NextResponse.json(
-      {
-        error: "Internal server error",
-        message: errorMessage,
-        traceId,
-      },
+      { error: "Internal server error", message: errorMessage, traceId },
       { status: 500, headers }
     );
   }

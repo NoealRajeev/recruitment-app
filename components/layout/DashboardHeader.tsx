@@ -47,13 +47,17 @@ export default function DashboardHeader({
     if (pathSegments.length <= 1) return "Dashboard";
 
     const roleSeg = getRoleBasePath(role).split("/").filter(Boolean)[1]; // "admin" | "client" | "agency"
-    let currentSegment =
-      pathSegments[1] === roleSeg
-        ? (pathSegments[2] ?? "") // role-scoped
-        : pathSegments[1]; // shared route
 
-    // Fallback
-    if (!currentSegment) return "Dashboard";
+    // Normalize to segments AFTER /dashboard/<role> if role-scoped
+    const afterRole =
+      pathSegments[1] === roleSeg
+        ? pathSegments.slice(2)
+        : pathSegments.slice(1);
+
+    // Special case: /company/[id]/edit
+    if (afterRole[0] === "company" && afterRole[2] === "edit") {
+      return "Edit Company";
+    }
 
     const pageTitles: Record<string, string> = {
       company: "Client",
@@ -75,6 +79,7 @@ export default function DashboardHeader({
         .replace(/_/g, " ")
         .replace(/^./, (c) => c.toUpperCase());
 
+    const currentSegment = afterRole[0] ?? "";
     return pageTitles[currentSegment] ?? pretty(currentSegment);
   }
 

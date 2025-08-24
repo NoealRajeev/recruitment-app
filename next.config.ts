@@ -4,7 +4,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["cdn.jsdelivr.net", "localhost", "findly.breaktroughf1.com"],
+    domains: [
+      "cdn.jsdelivr.net",
+      "localhost",
+      "findly.breaktroughf1.com",
+      "avatars.githubusercontent.com",
+    ],
   },
   reactStrictMode: true,
   swcMinify: true,

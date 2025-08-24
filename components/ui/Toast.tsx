@@ -2,13 +2,13 @@
 "use client";
 
 import { useEffect } from "react";
-import { CheckCircle2, AlertCircle } from "lucide-react";
+import { CheckCircle2, AlertCircle, Info } from "lucide-react";
 import { motion } from "framer-motion";
 
 type ToastProps = {
   id: string;
   message: string;
-  type: "success" | "error";
+  type: "success" | "error" | "info";
   onDismiss: (id: string) => void;
   action?: {
     label: string;
@@ -21,9 +21,31 @@ export function Toast({ id, message, type, onDismiss, action }: ToastProps) {
     const timer = setTimeout(() => {
       onDismiss(id);
     }, 5000);
-
     return () => clearTimeout(timer);
   }, [id, onDismiss]);
+
+  const bgColor =
+    type === "success"
+      ? "bg-green-50"
+      : type === "error"
+        ? "bg-red-50"
+        : "bg-blue-50";
+
+  const icon =
+    type === "success" ? (
+      <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
+    ) : type === "error" ? (
+      <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
+    ) : (
+      <Info className="h-5 w-5 text-blue-500 mt-0.5" />
+    );
+
+  const title =
+    type === "success"
+      ? "Success!"
+      : type === "error"
+        ? "Uh oh! Something went wrong."
+        : "Information";
 
   return (
     <motion.div
@@ -31,25 +53,23 @@ export function Toast({ id, message, type, onDismiss, action }: ToastProps) {
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 300, opacity: 0 }}
       transition={{ type: "spring", damping: 25 }}
-      className={`relative w-80 p-4 rounded-lg shadow-lg ${
-        type === "success" ? "bg-green-50" : "bg-red-50"
-      }`}
+      className={`relative w-80 p-4 rounded-lg shadow-lg ${bgColor}`}
     >
       <div className="flex items-start gap-3">
-        {type === "success" ? (
-          <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
-        ) : (
-          <AlertCircle className="h-5 w-5 text-red-500 mt-0.5" />
-        )}
+        {icon}
         <div className="flex-1">
-          <h3 className="font-medium text-gray-900">
-            {type === "success" ? "Success!" : "Uh oh! Something went wrong."}
-          </h3>
+          <h3 className="font-medium text-gray-900">{title}</h3>
           <p className="mt-1 text-sm text-gray-700">{message}</p>
           {action && (
             <button
               onClick={action.onClick}
-              className="mt-2 text-sm font-medium text-red-700 hover:text-red-800"
+              className={`mt-2 text-sm font-medium ${
+                type === "error"
+                  ? "text-red-700 hover:text-red-800"
+                  : type === "success"
+                    ? "text-green-700 hover:text-green-800"
+                    : "text-blue-700 hover:text-blue-800"
+              }`}
             >
               {action.label}
             </button>

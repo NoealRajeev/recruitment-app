@@ -36,7 +36,6 @@ interface Agency {
   country: string;
   contactPerson: string;
   phone: string;
-  profilePicture?: string;
   createdAt: Date | string;
   status: AccountStatus;
   user: {
@@ -45,6 +44,7 @@ interface Agency {
     status: AccountStatus | string | null;
     deleteAt?: Date | string | null;
     deletionType?: string | null;
+    profilePicture?: string | null;
   };
   address?: string | null;
   city?: string | null;
@@ -901,7 +901,7 @@ export default function Agencies() {
                       <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-100">
                         <Image
                           src={
-                            agency.profilePicture ||
+                            agency.user.profilePicture ||
                             "/assets/avatar-placeholder.png"
                           }
                           alt={agency.agencyName}
@@ -1024,11 +1024,10 @@ export default function Agencies() {
             .map((agency) => (
               <div key={agency.id} className="relative">
                 <AgencyCardContent
+                  key={agency.id}
                   agencyName={agency.agencyName}
                   location={`${agency.country} • ${agency.registrationNo}`}
-                  logoUrl={
-                    agency.profilePicture || "/assets/avatar-placeholder.png"
-                  }
+                  logoUrl={agency.user.profilePicture ?? undefined}
                   email={agency.user.email}
                   registerNo={agency.registrationNo}
                   time={
@@ -1038,6 +1037,18 @@ export default function Agencies() {
                       : formatTimeAgo(agency.createdAt)
                   }
                   onClick={() => openInfoModal(agency)}
+                  onEdit={() =>
+                    router.push(`/dashboard/admin/agencies/${agency.id}/edit`)
+                  }
+                  onOpenDocs={async () => {
+                    setSelectedAgency(agency);
+                    await fetchAgencyDocuments(agency.id);
+                    setIsModalOpen(true);
+                  }}
+                  onDelete={() => {
+                    setAgencyToDelete(agency);
+                    setIsDeleteModalOpen(true);
+                  }}
                   aria-label={`View details for ${agency.agencyName}`}
                 />
 
@@ -1418,15 +1429,22 @@ export default function Agencies() {
         {infoAgency && (
           <div className="space-y-4 mb-8">
             <div className="flex items-start gap-4">
-              <Image
-                src={
-                  infoAgency.profilePicture || "/assets/avatar-placeholder.png"
-                }
-                alt={infoAgency.agencyName}
-                width={56}
-                height={56}
-                className="h-14 w-14 rounded-xl object-cover border border-[#2C0053]/15 bg-white"
-              />
+              {infoAgency.user.profilePicture ? (
+                <Image
+                  src={infoAgency.user.profilePicture}
+                  alt={infoAgency.agencyName}
+                  width={56}
+                  height={56}
+                  className="h-14 w-14 rounded-xl object-cover border border-[#2C0053]/15 bg-white"
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <span className="text-base font-bold text-gray-500">
+                    {(infoAgency.agencyName || "?").charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+
               <div className="flex-1">
                 <div className="flex items-center gap-3 flex-wrap">
                   <h3 className="text-lg font-semibold text-[#2C0053] m-0">

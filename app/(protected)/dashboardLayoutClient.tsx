@@ -29,7 +29,7 @@ export default function DashboardLayoutClient({
     routes.some((route) => pathname.startsWith(route.path)) ||
     pathname.startsWith("/dashboard/profile") ||
     pathname.startsWith("/dashboard/settings") ||
-    pathname.startsWith("/dashboard/test-notifications");
+    pathname.startsWith("/dashboard/notifications");
 
   return (
     <div className="flex h-screen bg-gray-50 relative">

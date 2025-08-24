@@ -40,10 +40,21 @@ export default function DashboardHeader({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const getPageTitle = () => {
-    const pathSegments = pathname.split("/").filter(Boolean);
-    if (pathSegments.length === 2) return "Dashboard";
-    const currentPath = pathSegments[2];
+  function getPageTitle() {
+    const pathSegments = (pathname || "").split("/").filter(Boolean);
+
+    // Nothing or just /dashboard
+    if (pathSegments.length <= 1) return "Dashboard";
+
+    const roleSeg = getRoleBasePath(role).split("/").filter(Boolean)[1]; // "admin" | "client" | "agency"
+    let currentSegment =
+      pathSegments[1] === roleSeg
+        ? (pathSegments[2] ?? "") // role-scoped
+        : pathSegments[1]; // shared route
+
+    // Fallback
+    if (!currentSegment) return "Dashboard";
+
     const pageTitles: Record<string, string> = {
       company: "Client",
       agencies: "Agencies",
@@ -54,14 +65,18 @@ export default function DashboardHeader({
       documents: "Documents",
       profile: "Profile",
       settings: "Settings",
+      notifications: "Notifications",
     };
-    return (
-      pageTitles[currentPath] ||
-      (currentPath
-        ? currentPath[0].toUpperCase() + currentPath.slice(1)
-        : "Dashboard")
-    );
-  };
+
+    // Pretty-print unknown segments (e.g. "my-page" -> "My page")
+    const pretty = (s: string) =>
+      decodeURIComponent(s)
+        .replace(/-/g, " ")
+        .replace(/_/g, " ")
+        .replace(/^./, (c) => c.toUpperCase());
+
+    return pageTitles[currentSegment] ?? pretty(currentSegment);
+  }
 
   const toggleDropdown = () => setIsDropdownOpen((o) => !o);
 

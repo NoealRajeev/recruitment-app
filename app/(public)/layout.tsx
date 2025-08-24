@@ -5,7 +5,6 @@ import Header from "@/components/layout/Header";
 import { ToastProvider } from "@/context/toast-provider";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { AuthProvider } from "@/context/AuthProvider";
-import OfflineStatusIndicator from "@/components/OfflineStatusIndicator";
 
 export default function RootLayout({
   children,
@@ -37,7 +36,6 @@ export default function RootLayout({
         <LanguageProvider>
           <AuthProvider>
             <ToastProvider>
-              <OfflineStatusIndicator />
               <Header />
               <main className="flex-1">{children}</main>
               <Footer />

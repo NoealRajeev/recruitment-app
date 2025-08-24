@@ -6,7 +6,6 @@ import { redirect } from "next/navigation";
 import "../(public)/globals.css";
 import ProvidersWrapper from "@/context/ProvidersWrapper";
 import { UserRole } from "@/lib/generated/prisma";
-import { env } from "@/lib/env.server";
 
 export default async function DashboardLayout({
   children,
@@ -17,10 +16,6 @@ export default async function DashboardLayout({
 
   if (!session) {
     redirect("/auth/login");
-  }
-
-  if (env.isProduction && typeof window === "undefined") {
-    import("@/lib/cron").then(({ startCronJobs }) => startCronJobs());
   }
 
   return (

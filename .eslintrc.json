@@ -14,10 +14,5 @@
     "react-hooks/exhaustive-deps": "off",
     "@next/next/no-img-element": "off"
   },
-  "ignorePatterns": [
-    "**/lib/generated/**",
-    "postcss.config.mjs",
-    "public/sw.js",
-    "websocket-server.js"
-  ]
+  "ignorePatterns": ["**/lib/generated/**", "postcss.config.mjs"]
 }

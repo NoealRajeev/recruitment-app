@@ -15,7 +15,6 @@ namespace NodeJS {
     SMTP_HOST?: string;
     SMTP_PORT?: string;
     SMTP_FROM?: string;
-    NEXT_PUBLIC_WEBSOCKET_URL?: string;
     NEXT_PUBLIC_LOGO_URL?: string;
     NEXT_PUBLIC_APP_URL?: string;
 

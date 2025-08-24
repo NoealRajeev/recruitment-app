@@ -266,14 +266,14 @@ export async function POST(
           action: "LABOUR_PROFILE_STATUS_CHANGE",
           entityType: "LABOUR_PROFILE",
           entityId: assignment.labourId,
-          description: `All travel documents uploaded for ${assignment.labour.name}.${travelDate ? ` Travel date: ${travelDate}.` : ""} Stage progressed to TRAVEL_CONFIRMATION.`,
+          description: `All travel documents uploaded for ${assignment.labour.name}.`,
           performedById: session.user.id,
           oldData: { currentStage: assignment.labour.currentStage },
           newData: { currentStage: "TRAVEL_CONFIRMATION" },
           affectedFields: ["currentStage", "travelDocuments"],
         },
       });
-      
+
       // Send notifications for complete document upload
       try {
         // Notify for each document type
@@ -283,10 +283,12 @@ export async function POST(
             assignment.labour.name,
             assignment.agencyId,
             // Find admin users to notify
-            (await prisma.user.findFirst({
-              where: { role: "RECRUITMENT_ADMIN" },
-              select: { id: true },
-            }))?.id
+            (
+              await prisma.user.findFirst({
+                where: { role: "RECRUITMENT_ADMIN" },
+                select: { id: true },
+              })
+            )?.id
           );
         }
       } catch (notificationError) {
@@ -300,14 +302,14 @@ export async function POST(
           action: "LABOUR_PROFILE_DOCUMENT_UPLOAD",
           entityType: "LABOUR_PROFILE",
           entityId: assignment.labourId,
-          description: `Partial travel documents uploaded for ${assignment.labour.name}.${travelDate ? ` Travel date: ${travelDate}.` : ""} Missing documents: ${requiredDocuments.filter((docType) => !uniqueUploadedTypes.includes(docType)).join(", ")}`,
+          description: `Partial travel documents uploaded for ${assignment.labour.name}.`,
           performedById: session.user.id,
           oldData: { currentStage: assignment.labour.currentStage },
           newData: { uploadedDocuments: savedDocuments.map((doc) => doc.type) },
           affectedFields: ["travelDocuments"],
         },
       });
-      
+
       // Send notifications for partial document upload
       try {
         // Notify for each document type that was uploaded
@@ -317,10 +319,12 @@ export async function POST(
             assignment.labour.name,
             assignment.agencyId,
             // Find admin users to notify
-            (await prisma.user.findFirst({
-              where: { role: "RECRUITMENT_ADMIN" },
-              select: { id: true },
-            }))?.id
+            (
+              await prisma.user.findFirst({
+                where: { role: "RECRUITMENT_ADMIN" },
+                select: { id: true },
+              })
+            )?.id
           );
         }
       } catch (notificationError) {

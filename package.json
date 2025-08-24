@@ -4,9 +4,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"npm run dev:next\" \"npm run dev:websocket\"",
+    "dev": "npm run dev:next",
     "dev:next": "next dev",
-    "dev:websocket": "node websocket-server.js",
     "start": "next start",
     "lint": "next lint --dir . --fix",
     "lint:quiet": "next lint --dir . --quiet",

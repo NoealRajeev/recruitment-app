@@ -35,7 +35,8 @@ export async function middleware(request: NextRequest) {
   }
   const cronSecret = request.headers.get("x-cron-secret");
   if (
-    request.nextUrl.pathname.startsWith("/api/reminders") &&
+    (pathname.startsWith("/api/reminders") ||
+      pathname.startsWith("/api/notifications/cleanup")) &&
     cronSecret !== env.CRON_SECRET
   ) {
     return new NextResponse("Unauthorized", { status: 401 });
@@ -154,7 +155,7 @@ function handleRoleBasedRouting(
   const roleBasePath = roleRoutes[role];
   const response = NextResponse.next();
 
-  // Set security headers
+  // Security headers…
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -163,12 +164,27 @@ function handleRoleBasedRouting(
     "max-age=63072000; includeSubDomains; preload"
   );
 
-  // Handle dashboard routing
+  // 👇 allow these shared pages across roles
+  const sharedDashboardRoots = [
+    "/dashboard/notifications",
+    "/dashboard/settings",
+    "/dashboard/profile",
+  ];
+  const isSharedDashboardPath = sharedDashboardRoots.some(
+    (p) => pathname === p || pathname.startsWith(p + "/")
+  );
+
+  // Redirect bare /dashboard to role home
   if (pathname === "/dashboard") {
     return NextResponse.redirect(new URL(roleBasePath, request.url));
   }
 
-  if (pathname.startsWith("/dashboard") && !pathname.startsWith(roleBasePath)) {
+  // If it's a dashboard path that is NOT under the role base path and NOT shared → redirect
+  if (
+    pathname.startsWith("/dashboard") &&
+    !pathname.startsWith(roleBasePath) &&
+    !isSharedDashboardPath
+  ) {
     return NextResponse.redirect(new URL(roleBasePath, request.url));
   }
 

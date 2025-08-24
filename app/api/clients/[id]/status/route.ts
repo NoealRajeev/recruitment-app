@@ -129,7 +129,7 @@ export async function PUT(
           performedById: session.user.id,
           oldData: { status: client.user.status },
           newData: { status },
-          description: `Status changed to ${status}. Reason: ${reason}`,
+          description: `Status changed to ${status}. For ${client.companyName}`,
           affectedFields: ["status"],
         },
       });

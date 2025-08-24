@@ -99,7 +99,7 @@ export async function PUT(
             type: true,
           },
         });
-        
+
         // Update documents
         await tx.document.updateMany({
           where: {
@@ -111,18 +111,17 @@ export async function PUT(
             status: "VERIFIED",
           },
         });
-        
+
         // Send notifications for each verified document
         try {
           for (const doc of documentsToVerify) {
-            await notifyDocumentVerified(
-              doc.type,
-              agency.user.name,
-              agency.id
-            );
+            await notifyDocumentVerified(doc.type, agency.user.name, agency.id);
           }
         } catch (notificationError) {
-          console.error("Failed to send document verification notifications:", notificationError);
+          console.error(
+            "Failed to send document verification notifications:",
+            notificationError
+          );
           // Continue even if notification fails
         }
       }
@@ -187,7 +186,7 @@ export async function PUT(
             deleteAt: status === "REJECTED" ? deleteAt : null,
             deletionType: status === "REJECTED" ? deletionType : null,
           },
-          description: `Status changed to ${status}. Reason: ${reason}`,
+          description: `Status changed to ${status}. For ${agency.agencyName}`,
           affectedFields: ["status"],
         },
       });

@@ -1,10 +1,11 @@
-// lib/notifications.ts
 import prisma from "./prisma";
 import {
   NotificationType,
   NotificationPriority,
   UserRole,
 } from "@prisma/client";
+import { notificationBus } from "./notification-bus";
+import { sendEmail } from "./utils/email-service";
 
 export interface CreateNotificationParams {
   type: NotificationType;
@@ -28,79 +29,142 @@ export interface NotificationConfig {
   actionText?: string;
 }
 
-export class NotificationService {
-  /**
-   * Create a single notification
-   */
-  static async createNotification(params: CreateNotificationParams) {
-    try {
-      const notification = await prisma.notification.create({
-        data: {
-          type: params.type,
-          title: params.title,
-          message: params.message,
-          recipientId: params.recipientId,
-          senderId: params.senderId,
-          entityType: params.entityType,
-          entityId: params.entityId,
-          priority: params.priority || NotificationPriority.NORMAL,
-          actionUrl: params.actionUrl,
-          actionText: params.actionText,
-        },
-        include: {
-          recipient: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: true,
-            },
-          },
-          sender: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-              role: true,
-            },
-          },
-        },
-      });
+/** Map a NotificationType to a UserSettings toggle bucket */
+function getSettingsBucketForType(
+  t: NotificationType
+): "notifyRequirement" | "notifyLabour" | "notifyDocument" | "notifySystem" {
+  switch (t) {
+    // Requirement lifecycle
+    case "REQUIREMENT_CREATED":
+    case "REQUIREMENT_UPDATED":
+    case "REQUIREMENT_STATUS_CHANGED":
+    case "REQUIREMENT_FORWARDED_TO_AGENCY":
+    case "REQUIREMENT_ACCEPTED":
+    case "REQUIREMENT_REJECTED":
+    case "REQUIREMENT_NEEDS_REVISION":
+      return "notifyRequirement";
 
-      console.log(
-        `Notification created: ${notification.type} for ${notification.recipient.name}`
-      );
-      return notification;
-    } catch (error) {
-      console.error("Error creating notification:", error);
-      throw error;
+    // Labour/Profile lifecycle
+    case "LABOUR_PROFILE_CREATED":
+    case "LABOUR_PROFILE_STATUS_CHANGED":
+    case "LABOUR_PROFILE_VERIFIED":
+    case "LABOUR_PROFILE_DOCUMENT_UPLOADED":
+    case "LABOUR_PROFILE_STAGE_UPDATED":
+      return "notifyLabour";
+
+    // Assignment / Offer / Visa / Docs
+    case "ASSIGNMENT_CREATED":
+    case "ASSIGNMENT_STATUS_CHANGED":
+    case "ASSIGNMENT_FEEDBACK_RECEIVED":
+    case "DOCUMENT_UPLOADED":
+    case "DOCUMENT_VERIFIED":
+    case "DOCUMENT_REJECTED":
+    case "OFFER_LETTER_GENERATED":
+    case "OFFER_LETTER_SIGNED":
+    case "VISA_UPLOADED":
+    case "TRAVEL_DOCUMENTS_UPLOADED":
+      return "notifyDocument";
+
+    // System / security / welcome / maintenance
+    default:
+      return "notifySystem";
+  }
+}
+
+async function shouldDeliverPush(recipientId: string, type: NotificationType) {
+  const s = await prisma.userSettings.findUnique({
+    where: { userId: recipientId },
+  });
+  if (!s) return true; // default on
+  const bucket = getSettingsBucketForType(type);
+  return (s as any)[bucket] && s.notifyPush;
+}
+
+async function shouldDeliverEmail(recipientId: string, type: NotificationType) {
+  const s = await prisma.userSettings.findUnique({
+    where: { userId: recipientId },
+  });
+  if (!s) return true; // default on
+  const bucket = getSettingsBucketForType(type);
+  return (s as any)[bucket] && s.notifyEmail;
+}
+
+export class NotificationService {
+  static async createNotification(params: CreateNotificationParams) {
+    const notification = await prisma.notification.create({
+      data: {
+        type: params.type,
+        title: params.title,
+        message: params.message,
+        recipientId: params.recipientId,
+        senderId: params.senderId,
+        entityType: params.entityType,
+        entityId: params.entityId,
+        priority: params.priority || NotificationPriority.NORMAL,
+        actionUrl: params.actionUrl,
+        actionText: params.actionText,
+      },
+      include: {
+        recipient: {
+          select: { id: true, name: true, email: true, role: true },
+        },
+        sender: { select: { id: true, name: true, email: true, role: true } },
+      },
+    });
+
+    // SSE push (respect push prefs)
+    if (await shouldDeliverPush(notification.recipientId, notification.type)) {
+      notificationBus.publish(notification.recipientId, {
+        id: notification.id,
+        type: notification.type,
+        title: notification.title,
+        message: notification.message,
+        isRead: notification.isRead,
+        priority: notification.priority,
+        createdAt: notification.createdAt,
+        actionUrl: notification.actionUrl,
+        actionText: notification.actionText,
+        sender: notification.sender
+          ? { name: notification.sender.name, role: notification.sender.role }
+          : undefined,
+      });
     }
+
+    // Email fan-out for HIGH/URGENT (respect email prefs)
+    if (
+      (notification.priority === "HIGH" ||
+        notification.priority === "URGENT") &&
+      (await shouldDeliverEmail(notification.recipientId, notification.type))
+    ) {
+      const to = notification.recipient.email;
+      if (to) {
+        const subject = `[${notification.priority}] ${notification.title}`;
+        const html = `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;border:1px solid #eee;border-radius:8px">
+            <h2 style="color:#2C0053;margin:0 0 10px">${notification.title}</h2>
+            <p style="margin:0 0 16px">${notification.message}</p>
+            ${notification.actionUrl ? `<p><a href="${notification.actionUrl}" style="background:#2C0053;color:#fff;padding:10px 16px;border-radius:6px;text-decoration:none;display:inline-block">${notification.actionText || "Open"}</a></p>` : ""}
+            <p style="color:#777;font-size:12px;margin-top:24px">Priority: ${notification.priority}</p>
+          </div>`;
+        await sendEmail({ to, subject, html });
+      }
+    }
+
+    return notification;
   }
 
-  /**
-   * Create notifications for multiple recipients
-   */
   static async createNotificationsForUsers(
     userIds: string[],
     config: NotificationConfig,
     senderId?: string
   ) {
-    const notifications = await Promise.all(
+    return Promise.all(
       userIds.map((recipientId) =>
-        this.createNotification({
-          ...config,
-          recipientId,
-          senderId,
-        })
+        this.createNotification({ ...config, recipientId, senderId })
       )
     );
-
-    return notifications;
   }
 
-  /**
-   * Create notifications for users by role
-   */
   static async createNotificationsForRole(
     role: UserRole,
     config: NotificationConfig,
@@ -110,384 +174,29 @@ export class NotificationService {
       where: { role },
       select: { id: true },
     });
-
-    const userIds = users.map((user) => user.id);
-    return this.createNotificationsForUsers(userIds, config, senderId);
+    return this.createNotificationsForUsers(
+      users.map((u) => u.id),
+      config,
+      senderId
+    );
   }
 
-  /**
-   * Mark notification as read
-   */
   static async markAsRead(notificationId: string, userId: string) {
     return prisma.notification.updateMany({
-      where: {
-        id: notificationId,
-        recipientId: userId,
-      },
-      data: {
-        isRead: true,
-        readAt: new Date(),
-      },
+      where: { id: notificationId, recipientId: userId },
+      data: { isRead: true, readAt: new Date() },
     });
   }
-
-  /**
-   * Mark all notifications as read for a user
-   */
   static async markAllAsRead(userId: string) {
     return prisma.notification.updateMany({
-      where: {
-        recipientId: userId,
-        isRead: false,
-      },
-      data: {
-        isRead: true,
-        readAt: new Date(),
-      },
+      where: { recipientId: userId, isRead: false },
+      data: { isRead: true, readAt: new Date() },
     });
   }
-
-  /**
-   * Archive a notification
-   */
   static async archiveNotification(notificationId: string, userId: string) {
     return prisma.notification.updateMany({
-      where: {
-        id: notificationId,
-        recipientId: userId,
-      },
-      data: {
-        isArchived: true,
-        archivedAt: new Date(),
-      },
-    });
-  }
-
-  /**
-   * Get notifications for a user
-   */
-  static async getUserNotifications(
-    userId: string,
-    options: {
-      limit?: number;
-      offset?: number;
-      includeArchived?: boolean;
-      includeRead?: boolean;
-    } = {}
-  ) {
-    const {
-      limit = 50,
-      offset = 0,
-      includeArchived = false,
-      includeRead = true,
-    } = options;
-
-    const where: {
-      recipientId: string;
-      isArchived?: boolean;
-      isRead?: boolean;
-    } = {
-      recipientId: userId,
-    };
-
-    if (!includeArchived) {
-      where.isArchived = false;
-    }
-
-    if (!includeRead) {
-      where.isRead = false;
-    }
-
-    return prisma.notification.findMany({
-      where,
-      include: {
-        sender: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            role: true,
-          },
-        },
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: limit,
-      skip: offset,
-    });
-  }
-
-  /**
-   * Get unread notification count for a user
-   */
-  static async getUnreadCount(userId: string) {
-    return prisma.notification.count({
-      where: {
-        recipientId: userId,
-        isRead: false,
-        isArchived: false,
-      },
-    });
-  }
-
-  /**
-   * Delete old notifications (cleanup)
-   */
-  static async deleteOldNotifications(daysOld: number = 90) {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - daysOld);
-
-    return prisma.notification.deleteMany({
-      where: {
-        createdAt: {
-          lt: cutoffDate,
-        },
-        isArchived: true,
-      },
+      where: { id: notificationId, recipientId: userId },
+      data: { isArchived: true, archivedAt: new Date() },
     });
   }
 }
-
-// Predefined notification configurations for common events
-export const NotificationTemplates = {
-  // User Management
-  USER_REGISTERED: (userName: string): NotificationConfig => ({
-    type: NotificationType.USER_REGISTERED,
-    title: "New User Registration",
-    message: `${userName} has registered on the platform`,
-    priority: NotificationPriority.NORMAL,
-  }),
-
-  USER_VERIFIED: (userName: string): NotificationConfig => ({
-    type: NotificationType.USER_VERIFIED,
-    title: "Account Verified",
-    message: `Account for ${userName} has been verified successfully`,
-    priority: NotificationPriority.NORMAL,
-  }),
-
-  // Requirement Management
-  REQUIREMENT_CREATED: (
-    requirementId: string,
-    companyName: string
-  ): NotificationConfig => ({
-    type: NotificationType.REQUIREMENT_CREATED,
-    title: "New Requirement Created",
-    message: `${companyName} has created a new requirement`,
-    priority: NotificationPriority.HIGH,
-    actionUrl: `/dashboard/admin/requirements/${requirementId}`,
-    actionText: "Review Requirement",
-  }),
-
-  REQUIREMENT_STATUS_CHANGED: (
-    requirementId: string,
-    companyName: string,
-    newStatus: string
-  ): NotificationConfig => ({
-    type: NotificationType.REQUIREMENT_STATUS_CHANGED,
-    title: "Requirement Status Updated",
-    message: `Requirement from ${companyName} status changed to ${newStatus}`,
-    priority: NotificationPriority.NORMAL,
-    actionUrl: `/dashboard/admin/requirements/${requirementId}`,
-    actionText: "View Requirement",
-  }),
-
-  REQUIREMENT_FORWARDED_TO_AGENCY: (
-    requirementId: string,
-    agencyName: string
-  ): NotificationConfig => ({
-    type: NotificationType.REQUIREMENT_FORWARDED_TO_AGENCY,
-    title: "New Requirement Assigned",
-    message: `A new requirement has been assigned to ${agencyName}`,
-    priority: NotificationPriority.HIGH,
-    actionUrl: `/dashboard/agency/requirements/${requirementId}`,
-    actionText: "View Requirement",
-  }),
-
-  // Labour Profile Management
-  LABOUR_PROFILE_CREATED: (
-    labourName: string,
-    agencyName: string
-  ): NotificationConfig => ({
-    type: NotificationType.LABOUR_PROFILE_CREATED,
-    title: "New Labour Profile Created",
-    message: `${agencyName} has created a profile for ${labourName}`,
-    priority: NotificationPriority.NORMAL,
-  }),
-
-  LABOUR_PROFILE_STATUS_CHANGED: (
-    labourName: string,
-    newStatus: string
-  ): NotificationConfig => ({
-    type: NotificationType.LABOUR_PROFILE_STATUS_CHANGED,
-    title: "Labour Profile Status Updated",
-    message: `Labour profile for ${labourName} status changed to ${newStatus}`,
-    priority: NotificationPriority.NORMAL,
-  }),
-
-  // Stage Management
-  STAGE_COMPLETED: (labourName: string, stage: string): NotificationConfig => ({
-    type: NotificationType.STAGE_COMPLETED,
-    title: "Stage Completed",
-    message: `${stage} stage completed for ${labourName}`,
-    priority: NotificationPriority.NORMAL,
-  }),
-
-  STAGE_PENDING_ACTION: (
-    labourName: string,
-    stage: string,
-    actionRequired: string
-  ): NotificationConfig => ({
-    type: NotificationType.STAGE_PENDING_ACTION,
-    title: "Action Required",
-    message: `${actionRequired} required for ${labourName} at ${stage} stage`,
-    priority: NotificationPriority.HIGH,
-  }),
-
-  TRAVEL_CONFIRMED: (
-    labourName: string,
-    travelDate: string
-  ): NotificationConfig => ({
-    type: NotificationType.TRAVEL_CONFIRMED,
-    title: "Travel Confirmed",
-    message: `Travel confirmed for ${labourName} on ${travelDate}`,
-    priority: NotificationPriority.HIGH,
-  }),
-
-  ARRIVAL_CONFIRMED: (labourName: string): NotificationConfig => ({
-    type: NotificationType.ARRIVAL_CONFIRMED,
-    title: "Labour Arrived",
-    message: `${labourName} has successfully arrived and been deployed`,
-    priority: NotificationPriority.HIGH,
-  }),
-
-  // Document Management
-  DOCUMENT_UPLOADED: (
-    documentType: string,
-    labourName: string
-  ): NotificationConfig => ({
-    type: NotificationType.DOCUMENT_UPLOADED,
-    title: "Document Uploaded",
-    message: `${documentType} uploaded for ${labourName}`,
-    priority: NotificationPriority.NORMAL,
-  }),
-
-  DOCUMENT_VERIFIED: (
-    documentType: string,
-    labourName: string
-  ): NotificationConfig => ({
-    type: NotificationType.DOCUMENT_VERIFIED,
-    title: "Document Verified",
-    message: `${documentType} verified for ${labourName}`,
-    priority: NotificationPriority.NORMAL,
-  }),
-
-  OFFER_LETTER_SIGNED: (labourName: string): NotificationConfig => ({
-    type: NotificationType.OFFER_LETTER_SIGNED,
-    title: "Offer Letter Signed",
-    message: `Offer letter signed by ${labourName}`,
-    priority: NotificationPriority.HIGH,
-  }),
-
-  CONTRACT_REFUSED: (
-    labourName: string,
-    jobTitle: string,
-    agencyName: string
-  ): NotificationConfig => ({
-    type: NotificationType.STAGE_FAILED,
-    title: "Contract Refused",
-    message: `${labourName} refused to sign contract for ${jobTitle} position at ${agencyName}`,
-    priority: NotificationPriority.HIGH,
-    actionUrl: `/dashboard/agency/recruitment`,
-    actionText: "View Recruitment",
-  }),
-
-  MEDICAL_UNFIT: (
-    labourName: string,
-    jobTitle: string,
-    agencyName: string
-  ): NotificationConfig => ({
-    type: NotificationType.STAGE_FAILED,
-    title: "Medical Examination Failed",
-    message: `${labourName} failed medical examination for ${jobTitle} position at ${agencyName}`,
-    priority: NotificationPriority.HIGH,
-    actionUrl: `/dashboard/agency/recruitment`,
-    actionText: "View Recruitment",
-  }),
-
-  FINGERPRINT_FAIL: (
-    labourName: string,
-    jobTitle: string,
-    agencyName: string
-  ): NotificationConfig => ({
-    type: NotificationType.STAGE_FAILED,
-    title: "Fingerprint Verification Failed",
-    message: `${labourName} failed fingerprint verification for ${jobTitle} position at ${agencyName}`,
-    priority: NotificationPriority.HIGH,
-    actionUrl: `/dashboard/agency/recruitment`,
-    actionText: "View Recruitment",
-  }),
-
-  TRAVEL_CANCELED: (
-    labourName: string,
-    jobTitle: string,
-    agencyName: string
-  ): NotificationConfig => ({
-    type: NotificationType.STAGE_FAILED,
-    title: "Travel Cancelled",
-    message: `${labourName} travel cancelled for ${jobTitle} position at ${agencyName}`,
-    priority: NotificationPriority.HIGH,
-    actionUrl: `/dashboard/agency/recruitment`,
-    actionText: "View Recruitment",
-  }),
-
-  TRAVEL_RESCHEDULED: (
-    labourName: string,
-    jobTitle: string,
-    agencyName: string,
-    rescheduledDate: string
-  ): NotificationConfig => ({
-    type: NotificationType.STAGE_PENDING_ACTION,
-    title: "Travel Rescheduled",
-    message: `${labourName} travel rescheduled to ${rescheduledDate} for ${jobTitle} position at ${agencyName}. New flight ticket required.`,
-    priority: NotificationPriority.HIGH,
-    actionUrl: `/dashboard/agency/recruitment`,
-    actionText: "Upload Flight Ticket",
-  }),
-
-  // Assignment Management
-  ASSIGNMENT_CREATED: (
-    labourName: string,
-    jobTitle: string
-  ): NotificationConfig => ({
-    type: NotificationType.ASSIGNMENT_CREATED,
-    title: "New Assignment Created",
-    message: `${labourName} assigned to ${jobTitle} position`,
-    priority: NotificationPriority.NORMAL,
-  }),
-
-  ASSIGNMENT_FEEDBACK_RECEIVED: (
-    labourName: string,
-    feedbackType: string
-  ): NotificationConfig => ({
-    type: NotificationType.ASSIGNMENT_FEEDBACK_RECEIVED,
-    title: "Feedback Received",
-    message: `${feedbackType} feedback received for ${labourName}`,
-    priority: NotificationPriority.NORMAL,
-  }),
-
-  // System Notifications
-  WELCOME_MESSAGE: (userName: string): NotificationConfig => ({
-    type: NotificationType.WELCOME_MESSAGE,
-    title: "Welcome to the Platform",
-    message: `Welcome ${userName}! We're glad to have you on board.`,
-    priority: NotificationPriority.LOW,
-  }),
-
-  SYSTEM_MAINTENANCE: (maintenanceTime: string): NotificationConfig => ({
-    type: NotificationType.SYSTEM_MAINTENANCE,
-    title: "System Maintenance",
-    message: `Scheduled maintenance on ${maintenanceTime}. Service may be temporarily unavailable.`,
-    priority: NotificationPriority.HIGH,
-  }),
-};

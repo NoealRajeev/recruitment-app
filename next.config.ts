@@ -13,6 +13,12 @@ const nextConfig: NextConfig = {
   },
   output: "standalone",
 
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "10mb",
+    },
+  },
+
   async headers() {
     return [
       {

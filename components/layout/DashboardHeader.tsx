@@ -1,3 +1,4 @@
+// components/layout/DashboardHeader.tsx
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
@@ -7,12 +8,25 @@ import { useState, useRef, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown, LogOut, Search, Settings, User } from "lucide-react";
 import NotificationBell from "../ui/NotificationBell";
-import MobileSidebar from "./MobileSidebar"; // <<< add
+import MobileSidebar from "./MobileSidebar";
 
 interface DashboardHeaderProps {
   role: UserRole;
   avatarUrl: string;
   userName: string;
+}
+
+function getRoleBasePath(role: UserRole) {
+  switch (role) {
+    case "RECRUITMENT_ADMIN":
+      return "/dashboard/admin";
+    case "CLIENT_ADMIN":
+      return "/dashboard/client";
+    case "RECRUITMENT_AGENCY":
+      return "/dashboard/agency";
+    default:
+      return "/dashboard"; // fallback
+  }
 }
 
 export default function DashboardHeader({
@@ -27,7 +41,7 @@ export default function DashboardHeader({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const getPageTitle = () => {
-    const pathSegments = pathname.split("/").filter((segment) => segment);
+    const pathSegments = pathname.split("/").filter(Boolean);
     if (pathSegments.length === 2) return "Dashboard";
     const currentPath = pathSegments[2];
     const pageTitles: Record<string, string> = {
@@ -38,6 +52,8 @@ export default function DashboardHeader({
       recruitment: "Recruitment Tracker",
       audit: "Audit Logs",
       documents: "Documents",
+      profile: "Profile",
+      settings: "Settings",
     };
     return (
       pageTitles[currentPath] ||
@@ -47,7 +63,7 @@ export default function DashboardHeader({
     );
   };
 
-  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
+  const toggleDropdown = () => setIsDropdownOpen((o) => !o);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -62,6 +78,8 @@ export default function DashboardHeader({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const base = getRoleBasePath(role);
+
   return (
     <header className="bg-transparent py-4">
       <div className="px-5">
@@ -69,7 +87,7 @@ export default function DashboardHeader({
           {/* LEFT: mobile menu button + title */}
           <div className="flex items-center gap-3">
             <div className="md:hidden">
-              <MobileSidebar role={role} /> {/* <<< menu button here */}
+              <MobileSidebar role={role} />
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-[#0B0016]">
               {getPageTitle()}
@@ -81,7 +99,7 @@ export default function DashboardHeader({
             {/* Search Bar (hidden on small) */}
             <div className="hidden md:block">
               <div className="relative w-[800px]">
-                <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                <div className="absolute left-3 top-1/2 -translate-y-1/2">
                   <Search className="text-gray-400 h-5 w-5" />
                 </div>
                 <input
@@ -137,7 +155,7 @@ export default function DashboardHeader({
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      router.push("/dashboard/profile");
+                      router.push(`${base}/profile`);
                       setIsDropdownOpen(false);
                     }}
                     className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"
@@ -149,7 +167,7 @@ export default function DashboardHeader({
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      window.location.href = "/dashboard/settings";
+                      router.push(`${base}/settings`);
                       setIsDropdownOpen(false);
                     }}
                     className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left"

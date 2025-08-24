@@ -313,12 +313,42 @@ model User {
   notifications     Notification[] @relation("UserNotifications")
   sentNotifications Notification[] @relation("UserSentNotifications")
   Document          Document[]
+  settings          UserSettings?
 
   @@index([email])
   @@index([status])
   @@index([role])
   @@index([createdAt])
   @@index([email, status])
+}
+
+model UserSettings {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
+  // Notifications
+  notifyEmail       Boolean @default(true)
+  notifyPush        Boolean @default(true)
+  notifyRequirement Boolean @default(true)
+  notifyLabour      Boolean @default(true)
+  notifyDocument    Boolean @default(true)
+  notifySystem      Boolean @default(true)
+
+  // Security
+  twoFactorAuth      Boolean @default(false)
+  sessionTimeoutMins Int     @default(30)
+
+  // Preferences
+  language   String @default("en")
+  timezone   String @default("UTC")
+  dateFormat String @default("MM/DD/YYYY")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("user_settings")
 }
 
 model Client {

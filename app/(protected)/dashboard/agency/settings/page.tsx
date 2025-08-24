@@ -1,4 +1,5 @@
-// app/(protected)/dashboard/admin/settings/page.tsx
-export default function Settings() {
-  return <div className="p-6 space-y-8"></div>;
+// app/(protected)/dashboard/agency/settings/page.tsx
+import SettingsPage from "@/components/dashboard/SettingsPage";
+export default function Page() {
+  return <SettingsPage />;
 }

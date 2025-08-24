@@ -8,6 +8,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/shared/Card";
+import { Eye, EyeOff } from "lucide-react";
 
 // dynamically load language selector (client-only)
 const LanguageSelector = dynamic(
@@ -40,6 +41,7 @@ function LoginForm({
     email: false,
     password: false,
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const validateEmail = (email: string) => {
     if (!email) return t.required;
@@ -128,19 +130,34 @@ function LoginForm({
           disabled={loading}
         />
 
-        <Input
-          label={t.password}
-          name="password"
-          type="password"
-          value={formData.password}
-          onChange={handleChange}
-          onBlur={() => handleBlur("password")}
-          error={errors.password}
-          required
-          placeholder={t.passwordPlaceholder}
-          id="password"
-          disabled={loading}
-        />
+        <div className="relative">
+          <Input
+            label={t.password}
+            name="password"
+            type={showPassword ? "text" : "password"}
+            value={formData.password}
+            onChange={handleChange}
+            onBlur={() => handleBlur("password")}
+            error={errors.password}
+            required
+            placeholder={t.passwordPlaceholder}
+            id="password"
+            disabled={loading}
+            className="pr-10"
+          />
+          <button
+            type="button"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            onClick={() => setShowPassword((s) => !s)}
+            className="absolute right-3 top-11 -translate-y-1/2"
+          >
+            {showPassword ? (
+              <EyeOff className="h-4 w-4 text-gray-400" />
+            ) : (
+              <Eye className="h-4 w-4 text-gray-400" />
+            )}
+          </button>
+        </div>
 
         <h2 className="text-lg font-semibold mb-2">{t.quickActions}</h2>
         <div className="space-y-4">

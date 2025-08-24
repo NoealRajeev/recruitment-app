@@ -64,6 +64,17 @@ export default function SettingsPage() {
     next: false,
     confirm: false,
   });
+
+  // checklist (same rules as Reset Password form)
+  const hasLowercase = useMemo(() => /[a-z]/.test(pwd.next), [pwd.next]);
+  const hasUppercase = useMemo(() => /[A-Z]/.test(pwd.next), [pwd.next]);
+  const hasNumber = useMemo(() => /[0-9]/.test(pwd.next), [pwd.next]);
+  const hasMinLength = useMemo(() => pwd.next.length >= 8, [pwd.next]);
+  const passwordsMatch = useMemo(
+    () => pwd.next === "" || pwd.confirm === "" || pwd.next === pwd.confirm,
+    [pwd.next, pwd.confirm]
+  );
+
   const weak = useMemo(
     () => pwd.next.length > 0 && pwd.next.length < 8,
     [pwd.next]
@@ -82,8 +93,7 @@ export default function SettingsPage() {
           const data = await res.json();
           setSettings(data.settings);
         }
-      } catch (e) {
-        console.error(e);
+      } catch {
         toast({ type: "error", message: "Failed to load settings" });
       } finally {
         setIsLoading(false);
@@ -118,13 +128,17 @@ export default function SettingsPage() {
 
   const onChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (weak)
+
+    if (!hasMinLength || !hasLowercase || !hasUppercase || !hasNumber) {
       return toast({
         type: "error",
-        message: "Password must be at least 8 characters",
+        message:
+          "Password must be at least 8 characters and include lowercase, uppercase, and a number.",
       });
-    if (mismatch)
+    }
+    if (mismatch) {
       return toast({ type: "error", message: "Passwords do not match" });
+    }
 
     setSaving(true);
     try {
@@ -167,11 +181,8 @@ export default function SettingsPage() {
     <div className="p-4 md:p-6">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* sticky action bar */}
-        <div className="sticky top-0 z-10 -mx-4 md:-mx-6 px-4 md:px-6 py-3 bg-white/80 backdrop-blur border-b">
+        <div className="sticky top-0 z-10 -mx-4 md:-mx-6 px-4 md:px-6 py-3 backdrop-blur-xs">
           <div className="flex items-center justify-between max-w-5xl mx-auto">
-            <h1 className="text-2xl md:text-3xl font-bold text-[#0B0016]">
-              Settings
-            </h1>
             <Button
               onClick={onSaveSettings}
               disabled={saving}
@@ -213,6 +224,9 @@ export default function SettingsPage() {
                       onClick={() =>
                         setShow({ ...show, current: !show.current })
                       }
+                      aria-label={
+                        show.current ? "Hide password" : "Show password"
+                      }
                     >
                       {show.current ? (
                         <EyeOff className="h-4 w-4 text-gray-400" />
@@ -239,6 +253,7 @@ export default function SettingsPage() {
                       type="button"
                       className="absolute right-3 top-1/2 -translate-y-1/2"
                       onClick={() => setShow({ ...show, next: !show.next })}
+                      aria-label={show.next ? "Hide password" : "Show password"}
                     >
                       {show.next ? (
                         <EyeOff className="h-4 w-4 text-gray-400" />
@@ -247,6 +262,31 @@ export default function SettingsPage() {
                       )}
                     </button>
                   </div>
+
+                  {/* Password requirements checklist */}
+                  <div className="text-sm text-gray-600 space-y-1 mt-2 pl-2">
+                    <p
+                      className={`flex items-center ${hasMinLength ? "text-green-600" : "text-gray-500"}`}
+                    >
+                      {hasMinLength ? "✓" : "•"} Use at least 8 characters.
+                    </p>
+                    <p
+                      className={`flex items-center ${hasLowercase ? "text-green-600" : "text-gray-500"}`}
+                    >
+                      {hasLowercase ? "✓" : "•"} Include a lowercase letter.
+                    </p>
+                    <p
+                      className={`flex items-center ${hasUppercase ? "text-green-600" : "text-gray-500"}`}
+                    >
+                      {hasUppercase ? "✓" : "•"} Include an uppercase letter.
+                    </p>
+                    <p
+                      className={`flex items-center ${hasNumber ? "text-green-600" : "text-gray-500"}`}
+                    >
+                      {hasNumber ? "✓" : "•"} Include a number.
+                    </p>
+                  </div>
+
                   {weak && (
                     <p className="text-xs text-red-600 mt-1">
                       Use at least 8 characters.
@@ -273,6 +313,9 @@ export default function SettingsPage() {
                       className="absolute right-3 top-1/2 -translate-y-1/2"
                       onClick={() =>
                         setShow({ ...show, confirm: !show.confirm })
+                      }
+                      aria-label={
+                        show.confirm ? "Hide password" : "Show password"
                       }
                     >
                       {show.confirm ? (
@@ -506,13 +549,13 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+          {/* /Notifications + Preferences */}
         </div>
       </div>
     </div>
   );
 }
 
-/** small helper for toggle rows **/
 function ToggleRow({
   title,
   desc,

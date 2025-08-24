@@ -14,14 +14,12 @@ export async function GET() {
       where: { userId: session.user.id },
     });
 
-    // Seed defaults if missing
     if (!settings) {
       settings = await prisma.userSettings.create({
         data: { userId: session.user.id },
       });
     }
 
-    // Map DB → UI shape
     return NextResponse.json({
       settings: {
         notifications: {
@@ -64,17 +62,14 @@ export async function PUT(request: NextRequest) {
     const updated = await prisma.userSettings.upsert({
       where: { userId: session.user.id },
       update: {
-        // Notifications
         notifyEmail: !!payload?.notifications?.email,
         notifyPush: !!payload?.notifications?.push,
         notifyRequirement: !!payload?.notifications?.requirementUpdates,
         notifyLabour: !!payload?.notifications?.labourUpdates,
         notifyDocument: !!payload?.notifications?.documentUpdates,
         notifySystem: !!payload?.notifications?.systemAlerts,
-        // Security
         twoFactorAuth: !!payload?.security?.twoFactorAuth,
         sessionTimeoutMins: Number(payload?.security?.sessionTimeout ?? 30),
-        // Preferences
         language: String(payload?.preferences?.language ?? "en"),
         timezone: String(payload?.preferences?.timezone ?? "UTC"),
         dateFormat: String(payload?.preferences?.dateFormat ?? "MM/DD/YYYY"),

@@ -28,39 +28,40 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
+    if (file.size > 10 * 1024 * 1024) {
+      return NextResponse.json(
+        { error: "Image too large (max 10MB)" },
+        { status: 400 }
+      );
+    }
 
-    // buffer the file
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // ensure output dir
     const relDir = "/uploads/avatars";
     const outDir = path.join(process.cwd(), "public", relDir);
     await mkdir(outDir, { recursive: true });
 
-    // unique name
-    const ext = file.name.includes(".") ? file.name.split(".").pop() : "png";
+    const ext =
+      file.name && file.name.includes(".") ? file.name.split(".").pop() : "png";
     const name = `${Date.now()}-${crypto.randomBytes(8).toString("hex")}.${ext}`;
     const fullPath = path.join(outDir, name);
-    const publicUrl = `${relDir}/${name}`; // e.g. /uploads/avatars/abc.png
+    const publicUrl = `${relDir}/${name}`;
 
-    // write to disk
     await writeFile(fullPath, buffer);
 
-    // Update User.profilePicture
     const user = await prisma.user.update({
       where: { id: session.user.id },
       data: { profilePicture: publicUrl },
       select: { id: true, profilePicture: true, role: true, status: true },
     });
 
-    // Save into Document table for traceability (status: VERIFIED or SUBMITTED—pick your flow)
     await prisma.document.create({
       data: {
         ownerId: session.user.id,
         type: "PROFILE_IMAGE",
         url: publicUrl,
-        status: "VERIFIED", // or "SUBMITTED" if you verify later
+        status: "VERIFIED",
         category: "IMPORTANT",
       },
     });
@@ -68,7 +69,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, url: publicUrl, user });
   } catch (err) {
     console.error("Avatar upload error:", err);
-    // If you still hit body limit, ensure next.config.js serverActions.bodySizeLimit is set.
     return NextResponse.json(
       { error: "Failed to upload avatar" },
       { status: 500 }

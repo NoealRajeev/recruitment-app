@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/shared/Card";
 import dynamic from "next/dynamic";
+import { Eye, EyeOff } from "lucide-react";
 
 // Language selector should be client-only
 const LanguageSelector = dynamic(
@@ -41,6 +42,7 @@ export default function ResetPasswordForm() {
   const [isValidToken, setIsValidToken] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [resetMode, setResetMode] = useState<"session" | "token">("session");
+  const [show, setShow] = useState({ new: false, confirm: false });
 
   // password checks
   const hasLowercase = /[a-z]/.test(formData.newPassword);
@@ -271,19 +273,32 @@ export default function ResetPasswordForm() {
                 <h2 className="text-lg font-semibold mb-2">
                   {t.passwordDetails}
                 </h2>
-
-                <Input
-                  label={t.newPassword}
-                  name="newPassword"
-                  type="password"
-                  value={formData.newPassword}
-                  onChange={handleChange}
-                  error={errors.newPassword}
-                  required
-                  placeholder={t.newPasswordPlaceholder}
-                  id="newPassword"
-                />
-
+                <div className="relative">
+                  <Input
+                    label={t.newPassword}
+                    name="newPassword"
+                    type={show.new ? "text" : "password"}
+                    value={formData.newPassword}
+                    onChange={handleChange}
+                    error={errors.newPassword}
+                    required
+                    placeholder={t.newPasswordPlaceholder}
+                    id="newPassword"
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    aria-label={show.new ? "Hide password" : "Show password"}
+                    onClick={() => setShow((s) => ({ ...s, new: !s.new }))}
+                    className="absolute right-3 top-11 -translate-y-1/2"
+                  >
+                    {show.new ? (
+                      <EyeOff className="h-4 w-4 text-gray-400" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-gray-400" />
+                    )}
+                  </button>
+                </div>
                 <div className="text-sm text-gray-600 space-y-1 mt-2 pl-2">
                   <p
                     className={`flex items-center ${
@@ -314,18 +329,36 @@ export default function ResetPasswordForm() {
                     {hasNumber ? "✓" : "•"} {t.passwordNumber}
                   </p>
                 </div>
-
-                <Input
-                  label={t.confirmPassword}
-                  name="confirmPassword"
-                  type="password"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  error={errors.confirmPassword}
-                  required
-                  placeholder={t.confirmPasswordPlaceholder}
-                  id="confirmPassword"
-                />
+                <div className="relative">
+                  <Input
+                    label={t.confirmPassword}
+                    name="confirmPassword"
+                    type={show.confirm ? "text" : "password"}
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    error={errors.confirmPassword}
+                    required
+                    placeholder={t.confirmPasswordPlaceholder}
+                    id="confirmPassword"
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    aria-label={
+                      show.confirm ? "Hide password" : "Show password"
+                    }
+                    onClick={() =>
+                      setShow((s) => ({ ...s, confirm: !s.confirm }))
+                    }
+                    className="absolute right-3 top-11 -translate-y-1/2"
+                  >
+                    {show.confirm ? (
+                      <EyeOff className="h-4 w-4 text-gray-400" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-gray-400" />
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* hidden submit so Enter works, without altering UI */}

@@ -1,3 +1,4 @@
+// components/dashboard/ProfilePage.tsx
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -115,8 +116,7 @@ export default function ProfilePage() {
           setProfile(p);
           setEdit(seedEdit(p));
         }
-      } catch (e) {
-        console.error(e);
+      } catch {
         toast({ type: "error", message: "Failed to load profile" });
       } finally {
         setIsLoading(false);
@@ -179,7 +179,6 @@ export default function ProfilePage() {
   const onSave = async () => {
     setSaving(true);
     try {
-      // First save text fields (PUT /profile)
       const res = await fetch("/api/users/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -190,9 +189,7 @@ export default function ProfilePage() {
         throw new Error(err.error || "Failed to save profile");
       }
 
-      // Then upload avatar if changed
       if (avatarFile) {
-        // limit ~10MB client-side to avoid 413
         if (avatarFile.size > 10 * 1024 * 1024) {
           throw new Error("Image too large (max 10MB)");
         }
@@ -263,10 +260,7 @@ export default function ProfilePage() {
     <div className="p-4 md:p-6">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl md:text-3xl font-bold text-[#0B0016]">
-            Profile
-          </h1>
+        <div className="sticky top-0 z-10 -mx-4 md:-mx-6 px-4 md:px-6 py-3 backdrop-blur-xs">
           <div className="flex gap-2">
             {isEditing ? (
               <>

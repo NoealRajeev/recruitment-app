@@ -1,8 +1,10 @@
+// app/api/assignments/[id]/arrival-confirmation/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
-import { notifyArrivalConfirmed } from "@/lib/notification-helpers";
+import { NotificationDelivery } from "@/lib/notification-delivery";
+import { NotificationType, NotificationPriority } from "@prisma/client";
 
 export async function POST(
   request: NextRequest,
@@ -16,8 +18,6 @@ export async function POST(
 
   try {
     const { status, notes } = await request.json();
-
-    // Validate status
     if (status !== "ARRIVED") {
       return NextResponse.json(
         { error: "Invalid status. Must be ARRIVED" },
@@ -25,43 +25,28 @@ export async function POST(
       );
     }
 
-    // Get the assignment and verify it belongs to the client
     const assignment = await prisma.labourAssignment.findUnique({
       where: { id },
       include: {
         labour: true,
         jobRole: {
           include: {
-            requirement: {
-              include: {
-                client: {
-                  include: {
-                    user: true,
-                  },
-                },
-              },
-            },
+            requirement: { include: { client: { include: { user: true } } } },
           },
         },
       },
     });
-
-    if (!assignment) {
+    if (!assignment)
       return NextResponse.json(
         { error: "Assignment not found" },
         { status: 404 }
       );
-    }
-
-    // Check if the assignment belongs to the logged-in client
     if (assignment.jobRole.requirement.client.userId !== session.user.id) {
       return NextResponse.json(
         { error: "Unauthorized to update this assignment" },
         { status: 403 }
       );
     }
-
-    // Verify the labour is in ARRIVAL_CONFIRMATION stage
     if (assignment.labour.currentStage !== "ARRIVAL_CONFIRMATION") {
       return NextResponse.json(
         { error: "Labour must be in ARRIVAL_CONFIRMATION stage" },
@@ -69,43 +54,32 @@ export async function POST(
       );
     }
 
-    // Find and update the existing ARRIVAL_CONFIRMATION stage to COMPLETED
     const existingArrivalStage = await prisma.labourStageHistory.findFirst({
-      where: {
-        labourId: assignment.labourId,
-        stage: "ARRIVAL_CONFIRMATION",
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
+      where: { labourId: assignment.labourId, stage: "ARRIVAL_CONFIRMATION" },
+      orderBy: { createdAt: "desc" },
     });
 
     if (existingArrivalStage) {
-      // Update the existing stage to COMPLETED
       await prisma.labourStageHistory.update({
-        where: {
-          id: existingArrivalStage.id,
-        },
+        where: { id: existingArrivalStage.id },
         data: {
           status: "COMPLETED",
-          notes: notes || `Arrival confirmed - labour has arrived`,
+          notes: notes || "Arrival confirmed - labour has arrived",
           completedAt: new Date(),
         },
       });
     } else {
-      // Fallback: create new stage if none exists
       await prisma.labourStageHistory.create({
         data: {
           labourId: assignment.labourId,
           stage: "ARRIVAL_CONFIRMATION",
           status: "COMPLETED",
-          notes: notes || `Arrival confirmed - labour has arrived`,
+          notes: notes || "Arrival confirmed - labour has arrived",
           completedAt: new Date(),
         },
       });
     }
 
-    // Create new DEPLOYED stage
     await prisma.labourStageHistory.create({
       data: {
         labourId: assignment.labourId,
@@ -116,16 +90,11 @@ export async function POST(
       },
     });
 
-    // Update the labour's current stage to DEPLOYED and status to DEPLOYED
     await prisma.labourProfile.update({
       where: { id: assignment.labourId },
-      data: {
-        currentStage: "DEPLOYED",
-        status: "DEPLOYED", // Update status from SHORTLISTED to DEPLOYED
-      },
+      data: { currentStage: "DEPLOYED", status: "DEPLOYED" },
     });
 
-    // Create audit log
     try {
       await prisma.auditLog.create({
         data: {
@@ -137,30 +106,44 @@ export async function POST(
             currentStage: "ARRIVAL_CONFIRMATION",
             status: assignment.labour.status,
           },
-          newData: {
-            currentStage: "DEPLOYED",
-            status: "DEPLOYED",
-          },
+          newData: { currentStage: "DEPLOYED", status: "DEPLOYED" },
           affectedFields: ["currentStage", "status"],
           performedById: session.user.id,
         },
       });
-    } catch (auditError) {
-      console.error("Audit log creation failed:", auditError);
-      // Continue even if audit log fails
-    }
+    } catch {}
 
-    // Send notifications
-    try {
-      await notifyArrivalConfirmed(
-        assignment.labour.name,
-        assignment.agencyId,
-        session.user.id
+    // NEW: Deliver (agency + client self)
+    const cfg = {
+      type: NotificationType.ARRIVAL_CONFIRMED,
+      title: "Arrival confirmed",
+      message: `Arrival confirmed for ${assignment.labour.name}. Status updated to DEPLOYED.`,
+      priority: NotificationPriority.HIGH,
+      actionUrl: `/dashboard/agency/recruitment`,
+      actionText: "View tracker",
+    } as const;
+
+    // Agency userId is on Agency record; we have agencyId here, so fetch userId:
+    const agency = await prisma.agency.findUnique({
+      where: { id: assignment.agencyId },
+      select: { userId: true },
+    });
+    if (agency?.userId) {
+      await NotificationDelivery.deliverToUser(
+        agency.userId,
+        cfg,
+        session.user.id,
+        "LabourAssignment",
+        id
       );
-    } catch (notificationError) {
-      console.error("Notification sending failed:", notificationError);
-      // Continue even if notification fails
     }
+    await NotificationDelivery.deliverToUser(
+      session.user.id,
+      cfg,
+      session.user.id,
+      "LabourAssignment",
+      id
+    );
 
     return NextResponse.json({
       success: true,

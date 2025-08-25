@@ -5,13 +5,19 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { z } from "zod";
 import crypto from "crypto";
-import { AuditAction, AccountStatus, DocumentCategory } from "@prisma/client";
+import {
+  AuditAction,
+  AccountStatus,
+  DocumentCategory,
+  NotificationType,
+  NotificationPriority,
+} from "@prisma/client";
 import { sendTemplateEmail } from "@/lib/utils/email-service";
 import {
+  getAgencyDeletionEmail,
   getAgencyWelcomeEmail,
-  getAccountDeletionEmail,
 } from "@/lib/utils/email-templates";
-import { notifyDocumentVerified } from "@/lib/notification-helpers";
+import { NotificationDelivery } from "@/lib/notification-delivery";
 
 const StatusUpdateSchema = z.object({
   status: z.enum(["VERIFIED", "REJECTED", "NOT_VERIFIED"]),
@@ -68,7 +74,7 @@ export async function PUT(
       if (!agency || !agency.user)
         throw new Error("Agency or associated user not found");
 
-      // If verifying, mark all IMPORTANT docs as VERIFIED and notify
+      // If verifying, mark all IMPORTANT docs as VERIFIED and deliver notifications (new helper)
       if (status === "VERIFIED") {
         const docsToVerify = await tx.document.findMany({
           where: {
@@ -89,13 +95,22 @@ export async function PUT(
             data: { status: AccountStatus.VERIFIED },
           });
 
-          // best-effort notifications
+          // best-effort notifications via Delivery
           for (const d of docsToVerify) {
-            try {
-              await notifyDocumentVerified(d.type, agency.user.name, agency.id);
-            } catch (e) {
-              console.error("notifyDocumentVerified failed:", e);
-            }
+            await NotificationDelivery.deliverToUser(
+              agency.userId,
+              {
+                type: NotificationType.DOCUMENT_VERIFIED,
+                title: `Document verified: ${d.type}`,
+                message: `Your ${d.type} document was verified successfully.`,
+                priority: NotificationPriority.NORMAL,
+                actionUrl: `/dashboard/agency/account/documents`,
+                actionText: "View documents",
+              },
+              session.user.id,
+              "Document",
+              d.id
+            );
           }
         }
       }
@@ -110,6 +125,23 @@ export async function PUT(
           ),
           agency.user.email
         );
+
+        // Welcome in-app (system category)
+        await NotificationDelivery.deliverToUser(
+          agency.userId,
+          {
+            type: NotificationType.WELCOME_MESSAGE,
+            title: "Welcome to Findly!",
+            message:
+              "Your account has been verified. You can now start using all features.",
+            priority: NotificationPriority.NORMAL,
+            actionUrl: `/dashboard/agency`,
+            actionText: "Open dashboard",
+          },
+          session.user.id,
+          "Agency",
+          agency.id
+        );
       }
 
       // If rejected + scheduled, set deleteAt and send apology email
@@ -117,13 +149,26 @@ export async function PUT(
       if (status === "REJECTED" && deletionType === "SCHEDULED") {
         deleteAt = new Date();
         deleteAt.setDate(deleteAt.getDate() + 1);
-        await sendTemplateEmail(
-          getAccountDeletionEmail({
-            recipientName: agency.agencyName || agency.user.name || "there",
-            supportUrl: `${process.env.NEXTAUTH_URL}/support`,
-            whenText: "in the next 24 hours",
-          }),
-          agency.user.email
+
+        if (agency.user.email) {
+          const emailTpl = getAgencyDeletionEmail(agency.agencyName);
+          await sendTemplateEmail(emailTpl, agency.user.email);
+        }
+
+        // In-app notify rejection (HIGH)
+        await NotificationDelivery.deliverToUser(
+          agency.userId,
+          {
+            type: NotificationType.USER_SUSPENDED,
+            title: "Account scheduled for removal",
+            message: `Your account will be removed soon. Reason: ${reason}`,
+            priority: NotificationPriority.HIGH,
+            actionUrl: `/support`,
+            actionText: "Contact support",
+          },
+          session.user.id,
+          "Agency",
+          agency.id
         );
       }
 

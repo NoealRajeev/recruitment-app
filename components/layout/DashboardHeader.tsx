@@ -9,6 +9,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown, LogOut, Search, Settings, User } from "lucide-react";
 import NotificationBell from "../ui/NotificationBell";
 import MobileSidebar from "./MobileSidebar";
+import { da } from "@faker-js/faker";
 
 interface DashboardHeaderProps {
   role: UserRole;
@@ -44,7 +45,7 @@ export default function DashboardHeader({
     const pathSegments = (pathname || "").split("/").filter(Boolean);
 
     // Nothing or just /dashboard
-    if (pathSegments.length <= 1) return "Dashboard";
+    if (pathSegments.length <= 2) return "Dashboard";
 
     const roleSeg = getRoleBasePath(role).split("/").filter(Boolean)[1]; // "admin" | "client" | "agency"
 
@@ -59,7 +60,12 @@ export default function DashboardHeader({
       return "Edit Company";
     }
 
+    if (afterRole[0] === "agencies" && afterRole[2] === "edit") {
+      return "Edit Agency";
+    }
+
     const pageTitles: Record<string, string> = {
+      dashboard: "Dashboard",
       company: "Client",
       agencies: "Agencies",
       requirements: "Requirements",

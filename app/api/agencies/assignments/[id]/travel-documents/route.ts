@@ -1,3 +1,4 @@
+// app/api/assignments/[id]/travel-documents/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
@@ -5,7 +6,12 @@ import { authOptions } from "@/lib/auth/options";
 import path from "path";
 import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
-import { notifyDocumentUploaded } from "@/lib/notification-helpers";
+import { NotificationDelivery } from "@/lib/notification-delivery";
+import {
+  NotificationType,
+  NotificationPriority,
+  UserRole,
+} from "@prisma/client";
 
 const UPLOAD_DIR = path.join(
   process.cwd(),
@@ -13,11 +19,7 @@ const UPLOAD_DIR = path.join(
   "uploads",
   "travel-documents"
 );
-
-// Ensure upload directory exists
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-}
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 export async function POST(
   request: NextRequest,
@@ -31,45 +33,28 @@ export async function POST(
   }
 
   try {
-    // Get agency profile
     const agency = await prisma.agency.findUnique({
       where: { userId: session.user.id },
       select: { id: true },
     });
-
-    if (!agency) {
+    if (!agency)
       return NextResponse.json(
         { error: "Agency profile not found" },
         { status: 404 }
       );
-    }
 
-    // Check if assignment exists and belongs to this agency
     const assignment = await prisma.labourAssignment.findFirst({
-      where: {
-        id: assignmentId,
-        agencyId: agency.id,
-      },
+      where: { id: assignmentId, agencyId: agency.id },
       include: {
         labour: true,
-        jobRole: {
-          include: {
-            requirement: {
-              include: {
-                client: true,
-              },
-            },
-          },
-        },
+        jobRole: { include: { requirement: { include: { client: true } } } },
       },
     });
-
-    if (!assignment) {
+    if (!assignment)
       return NextResponse.json(
         { error: "Assignment not found" },
         { status: 404 }
       );
-    }
 
     const formData = await request.formData();
     const travelDate = formData.get("travelDate") as string;
@@ -85,12 +70,10 @@ export async function POST(
       "additionalDocuments"
     ) as File[];
 
-    // Create a unique folder for this assignment's travel documents
     const travelFolder = `assignment-${assignmentId}-${uuidv4()}`;
     const travelDir = path.join(UPLOAD_DIR, travelFolder);
     fs.mkdirSync(travelDir, { recursive: true });
 
-    // Helper function to save file and return URL
     const saveFile = async (file: File, prefix: string): Promise<string> => {
       const buffer = Buffer.from(await file.arrayBuffer());
       const filename = `${prefix}-${Date.now()}${path.extname(file.name)}`;
@@ -99,59 +82,41 @@ export async function POST(
       return `/uploads/travel-documents/${travelFolder}/${filename}`;
     };
 
-    // Save all documents
-    const savedDocuments = [];
-
-    if (flightTicket) {
-      const url = await saveFile(flightTicket, "flight-ticket");
+    const savedDocuments: { type: string; url: string; name: string }[] = [];
+    if (flightTicket)
       savedDocuments.push({
         type: "FLIGHT_TICKET",
-        url,
+        url: await saveFile(flightTicket, "flight-ticket"),
         name: flightTicket.name,
       });
-    }
-
-    if (medicalCertificate) {
-      const url = await saveFile(medicalCertificate, "medical-certificate");
+    if (medicalCertificate)
       savedDocuments.push({
         type: "MEDICAL_CERTIFICATE",
-        url,
+        url: await saveFile(medicalCertificate, "medical-certificate"),
         name: medicalCertificate.name,
       });
-    }
-
-    if (policeClearance) {
-      const url = await saveFile(policeClearance, "police-clearance");
+    if (policeClearance)
       savedDocuments.push({
         type: "POLICE_CLEARANCE",
-        url,
+        url: await saveFile(policeClearance, "police-clearance"),
         name: policeClearance.name,
       });
-    }
-
-    if (employmentContract) {
-      const url = await saveFile(employmentContract, "employment-contract");
+    if (employmentContract)
       savedDocuments.push({
         type: "EMPLOYMENT_CONTRACT",
-        url,
+        url: await saveFile(employmentContract, "employment-contract"),
         name: employmentContract.name,
       });
-    }
-
-    // Save additional documents
     for (let i = 0; i < additionalDocuments.length; i++) {
       const doc = additionalDocuments[i];
-      if (doc && doc.size > 0) {
-        const url = await saveFile(doc, `additional-${i + 1}`);
+      if (doc && doc.size > 0)
         savedDocuments.push({
           type: "OTHER",
-          url,
+          url: await saveFile(doc, `additional-${i + 1}`),
           name: doc.name,
         });
-      }
     }
 
-    // Check if assignment exists and get existing documents
     const existingAssignment = await prisma.labourAssignment.findUnique({
       where: { id: assignmentId },
       select: {
@@ -164,15 +129,12 @@ export async function POST(
         travelDate: true,
       },
     });
-
-    if (!existingAssignment) {
+    if (!existingAssignment)
       return NextResponse.json(
         { error: "Assignment not found" },
         { status: 404 }
       );
-    }
 
-    // Check if all required documents are uploaded
     const requiredDocuments = [
       "FLIGHT_TICKET",
       "MEDICAL_CERTIFICATE",
@@ -188,79 +150,59 @@ export async function POST(
       ...(existingAssignment.employmentContractUrl
         ? ["EMPLOYMENT_CONTRACT"]
         : []),
-      ...savedDocuments.map((doc) => doc.type),
+      ...savedDocuments.map((d) => d.type),
     ];
-
-    // Remove duplicates
     const uniqueUploadedTypes = Array.from(new Set(uploadedDocumentTypes));
-
-    const allRequiredDocumentsUploaded = requiredDocuments.every((docType) =>
-      uniqueUploadedTypes.includes(docType)
+    const allRequiredDocumentsUploaded = requiredDocuments.every((t) =>
+      uniqueUploadedTypes.includes(t)
     );
-
-    // Check for travel date in DB or current upload
     const hasTravelDate = !!(travelDate || existingAssignment.travelDate);
-
     const readyToMoveToNextStage =
       allRequiredDocumentsUploaded && hasTravelDate;
 
-    // Update the assignment with travel information
     await prisma.labourAssignment.update({
       where: { id: assignmentId },
       data: {
-        // travelDate is expected to be a full ISO string (date and time), and will be stored as a Date object with time preserved
         travelDate: travelDate ? new Date(travelDate) : null,
         flightTicketUrl:
-          savedDocuments.find((doc) => doc.type === "FLIGHT_TICKET")?.url ||
+          savedDocuments.find((d) => d.type === "FLIGHT_TICKET")?.url ||
           existingAssignment.flightTicketUrl ||
           null,
         medicalCertificateUrl:
-          savedDocuments.find((doc) => doc.type === "MEDICAL_CERTIFICATE")
-            ?.url ||
+          savedDocuments.find((d) => d.type === "MEDICAL_CERTIFICATE")?.url ||
           existingAssignment.medicalCertificateUrl ||
           null,
         policeClearanceUrl:
-          savedDocuments.find((doc) => doc.type === "POLICE_CLEARANCE")?.url ||
+          savedDocuments.find((d) => d.type === "POLICE_CLEARANCE")?.url ||
           existingAssignment.policeClearanceUrl ||
           null,
         employmentContractUrl:
-          savedDocuments.find((doc) => doc.type === "EMPLOYMENT_CONTRACT")
-            ?.url ||
+          savedDocuments.find((d) => d.type === "EMPLOYMENT_CONTRACT")?.url ||
           existingAssignment.employmentContractUrl ||
           null,
         additionalDocumentsUrls: [
           ...(existingAssignment.additionalDocumentsUrls || []),
-          ...savedDocuments
-            .filter((doc) => doc.type === "OTHER")
-            .map((doc) => doc.url),
+          ...savedDocuments.filter((d) => d.type === "OTHER").map((d) => d.url),
         ],
         updatedAt: new Date(),
       },
     });
 
-    // Only create stage history and update current stage if all required documents are uploaded
     if (readyToMoveToNextStage) {
-      // Create stage history entry for READY_TO_TRAVEL
       await prisma.labourStageHistory.create({
         data: {
           labourId: assignment.labourId,
           stage: "READY_TO_TRAVEL",
           status: "COMPLETED",
           notes: `All travel documents uploaded.${travelDate ? ` Travel date: ${travelDate}` : ""}`,
-          documents: savedDocuments.map((doc) => doc.url),
+          documents: savedDocuments.map((d) => d.url),
           completedAt: new Date(),
         },
       });
-
-      // Update labour profile current stage
       await prisma.labourProfile.update({
         where: { id: assignment.labourId },
-        data: {
-          currentStage: "TRAVEL_CONFIRMATION",
-        },
+        data: { currentStage: "TRAVEL_CONFIRMATION" },
       });
-
-      // Create audit log for stage completion
       await prisma.auditLog.create({
         data: {
           action: "LABOUR_PROFILE_STATUS_CHANGE",
@@ -274,29 +216,41 @@ export async function POST(
         },
       });
 
-      // Send notifications for complete document upload
-      try {
-        // Notify for each document type
-        for (const docType of uniqueUploadedTypes) {
-          await notifyDocumentUploaded(
-            docType,
-            assignment.labour.name,
-            assignment.agencyId,
-            // Find admin users to notify
-            (
-              await prisma.user.findFirst({
-                where: { role: "RECRUITMENT_ADMIN" },
-                select: { id: true },
-              })
-            )?.id
+      // NEW: Deliver “complete” doc upload notifications
+      const cfg = (docLabel: string) =>
+        ({
+          type: NotificationType.TRAVEL_DOCUMENTS_UPLOADED,
+          title: `${docLabel} uploaded`,
+          message: `New ${docLabel.toLowerCase()} uploaded for ${assignment.labour.name}.`,
+          priority: NotificationPriority.NORMAL,
+          actionUrl: `/dashboard/admin/requirements?requirementId=${assignment.jobRole.requirement.id}`,
+          actionText: "Open requirement",
+        }) as const;
+
+      // Admin (first admin found)
+      const admin = await prisma.user.findFirst({
+        where: { role: UserRole.RECRUITMENT_ADMIN },
+        select: { id: true },
+      });
+      for (const t of uniqueUploadedTypes) {
+        if (admin?.id) {
+          await NotificationDelivery.deliverToUser(
+            admin.id,
+            cfg(t),
+            session.user.id,
+            "LabourAssignment",
+            assignmentId
           );
         }
-      } catch (notificationError) {
-        console.error("Notification sending failed:", notificationError);
-        // Continue even if notification fails
+        await NotificationDelivery.deliverToUser(
+          assignment.agencyId,
+          cfg(t),
+          session.user.id,
+          "LabourAssignment",
+          assignmentId
+        );
       }
     } else {
-      // Create audit log for partial document upload
       await prisma.auditLog.create({
         data: {
           action: "LABOUR_PROFILE_DOCUMENT_UPLOAD",
@@ -305,31 +259,43 @@ export async function POST(
           description: `Partial travel documents uploaded for ${assignment.labour.name}.`,
           performedById: session.user.id,
           oldData: { currentStage: assignment.labour.currentStage },
-          newData: { uploadedDocuments: savedDocuments.map((doc) => doc.type) },
+          newData: { uploadedDocuments: savedDocuments.map((d) => d.type) },
           affectedFields: ["travelDocuments"],
         },
       });
 
-      // Send notifications for partial document upload
-      try {
-        // Notify for each document type that was uploaded
-        for (const doc of savedDocuments) {
-          await notifyDocumentUploaded(
-            doc.type,
-            assignment.labour.name,
-            assignment.agencyId,
-            // Find admin users to notify
-            (
-              await prisma.user.findFirst({
-                where: { role: "RECRUITMENT_ADMIN" },
-                select: { id: true },
-              })
-            )?.id
+      // NEW: Deliver “partial” doc upload notifications (NORMAL)
+      const partialCfg = (docLabel: string) =>
+        ({
+          type: NotificationType.TRAVEL_DOCUMENTS_UPLOADED,
+          title: `${docLabel} uploaded`,
+          message: `${docLabel} uploaded for ${assignment.labour.name}. More documents are pending.`,
+          priority: NotificationPriority.NORMAL,
+          actionUrl: `/dashboard/agency/recruitment`,
+          actionText: "Review",
+        }) as const;
+
+      const admin = await prisma.user.findFirst({
+        where: { role: UserRole.RECRUITMENT_ADMIN },
+        select: { id: true },
+      });
+      for (const d of savedDocuments) {
+        if (admin?.id) {
+          await NotificationDelivery.deliverToUser(
+            admin.id,
+            partialCfg(d.type),
+            session.user.id,
+            "LabourAssignment",
+            assignmentId
           );
         }
-      } catch (notificationError) {
-        console.error("Notification sending failed:", notificationError);
-        // Continue even if notification fails
+        await NotificationDelivery.deliverToUser(
+          assignment.agencyId,
+          partialCfg(d.type),
+          session.user.id,
+          "LabourAssignment",
+          assignmentId
+        );
       }
     }
 
@@ -343,9 +309,7 @@ export async function POST(
       readyToMoveToNextStage,
       missingDocuments: readyToMoveToNextStage
         ? []
-        : requiredDocuments.filter(
-            (docType) => !uniqueUploadedTypes.includes(docType)
-          ),
+        : requiredDocuments.filter((t) => !uniqueUploadedTypes.includes(t)),
     });
   } catch (error) {
     console.error("Error uploading travel documents:", error);

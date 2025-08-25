@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
-import { AuditAction } from "@prisma/client";
+import { AuditAction, NotificationType } from "@prisma/client";
 import { getAgencyDeletionEmail } from "@/lib/utils/email-templates";
 import { sendTemplateEmail } from "@/lib/utils/email-service";
 
@@ -11,7 +11,6 @@ export async function DELETE(
   _request: Request,
   context: { params: Promise<Record<string, string>> }
 ): Promise<Response> {
-  // await the generic key/value params
   const { id } = await context.params;
   const agencyId = id;
 
@@ -25,13 +24,10 @@ export async function DELETE(
 
   try {
     const result = await prisma.$transaction(async (tx) => {
-      // Get agency + user (for email + user id)
       const agency = await tx.agency.findUnique({
         where: { id: agencyId },
         include: {
-          user: {
-            select: { id: true, email: true, status: true },
-          },
+          user: { select: { id: true, email: true, status: true, name: true } },
         },
       });
 
@@ -42,7 +38,6 @@ export async function DELETE(
       const deleteAt = new Date();
       deleteAt.setHours(deleteAt.getHours() + 1);
 
-      // Update just the necessary user fields
       const updatedUser = await tx.user.update({
         where: { id: agency.user.id },
         data: {
@@ -57,10 +52,10 @@ export async function DELETE(
           deleteAt: true,
           deletionType: true,
           email: true,
+          name: true,
         },
       });
 
-      // Audit log
       await tx.auditLog.create({
         data: {
           action: AuditAction.AGENCY_DELETE,
@@ -69,16 +64,36 @@ export async function DELETE(
           performedById: session.user.id,
           description: `Account marked for immediate deletion`,
           oldData: { status: agency.user.status },
-          newData: {
-            status: "REJECTED",
-            deleteAt,
-            deletionType: "IMMEDIATE",
-          },
+          newData: { status: "REJECTED", deleteAt, deletionType: "IMMEDIATE" },
           affectedFields: ["status", "deleteAt", "deletionType"],
         },
       });
 
-      // Return everything needed to send the email after the transaction
+      // 🔔 NEW: notify the agency user (deletion scheduled)
+      try {
+        await tx.notification.create({
+          data: {
+            type: NotificationType.SECURITY_ALERT,
+            title: "Your account deletion is scheduled",
+            message:
+              `Hello ${updatedUser.name || "there"}, your agency account has been scheduled for deletion ` +
+              `and will be permanently removed after ${deleteAt.toLocaleString()}. ` +
+              `You can recover it within this window.`,
+            recipientId: updatedUser.id,
+            senderId: session.user.id,
+            entityType: "Agency",
+            entityId: agencyId,
+            actionText: "Recover Account",
+            actionUrl: `${process.env.NEXTAUTH_URL ?? ""}/dashboard/account/recover`,
+          },
+        });
+      } catch (nerr) {
+        console.error(
+          "Failed to create agency scheduled deletion notification:",
+          nerr
+        );
+      }
+
       return {
         id: agencyId,
         user: {
@@ -92,18 +107,16 @@ export async function DELETE(
       };
     });
 
-    // Send the deletion email (outside the transaction)
+    // keep your email (already “scheduled” email if you’ve added it) or this “deleted” email if desired later
     try {
       const emailTpl = getAgencyDeletionEmail(result.agencyName);
       if (result.user.email) {
         await sendTemplateEmail(emailTpl, result.user.email);
       }
     } catch (mailErr) {
-      // Don't fail the request if email sending has issues; just log it.
       console.error("Failed to send agency deletion email:", mailErr);
     }
 
-    // Respond to client
     return NextResponse.json({
       id: result.id,
       user: {

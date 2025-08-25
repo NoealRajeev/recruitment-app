@@ -1,10 +1,12 @@
+// app/api/assignments/signed-offer/route.ts
 import { NextRequest } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import path from "path";
 import fs from "fs";
-import { notifyOfferLetterSigned } from "@/lib/notification-helpers";
+import { NotificationDelivery } from "@/lib/notification-delivery";
+import { NotificationType, NotificationPriority } from "@prisma/client";
 
 const UPLOAD_DIR = path.join(
   process.cwd(),
@@ -12,9 +14,7 @@ const UPLOAD_DIR = path.join(
   "uploads",
   "signed-offers"
 );
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-}
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -35,29 +35,22 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Check assignment exists and belongs to agency
   const assignment = await prisma.labourAssignment.findUnique({
     where: { id: assignmentId },
     select: { id: true, agencyId: true, labourId: true },
   });
-  if (!assignment) {
+  if (!assignment)
     return new Response(JSON.stringify({ error: "Assignment not found" }), {
       status: 404,
     });
-  }
-  // Optionally, check agencyId matches session user
 
-  // Save file
   const filename = `signed-offer-${assignmentId}-${Date.now()}.pdf`;
   const filePath = path.join(UPLOAD_DIR, filename);
-
-  // Ensure directory exists
   try {
-    if (!fs.existsSync(UPLOAD_DIR)) {
+    if (!fs.existsSync(UPLOAD_DIR))
       fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-    }
-  } catch (error) {
-    console.error("Error creating directory:", error);
+  } catch (e) {
+    console.error("Error creating directory:", e);
     return new Response(
       JSON.stringify({ error: "Failed to create upload directory" }),
       { status: 500 }
@@ -68,68 +61,84 @@ export async function POST(req: NextRequest) {
   fs.writeFileSync(filePath, buffer);
   const url = `/uploads/signed-offers/${filename}`;
 
-  // Use a transaction to update both the assignment and stage history
   await prisma.$transaction(async (tx) => {
-    // Update assignment with signed offer letter URL
     await tx.labourAssignment.update({
       where: { id: assignmentId },
       data: { signedOfferLetterUrl: url },
     });
-
-    // Update OFFER_LETTER_SIGN stage from PENDING to SIGNED
     await tx.labourStageHistory.updateMany({
       where: {
         labourId: assignment.labourId,
         stage: "OFFER_LETTER_SIGN",
         status: "PENDING",
       },
-      data: {
-        status: "SIGNED",
-        completedAt: new Date(),
-      },
+      data: { status: "SIGNED", completedAt: new Date() },
     });
   });
 
-  // Get labour profile and assignment details for notification
   const labourAssignment = await prisma.labourAssignment.findUnique({
     where: { id: assignmentId },
     select: {
       id: true,
       agencyId: true,
-      jobRole: {
-        select: {
-          requirement: {
-            select: {
-              clientId: true
-            }
-          }
-        }
-      },
-      labourId: true
+      jobRole: { select: { requirement: { select: { clientId: true } } } },
+      labourId: true,
     },
   });
-  
-  // Get labour profile details
-  const labourProfile = labourAssignment ? await prisma.labourProfile.findUnique({
-    where: { id: labourAssignment.labourId },
-    select: {
-      id: true,
-      name: true
-    }
-  }) : null;
+  const labourProfile = labourAssignment
+    ? await prisma.labourProfile.findUnique({
+        where: { id: labourAssignment.labourId },
+        select: { id: true, name: true },
+      })
+    : null;
 
-  // Send notifications
+  // NEW: Deliver to agency + client
   try {
-    if (labourAssignment && labourProfile && labourAssignment.jobRole?.requirement?.clientId) {
-      await notifyOfferLetterSigned(
-        labourProfile.name,
-        labourAssignment.agencyId,
-        labourAssignment.jobRole.requirement.clientId
-      );
+    if (
+      labourAssignment &&
+      labourProfile &&
+      labourAssignment.jobRole?.requirement?.clientId
+    ) {
+      const cfg = {
+        type: NotificationType.OFFER_LETTER_SIGNED,
+        title: "Offer letter signed",
+        message: `${labourProfile.name} has signed the offer letter.`,
+        priority: NotificationPriority.HIGH,
+        actionUrl: url,
+        actionText: "Open signed offer",
+      } as const;
+
+      // agency user
+      const agency = await prisma.agency.findUnique({
+        where: { id: labourAssignment.agencyId },
+        select: { userId: true },
+      });
+      if (agency?.userId) {
+        await NotificationDelivery.deliverToUser(
+          agency.userId,
+          cfg,
+          session.user.id,
+          "LabourAssignment",
+          labourAssignment.id
+        );
+      }
+      // client user (clientId here is the Client entity; fetch its userId)
+      const client = await prisma.client.findUnique({
+        where: { id: labourAssignment.jobRole.requirement.clientId },
+        select: { userId: true },
+      });
+      if (client?.userId) {
+        await NotificationDelivery.deliverToUser(
+          client.userId,
+          cfg,
+          session.user.id,
+          "LabourAssignment",
+          labourAssignment.id
+        );
+      }
     }
-  } catch (notificationError) {
-    console.error("Notification sending failed:", notificationError);
-    // Continue even if notification fails
+  } catch (e) {
+    console.error("Notification delivery failed:", e);
   }
 
   return new Response(JSON.stringify({ success: true, url }), { status: 200 });

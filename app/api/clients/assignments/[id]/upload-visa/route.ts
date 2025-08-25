@@ -1,3 +1,4 @@
+// app/api/assignments/[id]/visa/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
@@ -7,12 +8,11 @@ import fs from "fs";
 import { sendTemplateEmail } from "@/lib/utils/email-service";
 import { getVisaNotificationEmail } from "@/lib/utils/email-templates";
 import { env } from "@/lib/env.server";
-import { notifyDocumentUploaded } from "@/lib/notification-helpers";
+import { NotificationDelivery } from "@/lib/notification-delivery";
+import { NotificationType, NotificationPriority } from "@prisma/client";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "visas");
-if (!fs.existsSync(UPLOAD_DIR)) {
-  fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-}
+if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 export async function POST(
   request: NextRequest,
@@ -28,49 +28,31 @@ export async function POST(
   const assignmentId = id;
 
   try {
-    // Get client profile
     const client = await prisma.client.findUnique({
       where: { userId: session.user.id },
       select: { id: true, companyName: true },
     });
-
-    if (!client) {
+    if (!client)
       return NextResponse.json(
         { error: "Client profile not found" },
         { status: 404 }
       );
-    }
 
-    // Check if assignment exists and belongs to this client
     const assignment = await prisma.labourAssignment.findFirst({
       where: {
         id: assignmentId,
-        jobRole: {
-          requirement: {
-            clientId: client.id,
-          },
-        },
+        jobRole: { requirement: { clientId: client.id } },
       },
-      include: {
-        jobRole: {
-          include: {
-            requirement: true,
-          },
-        },
-        labour: true,
-      },
+      include: { jobRole: { include: { requirement: true } }, labour: true },
     });
-
-    if (!assignment) {
+    if (!assignment)
       return NextResponse.json(
         { error: "Assignment not found" },
         { status: 404 }
       );
-    }
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
-
     if (!file || file.type !== "application/pdf") {
       return NextResponse.json(
         { error: "Missing or invalid PDF file" },
@@ -78,43 +60,29 @@ export async function POST(
       );
     }
 
-    // Save file
     const filename = `visa-${assignmentId}-${Date.now()}.pdf`;
     const filePath = path.join(UPLOAD_DIR, filename);
     const buffer = Buffer.from(await file.arrayBuffer());
     fs.writeFileSync(filePath, buffer);
     const url = `/uploads/visas/${filename}`;
 
-    // Use a transaction to update both the assignment and stage history
     await prisma.$transaction(async (tx) => {
-      // Update assignment with visa URL
       await tx.labourAssignment.update({
         where: { id: assignmentId },
         data: { visaUrl: url },
       });
-
-      // Mark VISA_PRINTING stage as completed
       await tx.labourStageHistory.updateMany({
         where: {
           labourId: assignment.labourId,
           stage: "VISA_PRINTING",
           status: "PENDING",
         },
-        data: {
-          status: "COMPLETED",
-          completedAt: new Date(),
-        },
+        data: { status: "COMPLETED", completedAt: new Date() },
       });
-
-      // Update current stage to READY_TO_TRAVEL
       await tx.labourProfile.update({
         where: { id: assignment.labourId },
-        data: {
-          currentStage: "READY_TO_TRAVEL",
-        },
+        data: { currentStage: "READY_TO_TRAVEL" },
       });
-
-      // Create new READY_TO_TRAVEL stage with PENDING status
       await tx.labourStageHistory.create({
         data: {
           labourId: assignment.labourId,
@@ -125,7 +93,7 @@ export async function POST(
       });
     });
 
-    // Send email notification to labourer if they have an email
+    // Email to labour (unchanged)
     if (assignment.labour.email) {
       try {
         const emailTemplate = getVisaNotificationEmail(
@@ -134,7 +102,6 @@ export async function POST(
           assignment.jobRole.title,
           `${env.NEXTAUTH_URL}${url}`
         );
-
         sendTemplateEmail(
           emailTemplate,
           assignment.labour.email,
@@ -150,27 +117,39 @@ export async function POST(
         );
       } catch (emailError) {
         console.error("Error sending visa notification email:", emailError);
-        // Don't fail the entire request if email fails
       }
     }
 
-    // Send in-app notifications
-    try {
-      // Notify agency about visa upload
-      await notifyDocumentUploaded(
-        "VISA",
-        assignment.labour.name,
-        assignment.agencyId,
-        // Find admin users to notify
-        (await prisma.user.findFirst({
-          where: { role: "RECRUITMENT_ADMIN" },
-          select: { id: true },
-        }))?.id
+    // NEW: Deliver to agency + admins
+    const cfg = {
+      type: NotificationType.VISA_UPLOADED,
+      title: "Visa uploaded",
+      message: `Visa uploaded for ${assignment.labour.name} (${assignment.jobRole.title}).`,
+      priority: NotificationPriority.HIGH,
+      actionUrl: url,
+      actionText: "Open Visa",
+    } as const;
+
+    const agency = await prisma.agency.findUnique({
+      where: { id: assignment.agencyId },
+      select: { userId: true },
+    });
+    if (agency?.userId) {
+      await NotificationDelivery.deliverToUser(
+        agency.userId,
+        cfg,
+        session.user.id,
+        "LabourAssignment",
+        assignmentId
       );
-    } catch (notificationError) {
-      console.error("Notification sending failed:", notificationError);
-      // Continue even if notification fails
     }
+    await NotificationDelivery.deliverToRole(
+      "RECRUITMENT_ADMIN",
+      cfg,
+      session.user.id,
+      "LabourAssignment",
+      assignmentId
+    );
 
     return NextResponse.json({
       success: true,

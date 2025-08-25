@@ -14,7 +14,8 @@ import {
   DocumentType,
   UserRole,
 } from "@/lib/generated/prisma";
-import { notifyDocumentUploaded } from "@/lib/notification-helpers";
+import { NotificationDelivery } from "@/lib/notification-delivery";
+import { NotificationType, NotificationPriority } from "@/lib/generated/prisma";
 
 const RegistrationSchema = z.object({
   companyName: z.string().min(2),
@@ -184,38 +185,60 @@ export async function POST(request: Request) {
 
       // Send notifications for document uploads
       try {
-        // Find a recruitment admin to notify
-        const adminUser = await tx.user.findFirst({
-          where: { role: UserRole.RECRUITMENT_ADMIN },
-          select: { id: true },
-        });
+        const mkCfg = (label: string) =>
+          ({
+            type: NotificationType.DOCUMENT_UPLOADED,
+            title: `${label} uploaded`,
+            message: `${user.name} uploaded ${label}.`,
+            priority: NotificationPriority.NORMAL,
+            actionUrl: `/dashboard/admin/review-docs?ownerId=${user.id}`,
+            actionText: "Review",
+          }) as const;
 
-        // Send notifications for each document type
-        await notifyDocumentUploaded(
-          "Company Registration",
-          user.name,
+        // Notify all admins (role fanout)
+        await NotificationDelivery.deliverToRole(
+          "RECRUITMENT_ADMIN",
+          mkCfg("Company Registration"),
           user.id,
-          adminUser?.id
+          "User",
+          user.id
         );
-
-        await notifyDocumentUploaded(
-          "License",
-          user.name,
+        await NotificationDelivery.deliverToRole(
+          "RECRUITMENT_ADMIN",
+          mkCfg("License"),
           user.id,
-          adminUser?.id
+          "User",
+          user.id
         );
 
         if (otherDocuments.length > 0) {
-          await notifyDocumentUploaded(
-            "Supporting Documents",
-            user.name,
+          await NotificationDelivery.deliverToRole(
+            "RECRUITMENT_ADMIN",
+            mkCfg("Supporting Documents"),
             user.id,
-            adminUser?.id
+            "User",
+            user.id
           );
         }
+
+        // Optional: confirmation to the submitting client admin
+        await NotificationDelivery.deliverToUser(
+          user.id,
+          {
+            type: NotificationType.DOCUMENT_UPLOADED,
+            title: "Documents received",
+            message:
+              "Your registration documents were received and queued for review.",
+            priority: NotificationPriority.NORMAL,
+            actionUrl: `/dashboard/client`,
+            actionText: "Go to dashboard",
+          },
+          user.id,
+          "User",
+          user.id
+        );
       } catch (notificationError) {
         console.error("Failed to send notifications:", notificationError);
-        // Continue even if notification fails
       }
 
       // Audit log

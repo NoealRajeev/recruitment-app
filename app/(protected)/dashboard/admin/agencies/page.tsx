@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -84,6 +84,8 @@ const COUNTRY_CODES = [
 
 const ITEMS_PER_PAGE = 10;
 
+type RowAction = "approve" | "reject" | "delete" | "rereview";
+
 export default function Agencies() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -150,12 +152,24 @@ export default function Agencies() {
       city: "",
       postalCode: "",
     });
+
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRegistering, setIsRegistering] = useState(false);
   const [activeTab, setActiveTab] = useState<
     "all" | "pending" | "verified" | "rejected"
   >("all");
+
+  // Per-row loading states so multiple rows can act independently
+  const [rowLoading, setRowLoading] = useState<
+    Record<string, Partial<Record<RowAction, boolean>>>
+  >({});
+
+  const setRowActionLoading = (id: string, action: RowAction, v: boolean) =>
+    setRowLoading((prev) => ({
+      ...prev,
+      [id]: { ...(prev[id] || {}), [action]: v },
+    }));
 
   // Document review modal
   const [selectedAgency, setSelectedAgency] = useState<Agency | null>(null);
@@ -172,6 +186,8 @@ export default function Agencies() {
   // Delete modal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [agencyToDelete, setAgencyToDelete] = useState<Agency | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isRecovering, setIsRecovering] = useState(false);
 
   // Pagination
   const [currentPage, setCurrentPage] = useState(1);
@@ -179,6 +195,15 @@ export default function Agencies() {
   // Info modal (card click)
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [infoAgency, setInfoAgency] = useState<Agency | null>(null);
+
+  // prevent state updates after unmount
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   // ---------- Utils ----------
   const toDate = (d: string | Date | null | undefined) =>
@@ -193,7 +218,7 @@ export default function Agencies() {
 
   const getRemainingTime = useCallback(
     (deleteAt?: Date | string | null): string => {
-      const del = toDate(deleteAt);
+      const del = toDate(deleteAt ?? null);
       if (!del) return "No deletion scheduled";
       const now = new Date();
       const diffInMs = del.getTime() - now.getTime();
@@ -231,27 +256,40 @@ export default function Agencies() {
       return;
     }
 
+    const controller = new AbortController();
+
     const fetchAgencies = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch("/api/agencies");
+        const response = await fetch("/api/agencies", {
+          signal: controller.signal,
+        });
         if (!response.ok) throw new Error("Failed to fetch agencies");
         const data: Agency[] = await response.json();
+        if (!mountedRef.current) return;
         setAgencies(data);
         logSecurityEvent("AGENCIES_FETCHED", { count: data.length });
       } catch (error) {
+        if ((error as any)?.name === "AbortError") return;
         console.error("Error fetching agencies:", error);
         toast({ type: "error", message: "Failed to load agencies" });
         logSecurityEvent("AGENCIES_FETCH_FAILED", {
           error: error instanceof Error ? error.message : "Unknown error",
         });
       } finally {
-        setIsLoading(false);
+        if (mountedRef.current) setIsLoading(false);
       }
     };
 
     fetchAgencies();
+
+    return () => controller.abort();
   }, [status, session, router, toast]);
+
+  // Reset paging when tab changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
 
   // ---------- Tabs mapping ----------
   const tabToStatus: Record<
@@ -309,6 +347,8 @@ export default function Agencies() {
   };
 
   const handleDocumentStatusChange = (docId: string, status: AccountStatus) => {
+    // While updating, lock selects
+    if (isUpdating) return;
     setDocumentStatuses((prev) => ({ ...prev, [docId]: status }));
   };
 
@@ -324,6 +364,13 @@ export default function Agencies() {
   // ---------- Handlers ----------
   const handleRowClick = async (agency: Agency) => {
     const statusNorm = normalizeStatus(agency.user?.status);
+    // disable opening reviewer when another action is loading for this row
+    const loadingForRow = rowLoading[agency.id];
+    const hasLoading =
+      loadingForRow &&
+      Object.values(loadingForRow).some((v) => Boolean(v === true));
+    if (hasLoading) return;
+
     if (statusNorm === AccountStatus.NOT_VERIFIED) {
       setSelectedAgency(agency);
       await fetchAgencyDocuments(agency.id);
@@ -339,6 +386,7 @@ export default function Agencies() {
 
   const handleRegistration = async () => {
     try {
+      if (isRegistering) return;
       setIsRegistering(true);
       const response = await fetch("/api/agencies/register", {
         method: "POST",
@@ -346,7 +394,7 @@ export default function Agencies() {
         body: JSON.stringify(registrationData),
       });
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || "Registration failed");
       }
       const newAgency: Agency = await response.json();
@@ -386,7 +434,17 @@ export default function Agencies() {
     reason?: string
   ) => {
     try {
+      // set per-row action spinner
+      const action: RowAction =
+        newStatus === AccountStatus.VERIFIED
+          ? "approve"
+          : newStatus === AccountStatus.NOT_VERIFIED
+            ? "rereview"
+            : "reject";
+
+      setRowActionLoading(agencyId, action, true);
       setIsUpdating(true);
+
       const response = await fetch(`/api/agencies/${agencyId}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -429,11 +487,17 @@ export default function Agencies() {
       });
     } finally {
       setIsUpdating(false);
+      setRowActionLoading(agencyId, "approve", false);
+      setRowActionLoading(agencyId, "reject", false);
+      setRowActionLoading(agencyId, "rereview", false);
     }
   };
 
   const handleImmediateDelete = async (agencyId: string) => {
     try {
+      setIsDeleting(true);
+      setRowActionLoading(agencyId, "delete", true);
+
       const response = await fetch(
         `/api/agencies/${agencyId}/delete-immediate`,
         { method: "DELETE" }
@@ -465,11 +529,15 @@ export default function Agencies() {
         agencyId,
         error: error instanceof Error ? error.message : "Unknown error",
       });
+    } finally {
+      setIsDeleting(false);
+      setRowActionLoading(agencyId, "delete", false);
     }
   };
 
   const handleRecoverAccount = async (agencyId: string) => {
     try {
+      setIsRecovering(true);
       const response = await fetch(`/api/agencies/${agencyId}/recover`, {
         method: "PUT",
       });
@@ -491,6 +559,8 @@ export default function Agencies() {
         agencyId,
         error: error instanceof Error ? error.message : "Unknown error",
       });
+    } finally {
+      setIsRecovering(false);
     }
   };
 
@@ -506,6 +576,7 @@ export default function Agencies() {
         <div
           className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#3D1673]"
           aria-label="Loading..."
+          aria-busy="true"
         />
       </div>
     );
@@ -513,7 +584,7 @@ export default function Agencies() {
 
   // ---------- Render ----------
   return (
-    <div className="px-4 sm:px-6 space-y-6">
+    <div className="px-4 sm:px-6 space-y-6" aria-busy={isLoading}>
       {/* Top Section - Registration and Verification */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div>
@@ -536,6 +607,7 @@ export default function Agencies() {
                 placeholder="Enter agency name"
                 required
                 aria-required="true"
+                disabled={isRegistering}
               />
               <Input
                 variant="horizontal"
@@ -546,6 +618,7 @@ export default function Agencies() {
                 placeholder="Enter registration number"
                 required
                 aria-required="true"
+                disabled={isRegistering}
               />
               <Input
                 variant="horizontal"
@@ -556,6 +629,7 @@ export default function Agencies() {
                 placeholder="Enter license number"
                 required
                 aria-required="true"
+                disabled={isRegistering}
               />
               <Input
                 variant="horizontal"
@@ -566,6 +640,7 @@ export default function Agencies() {
                 onChange={handleRegistrationChange}
                 required
                 aria-required="true"
+                disabled={isRegistering}
               />
               <Input
                 variant="horizontal"
@@ -577,6 +652,7 @@ export default function Agencies() {
                 placeholder="Enter email address"
                 required
                 aria-required="true"
+                disabled={isRegistering}
               />
 
               {/* Phone with country code — responsive */}
@@ -599,9 +675,10 @@ export default function Agencies() {
                             countryCode: e.target.value,
                           }))
                         }
-                        className="px-3 py-2 text-sm text-gray-700 outline-none"
+                        className="px-3 py-2 text-sm text-gray-700 outline-none disabled:opacity-60"
                         required
                         aria-required="true"
+                        disabled={isRegistering}
                       >
                         {COUNTRY_CODES.map((cc) => (
                           <option key={cc.code} value={cc.code}>
@@ -616,9 +693,10 @@ export default function Agencies() {
                         value={registrationData.phone}
                         onChange={handleRegistrationChange}
                         placeholder="Enter phone number"
-                        className="flex-1 px-3 py-2 text-sm outline-none"
+                        className="flex-1 px-3 py-2 text-sm outline-none disabled:opacity-60"
                         required
                         aria-required="true"
+                        disabled={isRegistering}
                       />
                     </div>
                   </div>
@@ -634,6 +712,7 @@ export default function Agencies() {
                 placeholder="Enter full address"
                 required
                 aria-required="true"
+                disabled={isRegistering}
               />
               <Input
                 variant="horizontal"
@@ -644,6 +723,7 @@ export default function Agencies() {
                 placeholder="Enter city"
                 required
                 aria-required="true"
+                disabled={isRegistering}
               />
               <HorizontalSelect
                 label="Country :"
@@ -663,6 +743,7 @@ export default function Agencies() {
                 }
                 required
                 aria-required="true"
+                disabled={isRegistering}
               />
               <Input
                 variant="horizontal"
@@ -671,6 +752,7 @@ export default function Agencies() {
                 value={registrationData.postalCode}
                 onChange={handleRegistrationChange}
                 placeholder="Enter postal code"
+                disabled={isRegistering}
               />
 
               <div className="flex justify-center mt-2">
@@ -679,6 +761,7 @@ export default function Agencies() {
                   disabled={isRegistering}
                   className="w-full sm:w-1/2 bg-[#3D1673] hover:bg-[#2b0e54] text-white py-2 px-4 rounded-md disabled:opacity-60 disabled:cursor-not-allowed"
                   aria-label="Register agency"
+                  aria-busy={isRegistering}
                 >
                   {isRegistering ? (
                     <>
@@ -730,6 +813,7 @@ export default function Agencies() {
                 onClick={() => setActiveTab("all")}
                 role="tab"
                 aria-selected={activeTab === "all"}
+                disabled={isLoading}
               >
                 All
               </Button>
@@ -738,6 +822,7 @@ export default function Agencies() {
                 onClick={() => setActiveTab("pending")}
                 role="tab"
                 aria-selected={activeTab === "pending"}
+                disabled={isLoading}
               >
                 Pending
               </Button>
@@ -746,6 +831,7 @@ export default function Agencies() {
                 onClick={() => setActiveTab("verified")}
                 role="tab"
                 aria-selected={activeTab === "verified"}
+                disabled={isLoading}
               >
                 Verified
               </Button>
@@ -754,6 +840,7 @@ export default function Agencies() {
                 onClick={() => setActiveTab("rejected")}
                 role="tab"
                 aria-selected={activeTab === "rejected"}
+                disabled={isLoading}
               >
                 Rejected
               </Button>
@@ -781,6 +868,18 @@ export default function Agencies() {
                 <tbody className="divide-y divide-transparent">
                   {paginatedAgencies.map((agency) => {
                     const statusNorm = normalizeStatus(agency?.user?.status);
+                    const loading = rowLoading[agency.id] || {};
+                    const commonDisable =
+                      Boolean(
+                        loading.approve ||
+                          loading.reject ||
+                          loading.delete ||
+                          loading.rereview
+                      ) ||
+                      isUpdating ||
+                      isDeleting ||
+                      isRecovering;
+
                     return (
                       <tr
                         key={agency.id}
@@ -811,13 +910,38 @@ export default function Agencies() {
                                 size="sm"
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  if (commonDisable) return;
                                   handleStatusUpdate(
                                     agency.id,
                                     AccountStatus.VERIFIED
                                   );
                                 }}
                                 aria-label={`Approve ${agency.agencyName}`}
+                                disabled={commonDisable}
+                                aria-busy={Boolean(loading.approve)}
                               >
+                                {loading.approve ? (
+                                  <svg
+                                    className="animate-spin -ml-1 mr-2 h-4 w-4"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <circle
+                                      className="opacity-25"
+                                      cx="12"
+                                      cy="12"
+                                      r="10"
+                                      stroke="currentColor"
+                                      strokeWidth="4"
+                                    />
+                                    <path
+                                      className="opacity-75"
+                                      fill="currentColor"
+                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    />
+                                  </svg>
+                                ) : null}
                                 Approve
                               </Button>
                               <Button
@@ -825,11 +949,36 @@ export default function Agencies() {
                                 variant="destructive"
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  if (commonDisable) return;
                                   setSelectedAgency(agency);
                                   setIsModalOpen(true);
                                 }}
                                 aria-label={`Reject ${agency.agencyName}`}
+                                disabled={commonDisable}
+                                aria-busy={Boolean(loading.reject)}
                               >
+                                {loading.reject ? (
+                                  <svg
+                                    className="animate-spin -ml-1 mr-2 h-4 w-4"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <circle
+                                      className="opacity-25"
+                                      cx="12"
+                                      cy="12"
+                                      r="10"
+                                      stroke="currentColor"
+                                      strokeWidth="4"
+                                    />
+                                    <path
+                                      className="opacity-75"
+                                      fill="currentColor"
+                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    />
+                                  </svg>
+                                ) : null}
                                 Reject
                               </Button>
                             </>
@@ -841,14 +990,39 @@ export default function Agencies() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
+                                if (commonDisable) return;
                                 setAgencyToDelete(agency);
                                 setIsDeleteModalOpen(true);
                               }}
-                              className="text-red-500 hover:text-red-700"
+                              className="text-red-500 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                               title="Delete account"
                               aria-label={`Delete ${agency.agencyName}`}
+                              disabled={commonDisable}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              {loading.delete ? (
+                                <svg
+                                  className="animate-spin h-4 w-4"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                  />
+                                  <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                  />
+                                </svg>
+                              ) : (
+                                <Trash2 className="h-4 w-4" />
+                              )}
                             </button>
                           )}
 
@@ -857,13 +1031,38 @@ export default function Agencies() {
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
+                                if (commonDisable) return;
                                 handleStatusUpdate(
                                   agency.id,
                                   AccountStatus.NOT_VERIFIED
                                 );
                               }}
                               aria-label={`Re-review ${agency.agencyName}`}
+                              disabled={commonDisable}
+                              aria-busy={Boolean(loading.rereview)}
                             >
+                              {loading.rereview ? (
+                                <svg
+                                  className="animate-spin -ml-1 mr-2 h-4 w-4"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                  />
+                                  <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                  />
+                                </svg>
+                              ) : null}
                               Re-review
                             </Button>
                           )}
@@ -881,7 +1080,10 @@ export default function Agencies() {
                     totalPages={Math.ceil(
                       filteredAgencies.length / ITEMS_PER_PAGE
                     )}
-                    onPageChange={setCurrentPage}
+                    onPageChange={(page) => {
+                      if (isUpdating || isDeleting) return;
+                      setCurrentPage(page);
+                    }}
                   />
                 </div>
               )}
@@ -891,11 +1093,24 @@ export default function Agencies() {
             <div className="md:hidden space-y-3">
               {paginatedAgencies.map((agency) => {
                 const statusNorm = normalizeStatus(agency?.user?.status);
+                const loading = rowLoading[agency.id] || {};
+                const commonDisable =
+                  Boolean(
+                    loading.approve ||
+                      loading.reject ||
+                      loading.delete ||
+                      loading.rereview
+                  ) ||
+                  isUpdating ||
+                  isDeleting ||
+                  isRecovering;
+
                 return (
                   <div
                     key={agency.id}
                     className="rounded-lg bg-white p-3 shadow hover:bg-[#f7f0fb] transition"
                     onClick={() => handleRowClick(agency)}
+                    aria-busy={commonDisable}
                   >
                     <div className="flex items-start gap-3">
                       <div className="relative h-10 w-10 rounded-full overflow-hidden bg-gray-100">
@@ -934,12 +1149,36 @@ export default function Agencies() {
                                 size="sm"
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  if (commonDisable) return;
                                   handleStatusUpdate(
                                     agency.id,
                                     AccountStatus.VERIFIED
                                   );
                                 }}
+                                disabled={commonDisable}
                               >
+                                {loading.approve ? (
+                                  <svg
+                                    className="animate-spin -ml-1 mr-2 h-4 w-4"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <circle
+                                      className="opacity-25"
+                                      cx="12"
+                                      cy="12"
+                                      r="10"
+                                      stroke="currentColor"
+                                      strokeWidth="4"
+                                    />
+                                    <path
+                                      className="opacity-75"
+                                      fill="currentColor"
+                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                    />
+                                  </svg>
+                                ) : null}
                                 Approve
                               </Button>
                               <Button
@@ -947,10 +1186,34 @@ export default function Agencies() {
                                 variant="destructive"
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  if (commonDisable) return;
                                   setSelectedAgency(agency);
                                   setIsModalOpen(true);
                                 }}
+                                disabled={commonDisable}
                               >
+                                {loading.reject ? (
+                                  <svg
+                                    className="animate-spin -ml-1 mr-2 h-4 w-4"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <circle
+                                      className="opacity-25"
+                                      cx="12"
+                                      cy="12"
+                                      r="10"
+                                      stroke="currentColor"
+                                      strokeWidth="4"
+                                    />
+                                    <path
+                                      className="opacity-75"
+                                      fill="currentColor"
+                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                    />
+                                  </svg>
+                                ) : null}
                                 Reject
                               </Button>
                             </>
@@ -963,11 +1226,36 @@ export default function Agencies() {
                               variant="outline"
                               onClick={(e) => {
                                 e.stopPropagation();
+                                if (commonDisable) return;
                                 setAgencyToDelete(agency);
                                 setIsDeleteModalOpen(true);
                               }}
+                              disabled={commonDisable}
                             >
-                              <Trash2 className="h-4 w-4 mr-1" />
+                              {loading.delete ? (
+                                <svg
+                                  className="animate-spin h-4 w-4 mr-1"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                  />
+                                  <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                  />
+                                </svg>
+                              ) : (
+                                <Trash2 className="h-4 w-4 mr-1" />
+                              )}
                               Delete
                             </Button>
                           )}
@@ -977,12 +1265,36 @@ export default function Agencies() {
                               variant="outline"
                               onClick={(e) => {
                                 e.stopPropagation();
+                                if (commonDisable) return;
                                 handleStatusUpdate(
                                   agency.id,
                                   AccountStatus.NOT_VERIFIED
                                 );
                               }}
+                              disabled={commonDisable}
                             >
+                              {loading.rereview ? (
+                                <svg
+                                  className="animate-spin -ml-1 mr-2 h-4 w-4"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                >
+                                  <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                  />
+                                  <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                  />
+                                </svg>
+                              ) : null}
                               Re-review
                             </Button>
                           )}
@@ -1000,7 +1312,10 @@ export default function Agencies() {
                     totalPages={Math.ceil(
                       filteredAgencies.length / ITEMS_PER_PAGE
                     )}
-                    onPageChange={setCurrentPage}
+                    onPageChange={(page) => {
+                      if (isUpdating || isDeleting) return;
+                      setCurrentPage(page);
+                    }}
                   />
                 </div>
               )}
@@ -1021,48 +1336,65 @@ export default function Agencies() {
                 statusNorm === AccountStatus.REJECTED
               );
             })
-            .map((agency) => (
-              <div key={agency.id} className="relative">
-                <AgencyCardContent
-                  key={agency.id}
-                  agencyName={agency.agencyName}
-                  location={`${agency.country} • ${agency.registrationNo}`}
-                  logoUrl={agency.user.profilePicture ?? undefined}
-                  email={agency.user.email}
-                  registerNo={agency.registrationNo}
-                  time={
-                    normalizeStatus(agency.user.status) ===
-                      AccountStatus.REJECTED && agency.user.deleteAt
-                      ? getRemainingTime(agency.user.deleteAt)
-                      : formatTimeAgo(agency.createdAt)
-                  }
-                  onClick={() => openInfoModal(agency)}
-                  onEdit={() =>
-                    router.push(`/dashboard/admin/agencies/${agency.id}/edit`)
-                  }
-                  onOpenDocs={async () => {
-                    setSelectedAgency(agency);
-                    await fetchAgencyDocuments(agency.id);
-                    setIsModalOpen(true);
-                  }}
-                  onDelete={() => {
-                    setAgencyToDelete(agency);
-                    setIsDeleteModalOpen(true);
-                  }}
-                  aria-label={`View details for ${agency.agencyName}`}
-                />
+            .map((agency) => {
+              const loading = rowLoading[agency.id] || {};
+              const commonDisable =
+                Boolean(
+                  loading.approve ||
+                    loading.reject ||
+                    loading.delete ||
+                    loading.rereview
+                ) ||
+                isUpdating ||
+                isDeleting ||
+                isRecovering;
 
-                {/* Status indicator */}
-                <div className="absolute bottom-3 left-2 right-2 flex justify-between items-start pointer-events-none">
-                  {normalizeStatus(agency.user.status) ===
-                    AccountStatus.REJECTED && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      Rejected
-                    </span>
-                  )}
+              return (
+                <div key={agency.id} className="relative">
+                  <AgencyCardContent
+                    key={agency.id}
+                    agencyName={agency.agencyName}
+                    location={`${agency.country} • ${agency.registrationNo}`}
+                    logoUrl={agency.user.profilePicture ?? undefined}
+                    email={agency.user.email}
+                    registerNo={agency.registrationNo}
+                    time={
+                      normalizeStatus(agency.user.status) ===
+                        AccountStatus.REJECTED && agency.user.deleteAt
+                        ? getRemainingTime(agency.user.deleteAt)
+                        : formatTimeAgo(agency.createdAt)
+                    }
+                    onClick={() => !commonDisable && openInfoModal(agency)}
+                    onEdit={() =>
+                      !commonDisable &&
+                      router.push(`/dashboard/admin/agencies/${agency.id}/edit`)
+                    }
+                    onOpenDocs={async () => {
+                      if (commonDisable) return;
+                      setSelectedAgency(agency);
+                      await fetchAgencyDocuments(agency.id);
+                      setIsModalOpen(true);
+                    }}
+                    onDelete={() => {
+                      if (commonDisable) return;
+                      setAgencyToDelete(agency);
+                      setIsDeleteModalOpen(true);
+                    }}
+                    aria-label={`View details for ${agency.agencyName}`}
+                  />
+
+                  {/* Status indicator */}
+                  <div className="absolute bottom-3 left-2 right-2 flex justify-between items-start pointer-events-none">
+                    {normalizeStatus(agency.user.status) ===
+                      AccountStatus.REJECTED && (
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        Rejected
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
         </div>
       </div>
 
@@ -1072,6 +1404,7 @@ export default function Agencies() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => {
+          if (isUpdating) return; // prevent closing while updating
           setIsModalOpen(false);
           setSelectedAgency(null);
           setRejectionReason("");
@@ -1090,6 +1423,8 @@ export default function Agencies() {
                 placeholder="Provide specific reasons for rejection..."
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
+                disabled={isUpdating}
+                aria-disabled={isUpdating}
               />
             </div>
             <div className="flex flex-col sm:flex-row gap-2 sm:justify-end">
@@ -1112,7 +1447,33 @@ export default function Agencies() {
                 }
                 disabled={!rejectionReason.trim() || isUpdating}
               >
-                {isUpdating ? "Processing..." : "Reject"}
+                {isUpdating ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      />
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  "Reject"
+                )}
               </Button>
               <Button
                 onClick={() =>
@@ -1126,7 +1487,33 @@ export default function Agencies() {
                     : ""
                 }
               >
-                {isUpdating ? "Processing..." : "Approve"}
+                {isUpdating ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      />
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  "Approve"
+                )}
               </Button>
             </div>
           </div>
@@ -1274,6 +1661,7 @@ export default function Agencies() {
                                   )
                                 }
                                 className={`text-sm border rounded px-2 py-1 ${isImportant ? "font-semibold" : ""}`}
+                                disabled={isUpdating}
                               >
                                 <option value="NOT_VERIFIED">
                                   Not Verified
@@ -1352,6 +1740,7 @@ export default function Agencies() {
       <Modal
         isOpen={isDeleteModalOpen}
         onClose={() => {
+          if (isDeleting) return; // lock while deleting
           setIsDeleteModalOpen(false);
           setAgencyToDelete(null);
         }}
@@ -1364,6 +1753,7 @@ export default function Agencies() {
               variant="outline"
               onClick={() => setIsDeleteModalOpen(false)}
               aria-label="Cancel deletion"
+              disabled={isDeleting}
             >
               Cancel
             </Button>
@@ -1373,8 +1763,36 @@ export default function Agencies() {
                 if (agencyToDelete) handleImmediateDelete(agencyToDelete.id);
               }}
               aria-label="Confirm deletion"
+              disabled={isDeleting}
+              aria-busy={isDeleting}
             >
-              Delete Account (1h window)
+              {isDeleting ? (
+                <>
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    />
+                  </svg>
+                  Deleting…
+                </>
+              ) : (
+                "Delete Account (1h window)"
+              )}
             </Button>
           </div>
         }
@@ -1393,9 +1811,33 @@ export default function Agencies() {
                 agencyToDelete && handleRecoverAccount(agencyToDelete.id)
               }
               aria-label="Recover account"
+              disabled={isRecovering || isDeleting}
             >
-              <Undo2 className="h-4 w-4 mr-2" />
-              Recover Account
+              {isRecovering ? (
+                <svg
+                  className="animate-spin h-4 w-4 mr-2"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  />
+                </svg>
+              ) : (
+                <Undo2 className="h-4 w-4 mr-2" />
+              )}
+              {isRecovering ? "Recovering…" : "Recover Account"}
             </Button>
             <span className="text-sm text-gray-500">
               Scheduled for deletion

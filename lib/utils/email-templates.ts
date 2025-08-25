@@ -763,3 +763,44 @@ The Findly Team`,
 </div>
 `,
 });
+
+export const getAgencyDeletionScheduledEmail = (
+  agencyName: string,
+  deleteAtISO: string
+) => ({
+  subject: `Your Findly Agency Account Is Scheduled for Deletion`,
+  text: `Dear ${agencyName},
+
+Your Findly agency account has been scheduled for deletion. It will be permanently removed after the deletion window ends.
+
+Deletion time: ${new Date(deleteAtISO).toUTCString()}
+
+If this was unexpected or you need help, you can recover your account before the deadline or contact support:
+${env.NEXTAUTH_URL}/support
+
+Best regards,
+The Findly Team`,
+  html: `
+<div style="${Object.entries(baseEmailStyles)
+    .map(([k, v]) => `${k}: ${v};`)
+    .join("")}">
+  ${headerTemplate("Deletion Scheduled")}
+
+  <p>Dear ${agencyName},</p>
+  <p>Your <strong>Findly agency account</strong> has been scheduled for deletion and will be permanently removed after the deletion window ends.</p>
+
+  <div style="background: ${warningBackground}; padding: 16px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #ffc107;">
+    <p style="margin: 0;">
+      <strong>Deletion time:</strong> ${new Date(deleteAtISO).toUTCString()}
+    </p>
+  </div>
+
+  <div style="text-align:center; margin: 20px 0;">
+    ${actionButton("Contact Support", `${env.NEXTAUTH_URL}/support`)}
+  </div>
+
+  <p>If this was unexpected or you need help, you can recover your account before the deadline or contact support.</p>
+
+  ${footerTemplate}
+</div>`,
+});

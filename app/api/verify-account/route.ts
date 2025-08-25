@@ -11,7 +11,8 @@ import {
   UserRole,
 } from "@/lib/generated/prisma";
 import { sendTemplateEmail } from "@/lib/utils/email-service";
-import { notifyDocumentUploaded } from "@/lib/notification-helpers";
+import { NotificationDelivery } from "@/lib/notification-delivery";
+import { NotificationType, NotificationPriority } from "@/lib/generated/prisma";
 
 async function saveFileToDisk(file: File, userId: string): Promise<string> {
   // Create uploads directory if it doesn't exist
@@ -126,55 +127,58 @@ export async function POST(request: Request) {
           processDocument(file, DocumentType.OTHER)
         ),
       ]);
-      
+
       // Send notifications for document uploads
       try {
-        // Find a recruitment admin to notify
-        const adminUser = await tx.user.findFirst({
-          where: { role: UserRole.RECRUITMENT_ADMIN },
-          select: { id: true },
-        });
-        
-        // Send notifications for each document type
-        await notifyDocumentUploaded(
-          "License",
-          user.name,
-          user.id,
-          adminUser?.id
-        );
-        
-        await notifyDocumentUploaded(
-          "Insurance",
-          user.name,
-          user.id,
-          adminUser?.id
-        );
-        
-        await notifyDocumentUploaded(
-          "ID Proof",
-          user.name,
-          user.id,
-          adminUser?.id
-        );
-        
-        await notifyDocumentUploaded(
-          "Address Proof",
-          user.name,
-          user.id,
-          adminUser?.id
-        );
-        
-        if (otherDocuments.length > 0) {
-          await notifyDocumentUploaded(
-            "Supporting Documents",
-            user.name,
+        const mkCfg = (label: string) =>
+          ({
+            type: NotificationType.DOCUMENT_UPLOADED,
+            title: `${label} uploaded`,
+            message: `${user.name} uploaded ${label}.`,
+            priority: NotificationPriority.NORMAL,
+            actionUrl: `/dashboard/admin/review-docs?ownerId=${user.id}`,
+            actionText: "Review",
+          }) as const;
+
+        const labels = ["License", "Insurance", "ID Proof", "Address Proof"];
+        for (const label of labels) {
+          await NotificationDelivery.deliverToRole(
+            "RECRUITMENT_ADMIN",
+            mkCfg(label),
             user.id,
-            adminUser?.id
+            "User",
+            user.id
           );
         }
+
+        if (otherDocuments.length > 0) {
+          await NotificationDelivery.deliverToRole(
+            "RECRUITMENT_ADMIN",
+            mkCfg("Supporting Documents"),
+            user.id,
+            "User",
+            user.id
+          );
+        }
+
+        // Optional: confirmation to the agency user
+        await NotificationDelivery.deliverToUser(
+          user.id,
+          {
+            type: NotificationType.DOCUMENT_UPLOADED,
+            title: "Documents received",
+            message:
+              "Your verification documents were received and queued for review.",
+            priority: NotificationPriority.NORMAL,
+            actionUrl: `/dashboard/agency`,
+            actionText: "Open dashboard",
+          },
+          user.id,
+          "User",
+          user.id
+        );
       } catch (notificationError) {
         console.error("Failed to send notifications:", notificationError);
-        // Continue even if notification fails
       }
 
       // 3. Update user status

@@ -1,3 +1,4 @@
+// app/api/auth/register/route.ts
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { hash } from "bcryptjs";
@@ -13,9 +14,10 @@ import {
   DocumentCategory,
   DocumentType,
   UserRole,
+  NotificationType,
+  NotificationPriority,
 } from "@/lib/generated/prisma";
 import { NotificationDelivery } from "@/lib/notification-delivery";
-import { NotificationType, NotificationPriority } from "@/lib/generated/prisma";
 
 const RegistrationSchema = z.object({
   companyName: z.string().min(2),
@@ -44,7 +46,6 @@ function generateRandomPassword(length = 12): string {
 }
 
 async function saveFileToDisk(file: File, userId: string): Promise<string> {
-  // Create uploads directory if it doesn't exist
   const uploadsDir = path.join(
     process.cwd(),
     "public",
@@ -54,30 +55,22 @@ async function saveFileToDisk(file: File, userId: string): Promise<string> {
   );
   await fs.mkdir(uploadsDir, { recursive: true });
 
-  // Convert file to buffer
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
 
-  // Generate unique filename
   const fileExt = path.extname(file.name);
   const fileName = `${Date.now()}-${file.name.replace(fileExt, "")}${fileExt}`;
   const filePath = path.join(uploadsDir, fileName);
 
-  // Save file
   await fs.writeFile(filePath, buffer);
-
-  // Return relative path for database storage
   return `/uploads/client/${userId}/${fileName}`;
 }
 
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
-
-    // Convert FormData to object
     const formFields = Object.fromEntries(formData.entries());
 
-    // Validate form data (excluding files)
     const validation = RegistrationSchema.safeParse({
       ...formFields,
       sector: formFields.sector as CompanySector,
@@ -93,7 +86,6 @@ export async function POST(request: Request) {
 
     const { email, phone, countryCode } = validation.data;
 
-    // Check existing user
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [{ email }, { phone: `${countryCode}${phone}` }],
@@ -107,7 +99,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Process files
     const crFile = formData.get("crFile") as File | null;
     const licenseFile = formData.get("licenseFile") as File | null;
     const otherDocuments = formData.getAll("otherDocuments") as File[];
@@ -122,14 +113,13 @@ export async function POST(request: Request) {
     const randomPassword = generateRandomPassword();
     const hashedPassword = await hash(randomPassword, 12);
 
-    // Transaction
+    // ===== 1) DB work in one transaction =====
     const result = await prisma.$transaction(async (tx) => {
-      // Create User
       const user = await tx.user.create({
         data: {
           name: validation.data.fullName,
           email,
-          phone: `${countryCode} " " ${phone}`,
+          phone: `${countryCode}${phone}`, // <-- fix: remove stray quotes
           altContact: validation.data.altContact
             ? `${validation.data.altCountryCode || countryCode}${validation.data.altContact}`
             : null,
@@ -141,7 +131,6 @@ export async function POST(request: Request) {
         },
       });
 
-      // Create Client
       const client = await tx.client.create({
         data: {
           userId: user.id,
@@ -158,10 +147,8 @@ export async function POST(request: Request) {
         },
       });
 
-      // Process documents
       const processDocument = async (file: File, type: DocumentType) => {
         const url = await saveFileToDisk(file, user.id);
-
         await tx.document.create({
           data: {
             ownerId: user.id,
@@ -178,70 +165,10 @@ export async function POST(request: Request) {
 
       await processDocument(crFile, DocumentType.COMPANY_REGISTRATION);
       await processDocument(licenseFile, DocumentType.LICENSE);
-
       for (const doc of otherDocuments) {
         await processDocument(doc, DocumentType.OTHER);
       }
 
-      // Send notifications for document uploads
-      try {
-        const mkCfg = (label: string) =>
-          ({
-            type: NotificationType.DOCUMENT_UPLOADED,
-            title: `${label} uploaded`,
-            message: `${user.name} uploaded ${label}.`,
-            priority: NotificationPriority.NORMAL,
-            actionUrl: `/dashboard/admin/review-docs?ownerId=${user.id}`,
-            actionText: "Review",
-          }) as const;
-
-        // Notify all admins (role fanout)
-        await NotificationDelivery.deliverToRole(
-          "RECRUITMENT_ADMIN",
-          mkCfg("Company Registration"),
-          user.id,
-          "User",
-          user.id
-        );
-        await NotificationDelivery.deliverToRole(
-          "RECRUITMENT_ADMIN",
-          mkCfg("License"),
-          user.id,
-          "User",
-          user.id
-        );
-
-        if (otherDocuments.length > 0) {
-          await NotificationDelivery.deliverToRole(
-            "RECRUITMENT_ADMIN",
-            mkCfg("Supporting Documents"),
-            user.id,
-            "User",
-            user.id
-          );
-        }
-
-        // Optional: confirmation to the submitting client admin
-        await NotificationDelivery.deliverToUser(
-          user.id,
-          {
-            type: NotificationType.DOCUMENT_UPLOADED,
-            title: "Documents received",
-            message:
-              "Your registration documents were received and queued for review.",
-            priority: NotificationPriority.NORMAL,
-            actionUrl: `/dashboard/client`,
-            actionText: "Go to dashboard",
-          },
-          user.id,
-          "User",
-          user.id
-        );
-      } catch (notificationError) {
-        console.error("Failed to send notifications:", notificationError);
-      }
-
-      // Audit log
       await tx.auditLog.create({
         data: {
           action: AuditAction.CLIENT_CREATE,
@@ -256,8 +183,66 @@ export async function POST(request: Request) {
         },
       });
 
-      return { user, client };
+      return { user, client, hasSupporting: otherDocuments.length > 0 };
     });
+
+    // ===== 2) SIDE EFFECTS AFTER COMMIT (notifications, emails, etc.) =====
+    try {
+      const mkAdminCfg = (label: string) =>
+        ({
+          type: NotificationType.DOCUMENT_UPLOADED,
+          title: `${label} uploaded`,
+          message: `${result.user.name} uploaded ${label}.`,
+          priority: NotificationPriority.NORMAL,
+          actionUrl: `/dashboard/admin/review-docs?ownerId=${result.user.id}`,
+          actionText: "Review",
+        }) as const;
+
+      // notify admins
+      await NotificationDelivery.deliverToRole(
+        "RECRUITMENT_ADMIN",
+        mkAdminCfg("Company Registration"),
+        result.user.id, // senderId exists now
+        "User",
+        result.user.id
+      );
+      await NotificationDelivery.deliverToRole(
+        "RECRUITMENT_ADMIN",
+        mkAdminCfg("License"),
+        result.user.id,
+        "User",
+        result.user.id
+      );
+      if (result.hasSupporting) {
+        await NotificationDelivery.deliverToRole(
+          "RECRUITMENT_ADMIN",
+          mkAdminCfg("Supporting Documents"),
+          result.user.id,
+          "User",
+          result.user.id
+        );
+      }
+
+      // confirmation to the new client admin
+      await NotificationDelivery.deliverToUser(
+        result.user.id,
+        {
+          type: NotificationType.DOCUMENT_UPLOADED,
+          title: "Documents received",
+          message:
+            "Your registration documents were received and queued for review.",
+          priority: NotificationPriority.NORMAL,
+          actionUrl: `/dashboard/client`,
+          actionText: "Go to dashboard",
+        },
+        result.user.id, // senderId
+        "User",
+        result.user.id
+      );
+    } catch (notificationError) {
+      // Best-effort: log but don’t fail the request
+      console.error("Failed to send notifications:", notificationError);
+    }
 
     return NextResponse.json({
       success: true,

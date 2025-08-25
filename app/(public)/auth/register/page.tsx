@@ -359,7 +359,7 @@ export default function RegisterPage() {
       const success = await sendOtp("email", formData.email);
       if (success) {
         setEmailOtpSent(true);
-        setEmailOtpResendTime(60); // 60 seconds countdown
+        setEmailOtpResendTime(30); // 60 seconds countdown
       }
     } finally {
       setIsSendingOtp((prev) => ({ ...prev, email: false }));
@@ -388,7 +388,7 @@ export default function RegisterPage() {
       const success = await sendOtp("phone", fullPhone);
       if (success) {
         setPhoneOtpSent(true);
-        setPhoneOtpResendTime(60); // 60 seconds countdown
+        setPhoneOtpResendTime(30); // 60 seconds countdown
         toast({
           type: "success",
           message: `Your OTP: ${success.otp}`,

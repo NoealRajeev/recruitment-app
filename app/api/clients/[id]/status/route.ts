@@ -4,7 +4,8 @@ import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { z } from "zod";
-import { AuditAction } from "@prisma/client";
+import crypto from "crypto";
+import { AuditAction, AccountStatus, DocumentCategory } from "@prisma/client";
 import { getAccountApprovalEmail } from "@/lib/utils/email-templates";
 import { sendTemplateEmail } from "@/lib/utils/email-service";
 
@@ -18,16 +19,13 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   const { id } = await context.params;
-
-  if (!id) {
-    return NextResponse.json({ error: "Missing id" }, { status: 400 });
-  }
+  if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
   const traceId = crypto.randomUUID();
   const headers = { "Content-Type": "application/json" };
 
   try {
-    // Authentication & Authorization
+    // AuthZ
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== "RECRUITMENT_ADMIN") {
       return NextResponse.json(
@@ -35,116 +33,112 @@ export async function PUT(
         { status: 401, headers }
       );
     }
-
-    if (!id || typeof id !== "string" || !/^[0-9a-f-]{36}$/.test(id)) {
+    if (!/^[0-9a-f-]{36}$/.test(id)) {
       return NextResponse.json(
         { error: "Invalid company ID format" },
         { status: 400, headers }
       );
     }
 
-    // Parse and validate request body
-    let requestBody;
-    try {
-      requestBody = await request.json();
-    } catch (e) {
+    // Body
+    const body = await request.json().catch(() => null);
+    if (!body) {
       return NextResponse.json(
         { error: "Invalid JSON request body" },
         { status: 400, headers }
       );
     }
-
-    const validation = StatusUpdateSchema.safeParse(requestBody);
+    const validation = StatusUpdateSchema.safeParse(body);
     if (!validation.success) {
       return NextResponse.json(
-        {
-          error: "Validation failed",
-          details: validation.error.errors,
-        },
+        { error: "Validation failed", details: validation.error.errors },
         { status: 400, headers }
       );
     }
-
     const { status, reason } = validation.data;
 
-    // Database operations
-    const result = await prisma.$transaction(async (tx) => {
-      // Get client with user
-      const client = await tx.client.findUnique({
-        where: { id },
-        include: { user: true },
-      });
+    // ---- DB work (short transaction; NO network I/O) ----
+    const { clientId, userEmail, userTempPassword, sendWelcome } =
+      await prisma.$transaction(
+        async (tx) => {
+          // Load current
+          const client = await tx.client.findUnique({
+            where: { id },
+            include: { user: true },
+          });
+          if (!client?.user) {
+            throw new Error("Client or associated user not found");
+          }
 
-      if (!client?.user) {
-        throw new Error("Client or associated user not found");
-      }
+          // If verifying, mark IMPORTANT docs as VERIFIED (or all; choose your policy)
+          if (status === "VERIFIED") {
+            await tx.document.updateMany({
+              where: {
+                ownerId: client.user.id,
+                status: { not: "VERIFIED" },
+                // uncomment if you only want important docs:
+                // category: DocumentCategory.IMPORTANT,
+              },
+              data: { status: "VERIFIED" as AccountStatus },
+            });
+          }
 
-      // If verifying, also verify all important documents
-      if (status === "VERIFIED") {
-        await tx.document.updateMany({
-          where: {
-            ownerId: client.user.id,
-            status: { not: "VERIFIED" },
-          },
-          data: {
-            status: "VERIFIED",
-          },
-        });
-      }
+          // Update user status; clear tempPassword when verified
+          const updatedUser = await tx.user.update({
+            where: { id: client.user.id },
+            data: {
+              status: status as AccountStatus,
+              tempPassword: status === "VERIFIED" ? null : undefined,
+            },
+            select: { id: true, email: true, tempPassword: true },
+          });
 
-      if (client.user.tempPassword) {
-        await sendTemplateEmail(
-          getAccountApprovalEmail(client.user.email, client.user.tempPassword),
-          client.user.email
-        );
-      }
+          // Audit log
+          await tx.auditLog.create({
+            data: {
+              action: AuditAction.CLIENT_UPDATE,
+              entityType: "CLIENT",
+              entityId: id,
+              performedById: session.user.id,
+              oldData: { status: client.user.status },
+              newData: { status },
+              description: `Status changed to ${status}. For ${client.companyName}. Reason: ${reason}`,
+              affectedFields: ["status"],
+            },
+          });
 
-      const updatedUser = await tx.user.update({
-        where: { id: client.user.id },
-        data: { tempPassword: null, status },
-        include: { clientProfile: true },
-      });
-
-      // Create audit log
-      let auditAction: AuditAction;
-      switch (status) {
-        case "VERIFIED":
-          auditAction = AuditAction.CLIENT_UPDATE;
-          break;
-        case "REJECTED":
-          auditAction = AuditAction.CLIENT_UPDATE;
-          break;
-        case "NOT_VERIFIED":
-          auditAction = AuditAction.CLIENT_UPDATE;
-          break;
-        default:
-          auditAction = AuditAction.CLIENT_UPDATE;
-      }
-
-      await tx.auditLog.create({
-        data: {
-          action: auditAction,
-          entityType: "CLIENT",
-          entityId: id,
-          performedById: session.user.id,
-          oldData: { status: client.user.status },
-          newData: { status },
-          description: `Status changed to ${status}. For ${client.companyName}`,
-          affectedFields: ["status"],
+          return {
+            clientId: client.id,
+            userEmail: updatedUser.email,
+            userTempPassword: client.user.tempPassword, // value before nulling
+            sendWelcome: status === "VERIFIED" && !!client.user.tempPassword,
+          };
         },
-      });
+        // Optional: modest timeout bump; still keep transaction short
+        { timeout: 10000 }
+      );
 
-      return updatedUser.clientProfile;
-    });
+    // ---- Side effects AFTER commit (safe from timeouts) ----
+    if (sendWelcome && userEmail && userTempPassword) {
+      try {
+        await sendTemplateEmail(
+          getAccountApprovalEmail(userEmail, userTempPassword),
+          userEmail
+        );
+      } catch (e) {
+        // best‑effort: log but don't fail request
+        console.error("Welcome email failed:", e);
+      }
+    }
 
-    return NextResponse.json(result, { headers });
+    return NextResponse.json({ id: clientId, status }, { headers });
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
+    const message = error instanceof Error ? error.message : "Unknown error";
+    console.error(`[${traceId}] Client status update failed:`, error);
     return NextResponse.json(
       {
         error: "Internal server error",
-        message: errorMessage,
+        message,
         traceId,
       },
       { status: 500, headers }

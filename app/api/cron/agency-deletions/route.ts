@@ -60,11 +60,10 @@ async function notifyAdminsAccountPurged(
 }
 
 /**
- * Purge one agency (and the user) in a single transaction, cascading through all related data.
- * Adjust relations to match your schema as needed.
+ * Purge one agency (and its user) in a single transaction, cascading through all related data.
  */
 async function purgeAgencyAndUser(agencyId: string) {
-  // Fetch full context BEFORE delete (for email + deletion by email)
+  // Fetch context BEFORE delete (for email + audit)
   const before = await prisma.agency.findUnique({
     where: { id: agencyId },
     include: {
@@ -74,23 +73,39 @@ async function purgeAgencyAndUser(agencyId: string) {
 
   if (!before || !before.user) return { skipped: true };
   const userId = before.user.id;
-  const userEmail = before.user.email;
+  const userEmail = before.user.email ?? null;
 
-  // Collect FK graph
-  const labourProfiles = await prisma.labourProfile.findMany({
-    where: { agencyId },
-    select: { id: true },
-  });
+  // Collect graph
+  const [labourProfiles, assignments, assignedJobRoles] = await Promise.all([
+    prisma.labourProfile.findMany({
+      where: { agencyId: agencyId },
+      select: { id: true },
+    }),
+    prisma.labourAssignment.findMany({
+      where: { agencyId: agencyId },
+      select: { id: true, labourId: true },
+    }),
+    prisma.jobRole.findMany({
+      where: { assignedAgencyId: agencyId },
+      select: { id: true },
+    }),
+  ]);
+
   const labourIds = labourProfiles.map((l) => l.id);
-
-  const assignments = await prisma.labourAssignment.findMany({
-    where: { agencyId },
-    select: { id: true, labourId: true },
-  });
   const assignmentIds = assignments.map((a) => a.id);
+  const assignedJobRoleIds = assignedJobRoles.map((j) => j.id);
 
-  // Delete order (be conservative with deleteMany where needed)
+  // Transactional purge
   await prisma.$transaction(async (tx) => {
+    // Nullify assigned job roles (do NOT delete job roles)
+    if (assignedJobRoleIds.length) {
+      await tx.jobRole.updateMany({
+        where: { id: { in: assignedJobRoleIds } },
+        data: { assignedAgencyId: null, agencyStatus: "UNDER_REVIEW" },
+      });
+    }
+
+    // LabourProfile graph
     if (labourIds.length) {
       await tx.labourStageHistory.deleteMany({
         where: { labourId: { in: labourIds } },
@@ -106,38 +121,43 @@ async function purgeAgencyAndUser(agencyId: string) {
       });
     }
 
+    // Clean any remaining assignments & forwardings
     if (assignmentIds.length) {
-      // double‑ensure no stragglers tied to agency
       await tx.labourAssignment.deleteMany({
         where: { id: { in: assignmentIds } },
       });
     }
+    await tx.jobRoleForwarding.deleteMany({ where: { agencyId: agencyId } });
 
-    // Agency-owned/created documents (ownerId = agency user id)
+    // Agency-owned documents (ownerId is the user)
     await tx.document.deleteMany({ where: { ownerId: userId } });
 
-    // Any job-role forwardings created by this agency
-    await tx.jobRoleForwarding.deleteMany({ where: { agencyId } });
-
-    // Notifications (recipient has onDelete: Cascade, but explicit delete is fine)
+    // Notifications (recipient and sender)
     await tx.notification.deleteMany({ where: { recipientId: userId } });
+    await tx.notification.deleteMany({ where: { senderId: userId } });
 
-    // Password reset tokens (delete by email — model has no userId)
+    // Password reset tokens
     if (userEmail) {
       await tx.passwordResetToken.deleteMany({ where: { email: userEmail } });
     }
 
-    // Audit logs created by this user (optional)
+    // User settings
+    await tx.userSettings.deleteMany({ where: { userId } });
+
+    // Audit logs created by this user
     await tx.auditLog.deleteMany({ where: { performedById: userId } });
 
-    // Finally delete the agency
-    await tx.agency.delete({ where: { id: agencyId } });
+    // Audit logs referencing this Agency as entity
+    await tx.auditLog.deleteMany({
+      where: { entityType: "Agency", entityId: agencyId },
+    });
 
-    // And the user itself
+    // Finally delete the Agency and the User
+    await tx.agency.delete({ where: { id: agencyId } });
     await tx.user.delete({ where: { id: userId } });
   });
 
-  // Post‑transaction audit log (performedBy must reference an existing user)
+  // Post-transaction: write a summarizing audit (must be performed by someone that still exists)
   try {
     const actorId = await resolveCronActorId();
     if (actorId) {
@@ -146,13 +166,14 @@ async function purgeAgencyAndUser(agencyId: string) {
           action: "AGENCY_DELETE",
           entityType: "Agency",
           entityId: agencyId,
-          description: "Agency permanently deleted (cascade)",
+          description: "Agency permanently deleted (cron cascade)",
           oldData: {
             agency: { id: before.id, name: before.agencyName },
             user: before.user,
             cascadeCounts: {
               labourProfiles: labourIds.length,
               assignments: assignmentIds.length,
+              assignedJobRoles: assignedJobRoleIds.length,
             },
           },
           affectedFields: [
@@ -163,20 +184,23 @@ async function purgeAgencyAndUser(agencyId: string) {
             "Document",
             "LabourStageHistory",
             "Notification",
+            "UserSettings",
+            "AuditLog",
+            "JobRoleForwarding",
           ],
           performedById: actorId,
         },
       });
     } else {
       console.warn(
-        "[agency-deletions] No CRON_ACTOR_ID or admin found; audit log skipped to avoid FK errors."
+        "[agency-deletions] No CRON_ACTOR_ID or admin found; audit log skipped."
       );
     }
   } catch (e) {
     console.error("Post-purge audit failed:", e);
   }
 
-  // Send final "deleted" email
+  // Final email
   try {
     if (userEmail) {
       const tpl = getAgencyDeletionEmail(before.agencyName);
@@ -186,6 +210,7 @@ async function purgeAgencyAndUser(agencyId: string) {
     console.error("Final deletion email failed:", e);
   }
 
+  // Notify admins
   try {
     const actorId = await resolveCronActorId();
     await notifyAdminsAccountPurged(before.agencyName, actorId, before.id);
@@ -203,7 +228,7 @@ export async function POST(req: NextRequest) {
 
   const now = new Date();
 
-  // Find due agencies (IMMEDIATE or SCHEDULED) with expired deleteAt
+  // Agencies whose users are marked for deletion and the time has come
   const dueUsers = await prisma.user.findMany({
     where: {
       deleteAt: { lte: now },

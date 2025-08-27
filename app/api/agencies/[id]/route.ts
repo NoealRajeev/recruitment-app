@@ -53,25 +53,29 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await ctx.params;
+
   const url = new URL(req.url);
   const force = url.searchParams.get("force") === "true";
-  const schedule = url.searchParams.get("schedule") === "true" || !force; // default to schedule if not forcing
+  const schedule = url.searchParams.get("schedule") === "true" || !force; // default schedule if not forcing
   const deleteUser = url.searchParams.get("deleteUser") === "true";
 
   try {
-    // Gather relations
+    // Gather relations & basic counts
     const [
       agency,
-      assignmentsCount,
-      labourIds,
+      assignments,
+      labourProfiles,
       forwardingsCount,
-      assignedJobRoleIds,
+      assignedJobRoles,
     ] = await prisma.$transaction([
       prisma.agency.findUnique({
         where: { id },
         include: { user: true },
       }),
-      prisma.labourAssignment.count({ where: { agencyId: id } }),
+      prisma.labourAssignment.findMany({
+        where: { agencyId: id },
+        select: { id: true, labourId: true },
+      }),
       prisma.labourProfile.findMany({
         where: { agencyId: id },
         select: { id: true },
@@ -87,20 +91,22 @@ export async function DELETE(
       return NextResponse.json({ error: "Agency not found" }, { status: 404 });
     }
 
-    const labourProfileIds = labourIds.map((x) => x.id);
+    const labourIds = labourProfiles.map((l) => l.id);
+    const assignmentIds = assignments.map((a) => a.id);
+    const assignedJobRoleIds = assignedJobRoles.map((j) => j.id);
+
     const relatedTotals = {
-      assignments: assignmentsCount,
-      labourProfiles: labourProfileIds.length,
+      assignments: assignmentIds.length,
+      labourProfiles: labourIds.length,
       forwardings: forwardingsCount,
       assignedJobRoles: assignedJobRoleIds.length,
       total:
-        assignmentsCount +
-        labourProfileIds.length +
+        assignmentIds.length +
+        labourIds.length +
         forwardingsCount +
         assignedJobRoleIds.length,
     };
 
-    // helper: send apology email (do not block flow on failure)
     const sendApologyEmail = async () => {
       try {
         const tpl = getAgencyDeletionEmail(agency.agencyName || "there");
@@ -110,15 +116,14 @@ export async function DELETE(
       }
     };
 
-    // BLOCK when there are related rows and not forcing (hard delete)
+    // If not forcing and there are related rows
     if (!force && relatedTotals.total > 0) {
-      // Schedule path is "soft delete": just mark the user for deletion
       if (schedule) {
         const deleteAt = new Date();
         deleteAt.setDate(deleteAt.getDate() + 1); // +24h
 
-        const result = await prisma.$transaction(async (tx) => {
-          const updated = await tx.agency.update({
+        const updated = await prisma.$transaction(async (tx) => {
+          const res = await tx.agency.update({
             where: { id },
             data: {
               user: {
@@ -136,7 +141,7 @@ export async function DELETE(
           await tx.auditLog.create({
             data: {
               action: AuditAction.AGENCY_DELETE,
-              entityType: "AGENCY",
+              entityType: "Agency",
               entityId: id,
               performedById: session.user.id,
               description: `Account scheduled for deletion (${deleteAt.toISOString()})`,
@@ -150,84 +155,125 @@ export async function DELETE(
             },
           });
 
-          return updated;
+          return res;
         });
 
-        // send the email outside the transaction
         await sendApologyEmail();
 
         return NextResponse.json({
           ok: true,
           scheduled: true,
           relatedTotals,
-          agency: result,
+          agency: updated,
         });
       }
 
-      // no schedule + not force => block
+      // No schedule + not force => block
       return NextResponse.json(
         {
           error: "Agency has related records. Delete is blocked unless forced.",
           related: relatedTotals,
-          hint: "Re-run with ?force=true for hard delete (cascading), or use ?schedule=true to schedule a soft deletion.",
+          hint: "Re-run with ?force=true for hard delete, or use ?schedule=true to schedule a soft deletion.",
         },
         { status: 409 }
       );
     }
 
-    // FORCE: cascade delete children in a safe order, then delete Agency; option to delete User
+    // FORCE — cascade deletion
     if (force) {
       const result = await prisma.$transaction(async (tx) => {
-        // 1) Children of LabourProfile
-        if (labourProfileIds.length) {
-          await tx.labourStageHistory.deleteMany({
-            where: { labourId: { in: labourProfileIds } },
-          });
-          await tx.document.deleteMany({
-            where: { labourProfileId: { in: labourProfileIds } },
-          });
-          await tx.labourAssignment.deleteMany({
-            where: { labourId: { in: labourProfileIds } },
-          });
-          await tx.labourProfile.deleteMany({
-            where: { id: { in: labourProfileIds } },
-          });
-        }
-
-        // 2) Agency-scoped children
-        await tx.labourAssignment.deleteMany({ where: { agencyId: id } });
-        await tx.jobRoleForwarding.deleteMany({ where: { agencyId: id } });
-
-        // 3) JobRoles that point to this agency — nullify assignment (do NOT delete job roles)
-        const jrIds = assignedJobRoleIds.map((j) => j.id);
-        if (jrIds.length) {
+        // 0) Nullify assigned job roles (never delete job roles)
+        if (assignedJobRoleIds.length) {
           await tx.jobRole.updateMany({
-            where: { id: { in: jrIds } },
+            where: { id: { in: assignedJobRoleIds } },
             data: { assignedAgencyId: null, agencyStatus: "UNDER_REVIEW" },
           });
         }
 
-        // 4) Delete Agency
-        await tx.agency.delete({ where: { id } });
-
-        // 5) Optionally delete the User (cascades owner/notifications as per schema)
-        if (deleteUser) {
-          await tx.user.delete({ where: { id: agency.userId } });
+        // 1) LabourProfile graph
+        if (labourIds.length) {
+          await tx.labourStageHistory.deleteMany({
+            where: { labourId: { in: labourIds } },
+          });
+          await tx.document.deleteMany({
+            where: { labourProfileId: { in: labourIds } },
+          });
+          await tx.labourAssignment.deleteMany({
+            where: { labourId: { in: labourIds } },
+          });
+          await tx.labourProfile.deleteMany({
+            where: { id: { in: labourIds } },
+          });
         }
 
+        // 2) Agency-scoped children (double ensure)
+        if (assignmentIds.length) {
+          await tx.labourAssignment.deleteMany({
+            where: { id: { in: assignmentIds } },
+          });
+        }
+        await tx.jobRoleForwarding.deleteMany({ where: { agencyId: id } });
+
+        // 3) Clean records tied to the agency user
+        const userId = agency.userId;
+        const userEmail = agency.user.email;
+
+        // Agency-owned docs (owner = user)
+        await tx.document.deleteMany({ where: { ownerId: userId } });
+
+        // Notifications (as recipient and as sender)
+        await tx.notification.deleteMany({ where: { recipientId: userId } });
+        await tx.notification.deleteMany({ where: { senderId: userId } });
+
+        // Password reset tokens (by email)
+        if (userEmail) {
+          await tx.passwordResetToken.deleteMany({
+            where: { email: userEmail },
+          });
+        }
+
+        // User settings
+        await tx.userSettings.deleteMany({ where: { userId } });
+
+        // Audit logs created by this user
+        await tx.auditLog.deleteMany({ where: { performedById: userId } });
+
+        // Audit logs where entity is this Agency (optional but matches “delete everything related”)
+        await tx.auditLog.deleteMany({
+          where: { entityType: "Agency", entityId: id },
+        });
+
+        // 4) Delete agency
+        await tx.agency.delete({ where: { id } });
+
+        // 5) Optionally delete the user
+        if (deleteUser) {
+          await tx.user.delete({ where: { id: userId } });
+        }
+
+        // Record a summarizing audit under the current admin
         await tx.auditLog.create({
           data: {
             action: AuditAction.AGENCY_DELETE,
-            entityType: "AGENCY",
+            entityType: "Agency",
             entityId: id,
             performedById: session.user.id,
             description: `Agency hard-deleted (force=${force}, deleteUser=${deleteUser})`,
-            affectedFields: ["relations", "agency"],
+            affectedFields: [
+              "Agency",
+              "User",
+              "LabourProfile",
+              "LabourAssignment",
+              "Document",
+              "LabourStageHistory",
+              "Notification",
+              "UserSettings",
+              "AuditLog",
+              "JobRoleForwarding",
+            ],
             oldData: {
-              assignments: assignmentsCount,
-              labourProfiles: labourProfileIds.length,
-              forwardings: forwardingsCount,
-              assignedJobRoles: jrIds.length,
+              agency: { id: agency.id, name: agency.agencyName },
+              counts: relatedTotals,
             },
             newData: {},
           },
@@ -236,19 +282,18 @@ export async function DELETE(
         return { ok: true, cascaded: true, deleteUser };
       });
 
-      // email after force-delete
       await sendApologyEmail();
 
       return NextResponse.json(result);
     }
 
-    // SCHEDULE soft delete (no related rows or we chose schedule explicitly)
+    // SCHEDULE (when not blocked or explicitly chosen)
     if (schedule) {
       const deleteAt = new Date();
       deleteAt.setDate(deleteAt.getDate() + 1);
 
-      const result = await prisma.$transaction(async (tx) => {
-        const updated = await tx.agency.update({
+      const updated = await prisma.$transaction(async (tx) => {
+        const res = await tx.agency.update({
           where: { id },
           data: {
             user: {
@@ -266,7 +311,7 @@ export async function DELETE(
         await tx.auditLog.create({
           data: {
             action: AuditAction.AGENCY_DELETE,
-            entityType: "AGENCY",
+            entityType: "Agency",
             entityId: id,
             performedById: session.user.id,
             description: `Account scheduled for deletion (${deleteAt.toISOString()})`,
@@ -280,21 +325,19 @@ export async function DELETE(
           },
         });
 
-        return updated;
+        return res;
       });
 
-      // email after scheduling
       await sendApologyEmail();
 
       return NextResponse.json({
         ok: true,
         scheduled: true,
         relatedTotals,
-        agency: result,
+        agency: updated,
       });
     }
 
-    // fallback (shouldn’t hit)
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Error deleting agency:", error);
@@ -304,6 +347,7 @@ export async function DELETE(
     );
   }
 }
+
 /** PATCH: edit agency fields (email/phone locked server‑side) */
 export async function PATCH(
   req: NextRequest,

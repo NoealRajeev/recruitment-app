@@ -11,9 +11,10 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+): Promise<Response> {
+  const { id } = await context.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id || session.user.role !== "RECRUITMENT_ADMIN") {
@@ -21,7 +22,7 @@ export async function POST(
     }
 
     const client = await prisma.client.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       select: { userId: true },
     });
     if (!client?.userId) {
@@ -74,9 +75,10 @@ export async function POST(
 }
 
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+): Promise<Response> {
+  const { id } = await context.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id || session.user.role !== "RECRUITMENT_ADMIN") {
@@ -85,7 +87,7 @@ export async function DELETE(
 
     // Find the client's user and current avatar
     const client = await prisma.client.findUnique({
-      where: { id: params.id },
+      where: { id: id },
       select: { userId: true, user: { select: { profilePicture: true } } },
     });
 

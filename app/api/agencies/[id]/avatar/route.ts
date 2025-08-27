@@ -10,9 +10,10 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+): Promise<Response> {
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
   if (!session?.user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -42,7 +43,7 @@ export async function POST(
 
   // update agency.user.profilePicture
   const agency = await prisma.agency.update({
-    where: { id: params.id },
+    where: { id: id },
     data: { user: { update: { profilePicture: publicUrl } } },
     select: { id: true },
   });
@@ -55,15 +56,16 @@ export async function POST(
 }
 
 export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  _req: Request,
+  context: { params: Promise<{ id: string }> }
+): Promise<Response> {
+  const { id } = await context.params;
   const session = await getServerSession(authOptions);
   if (!session?.user)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const agency = await prisma.agency.update({
-    where: { id: params.id },
+    where: { id: id },
     data: { user: { update: { profilePicture: null } } },
     select: { id: true },
   });

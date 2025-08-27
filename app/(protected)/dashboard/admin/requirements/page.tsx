@@ -524,7 +524,7 @@ const ForwardRequirementModal = ({
       }
 
       if (errors.length > 0) {
-        useToast().toast({ type: "error", message: errors.join("\n") });
+        toast({ type: "error", message: errors.join("\n") });
       }
     } finally {
       setIsSubmitting(false);

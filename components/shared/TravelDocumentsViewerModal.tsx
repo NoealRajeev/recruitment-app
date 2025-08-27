@@ -76,7 +76,7 @@ const documentTypes = [
 const formatDateTime = (isoString: string) => {
   if (!isoString) return "";
   const date = new Date(isoString);
-  let formatted = date.toLocaleString("en-GB", {
+  const formatted = date.toLocaleString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",

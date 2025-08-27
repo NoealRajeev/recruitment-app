@@ -297,7 +297,6 @@ export default function ClientLabourReview() {
           <div className="flex flex-col items-end">
             <span
               className={`text-xs px-2 py-1 rounded-full ${
-                // @ts-ignore
                 statusColors[profile.status] || "bg-gray-100 text-gray-800"
               }`}
             >
@@ -305,7 +304,6 @@ export default function ClientLabourReview() {
             </span>
             <span
               className={`text-xs px-2 py-1 rounded-full mt-1 ${
-                // @ts-ignore
                 verificationColors[profile.verificationStatus]
               }`}
             >

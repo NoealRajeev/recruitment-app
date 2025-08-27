@@ -353,16 +353,17 @@ export async function PATCH(
 
 // DELETE /api/requirements/[id] - Delete a requirement
 export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  _req: Request,
+  context: { params: Promise<{ id: string }> }
+): Promise<Response> {
+  // pull the id out of the promised params
+  const { id } = await context.params;
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== "CLIENT_ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const id = params.id;
     if (!id || !/^[0-9a-f-]{36}$/.test(id)) {
       return NextResponse.json({ error: "Invalid id" }, { status: 400 });
     }

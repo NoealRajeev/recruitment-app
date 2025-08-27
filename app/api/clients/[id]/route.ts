@@ -111,9 +111,11 @@ export async function PATCH(
  * Also supports ?deleteUser=true to remove the associated login (optional).
  */
 export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+): Promise<Response> {
+  // pull the id out of the promised params
+  const { id } = await context.params;
   const session = await requireAdmin();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -123,7 +125,6 @@ export async function DELETE(
   const adminIp = req.headers.get("x-forwarded-for") ?? undefined;
   const adminUA = req.headers.get("user-agent") ?? undefined;
 
-  const id = params.id;
   const url = new URL(req.url);
   const force = url.searchParams.get("force") === "true";
   const deleteUser = url.searchParams.get("deleteUser") === "true";

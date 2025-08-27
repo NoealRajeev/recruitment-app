@@ -195,72 +195,20 @@ export default function ClientReviewPage() {
     }
   };
   const confirmDelete = async (clientId: string, companyName: string) => {
-    // First, a lightweight confirmation
-    if (!window.confirm(`Delete “${companyName}”? This cannot be undone.`))
-      return;
-
     try {
-      const res = await fetch(`/api/clients/${clientId}`, { method: "DELETE" });
+      // hard cascade + remove login
+      const res = await fetch(
+        `/api/clients/${clientId}?force=true&deleteUser=true`,
+        { method: "DELETE" }
+      );
 
-      if (res.ok) {
-        toast({ type: "success", message: "Company deleted" });
-        await fetchClients();
-        return;
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || "Failed to delete company");
       }
 
-      // Parse server response if available
-      const data = await res.json().catch(() => ({}) as any);
-
-      // 409 = related records exist; offer cascade
-      if (res.status === 409 && data?.related) {
-        const {
-          requirements = 0,
-          labourProfiles = 0,
-          assignments = 0,
-        } = data.related || {};
-
-        const msg =
-          `“${companyName}” can’t be deleted because related records exist:\n\n` +
-          `• Requirements: ${requirements}\n` +
-          `• Labour Profiles: ${labourProfiles}\n` +
-          `• Assignments: ${assignments}\n\n` +
-          `Do you want to cascade delete these and the company?`;
-
-        const doCascade = window.confirm(msg);
-        if (!doCascade) {
-          toast({
-            type: "info",
-            message:
-              "Delete cancelled. Remove related records or choose cascade.",
-          });
-          return;
-        }
-
-        const alsoDeleteUser = window.confirm(
-          "Also delete the associated login/user account? (This will remove their documents & notifications.)"
-        );
-
-        const forceUrl = `/api/clients/${clientId}?force=true${
-          alsoDeleteUser ? "&deleteUser=true" : ""
-        }`;
-        const res2 = await fetch(forceUrl, { method: "DELETE" });
-        if (!res2.ok) {
-          const d2 = await res2.json().catch(() => ({}));
-          throw new Error(d2?.error || "Force delete failed");
-        }
-
-        toast({
-          type: "success",
-          message: `Company deleted${
-            alsoDeleteUser ? " (user account removed)" : ""
-          }.`,
-        });
-        await fetchClients();
-        return;
-      }
-
-      // Any other non-OK
-      throw new Error(data?.error || "Failed to delete company");
+      toast({ type: "success", message: "Company and user fully deleted." });
+      await fetchClients(); // refresh list
     } catch (e: any) {
       console.error(e);
       toast({

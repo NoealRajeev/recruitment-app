@@ -98,6 +98,36 @@ The Findly Team`,
 `,
 });
 
+export const getAccountUnderReviewEmail = (
+  recipientName = "there"
+): EmailTemplate => ({
+  subject: "We received your Findly registration",
+  text: `Hello ${recipientName},
+
+Thanks for registering with Findly. Your account and documents are now under review by our team.
+
+You'll get another email once your account is approved. After approval, we'll share your login credentials so you can access the dashboard.
+
+You can check back anytime:
+${env.NEXTAUTH_URL}/auth/login
+
+— The Findly Team`,
+  html: `
+<div style="${Object.entries(baseEmailStyles)
+    .map(([k, v]) => `${k}: ${v};`)
+    .join("")}">
+  ${headerTemplate("Thanks for registering with Findly")}
+  <p>Hello ${recipientName},</p>
+  <p>We’ve received your registration. Our team is reviewing your information and documents.</p>
+  <div style="background: ${lightBackground}; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 4px solid ${primaryColor};">
+    <p style="margin: 0;">You’ll get an approval email with your login credentials once you’re verified.</p>
+  </div>
+  ${actionButton("Go to Login", `${env.NEXTAUTH_URL}/auth/login`)}
+  ${footerTemplate}
+</div>
+`,
+});
+
 export const getAccountApprovalEmail = (
   email: string,
   password: string

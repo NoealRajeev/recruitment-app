@@ -5,7 +5,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth/options";
 import { sendEmail } from "@/lib/utils/email-service";
 import { getClientDeletionEmail } from "@/lib/utils/email-templates";
+import { AuditAction } from "@prisma/client";
 
+/** Require an admin session */
 async function requireAdmin() {
   const session = await getServerSession(authOptions);
   if (!session?.user || session.user.role !== "RECRUITMENT_ADMIN") return null;
@@ -24,7 +26,7 @@ function normalizePlusCodeSpace(raw?: string | null): string | null {
   return `+${code}${rest ? ` ${rest}` : ""}`;
 }
 
-/** GET: fetch company + user */
+/** GET: fetch company + user (unchanged) */
 export async function GET(
   _req: NextRequest,
   ctx: { params: Promise<{ id: string }> }
@@ -60,12 +62,11 @@ export async function GET(
   }
 }
 
-/** PATCH: edit company fields (email/phone locked server-side) */
+/** PATCH: edit company fields (email/phone locked server-side; unchanged) */
 export async function PATCH(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
-  // ...auth, params, parse body...
   const { id } = await context.params;
   const { user, ...company } = await req.json();
 
@@ -99,7 +100,6 @@ export async function PATCH(
     },
   });
 
-  // Optionally normalize for response
   updated.user.phone = normalizePlusCodeSpace(updated.user.phone);
   updated.user.altContact = normalizePlusCodeSpace(updated.user.altContact);
 
@@ -107,15 +107,14 @@ export async function PATCH(
 }
 
 /**
- * DELETE: block when related rows exist; cascade with ?force=true
- * Also supports ?deleteUser=true to remove the associated login (optional).
+ * DELETE: Full, irreversible purge (no related-count blocker).
+ * Defaults: force=true & deleteUser=true unless explicitly set to "false".
+ * This matches your frontend call: /api/clients/:id?force=true&deleteUser=true
  */
 export async function DELETE(
-  req: Request,
+  req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ): Promise<Response> {
-  const { id } = await context.params;
-
   const session = await requireAdmin();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -125,12 +124,15 @@ export async function DELETE(
   const adminIp = req.headers.get("x-forwarded-for") ?? undefined;
   const adminUA = req.headers.get("user-agent") ?? undefined;
 
+  const { id } = await context.params;
   const url = new URL(req.url);
-  const force = url.searchParams.get("force") === "true";
-  const deleteUser = url.searchParams.get("deleteUser") === "true";
+
+  // Default to hard cascade + delete associated login unless explicitly disabled.
+  const force = url.searchParams.get("force") !== "false";
+  const deleteUser = url.searchParams.get("deleteUser") !== "false";
 
   try {
-    // 0) Fetch client + user (for audit + email + tokens cleanup)
+    // Fetch client + user FIRST (for audit + emails + tokens cleanup)
     const clientBefore = await prisma.client.findUnique({
       where: { id },
       include: {
@@ -145,7 +147,7 @@ export async function DELETE(
     const userIdToDelete = clientBefore.user?.id ?? null;
     const userEmailToDelete = clientBefore.user?.email ?? null;
 
-    // 1) Gather the cascade graph up-front (ids only; no heavy payloads)
+    // Gather dependency graph (IDs only)
     const requirements = await prisma.requirement.findMany({
       where: { clientId: id },
       select: { id: true, jobRoles: { select: { id: true } } },
@@ -156,7 +158,7 @@ export async function DELETE(
       r.jobRoles.map((jr) => jr.id)
     );
 
-    // Assignments can connect both ways (jobRoleId & labourId)
+    // Assignments attached to job roles
     const assignmentsByRole = jobRoleIds.length
       ? await prisma.labourAssignment.findMany({
           where: { jobRoleId: { in: jobRoleIds } },
@@ -164,6 +166,7 @@ export async function DELETE(
         })
       : [];
 
+    // Labour profiles attached to requirements
     const labourViaRequirement = requirementIds.length
       ? await prisma.labourProfile.findMany({
           where: { requirementId: { in: requirementIds } },
@@ -179,83 +182,63 @@ export async function DELETE(
       new Set([...labourIdsViaAssignments, ...labourIdsViaRequirement])
     );
 
-    // Totals for the “blocked unless forced” response and audit log
+    // Totals (for auditing/response only)
     const totals = {
       requirements: requirementIds.length,
       jobRoles: jobRoleIds.length,
       assignments: assignmentsByRole.length,
       labourProfiles: labourProfileIds.length,
     };
-    const totalRelated =
-      totals.requirements +
-      totals.jobRoles +
-      totals.assignments +
-      totals.labourProfiles;
 
-    if (totalRelated > 0 && !force) {
-      return NextResponse.json(
-        {
-          error: "Client has related records. Delete is blocked unless forced.",
-          related: totals,
-          hint: "Re-run with ?force=true to cascade delete, or remove related records first.",
-        },
-        { status: 409 }
-      );
-    }
-
-    // 2) CASCADE in a transaction with FK-safe order
+    // ALWAYS CASCADE (force default = true)
     await prisma.$transaction(async (tx) => {
-      // 2.1) CHILD LEVEL CLEANUP (deepest first)
-
-      // Labour-side cleanup
+      // Deepest first: Labour-related
       if (labourProfileIds.length) {
-        // Labour stage history
         await tx.labourStageHistory.deleteMany({
           where: { labourId: { in: labourProfileIds } },
         });
 
-        // Labour assignments by labour
         await tx.labourAssignment.deleteMany({
           where: { labourId: { in: labourProfileIds } },
         });
 
-        // Documents attached to labour profiles (regardless of owner)
         await tx.document.deleteMany({
           where: { labourProfileId: { in: labourProfileIds } },
         });
 
-        // Labour profile audit logs (generic audit table)
         await tx.auditLog.deleteMany({
           where: {
             entityType: "LabourProfile",
             entityId: { in: labourProfileIds },
           },
         });
+
+        await tx.labourProfile.deleteMany({
+          where: { id: { in: labourProfileIds } },
+        });
       }
 
-      // JobRole-level cleanup (forwardings & assignments by role)
+      // JobRole-level dependencies
       if (jobRoleIds.length) {
         await tx.jobRoleForwarding.deleteMany({
           where: { jobRoleId: { in: jobRoleIds } },
         });
+
         await tx.labourAssignment.deleteMany({
           where: { jobRoleId: { in: jobRoleIds } },
         });
       }
 
-      // Requirement-level cleanup
+      // Requirement-level dependencies
       if (requirementIds.length) {
-        // Offer letter
         await tx.offerLetterDetails.deleteMany({
           where: { requirementId: { in: requirementIds } },
         });
 
-        // Documents attached to requirements (regardless of owner)
         await tx.document.deleteMany({
           where: { requirementId: { in: requirementIds } },
         });
 
-        // Requirement audit logs (generic audit table)
         await tx.auditLog.deleteMany({
           where: {
             entityType: "Requirement",
@@ -263,60 +246,56 @@ export async function DELETE(
           },
         });
 
-        // Labour profiles tied directly to requirements
-        await tx.labourProfile.deleteMany({
-          where: { id: { in: labourProfileIds } },
-        });
-
-        // Job roles
+        // Delete job roles then requirements
         await tx.jobRole.deleteMany({
           where: { requirementId: { in: requirementIds } },
         });
 
-        // Requirements
         await tx.requirement.deleteMany({
           where: { id: { in: requirementIds } },
         });
       }
 
-      // 2.2) CLIENT ROW
-      // Client audit logs (if you logged 'Client' as entity)
+      // Client audit logs (entity-type scoped)
       await tx.auditLog.deleteMany({
         where: { entityType: "Client", entityId: id },
       });
 
+      // Delete the client row
       await tx.client.delete({ where: { id } });
 
-      // 2.3) USER-LEVEL CLEANUP (optional and last)
+      // USER-LEVEL CLEANUP (optional; default = true)
       if (deleteUser && userIdToDelete) {
-        // Notifications where the user is recipient or sender
+        // Notifications where user is recipient or sender
         await tx.notification.deleteMany({
           where: {
             OR: [{ recipientId: userIdToDelete }, { senderId: userIdToDelete }],
           },
         });
 
-        // User-authored audit logs (performedById is RESTRICT → must delete before user)
+        // Audit logs authored by this user
         await tx.auditLog.deleteMany({
           where: { performedById: userIdToDelete },
         });
 
-        // Documents owned by the user (ownerId has CASCADE, but we remove explicitly)
-        await tx.document.deleteMany({ where: { ownerId: userIdToDelete } });
+        // Documents owned by this user
+        await tx.document.deleteMany({
+          where: { ownerId: userIdToDelete },
+        });
 
-        // Any remaining documents tied to client’s artefacts were already deleted above
+        // User settings
+        await tx.userSettings.deleteMany({
+          where: { userId: userIdToDelete },
+        });
 
-        // User settings (RESTRICT → delete before user)
-        await tx.userSettings.deleteMany({ where: { userId: userIdToDelete } });
-
-        // Password reset tokens for this user's email (clean nice-to-have)
+        // Password reset tokens (by email)
         if (userEmailToDelete) {
           await tx.passwordResetToken.deleteMany({
             where: { email: userEmailToDelete },
           });
         }
 
-        // If this user created others, null out createdBy to avoid FK issues
+        // If this user created other users, null out createdBy to avoid FK issues
         await tx.user.updateMany({
           where: { createdById: userIdToDelete },
           data: { createdById: null },
@@ -327,14 +306,14 @@ export async function DELETE(
       }
     });
 
-    // 3) Audit log (post-transaction)
+    // Post-transaction audit log (performedBy = current admin)
     await prisma.auditLog.create({
       data: {
-        action: "CLIENT_DELETE",
+        action: AuditAction.CLIENT_DELETE,
         entityType: "Client",
         entityId: id,
-        description: `Client deleted${force ? " (cascade)" : ""}${
-          deleteUser ? " and user removed" : ""
+        description: `Client permanently deleted (cascade)${
+          deleteUser ? " and associated user removed" : ""
         }`,
         oldData: {
           client: {
@@ -363,27 +342,24 @@ export async function DELETE(
       },
     });
 
-    // 4) Courtesy email (best-effort; non-blocking)
+    // Courtesy email (best-effort; non-blocking)
     let emailSent = false;
     try {
       const toEmail = clientBefore.user?.email;
       const recipientName =
         clientBefore.user?.name || clientBefore.companyName || "User";
-
       if (toEmail) {
         const emailData = getClientDeletionEmail({
           recipientName,
           companyName: clientBefore.companyName,
           loginDeleted: deleteUser,
         });
-
         await sendEmail({
           to: toEmail,
           subject: emailData.subject,
           html: emailData.html,
           text: emailData.text,
         });
-
         emailSent = true;
       }
     } catch (mailErr) {
@@ -400,11 +376,12 @@ export async function DELETE(
   } catch (error: any) {
     console.error("Delete client error:", error);
 
+    // Prisma FK constraint guard (shouldn’t trigger with the order we use)
     if (error?.code === "P2003") {
       return NextResponse.json(
         {
           error:
-            "Delete failed due to foreign key constraints. Remove related records or use ?force=true.",
+            "Delete failed due to foreign key constraints. Please contact support.",
         },
         { status: 409 }
       );

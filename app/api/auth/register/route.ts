@@ -18,6 +18,8 @@ import {
   NotificationPriority,
 } from "@/lib/generated/prisma";
 import { NotificationDelivery } from "@/lib/notification-delivery";
+import { getAccountUnderReviewEmail } from "@/lib/utils/email-templates";
+import { sendTemplateEmail } from "@/lib/utils/email-service";
 
 const RegistrationSchema = z.object({
   companyName: z.string().min(2),
@@ -239,6 +241,9 @@ export async function POST(request: Request) {
         "User",
         result.user.id
       );
+
+      const tpl = getAccountUnderReviewEmail(result.user.name || "there");
+      await sendTemplateEmail(tpl, result.user.email);
     } catch (notificationError) {
       // Best-effort: log but don’t fail the request
       console.error("Failed to send notifications:", notificationError);

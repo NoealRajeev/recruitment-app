@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import {
   RequirementStatus,
@@ -353,78 +353,81 @@ export async function PATCH(
 
 // DELETE /api/requirements/[id] - Delete a requirement
 export async function DELETE(
-  request: Request,
-  context: { params: Promise<Record<string, string>> }
-): Promise<Response> {
-  // await the generic key/value params
-  const { id } = await context.params;
+  _req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user || session.user.role !== "CLIENT_ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const id = params.id;
+    if (!id || !/^[0-9a-f-]{36}$/.test(id)) {
+      return NextResponse.json({ error: "Invalid id" }, { status: 400 });
+    }
+
+    // ensure the requirement belongs to this client and is a DRAFT
     const client = await prisma.client.findUnique({
       where: { userId: session.user.id },
+      select: { id: true },
     });
-
     if (!client) {
       return NextResponse.json(
-        { error: "Client profile not found for this user" },
+        { error: "Client profile not found" },
         { status: 404 }
       );
     }
 
-    // Check if requirement exists and user has access
-    const existingRequirement = await prisma.requirement.findUnique({
-      where: { id: id },
+    const reqBefore = await prisma.requirement.findFirst({
+      where: { id, clientId: client.id },
+      include: { jobRoles: { select: { id: true, title: true } } },
     });
 
-    if (!existingRequirement) {
+    if (!reqBefore) {
       return NextResponse.json(
         { error: "Requirement not found" },
         { status: 404 }
       );
     }
-
-    // Only client admin can delete their own DRAFT requirements
-    if (
-      session.user.role !== "CLIENT_ADMIN" ||
-      existingRequirement.clientId !== client.id ||
-      existingRequirement.status !== "DRAFT"
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (reqBefore.status !== "DRAFT") {
+      return NextResponse.json(
+        { error: "Only drafts can be deleted" },
+        { status: 409 }
+      );
     }
 
+    // cascade delete inside a transaction
     await prisma.$transaction(async (tx) => {
-      // Delete job roles first
-      await tx.jobRole.deleteMany({
-        where: { requirementId: id },
-      });
+      if (reqBefore.jobRoles.length) {
+        await tx.jobRole.deleteMany({ where: { requirementId: id } });
+      }
+      await tx.requirement.delete({ where: { id } });
 
-      // Then delete the requirement
-      await tx.requirement.delete({
-        where: { id: id },
-      });
-
-      // Create audit log
       await tx.auditLog.create({
         data: {
           action: AuditAction.REQUIREMENT_DELETE,
           entityType: "Requirement",
           entityId: id,
-          performedById: client.id,
+          performedById: session.user.id,
+          description: "Draft requirement deleted by client",
+          oldData: {
+            status: reqBefore.status,
+            jobRoles: reqBefore.jobRoles.map((r) => ({
+              id: r.id,
+              title: r.title,
+            })),
+          },
+          affectedFields: ["Requirement", "JobRole"],
         },
       });
     });
 
+    return NextResponse.json({ ok: true });
+  } catch (e) {
+    console.error("Delete draft error:", e);
     return NextResponse.json(
-      { message: "Requirement deleted successfully" },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("Error deleting requirement:", error);
-    return NextResponse.json(
-      { error: "Failed to delete requirement" },
+      { error: "Failed to delete draft" },
       { status: 500 }
     );
   }

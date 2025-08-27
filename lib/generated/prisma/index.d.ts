@@ -59,6 +59,11 @@ export type Requirement = $Result.DefaultSelection<Prisma.$RequirementPayload>
  */
 export type JobRole = $Result.DefaultSelection<Prisma.$JobRolePayload>
 /**
+ * Model RequirementOption
+ * 
+ */
+export type RequirementOption = $Result.DefaultSelection<Prisma.$RequirementOptionPayload>
+/**
  * Model LabourProfile
  * 
  */
@@ -393,6 +398,19 @@ export const Department: {
 export type Department = (typeof Department)[keyof typeof Department]
 
 
+export const RequirementOptionType: {
+  JOB_TITLE: 'JOB_TITLE',
+  TICKET_FREQUENCY: 'TICKET_FREQUENCY',
+  WORK_LOCATION: 'WORK_LOCATION',
+  PREVIOUS_EXPERIENCE: 'PREVIOUS_EXPERIENCE',
+  LANGUAGE: 'LANGUAGE',
+  CURRENCY: 'CURRENCY',
+  CONTRACT_DURATION: 'CONTRACT_DURATION'
+};
+
+export type RequirementOptionType = (typeof RequirementOptionType)[keyof typeof RequirementOptionType]
+
+
 export const NotificationPriority: {
   LOW: 'LOW',
   NORMAL: 'NORMAL',
@@ -471,6 +489,10 @@ export const DocumentVerificationStatus: typeof $Enums.DocumentVerificationStatu
 export type Department = $Enums.Department
 
 export const Department: typeof $Enums.Department
+
+export type RequirementOptionType = $Enums.RequirementOptionType
+
+export const RequirementOptionType: typeof $Enums.RequirementOptionType
 
 export type NotificationPriority = $Enums.NotificationPriority
 
@@ -690,6 +712,16 @@ export class PrismaClient<
     * ```
     */
   get jobRole(): Prisma.JobRoleDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.requirementOption`: Exposes CRUD operations for the **RequirementOption** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more RequirementOptions
+    * const requirementOptions = await prisma.requirementOption.findMany()
+    * ```
+    */
+  get requirementOption(): Prisma.RequirementOptionDelegate<ExtArgs, ClientOptions>;
 
   /**
    * `prisma.labourProfile`: Exposes CRUD operations for the **LabourProfile** model.
@@ -1219,6 +1251,7 @@ export namespace Prisma {
     DocumentRequirement: 'DocumentRequirement',
     Requirement: 'Requirement',
     JobRole: 'JobRole',
+    RequirementOption: 'RequirementOption',
     LabourProfile: 'LabourProfile',
     LabourAssignment: 'LabourAssignment',
     LabourStageHistory: 'LabourStageHistory',
@@ -1245,7 +1278,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "userSettings" | "client" | "agency" | "admin" | "document" | "documentRequirement" | "requirement" | "jobRole" | "labourProfile" | "labourAssignment" | "labourStageHistory" | "auditLog" | "jobRoleForwarding" | "offerLetterDetails" | "notification" | "passwordResetToken"
+      modelProps: "user" | "userSettings" | "client" | "agency" | "admin" | "document" | "documentRequirement" | "requirement" | "jobRole" | "requirementOption" | "labourProfile" | "labourAssignment" | "labourStageHistory" | "auditLog" | "jobRoleForwarding" | "offerLetterDetails" | "notification" | "passwordResetToken"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1912,6 +1945,80 @@ export namespace Prisma {
           count: {
             args: Prisma.JobRoleCountArgs<ExtArgs>
             result: $Utils.Optional<JobRoleCountAggregateOutputType> | number
+          }
+        }
+      }
+      RequirementOption: {
+        payload: Prisma.$RequirementOptionPayload<ExtArgs>
+        fields: Prisma.RequirementOptionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.RequirementOptionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementOptionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.RequirementOptionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementOptionPayload>
+          }
+          findFirst: {
+            args: Prisma.RequirementOptionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementOptionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.RequirementOptionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementOptionPayload>
+          }
+          findMany: {
+            args: Prisma.RequirementOptionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementOptionPayload>[]
+          }
+          create: {
+            args: Prisma.RequirementOptionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementOptionPayload>
+          }
+          createMany: {
+            args: Prisma.RequirementOptionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.RequirementOptionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementOptionPayload>[]
+          }
+          delete: {
+            args: Prisma.RequirementOptionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementOptionPayload>
+          }
+          update: {
+            args: Prisma.RequirementOptionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementOptionPayload>
+          }
+          deleteMany: {
+            args: Prisma.RequirementOptionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.RequirementOptionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.RequirementOptionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementOptionPayload>[]
+          }
+          upsert: {
+            args: Prisma.RequirementOptionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$RequirementOptionPayload>
+          }
+          aggregate: {
+            args: Prisma.RequirementOptionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateRequirementOption>
+          }
+          groupBy: {
+            args: Prisma.RequirementOptionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<RequirementOptionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.RequirementOptionCountArgs<ExtArgs>
+            result: $Utils.Optional<RequirementOptionCountAggregateOutputType> | number
           }
         }
       }
@@ -2600,6 +2707,7 @@ export namespace Prisma {
     documentRequirement?: DocumentRequirementOmit
     requirement?: RequirementOmit
     jobRole?: JobRoleOmit
+    requirementOption?: RequirementOptionOmit
     labourProfile?: LabourProfileOmit
     labourAssignment?: LabourAssignmentOmit
     labourStageHistory?: LabourStageHistoryOmit
@@ -14312,6 +14420,1061 @@ export namespace Prisma {
 
 
   /**
+   * Model RequirementOption
+   */
+
+  export type AggregateRequirementOption = {
+    _count: RequirementOptionCountAggregateOutputType | null
+    _avg: RequirementOptionAvgAggregateOutputType | null
+    _sum: RequirementOptionSumAggregateOutputType | null
+    _min: RequirementOptionMinAggregateOutputType | null
+    _max: RequirementOptionMaxAggregateOutputType | null
+  }
+
+  export type RequirementOptionAvgAggregateOutputType = {
+    order: number | null
+  }
+
+  export type RequirementOptionSumAggregateOutputType = {
+    order: number | null
+  }
+
+  export type RequirementOptionMinAggregateOutputType = {
+    id: string | null
+    type: $Enums.RequirementOptionType | null
+    value: string | null
+    isActive: boolean | null
+    order: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RequirementOptionMaxAggregateOutputType = {
+    id: string | null
+    type: $Enums.RequirementOptionType | null
+    value: string | null
+    isActive: boolean | null
+    order: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type RequirementOptionCountAggregateOutputType = {
+    id: number
+    type: number
+    value: number
+    isActive: number
+    order: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type RequirementOptionAvgAggregateInputType = {
+    order?: true
+  }
+
+  export type RequirementOptionSumAggregateInputType = {
+    order?: true
+  }
+
+  export type RequirementOptionMinAggregateInputType = {
+    id?: true
+    type?: true
+    value?: true
+    isActive?: true
+    order?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RequirementOptionMaxAggregateInputType = {
+    id?: true
+    type?: true
+    value?: true
+    isActive?: true
+    order?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type RequirementOptionCountAggregateInputType = {
+    id?: true
+    type?: true
+    value?: true
+    isActive?: true
+    order?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type RequirementOptionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RequirementOption to aggregate.
+     */
+    where?: RequirementOptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RequirementOptions to fetch.
+     */
+    orderBy?: RequirementOptionOrderByWithRelationInput | RequirementOptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: RequirementOptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RequirementOptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RequirementOptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned RequirementOptions
+    **/
+    _count?: true | RequirementOptionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: RequirementOptionAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: RequirementOptionSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: RequirementOptionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: RequirementOptionMaxAggregateInputType
+  }
+
+  export type GetRequirementOptionAggregateType<T extends RequirementOptionAggregateArgs> = {
+        [P in keyof T & keyof AggregateRequirementOption]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateRequirementOption[P]>
+      : GetScalarType<T[P], AggregateRequirementOption[P]>
+  }
+
+
+
+
+  export type RequirementOptionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RequirementOptionWhereInput
+    orderBy?: RequirementOptionOrderByWithAggregationInput | RequirementOptionOrderByWithAggregationInput[]
+    by: RequirementOptionScalarFieldEnum[] | RequirementOptionScalarFieldEnum
+    having?: RequirementOptionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: RequirementOptionCountAggregateInputType | true
+    _avg?: RequirementOptionAvgAggregateInputType
+    _sum?: RequirementOptionSumAggregateInputType
+    _min?: RequirementOptionMinAggregateInputType
+    _max?: RequirementOptionMaxAggregateInputType
+  }
+
+  export type RequirementOptionGroupByOutputType = {
+    id: string
+    type: $Enums.RequirementOptionType
+    value: string
+    isActive: boolean
+    order: number
+    createdAt: Date
+    updatedAt: Date
+    _count: RequirementOptionCountAggregateOutputType | null
+    _avg: RequirementOptionAvgAggregateOutputType | null
+    _sum: RequirementOptionSumAggregateOutputType | null
+    _min: RequirementOptionMinAggregateOutputType | null
+    _max: RequirementOptionMaxAggregateOutputType | null
+  }
+
+  type GetRequirementOptionGroupByPayload<T extends RequirementOptionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<RequirementOptionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof RequirementOptionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], RequirementOptionGroupByOutputType[P]>
+            : GetScalarType<T[P], RequirementOptionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type RequirementOptionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    type?: boolean
+    value?: boolean
+    isActive?: boolean
+    order?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["requirementOption"]>
+
+  export type RequirementOptionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    type?: boolean
+    value?: boolean
+    isActive?: boolean
+    order?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["requirementOption"]>
+
+  export type RequirementOptionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    type?: boolean
+    value?: boolean
+    isActive?: boolean
+    order?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }, ExtArgs["result"]["requirementOption"]>
+
+  export type RequirementOptionSelectScalar = {
+    id?: boolean
+    type?: boolean
+    value?: boolean
+    isActive?: boolean
+    order?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type RequirementOptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "value" | "isActive" | "order" | "createdAt" | "updatedAt", ExtArgs["result"]["requirementOption"]>
+
+  export type $RequirementOptionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "RequirementOption"
+    objects: {}
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      type: $Enums.RequirementOptionType
+      value: string
+      isActive: boolean
+      order: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["requirementOption"]>
+    composites: {}
+  }
+
+  type RequirementOptionGetPayload<S extends boolean | null | undefined | RequirementOptionDefaultArgs> = $Result.GetResult<Prisma.$RequirementOptionPayload, S>
+
+  type RequirementOptionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<RequirementOptionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: RequirementOptionCountAggregateInputType | true
+    }
+
+  export interface RequirementOptionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['RequirementOption'], meta: { name: 'RequirementOption' } }
+    /**
+     * Find zero or one RequirementOption that matches the filter.
+     * @param {RequirementOptionFindUniqueArgs} args - Arguments to find a RequirementOption
+     * @example
+     * // Get one RequirementOption
+     * const requirementOption = await prisma.requirementOption.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends RequirementOptionFindUniqueArgs>(args: SelectSubset<T, RequirementOptionFindUniqueArgs<ExtArgs>>): Prisma__RequirementOptionClient<$Result.GetResult<Prisma.$RequirementOptionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one RequirementOption that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {RequirementOptionFindUniqueOrThrowArgs} args - Arguments to find a RequirementOption
+     * @example
+     * // Get one RequirementOption
+     * const requirementOption = await prisma.requirementOption.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends RequirementOptionFindUniqueOrThrowArgs>(args: SelectSubset<T, RequirementOptionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__RequirementOptionClient<$Result.GetResult<Prisma.$RequirementOptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RequirementOption that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementOptionFindFirstArgs} args - Arguments to find a RequirementOption
+     * @example
+     * // Get one RequirementOption
+     * const requirementOption = await prisma.requirementOption.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends RequirementOptionFindFirstArgs>(args?: SelectSubset<T, RequirementOptionFindFirstArgs<ExtArgs>>): Prisma__RequirementOptionClient<$Result.GetResult<Prisma.$RequirementOptionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first RequirementOption that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementOptionFindFirstOrThrowArgs} args - Arguments to find a RequirementOption
+     * @example
+     * // Get one RequirementOption
+     * const requirementOption = await prisma.requirementOption.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends RequirementOptionFindFirstOrThrowArgs>(args?: SelectSubset<T, RequirementOptionFindFirstOrThrowArgs<ExtArgs>>): Prisma__RequirementOptionClient<$Result.GetResult<Prisma.$RequirementOptionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more RequirementOptions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementOptionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all RequirementOptions
+     * const requirementOptions = await prisma.requirementOption.findMany()
+     * 
+     * // Get first 10 RequirementOptions
+     * const requirementOptions = await prisma.requirementOption.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const requirementOptionWithIdOnly = await prisma.requirementOption.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends RequirementOptionFindManyArgs>(args?: SelectSubset<T, RequirementOptionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementOptionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a RequirementOption.
+     * @param {RequirementOptionCreateArgs} args - Arguments to create a RequirementOption.
+     * @example
+     * // Create one RequirementOption
+     * const RequirementOption = await prisma.requirementOption.create({
+     *   data: {
+     *     // ... data to create a RequirementOption
+     *   }
+     * })
+     * 
+     */
+    create<T extends RequirementOptionCreateArgs>(args: SelectSubset<T, RequirementOptionCreateArgs<ExtArgs>>): Prisma__RequirementOptionClient<$Result.GetResult<Prisma.$RequirementOptionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many RequirementOptions.
+     * @param {RequirementOptionCreateManyArgs} args - Arguments to create many RequirementOptions.
+     * @example
+     * // Create many RequirementOptions
+     * const requirementOption = await prisma.requirementOption.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends RequirementOptionCreateManyArgs>(args?: SelectSubset<T, RequirementOptionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many RequirementOptions and returns the data saved in the database.
+     * @param {RequirementOptionCreateManyAndReturnArgs} args - Arguments to create many RequirementOptions.
+     * @example
+     * // Create many RequirementOptions
+     * const requirementOption = await prisma.requirementOption.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many RequirementOptions and only return the `id`
+     * const requirementOptionWithIdOnly = await prisma.requirementOption.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends RequirementOptionCreateManyAndReturnArgs>(args?: SelectSubset<T, RequirementOptionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementOptionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a RequirementOption.
+     * @param {RequirementOptionDeleteArgs} args - Arguments to delete one RequirementOption.
+     * @example
+     * // Delete one RequirementOption
+     * const RequirementOption = await prisma.requirementOption.delete({
+     *   where: {
+     *     // ... filter to delete one RequirementOption
+     *   }
+     * })
+     * 
+     */
+    delete<T extends RequirementOptionDeleteArgs>(args: SelectSubset<T, RequirementOptionDeleteArgs<ExtArgs>>): Prisma__RequirementOptionClient<$Result.GetResult<Prisma.$RequirementOptionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one RequirementOption.
+     * @param {RequirementOptionUpdateArgs} args - Arguments to update one RequirementOption.
+     * @example
+     * // Update one RequirementOption
+     * const requirementOption = await prisma.requirementOption.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends RequirementOptionUpdateArgs>(args: SelectSubset<T, RequirementOptionUpdateArgs<ExtArgs>>): Prisma__RequirementOptionClient<$Result.GetResult<Prisma.$RequirementOptionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more RequirementOptions.
+     * @param {RequirementOptionDeleteManyArgs} args - Arguments to filter RequirementOptions to delete.
+     * @example
+     * // Delete a few RequirementOptions
+     * const { count } = await prisma.requirementOption.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends RequirementOptionDeleteManyArgs>(args?: SelectSubset<T, RequirementOptionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RequirementOptions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementOptionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many RequirementOptions
+     * const requirementOption = await prisma.requirementOption.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends RequirementOptionUpdateManyArgs>(args: SelectSubset<T, RequirementOptionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more RequirementOptions and returns the data updated in the database.
+     * @param {RequirementOptionUpdateManyAndReturnArgs} args - Arguments to update many RequirementOptions.
+     * @example
+     * // Update many RequirementOptions
+     * const requirementOption = await prisma.requirementOption.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more RequirementOptions and only return the `id`
+     * const requirementOptionWithIdOnly = await prisma.requirementOption.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends RequirementOptionUpdateManyAndReturnArgs>(args: SelectSubset<T, RequirementOptionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RequirementOptionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one RequirementOption.
+     * @param {RequirementOptionUpsertArgs} args - Arguments to update or create a RequirementOption.
+     * @example
+     * // Update or create a RequirementOption
+     * const requirementOption = await prisma.requirementOption.upsert({
+     *   create: {
+     *     // ... data to create a RequirementOption
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the RequirementOption we want to update
+     *   }
+     * })
+     */
+    upsert<T extends RequirementOptionUpsertArgs>(args: SelectSubset<T, RequirementOptionUpsertArgs<ExtArgs>>): Prisma__RequirementOptionClient<$Result.GetResult<Prisma.$RequirementOptionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of RequirementOptions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementOptionCountArgs} args - Arguments to filter RequirementOptions to count.
+     * @example
+     * // Count the number of RequirementOptions
+     * const count = await prisma.requirementOption.count({
+     *   where: {
+     *     // ... the filter for the RequirementOptions we want to count
+     *   }
+     * })
+    **/
+    count<T extends RequirementOptionCountArgs>(
+      args?: Subset<T, RequirementOptionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], RequirementOptionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a RequirementOption.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementOptionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends RequirementOptionAggregateArgs>(args: Subset<T, RequirementOptionAggregateArgs>): Prisma.PrismaPromise<GetRequirementOptionAggregateType<T>>
+
+    /**
+     * Group by RequirementOption.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {RequirementOptionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends RequirementOptionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: RequirementOptionGroupByArgs['orderBy'] }
+        : { orderBy?: RequirementOptionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, RequirementOptionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetRequirementOptionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the RequirementOption model
+   */
+  readonly fields: RequirementOptionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for RequirementOption.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__RequirementOptionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the RequirementOption model
+   */
+  interface RequirementOptionFieldRefs {
+    readonly id: FieldRef<"RequirementOption", 'String'>
+    readonly type: FieldRef<"RequirementOption", 'RequirementOptionType'>
+    readonly value: FieldRef<"RequirementOption", 'String'>
+    readonly isActive: FieldRef<"RequirementOption", 'Boolean'>
+    readonly order: FieldRef<"RequirementOption", 'Int'>
+    readonly createdAt: FieldRef<"RequirementOption", 'DateTime'>
+    readonly updatedAt: FieldRef<"RequirementOption", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * RequirementOption findUnique
+   */
+  export type RequirementOptionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementOption
+     */
+    select?: RequirementOptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementOption
+     */
+    omit?: RequirementOptionOmit<ExtArgs> | null
+    /**
+     * Filter, which RequirementOption to fetch.
+     */
+    where: RequirementOptionWhereUniqueInput
+  }
+
+  /**
+   * RequirementOption findUniqueOrThrow
+   */
+  export type RequirementOptionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementOption
+     */
+    select?: RequirementOptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementOption
+     */
+    omit?: RequirementOptionOmit<ExtArgs> | null
+    /**
+     * Filter, which RequirementOption to fetch.
+     */
+    where: RequirementOptionWhereUniqueInput
+  }
+
+  /**
+   * RequirementOption findFirst
+   */
+  export type RequirementOptionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementOption
+     */
+    select?: RequirementOptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementOption
+     */
+    omit?: RequirementOptionOmit<ExtArgs> | null
+    /**
+     * Filter, which RequirementOption to fetch.
+     */
+    where?: RequirementOptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RequirementOptions to fetch.
+     */
+    orderBy?: RequirementOptionOrderByWithRelationInput | RequirementOptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RequirementOptions.
+     */
+    cursor?: RequirementOptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RequirementOptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RequirementOptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RequirementOptions.
+     */
+    distinct?: RequirementOptionScalarFieldEnum | RequirementOptionScalarFieldEnum[]
+  }
+
+  /**
+   * RequirementOption findFirstOrThrow
+   */
+  export type RequirementOptionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementOption
+     */
+    select?: RequirementOptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementOption
+     */
+    omit?: RequirementOptionOmit<ExtArgs> | null
+    /**
+     * Filter, which RequirementOption to fetch.
+     */
+    where?: RequirementOptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RequirementOptions to fetch.
+     */
+    orderBy?: RequirementOptionOrderByWithRelationInput | RequirementOptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for RequirementOptions.
+     */
+    cursor?: RequirementOptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RequirementOptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RequirementOptions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of RequirementOptions.
+     */
+    distinct?: RequirementOptionScalarFieldEnum | RequirementOptionScalarFieldEnum[]
+  }
+
+  /**
+   * RequirementOption findMany
+   */
+  export type RequirementOptionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementOption
+     */
+    select?: RequirementOptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementOption
+     */
+    omit?: RequirementOptionOmit<ExtArgs> | null
+    /**
+     * Filter, which RequirementOptions to fetch.
+     */
+    where?: RequirementOptionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of RequirementOptions to fetch.
+     */
+    orderBy?: RequirementOptionOrderByWithRelationInput | RequirementOptionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing RequirementOptions.
+     */
+    cursor?: RequirementOptionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` RequirementOptions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` RequirementOptions.
+     */
+    skip?: number
+    distinct?: RequirementOptionScalarFieldEnum | RequirementOptionScalarFieldEnum[]
+  }
+
+  /**
+   * RequirementOption create
+   */
+  export type RequirementOptionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementOption
+     */
+    select?: RequirementOptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementOption
+     */
+    omit?: RequirementOptionOmit<ExtArgs> | null
+    /**
+     * The data needed to create a RequirementOption.
+     */
+    data: XOR<RequirementOptionCreateInput, RequirementOptionUncheckedCreateInput>
+  }
+
+  /**
+   * RequirementOption createMany
+   */
+  export type RequirementOptionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many RequirementOptions.
+     */
+    data: RequirementOptionCreateManyInput | RequirementOptionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RequirementOption createManyAndReturn
+   */
+  export type RequirementOptionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementOption
+     */
+    select?: RequirementOptionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementOption
+     */
+    omit?: RequirementOptionOmit<ExtArgs> | null
+    /**
+     * The data used to create many RequirementOptions.
+     */
+    data: RequirementOptionCreateManyInput | RequirementOptionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * RequirementOption update
+   */
+  export type RequirementOptionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementOption
+     */
+    select?: RequirementOptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementOption
+     */
+    omit?: RequirementOptionOmit<ExtArgs> | null
+    /**
+     * The data needed to update a RequirementOption.
+     */
+    data: XOR<RequirementOptionUpdateInput, RequirementOptionUncheckedUpdateInput>
+    /**
+     * Choose, which RequirementOption to update.
+     */
+    where: RequirementOptionWhereUniqueInput
+  }
+
+  /**
+   * RequirementOption updateMany
+   */
+  export type RequirementOptionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update RequirementOptions.
+     */
+    data: XOR<RequirementOptionUpdateManyMutationInput, RequirementOptionUncheckedUpdateManyInput>
+    /**
+     * Filter which RequirementOptions to update
+     */
+    where?: RequirementOptionWhereInput
+    /**
+     * Limit how many RequirementOptions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RequirementOption updateManyAndReturn
+   */
+  export type RequirementOptionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementOption
+     */
+    select?: RequirementOptionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementOption
+     */
+    omit?: RequirementOptionOmit<ExtArgs> | null
+    /**
+     * The data used to update RequirementOptions.
+     */
+    data: XOR<RequirementOptionUpdateManyMutationInput, RequirementOptionUncheckedUpdateManyInput>
+    /**
+     * Filter which RequirementOptions to update
+     */
+    where?: RequirementOptionWhereInput
+    /**
+     * Limit how many RequirementOptions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * RequirementOption upsert
+   */
+  export type RequirementOptionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementOption
+     */
+    select?: RequirementOptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementOption
+     */
+    omit?: RequirementOptionOmit<ExtArgs> | null
+    /**
+     * The filter to search for the RequirementOption to update in case it exists.
+     */
+    where: RequirementOptionWhereUniqueInput
+    /**
+     * In case the RequirementOption found by the `where` argument doesn't exist, create a new RequirementOption with this data.
+     */
+    create: XOR<RequirementOptionCreateInput, RequirementOptionUncheckedCreateInput>
+    /**
+     * In case the RequirementOption was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<RequirementOptionUpdateInput, RequirementOptionUncheckedUpdateInput>
+  }
+
+  /**
+   * RequirementOption delete
+   */
+  export type RequirementOptionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementOption
+     */
+    select?: RequirementOptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementOption
+     */
+    omit?: RequirementOptionOmit<ExtArgs> | null
+    /**
+     * Filter which RequirementOption to delete.
+     */
+    where: RequirementOptionWhereUniqueInput
+  }
+
+  /**
+   * RequirementOption deleteMany
+   */
+  export type RequirementOptionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which RequirementOptions to delete
+     */
+    where?: RequirementOptionWhereInput
+    /**
+     * Limit how many RequirementOptions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * RequirementOption without action
+   */
+  export type RequirementOptionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RequirementOption
+     */
+    select?: RequirementOptionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RequirementOption
+     */
+    omit?: RequirementOptionOmit<ExtArgs> | null
+  }
+
+
+  /**
    * Model LabourProfile
    */
 
@@ -24111,6 +25274,19 @@ export namespace Prisma {
   export type JobRoleScalarFieldEnum = (typeof JobRoleScalarFieldEnum)[keyof typeof JobRoleScalarFieldEnum]
 
 
+  export const RequirementOptionScalarFieldEnum: {
+    id: 'id',
+    type: 'type',
+    value: 'value',
+    isActive: 'isActive',
+    order: 'order',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type RequirementOptionScalarFieldEnum = (typeof RequirementOptionScalarFieldEnum)[keyof typeof RequirementOptionScalarFieldEnum]
+
+
   export const LabourProfileScalarFieldEnum: {
     id: 'id',
     name: 'name',
@@ -24530,6 +25706,20 @@ export namespace Prisma {
    * Reference to a field of type 'Float[]'
    */
   export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'RequirementOptionType'
+   */
+  export type EnumRequirementOptionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RequirementOptionType'>
+    
+
+
+  /**
+   * Reference to a field of type 'RequirementOptionType[]'
+   */
+  export type ListEnumRequirementOptionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RequirementOptionType[]'>
     
 
 
@@ -25580,6 +26770,71 @@ export namespace Prisma {
     agencyStatus?: EnumRequirementStatusWithAggregatesFilter<"JobRole"> | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusWithAggregatesFilter<"JobRole"> | $Enums.RequirementStatus
     needsMoreLabour?: BoolWithAggregatesFilter<"JobRole"> | boolean
+  }
+
+  export type RequirementOptionWhereInput = {
+    AND?: RequirementOptionWhereInput | RequirementOptionWhereInput[]
+    OR?: RequirementOptionWhereInput[]
+    NOT?: RequirementOptionWhereInput | RequirementOptionWhereInput[]
+    id?: StringFilter<"RequirementOption"> | string
+    type?: EnumRequirementOptionTypeFilter<"RequirementOption"> | $Enums.RequirementOptionType
+    value?: StringFilter<"RequirementOption"> | string
+    isActive?: BoolFilter<"RequirementOption"> | boolean
+    order?: IntFilter<"RequirementOption"> | number
+    createdAt?: DateTimeFilter<"RequirementOption"> | Date | string
+    updatedAt?: DateTimeFilter<"RequirementOption"> | Date | string
+  }
+
+  export type RequirementOptionOrderByWithRelationInput = {
+    id?: SortOrder
+    type?: SortOrder
+    value?: SortOrder
+    isActive?: SortOrder
+    order?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RequirementOptionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    type_value?: RequirementOptionTypeValueCompoundUniqueInput
+    AND?: RequirementOptionWhereInput | RequirementOptionWhereInput[]
+    OR?: RequirementOptionWhereInput[]
+    NOT?: RequirementOptionWhereInput | RequirementOptionWhereInput[]
+    type?: EnumRequirementOptionTypeFilter<"RequirementOption"> | $Enums.RequirementOptionType
+    value?: StringFilter<"RequirementOption"> | string
+    isActive?: BoolFilter<"RequirementOption"> | boolean
+    order?: IntFilter<"RequirementOption"> | number
+    createdAt?: DateTimeFilter<"RequirementOption"> | Date | string
+    updatedAt?: DateTimeFilter<"RequirementOption"> | Date | string
+  }, "id" | "type_value">
+
+  export type RequirementOptionOrderByWithAggregationInput = {
+    id?: SortOrder
+    type?: SortOrder
+    value?: SortOrder
+    isActive?: SortOrder
+    order?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: RequirementOptionCountOrderByAggregateInput
+    _avg?: RequirementOptionAvgOrderByAggregateInput
+    _max?: RequirementOptionMaxOrderByAggregateInput
+    _min?: RequirementOptionMinOrderByAggregateInput
+    _sum?: RequirementOptionSumOrderByAggregateInput
+  }
+
+  export type RequirementOptionScalarWhereWithAggregatesInput = {
+    AND?: RequirementOptionScalarWhereWithAggregatesInput | RequirementOptionScalarWhereWithAggregatesInput[]
+    OR?: RequirementOptionScalarWhereWithAggregatesInput[]
+    NOT?: RequirementOptionScalarWhereWithAggregatesInput | RequirementOptionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"RequirementOption"> | string
+    type?: EnumRequirementOptionTypeWithAggregatesFilter<"RequirementOption"> | $Enums.RequirementOptionType
+    value?: StringWithAggregatesFilter<"RequirementOption"> | string
+    isActive?: BoolWithAggregatesFilter<"RequirementOption"> | boolean
+    order?: IntWithAggregatesFilter<"RequirementOption"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"RequirementOption"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"RequirementOption"> | Date | string
   }
 
   export type LabourProfileWhereInput = {
@@ -27499,6 +28754,76 @@ export namespace Prisma {
     agencyStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     adminStatus?: EnumRequirementStatusFieldUpdateOperationsInput | $Enums.RequirementStatus
     needsMoreLabour?: BoolFieldUpdateOperationsInput | boolean
+  }
+
+  export type RequirementOptionCreateInput = {
+    id?: string
+    type: $Enums.RequirementOptionType
+    value: string
+    isActive?: boolean
+    order?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RequirementOptionUncheckedCreateInput = {
+    id?: string
+    type: $Enums.RequirementOptionType
+    value: string
+    isActive?: boolean
+    order?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RequirementOptionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumRequirementOptionTypeFieldUpdateOperationsInput | $Enums.RequirementOptionType
+    value?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    order?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RequirementOptionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumRequirementOptionTypeFieldUpdateOperationsInput | $Enums.RequirementOptionType
+    value?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    order?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RequirementOptionCreateManyInput = {
+    id?: string
+    type: $Enums.RequirementOptionType
+    value: string
+    isActive?: boolean
+    order?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type RequirementOptionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumRequirementOptionTypeFieldUpdateOperationsInput | $Enums.RequirementOptionType
+    value?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    order?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type RequirementOptionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumRequirementOptionTypeFieldUpdateOperationsInput | $Enums.RequirementOptionType
+    value?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    order?: IntFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type LabourProfileCreateInput = {
@@ -29542,6 +30867,66 @@ export namespace Prisma {
     _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
+  export type EnumRequirementOptionTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.RequirementOptionType | EnumRequirementOptionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.RequirementOptionType[] | ListEnumRequirementOptionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RequirementOptionType[] | ListEnumRequirementOptionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumRequirementOptionTypeFilter<$PrismaModel> | $Enums.RequirementOptionType
+  }
+
+  export type RequirementOptionTypeValueCompoundUniqueInput = {
+    type: $Enums.RequirementOptionType
+    value: string
+  }
+
+  export type RequirementOptionCountOrderByAggregateInput = {
+    id?: SortOrder
+    type?: SortOrder
+    value?: SortOrder
+    isActive?: SortOrder
+    order?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RequirementOptionAvgOrderByAggregateInput = {
+    order?: SortOrder
+  }
+
+  export type RequirementOptionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    type?: SortOrder
+    value?: SortOrder
+    isActive?: SortOrder
+    order?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RequirementOptionMinOrderByAggregateInput = {
+    id?: SortOrder
+    type?: SortOrder
+    value?: SortOrder
+    isActive?: SortOrder
+    order?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type RequirementOptionSumOrderByAggregateInput = {
+    order?: SortOrder
+  }
+
+  export type EnumRequirementOptionTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RequirementOptionType | EnumRequirementOptionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.RequirementOptionType[] | ListEnumRequirementOptionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RequirementOptionType[] | ListEnumRequirementOptionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumRequirementOptionTypeWithAggregatesFilter<$PrismaModel> | $Enums.RequirementOptionType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRequirementOptionTypeFilter<$PrismaModel>
+    _max?: NestedEnumRequirementOptionTypeFilter<$PrismaModel>
+  }
+
   export type EnumGenderFilter<$PrismaModel = never> = {
     equals?: $Enums.Gender | EnumGenderFieldRefInput<$PrismaModel>
     in?: $Enums.Gender[] | ListEnumGenderFieldRefInput<$PrismaModel>
@@ -31216,6 +32601,10 @@ export namespace Prisma {
     deleteMany?: JobRoleForwardingScalarWhereInput | JobRoleForwardingScalarWhereInput[]
   }
 
+  export type EnumRequirementOptionTypeFieldUpdateOperationsInput = {
+    set?: $Enums.RequirementOptionType
+  }
+
   export type LabourProfileCreateskillsInput = {
     set: string[]
   }
@@ -32129,6 +33518,23 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumRequirementOptionTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.RequirementOptionType | EnumRequirementOptionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.RequirementOptionType[] | ListEnumRequirementOptionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RequirementOptionType[] | ListEnumRequirementOptionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumRequirementOptionTypeFilter<$PrismaModel> | $Enums.RequirementOptionType
+  }
+
+  export type NestedEnumRequirementOptionTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RequirementOptionType | EnumRequirementOptionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.RequirementOptionType[] | ListEnumRequirementOptionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RequirementOptionType[] | ListEnumRequirementOptionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumRequirementOptionTypeWithAggregatesFilter<$PrismaModel> | $Enums.RequirementOptionType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRequirementOptionTypeFilter<$PrismaModel>
+    _max?: NestedEnumRequirementOptionTypeFilter<$PrismaModel>
   }
 
   export type NestedEnumGenderFilter<$PrismaModel = never> = {

@@ -172,12 +172,10 @@ This directory contains all the route-based pages of the application using Next.
 
 - **Path:** `/dashboard`
 - **Purpose:** Protected area for logged-in clients (Party 2). Includes multiple subpages:
-
   - **📄 page.tsx** – Dashboard home/overview.
   - **📄 layout.tsx** – Dashboard layout wrapper with sidebar and header.
 
   #### Subroutes:
-
   - **📂 requirements/**
     - **📄 page.tsx** – View all submitted requirements.
     - **📄 [id]/page.tsx** – View details of a specific requirement (dynamic route).
@@ -214,9 +212,7 @@ This folder contains all the reusable UI and layout components used across the a
 ### 📁 layout/
 
 - Layout-level components shared across pages.
-
   - **📄 Header.tsx**
-
     - Top navigation bar.
     - Includes logo, navigation links, profile dropdown (with Logout, Settings, etc.).
 
@@ -227,17 +223,13 @@ This folder contains all the reusable UI and layout components used across the a
 ### 📁 sections/
 
 - Specific to landing page content blocks. Each component maps to a section of the landing page.
-
   - **📄 HeroSection.tsx**
-
     - The hero banner with headline, subheadline, and primary CTA button.
 
   - **📄 ServicesSection.tsx**
-
     - Displays categorized services offered (Construction Workers, Masons, etc.) with icons and labels.
 
   - **📄 ProcessSection.tsx**
-
     - A visual representation of the recruitment process from submission to deployment.
 
   - **📄 TestimonialsSection.tsx**
@@ -246,16 +238,13 @@ This folder contains all the reusable UI and layout components used across the a
 ### 📁 shared/
 
 - Small reusable components shared across various parts of the app.
-
   - **📄 Card.tsx**
     - Generic card layout component used for displaying content blocks in a consistent style.
 
 ### 📁 ui/
 
 - Foundational UI components used throughout the app.
-
   - **📄 Button.tsx**
-
     - Styled button component (primary, secondary, loading states).
 
   - **📄 Input.tsx**
@@ -270,9 +259,7 @@ The `lib/` folder is where all shared logic and utilities live. It is structured
 ### 📁 api/
 
 - Contains methods for handling server and client API communication.
-
   - **📄 client.ts**
-
     - Utility functions and wrappers to make API calls from the client side (e.g., fetching data with `fetch`, Axios, etc.).
     - Can be used in React hooks or component logic.
 
@@ -283,7 +270,6 @@ The `lib/` folder is where all shared logic and utilities live. It is structured
 ### 📁 auth/
 
 - Authentication-related utilities.
-
   - **📄 session.ts**
     - Manages user session logic, likely using NextAuth or a custom JWT-based approach.
     - Contains logic for checking auth status, retrieving user info, or enforcing protected routes.
@@ -291,7 +277,6 @@ The `lib/` folder is where all shared logic and utilities live. It is structured
 ### 📁 utils/
 
 - General-purpose helper functions used across the application.
-
   - **📄 helpers.ts**
     - Utility methods for formatting, date handling, string manipulation, validations, etc.
     - Keeps your component code clean and DRY.

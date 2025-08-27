@@ -6,6 +6,7 @@ import {
   CompanySector,
   CompanySize,
   Department,
+  RequirementOptionType,
 } from "@prisma/client";
 import { faker } from "@faker-js/faker";
 import prisma from "@/lib/prisma";
@@ -20,14 +21,10 @@ interface SeedUser {
   altContact?: string;
   profilePicture?: string;
   profile: {
-    // Admin-specific fields
     admin?: {
       department?: Department;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       permissions?: any;
     };
-
-    // Client-specific fields
     client?: {
       companyName: string;
       registrationNo?: string;
@@ -40,8 +37,6 @@ interface SeedUser {
       postalCode?: string;
       designation: string;
     };
-
-    // Agency-specific fields
     agency?: {
       agencyName: string;
       registrationNo?: string;
@@ -54,6 +49,7 @@ interface SeedUser {
     };
   };
 }
+
 export async function seedDatabase() {
   try {
     await seedBaseData();
@@ -83,6 +79,7 @@ async function seedBaseData() {
             canCreateUsers: true,
             canVerifyClients: true,
             canVerifyAgencies: true,
+            canEditRequirementOptions: true,
           },
         },
       },
@@ -92,6 +89,9 @@ async function seedBaseData() {
   for (const userData of usersToSeed) {
     await seedUserWithProfile(userData);
   }
+
+  await seedRequirementOptions();
+  console.log("✅ Requirement options seeded");
 }
 
 async function seedUserWithProfile(userData: SeedUser) {
@@ -101,6 +101,7 @@ async function seedUserWithProfile(userData: SeedUser) {
 
   if (existingUser) {
     console.log(`ℹ️ User ${userData.email} already exists`);
+    await ensureUserSettings(existingUser.id);
     return;
   }
 
@@ -118,28 +119,95 @@ async function seedUserWithProfile(userData: SeedUser) {
     profilePicture: userData.profilePicture,
   };
 
-  // Role-specific profile creation
   let profileRelation = {};
-  switch (userData.role) {
-    case UserRole.RECRUITMENT_ADMIN:
-      profileRelation = {
-        adminProfile: {
-          create: {
-            name: userData.name,
-            department: userData.profile.admin?.department,
-            permissions: userData.profile.admin?.permissions || {},
-          },
+  if (userData.role === UserRole.RECRUITMENT_ADMIN) {
+    profileRelation = {
+      adminProfile: {
+        create: {
+          name: userData.name,
+          department: userData.profile.admin?.department,
+          permissions: userData.profile.admin?.permissions || {},
         },
-      };
-      break;
+      },
+    };
   }
 
-  await prisma.user.create({
+  const created = await prisma.user.create({
     data: {
       ...userCreateData,
       ...profileRelation,
     },
   });
 
+  await ensureUserSettings(created.id);
   console.log(`✅ Created ${userData.role} user: ${userData.email}`);
+}
+
+async function ensureUserSettings(userId: string) {
+  const existing = await prisma.userSettings.findUnique({ where: { userId } });
+  if (!existing) {
+    await prisma.userSettings.create({ data: { userId } });
+  }
+}
+
+/**
+ * Centralized requirement options taken from translation table
+ */
+const requirementOptionSeeds: Record<RequirementOptionType, string[]> = {
+  JOB_TITLE: [
+    "Carpenter",
+    "Electrician",
+    "Plumber",
+    "Welder",
+    "Driver",
+    "Cleaner",
+    "Cook",
+  ],
+  TICKET_FREQUENCY: ["Annual", "Biennial", "End of Contract"],
+  WORK_LOCATION: ["Office", "Site", "Hybrid", "Remote"],
+  PREVIOUS_EXPERIENCE: [
+    "GCC Experience",
+    "Qatar Experience",
+    "Overseas Experience",
+  ],
+  LANGUAGE: ["English", "Arabic", "Hindi", "Urdu", "Tagalog"],
+  CURRENCY: ["QAR", "USD", "EUR"],
+  CONTRACT_DURATION: [
+    "1 Month",
+    "3 Months",
+    "6 Months",
+    "1 Year",
+    "2 Years",
+    "3 Years",
+    "5+ Years",
+  ],
+};
+
+async function seedRequirementOptions() {
+  for (const [type, values] of Object.entries(requirementOptionSeeds)) {
+    await Promise.all(
+      values.map(async (value, index) => {
+        const existing = await prisma.requirementOption.findFirst({
+          where: { type: type as RequirementOptionType, value },
+          select: { id: true },
+        });
+        if (existing) {
+          await prisma.requirementOption.update({
+            where: { id: existing.id },
+            data: { isActive: true, order: index },
+          });
+        } else {
+          await prisma.requirementOption.create({
+            data: {
+              type: type as RequirementOptionType,
+              value,
+              order: index,
+              isActive: true,
+            },
+          });
+        }
+      })
+    );
+    console.log(`✅ Seeded ${type} options (${values.length} entries)`);
+  }
 }

@@ -1,3 +1,4 @@
+// app/(protected)/dashboard/admin/requirements/page.tsx
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
@@ -6,8 +7,11 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import { Input } from "@/components/ui/Input";
-import { ChevronDown, ChevronUp, Trash2, User } from "lucide-react";
+import { ChevronDown, ChevronUp, Trash2, User, Settings2 } from "lucide-react";
 import { RequirementStatus, ContractDuration } from "@/lib/generated/prisma";
+import { RequirementOptionsModal } from "@/components/shared/RequirementOptionsModal";
+
+/* ----------------------------- Types ----------------------------- */
 
 interface Client {
   id: string;
@@ -75,9 +79,7 @@ interface JobRole {
   specialRequirements: string | null;
   assignedAgencyId: string | null;
   agencyStatus: RequirementStatus | null;
-  assignedAgency?: {
-    agencyName: string;
-  } | null;
+  assignedAgency?: { agencyName: string } | null;
   forwardedQuantity?: number;
   needsMoreLabour?: boolean;
 }
@@ -96,10 +98,7 @@ interface Requirement {
 
 interface RequirementSection {
   title: string;
-  fields: {
-    label: string;
-    value: string | number;
-  }[];
+  fields: { label: string; value: string | number }[];
   hasActions?: boolean;
   id: string;
   foodProvidedByCompany: boolean;
@@ -127,10 +126,7 @@ interface ForwardingJobRole {
   id: string;
   title: string;
   originalQuantity: number;
-  forwarded: {
-    agencyId: string;
-    quantity: number;
-  }[];
+  forwarded: { agencyId: string; quantity: number }[];
 }
 
 interface ForwardRequirementModalProps {
@@ -141,6 +137,8 @@ interface ForwardRequirementModalProps {
   onForward: (assignments: ForwardingJobRole[]) => Promise<void>;
 }
 
+/* ----------------------- Enum labels (read-only) ----------------------- */
+
 const contractDurationMap: Record<ContractDuration, string> = {
   ONE_MONTH: "1 Month",
   THREE_MONTHS: "3 Months",
@@ -150,6 +148,187 @@ const contractDurationMap: Record<ContractDuration, string> = {
   THREE_YEARS: "3 Years",
   FIVE_PLUS_YEARS: "5+ Years",
 };
+
+/* --------------------- Requirement Options Manager --------------------- */
+/** Admin-configurable enumerations (global) */
+
+type RequirementOptionType =
+  | "JOB_TITLE"
+  | "TICKET_FREQUENCY"
+  | "WORK_LOCATION"
+  | "PREVIOUS_EXPERIENCE"
+  | "LANGUAGE"
+  | "CURRENCY";
+
+interface RequirementOption {
+  id: string;
+  type: RequirementOptionType;
+  value: string;
+  order: number | null;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+const TYPE_LABELS: Record<RequirementOptionType, string> = {
+  JOB_TITLE: "Job Titles",
+  TICKET_FREQUENCY: "Ticket Frequencies",
+  WORK_LOCATION: "Work Locations",
+  PREVIOUS_EXPERIENCE: "Previous Experience",
+  LANGUAGE: "Languages",
+  CURRENCY: "Currencies",
+};
+
+function Pill({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center rounded-full bg-[#EDDDF3] text-[#150B3D] px-2.5 py-1 text-xs font-medium">
+      {children}
+    </span>
+  );
+}
+
+function SectionCard({
+  title,
+  children,
+  right,
+}: {
+  title: string;
+  children: React.ReactNode;
+  right?: React.ReactNode;
+}) {
+  return (
+    <div className="bg-white border border-[#EDDDF3] rounded-xl p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-[#150B3D] font-semibold">{title}</h3>
+        {right}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function Row({
+  option,
+  onSave,
+  onDelete,
+}: {
+  option: RequirementOption;
+  onSave: (o: RequirementOption) => void;
+  onDelete: (id: string) => void;
+}) {
+  const [val, setVal] = useState(option.value);
+  const [ord, setOrd] = useState<number | "">(option.order ?? "");
+  const [active, setActive] = useState(option.isActive);
+
+  return (
+    <div className="grid grid-cols-[1fr_120px_110px_110px] gap-2 items-center">
+      <Input
+        value={val}
+        onChange={(e) => setVal(e.target.value)}
+        className="h-9"
+        placeholder="Value"
+      />
+      <Input
+        type="number"
+        value={ord}
+        onChange={(e) =>
+          setOrd(e.target.value === "" ? "" : parseInt(e.target.value) || 0)
+        }
+        className="h-9"
+        placeholder="Order"
+      />
+      <label className="inline-flex items-center gap-2 text-sm text-[#150B3D]">
+        <input
+          type="checkbox"
+          checked={active}
+          onChange={(e) => setActive(e.target.checked)}
+          className="h-4 w-4"
+        />
+        Active
+      </label>
+      <div className="flex items-center gap-2">
+        <Button
+          size="sm"
+          onClick={() =>
+            onSave({
+              ...option,
+              value: val.trim(),
+              order: ord === "" ? null : Number(ord),
+              isActive: active,
+            })
+          }
+        >
+          Save
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => onDelete(option.id)}>
+          Delete
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function NewRow({
+  type,
+  onCreate,
+}: {
+  type: RequirementOptionType;
+  onCreate: (
+    payload: Omit<RequirementOption, "id" | "createdAt" | "updatedAt">
+  ) => void;
+}) {
+  const [val, setVal] = useState("");
+  const [ord, setOrd] = useState<number | "">("");
+  const [active, setActive] = useState(true);
+
+  return (
+    <div className="grid grid-cols-[1fr_120px_110px_110px] gap-2 items-center">
+      <Input
+        value={val}
+        onChange={(e) => setVal(e.target.value)}
+        className="h-9"
+        placeholder={`Add new ${TYPE_LABELS[type].slice(0, -1).toLowerCase()}`}
+      />
+      <Input
+        type="number"
+        value={ord}
+        onChange={(e) =>
+          setOrd(e.target.value === "" ? "" : parseInt(e.target.value) || 0)
+        }
+        className="h-9"
+        placeholder="Order"
+      />
+      <label className="inline-flex items-center gap-2 text-sm text-[#150B3D]">
+        <input
+          type="checkbox"
+          checked={active}
+          onChange={(e) => setActive(e.target.checked)}
+          className="h-4 w-4"
+        />
+        Active
+      </label>
+      <div>
+        <Button
+          size="sm"
+          onClick={() => {
+            if (!val.trim()) return;
+            onCreate({
+              type,
+              value: val.trim(),
+              order: ord === "" ? 0 : Number(ord),
+              isActive: active,
+            } as any);
+            setVal("");
+            setOrd("");
+            setActive(true);
+          }}
+        >
+          Add
+        </Button>
+      </div>
+    </div>
+  );
+} /* ----------------------- Forward Requirement Modal ---------------------- */
 
 const ForwardRequirementModal = ({
   isOpen,
@@ -181,7 +360,6 @@ const ForwardRequirementModal = ({
   useEffect(() => {
     if (requirement) {
       const rolesToForward = requirement.jobRoles;
-
       const initialJobRoles: ForwardingJobRole[] = rolesToForward.map(
         (role) => ({
           id: role.id,
@@ -191,25 +369,10 @@ const ForwardRequirementModal = ({
         })
       );
       setJobRoles(initialJobRoles);
-
       const expandedState: Record<string, boolean> = {};
-      rolesToForward.forEach((role) => {
-        expandedState[role.id] = false;
-      });
+      rolesToForward.forEach((role) => (expandedState[role.id] = false));
       setExpandedRoles(expandedState);
 
-      const rejected = new Set<string>();
-      requirement.jobRoles.forEach((role) => {
-        if (role.agencyStatus === "REJECTED" && role.assignedAgencyId) {
-          rejected.add(role.assignedAgencyId);
-        }
-      });
-      setRejectedAgencies(rejected);
-    }
-  }, [requirement]);
-
-  useEffect(() => {
-    if (requirement) {
       const rejected = new Set<string>();
       requirement.jobRoles.forEach((role) => {
         if (role.agencyStatus === "REJECTED" && role.assignedAgencyId) {
@@ -226,19 +389,15 @@ const ForwardRequirementModal = ({
     }
   }, [mode, agencies]);
 
-  const toggleRoleExpansion = (roleId: string) => {
-    setExpandedRoles((prev) => ({
-      ...prev,
-      [roleId]: !prev[roleId],
-    }));
-  };
+  const toggleRoleExpansion = (roleId: string) =>
+    setExpandedRoles((p) => ({ ...p, [roleId]: !p[roleId] }));
 
-  const handleAddAssignment = (jobRoleId: string) => {
+  const handleAddAssignment = (jobRoleId: string) =>
     setJobRoles((prev) =>
       prev.map((role) => {
         if (role.id === jobRoleId) {
           const availableAgencies = agencies.filter(
-            (agency) => !role.forwarded.some((a) => a.agencyId === agency.id)
+            (a) => !role.forwarded.some((f) => f.agencyId === a.id)
           );
           if (availableAgencies.length > 0) {
             return {
@@ -256,179 +415,129 @@ const ForwardRequirementModal = ({
         return role;
       })
     );
-  };
 
-  const handleRemoveAssignment = (jobRoleId: string, index: number) => {
+  const handleRemoveAssignment = (jobRoleId: string, index: number) =>
     setJobRoles((prev) =>
-      prev.map((role) => {
-        if (role.id === jobRoleId) {
-          const newForwarded = [...role.forwarded];
-          newForwarded.splice(index, 1);
-          return { ...role, forwarded: newForwarded };
-        }
-        return role;
-      })
+      prev.map((role) =>
+        role.id === jobRoleId
+          ? { ...role, forwarded: role.forwarded.filter((_, i) => i !== index) }
+          : role
+      )
     );
-  };
 
   const handleAgencyChange = (
     jobRoleId: string,
     assignmentIndex: number,
     agencyId: string
-  ) => {
+  ) =>
     setJobRoles((prev) =>
-      prev.map((role) => {
-        if (role.id === jobRoleId) {
-          const newForwarded = [...role.forwarded];
-          newForwarded[assignmentIndex] = {
-            ...newForwarded[assignmentIndex],
-            agencyId,
-          };
-          return { ...role, forwarded: newForwarded };
-        }
-        return role;
-      })
+      prev.map((role) =>
+        role.id === jobRoleId
+          ? {
+              ...role,
+              forwarded: role.forwarded.map((f, i) =>
+                i === assignmentIndex ? { ...f, agencyId } : f
+              ),
+            }
+          : role
+      )
     );
-  };
 
   const handleQuantityChange = (
     jobRoleId: string,
     assignmentIndex: number,
     quantity: number
-  ) => {
+  ) =>
     setJobRoles((prev) =>
-      prev.map((role) => {
-        if (role.id === jobRoleId) {
-          const newForwarded = [...role.forwarded];
-          newForwarded[assignmentIndex] = {
-            ...newForwarded[assignmentIndex],
-            quantity: Math.max(0, quantity),
-          };
-          return { ...role, forwarded: newForwarded };
-        }
-        return role;
-      })
+      prev.map((role) =>
+        role.id === jobRoleId
+          ? {
+              ...role,
+              forwarded: role.forwarded.map((f, i) =>
+                i === assignmentIndex
+                  ? { ...f, quantity: Math.max(0, quantity) }
+                  : f
+              ),
+            }
+          : role
+      )
     );
-  };
 
   const handleSingleModeQuantityChange = (
     jobRoleId: string,
     quantity: number
-  ) => {
+  ) =>
     setJobRoles((prev) =>
-      prev.map((role) => {
-        if (role.id === jobRoleId) {
-          return {
-            ...role,
-            originalQuantity: Math.max(0, quantity),
-          };
-        }
-        return role;
-      })
+      prev.map((role) =>
+        role.id === jobRoleId
+          ? { ...role, originalQuantity: Math.max(0, quantity) }
+          : role
+      )
     );
+
+  const getAvailableAgencies = (jobRoleId: string, currentAgencyId: string) => {
+    const currentRole = jobRoles.find((r) => r.id === jobRoleId);
+    const assigned = currentRole?.forwarded.map((a) => a.agencyId) || [];
+    return agencies.filter(
+      (a) =>
+        (a.id === currentAgencyId || !assigned.includes(a.id)) &&
+        !rejectedAgencies.has(a.id)
+    );
+  };
+
+  const getTotalAssigned = (jobRoleId: string) => {
+    const role = jobRoles.find((r) => r.id === jobRoleId);
+    return role ? role.forwarded.reduce((s, a) => s + a.quantity, 0) : 0;
   };
 
   const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
-      let isValid = true;
       const errors: string[] = [];
 
       if (mode === "SINGLE") {
-        if (!selectedAgency) {
-          errors.push("Please select an agency");
-          isValid = false;
-        }
-
-        if (isValid) {
-          const assignments: ForwardingJobRole[] = jobRoles.map((role) => ({
-            ...role,
-            forwarded: [
-              {
-                agencyId: selectedAgency,
-                quantity: role.originalQuantity,
-              },
-            ],
-          }));
-          await onForward(assignments);
+        if (!selectedAgency) errors.push("Please select an agency");
+        if (errors.length === 0) {
+          await onForward(
+            jobRoles.map((role) => ({
+              ...role,
+              forwarded: [
+                { agencyId: selectedAgency, quantity: role.originalQuantity },
+              ],
+            }))
+          );
           onClose();
         }
       } else {
         const assignments: ForwardingJobRole[] = [];
-
         for (const role of jobRoles) {
-          if (role.forwarded.length === 0) {
+          if (role.forwarded.length === 0)
             errors.push(`No agencies assigned for ${role.title}`);
-            isValid = false;
-            continue;
-          }
-
-          const totalAssigned = role.forwarded.reduce(
-            (sum, a) => sum + a.quantity,
-            0
-          );
-          if (totalAssigned <= 0) {
+          if (role.forwarded.reduce((s, a) => s + a.quantity, 0) <= 0)
             errors.push(`Please assign quantities for ${role.title}`);
-            isValid = false;
-          }
-
           assignments.push(role);
         }
-
-        if (isValid) {
+        if (errors.length === 0) {
           await onForward(assignments);
           onClose();
         }
       }
 
       if (errors.length > 0) {
-        toast({
-          type: "error",
-          message: errors.join("\n"),
-        });
+        useToast().toast({ type: "error", message: errors.join("\n") });
       }
-    } catch (error) {
-      console.error("Error forwarding requirement:", error);
-      toast({
-        type: "error",
-        message:
-          error instanceof Error
-            ? error.message
-            : "Failed to forward requirement",
-      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const getAvailableAgencies = (jobRoleId: string, currentAgencyId: string) => {
-    const currentRole = jobRoles.find((r) => r.id === jobRoleId);
-    const assignedAgencyIds =
-      currentRole?.forwarded.map((a) => a.agencyId) || [];
-
-    return agencies.filter(
-      (agency) =>
-        (agency.id === currentAgencyId ||
-          !assignedAgencyIds.includes(agency.id)) &&
-        !rejectedAgencies.has(agency.id)
-    );
-  };
-
-  const getTotalAssigned = (jobRoleId: string) => {
-    const role = jobRoles.find((r) => r.id === jobRoleId);
-    if (!role) return 0;
-    return role.forwarded.reduce((sum, a) => sum + a.quantity, 0);
-  };
-
-  if (!requirement) {
-    return null;
-  }
+  if (!requirement) return null;
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Forward Requirement`}
+      title="Forward Requirement"
       size="3xl"
       showFooter
       onConfirm={handleSubmit}
@@ -465,9 +574,9 @@ const ForwardRequirementModal = ({
                   onChange={(e) => setSelectedAgency(e.target.value)}
                   className="flex-1 p-2 border border-gray-300 rounded-md"
                 >
-                  {agencies.map((agency) => (
-                    <option key={agency.id} value={agency.id}>
-                      {agency.agencyName}
+                  {agencies.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.agencyName}
                     </option>
                   ))}
                 </select>
@@ -493,13 +602,12 @@ const ForwardRequirementModal = ({
                         type="number"
                         min="0"
                         value={role.originalQuantity}
-                        onChange={(e) => {
-                          const newQuantity = Math.max(
-                            0,
-                            parseInt(e.target.value) || 0
-                          );
-                          handleSingleModeQuantityChange(role.id, newQuantity);
-                        }}
+                        onChange={(e) =>
+                          handleSingleModeQuantityChange(
+                            role.id,
+                            Math.max(0, parseInt(e.target.value) || 0)
+                          )
+                        }
                         className="w-24"
                       />
                     </div>
@@ -510,113 +618,108 @@ const ForwardRequirementModal = ({
           </div>
         ) : (
           <div className="space-y-6">
+            <h3 className="font-medium">Assign Job Roles to Agencies</h3>
             <div className="space-y-4">
-              <h3 className="font-medium">Assign Job Roles to Agencies</h3>
-              <div className="space-y-4">
-                {jobRoles.map((role) => (
+              {jobRoles.map((role) => (
+                <div
+                  key={role.id}
+                  className="border rounded-lg overflow-hidden"
+                >
                   <div
-                    key={role.id}
-                    className="border rounded-lg overflow-hidden"
+                    className="flex justify-between items-center p-4 cursor-pointer bg-gray-50 hover:bg-gray-100"
+                    onClick={() => toggleRoleExpansion(role.id)}
                   >
-                    <div
-                      className="flex justify-between items-center p-4 cursor-pointer bg-gray-50 hover:bg-gray-100"
-                      onClick={() => toggleRoleExpansion(role.id)}
-                    >
-                      <div className="flex items-center space-x-3">
-                        {expandedRoles[role.id] ? (
-                          <ChevronUp className="h-5 w-5 text-gray-500" />
-                        ) : (
-                          <ChevronDown className="h-5 w-5 text-gray-500" />
-                        )}
-                        <div>
-                          <h4 className="font-medium">{role.title}</h4>
-                          <p className="text-sm text-gray-600">
-                            Total Quantity: {role.originalQuantity}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-sm">
-                        <span className="font-medium">
-                          Assigned: {getTotalAssigned(role.id)} /{" "}
-                          {role.originalQuantity}
-                        </span>
+                    <div className="flex items-center space-x-3">
+                      {expandedRoles[role.id] ? (
+                        <ChevronUp className="h-5 w-5 text-gray-500" />
+                      ) : (
+                        <ChevronDown className="h-5 w-5 text-gray-500" />
+                      )}
+                      <div>
+                        <h4 className="font-medium">{role.title}</h4>
+                        <p className="text-sm text-gray-600">
+                          Total Quantity: {role.originalQuantity}
+                        </p>
                       </div>
                     </div>
+                    <div className="text-sm">
+                      <span className="font-medium">
+                        Assigned: {getTotalAssigned(role.id)} /{" "}
+                        {role.originalQuantity}
+                      </span>
+                    </div>
+                  </div>
 
-                    {expandedRoles[role.id] && (
-                      <div className="p-4 space-y-3">
-                        {role.forwarded.length === 0 && (
-                          <p className="text-sm text-gray-500 italic">
-                            No agencies assigned yet
-                          </p>
-                        )}
-                        {role.forwarded.map((assignment, index) => (
-                          <div
-                            key={`${role.id}-${index}`}
-                            className="flex flex-col sm:flex-row sm:items-center gap-3"
+                  {expandedRoles[role.id] && (
+                    <div className="p-4 space-y-3">
+                      {role.forwarded.length === 0 && (
+                        <p className="text-sm text-gray-500 italic">
+                          No agencies assigned yet
+                        </p>
+                      )}
+
+                      {role.forwarded.map((assignment, index) => (
+                        <div
+                          key={`${role.id}-${index}`}
+                          className="flex flex-col sm:flex-row sm:items-center gap-3"
+                        >
+                          <select
+                            value={assignment.agencyId}
+                            onChange={(e) =>
+                              handleAgencyChange(role.id, index, e.target.value)
+                            }
+                            className="flex-1 p-2 border border-gray-300 rounded-md"
                           >
-                            <select
-                              value={assignment.agencyId}
+                            {getAvailableAgencies(
+                              role.id,
+                              assignment.agencyId
+                            ).map((a) => (
+                              <option key={a.id} value={a.id}>
+                                {a.agencyName}
+                              </option>
+                            ))}
+                          </select>
+
+                          <div className="flex items-center gap-2 w-full sm:w-48">
+                            <Input
+                              type="number"
+                              min="0"
+                              value={assignment.quantity}
                               onChange={(e) =>
-                                handleAgencyChange(
+                                handleQuantityChange(
                                   role.id,
                                   index,
-                                  e.target.value
+                                  Math.max(0, parseInt(e.target.value) || 0)
                                 )
                               }
-                              className="flex-1 p-2 border border-gray-300 rounded-md"
-                            >
-                              {getAvailableAgencies(
-                                role.id,
-                                assignment.agencyId
-                              ).map((agency) => (
-                                <option key={agency.id} value={agency.id}>
-                                  {agency.agencyName}
-                                </option>
-                              ))}
-                            </select>
-
-                            <div className="flex items-center gap-2 w-full sm:w-48">
-                              <Input
-                                type="number"
-                                min="0"
-                                value={assignment.quantity}
-                                onChange={(e) =>
-                                  handleQuantityChange(
-                                    role.id,
-                                    index,
-                                    parseInt(e.target.value) || 0
-                                  )
-                                }
-                                className="w-full"
-                              />
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleRemoveAssignment(role.id, index)
-                              }
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              <Trash2 className="w-5 h-5" />
-                            </button>
+                              className="w-full"
+                            />
                           </div>
-                        ))}
 
-                        <button
-                          type="button"
-                          onClick={() => handleAddAssignment(role.id)}
-                          disabled={role.forwarded.length >= agencies.length}
-                          className="text-sm text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed"
-                        >
-                          + Add Agency Assignment
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleRemoveAssignment(role.id, index)
+                            }
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
+                      ))}
+
+                      <button
+                        type="button"
+                        onClick={() => handleAddAssignment(role.id)}
+                        disabled={role.forwarded.length >= agencies.length}
+                        className="text-sm text-blue-600 hover:text-blue-800 disabled:text-gray-400 disabled:cursor-not-allowed"
+                      >
+                        + Add Agency Assignment
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         )}
@@ -624,6 +727,8 @@ const ForwardRequirementModal = ({
     </Modal>
   );
 };
+
+/* ----------------------- Helpers: status + timeago ---------------------- */
 
 function getStatusColor(
   status: "PENDING_REVIEW" | "REJECTED" | "NOT_VERIFIED" | "VERIFIED"
@@ -636,7 +741,6 @@ function getStatusColor(
     case "REJECTED":
       return "text-red-600";
     case "NOT_VERIFIED":
-      return "text-gray-500";
     default:
       return "text-gray-500";
   }
@@ -653,11 +757,12 @@ function getStatusText(
     case "REJECTED":
       return "Rejected";
     case "NOT_VERIFIED":
-      return "Not Verified";
     default:
-      return status;
+      return "Not Verified";
   }
 }
+
+/* =============================== Page ================================== */
 
 export default function Requirements() {
   const [selectedCompany, setSelectedCompany] = useState<string | null>(null);
@@ -668,11 +773,14 @@ export default function Requirements() {
   const [loadingCompanies, setLoadingCompanies] = useState(true);
   const [loadingRequirements, setLoadingRequirements] = useState(true);
   const [isForwardModalOpen, setIsForwardModalOpen] = useState(false);
+  const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
   const { toast } = useToast();
   const [rejectedAssignmentsByJobRole, setRejectedAssignmentsByJobRole] =
     useState<Record<string, LabourAssignment[]>>({});
 
   const currentRequirement = requirements[currentRequirementIndex];
+
+  /* -------- data fetchers -------- */
 
   const fetchCompanies = useCallback(async () => {
     try {
@@ -680,16 +788,10 @@ export default function Requirements() {
       if (response.ok) {
         const data = await response.json();
         setCompanies(data);
-        if (data.length > 0 && !selectedCompany) {
-          setSelectedCompany(data[0].id);
-        }
+        if (data.length > 0 && !selectedCompany) setSelectedCompany(data[0].id);
       }
-    } catch (error) {
-      console.error("Error fetching companies:", error);
-      toast({
-        type: "error",
-        message: "Failed to load companies",
-      });
+    } catch {
+      toast({ type: "error", message: "Failed to load companies" });
     } finally {
       setLoadingCompanies(false);
     }
@@ -702,12 +804,8 @@ export default function Requirements() {
         const data = await response.json();
         setAgencies(data);
       }
-    } catch (error) {
-      console.error("Error fetching agencies:", error);
-      toast({
-        type: "error",
-        message: "Failed to load agencies",
-      });
+    } catch {
+      toast({ type: "error", message: "Failed to load agencies" });
     }
   }, [toast]);
 
@@ -717,27 +815,19 @@ export default function Requirements() {
         setLoadingRequirements(true);
         const response = await fetch(
           `/api/requirements?clientId=${companyId}&status=SUBMITTED,UNDER_REVIEW`,
-          {
-            credentials: "include",
-          }
+          { credentials: "include" }
         );
-
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || "Failed to fetch requirements");
         }
-
         const data = await response.json();
         setRequirements(data);
         setCurrentRequirementIndex(0);
-      } catch (error) {
-        console.error("Error fetching requirements:", error);
+      } catch (error: any) {
         toast({
           type: "error",
-          message:
-            error instanceof Error
-              ? error.message
-              : "Failed to load requirements",
+          message: error?.message || "Failed to load requirements",
         });
       } finally {
         setLoadingRequirements(false);
@@ -751,36 +841,23 @@ export default function Requirements() {
       try {
         const response = await fetch(`/api/requirements/${requirementId}`, {
           method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            status,
-          }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status }),
         });
-
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || "Failed to update requirement");
         }
-
-        const data = await response.json();
         toast({
           type: "success",
           message: `Requirement ${status.toLowerCase()} successfully`,
         });
-        if (selectedCompany) {
-          fetchRequirements(selectedCompany);
-        }
-        return data;
-      } catch (error) {
-        console.error("Error updating requirement:", error);
+        if (selectedCompany) fetchRequirements(selectedCompany);
+      } catch (error: any) {
         toast({
           type: "error",
           message:
-            error instanceof Error
-              ? error.message
-              : `Failed to ${status.toLowerCase()} requirement`,
+            error?.message || `Failed to ${status.toLowerCase()} requirement`,
         });
         throw error;
       }
@@ -792,7 +869,6 @@ export default function Requirements() {
     async (assignments: ForwardingJobRole[]) => {
       try {
         if (!currentRequirement) return;
-
         const forwardedRoles = assignments.flatMap((role) =>
           role.forwarded.map((a) => ({
             jobRoleId: role.id,
@@ -800,39 +876,28 @@ export default function Requirements() {
             quantity: a.quantity,
           }))
         );
-
         const response = await fetch(`/api/requirements/forward`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             requirementId: currentRequirement.id,
             forwardedRoles,
           }),
         });
-
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || "Failed to forward requirement");
         }
-
         toast({
           type: "success",
-          message: `Requirement forwarded successfully`,
+          message: "Requirement forwarded successfully",
         });
         setIsForwardModalOpen(false);
-        if (selectedCompany) {
-          fetchRequirements(selectedCompany);
-        }
-      } catch (error) {
-        console.error("Error forwarding requirement:", error);
+        if (selectedCompany) fetchRequirements(selectedCompany);
+      } catch (error: any) {
         toast({
           type: "error",
-          message:
-            error instanceof Error
-              ? error.message
-              : "Failed to forward requirement",
+          message: error?.message || "Failed to forward requirement",
         });
         throw error;
       }
@@ -860,11 +925,10 @@ export default function Requirements() {
   };
 
   useEffect(() => {
-    if (currentRequirement) {
-      currentRequirement.jobRoles.forEach((role) => {
-        fetchRejectedAssignments(role.id);
-      });
-    }
+    if (currentRequirement)
+      currentRequirement.jobRoles.forEach((r) =>
+        fetchRejectedAssignments(r.id)
+      );
   }, [currentRequirement]);
 
   useEffect(() => {
@@ -873,35 +937,18 @@ export default function Requirements() {
   }, [fetchCompanies, fetchAgencies]);
 
   useEffect(() => {
-    if (selectedCompany) {
-      fetchRequirements(selectedCompany);
-    }
+    if (selectedCompany) fetchRequirements(selectedCompany);
   }, [selectedCompany, fetchRequirements]);
+
+  /* -------- UI helpers -------- */
 
   const formatTimeAgo = (date: Date) => {
     const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
-    if (diffInSeconds < 60) return `${diffInSeconds} sec ago`;
-    if (diffInSeconds < 3600)
-      return `${Math.floor(diffInSeconds / 60)} min ago`;
-    if (diffInSeconds < 86400)
-      return `${Math.floor(diffInSeconds / 3600)} hrs ago`;
-    return `${Math.floor(diffInSeconds / 86400)} days ago`;
-  };
-
-  const handleCompanySelect = (companyId: string) => {
-    setSelectedCompany(companyId);
-  };
-
-  const handlePrevRequirement = () => {
-    setCurrentRequirementIndex((prev) => Math.max(prev - 1, 0));
-  };
-
-  const handleNextRequirement = () => {
-    setCurrentRequirementIndex((prev) =>
-      Math.min(prev + 1, requirements.length - 1)
-    );
+    const diff = Math.floor((now.getTime() - new Date(date).getTime()) / 1000);
+    if (diff < 60) return `${diff} sec ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} hrs ago`;
+    return `${Math.floor(diff / 86400)} days ago`;
   };
 
   const handleReject = async (requirementId: string) => {
@@ -911,10 +958,10 @@ export default function Requirements() {
   };
 
   const handleForwardClick = () => {
-    if (currentRequirement) {
-      setIsForwardModalOpen(true);
-    }
+    if (currentRequirement) setIsForwardModalOpen(true);
   };
+
+  /* -------- Derive sections -------- */
 
   const requirementSections: RequirementSection[] =
     currentRequirement?.jobRoles.map((role) => ({
@@ -1007,11 +1054,13 @@ export default function Requirements() {
             </Button>
           </div>
         </div>
+
         {needsMoreLabour && (
           <div className="text-sm text-red-700 font-semibold mb-2">
             {`You need to assign ${totalNeeded} more labourer${totalNeeded !== 1 ? "s" : ""} to fulfill this requirement.`}
           </div>
         )}
+
         {(adminRejectedCount > rejectionThreshold || needsMoreLabour) &&
           rejectedList.length > 0 && (
             <div className="mb-4">
@@ -1045,6 +1094,7 @@ export default function Requirements() {
               </div>
             </div>
           )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {section.fields.map((field, index) => (
             <div key={index} className="flex flex-col">
@@ -1156,7 +1206,9 @@ export default function Requirements() {
                 Language Requirements:
               </p>
               <p className="text-[#150B3D] font-medium">
-                {section.languageRequirements || "Not specified"}
+                {section.languageRequirements?.length
+                  ? section.languageRequirements.join(", ")
+                  : "Not specified"}
               </p>
             </div>
             <div className="flex flex-col">
@@ -1171,10 +1223,12 @@ export default function Requirements() {
     );
   };
 
+  /* ------------------------------- Render ------------------------------- */
+
   return (
-    <div className="flex flex-col md:flex-row min-h-screen">
+    <div className="flex flex-col md:flex-row">
       {/* Left Sidebar */}
-      <div className="w-full md:w-1/6 rounded-lg p-4 md:overflow-y-auto md:max-h-[calc(100vh-2rem)]">
+      <aside className="w-full md:w-1/6 rounded-lg p-4 md:overflow-y-auto md:max-h-[calc(100vh-2rem)]">
         {loadingCompanies ? (
           <div className="space-y-2">
             {[...Array(5)].map((_, i) => (
@@ -1189,7 +1243,7 @@ export default function Requirements() {
             {companies.map((company) => (
               <div
                 key={company.id}
-                onClick={() => handleCompanySelect(company.id)}
+                onClick={() => setSelectedCompany(company.id)}
                 className={`p-3 rounded-lg cursor-pointer transition-colors border-l-4 ${
                   selectedCompany === company.id
                     ? "bg-[#EDDDF3] border-l-[#150B3D]"
@@ -1215,92 +1269,132 @@ export default function Requirements() {
             ))}
           </div>
         )}
-      </div>
+      </aside>
 
       {/* Right Content */}
-      <div className="w-full md:w-5/6 p-4 md:p-6 md:overflow-y-auto md:max-h-[calc(100vh-2rem)]">
-        {loadingRequirements ? (
-          <div className="bg-[#EDDDF3]/50 rounded-xl p-6 shadow-sm mb-6 animate-pulse h-64" />
-        ) : currentRequirement ? (
-          <>
-            <div className="bg-[#EDDDF3]/50 rounded-xl p-4 md:p-6 shadow-sm mb-6">
-              <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center mb-6">
-                <div>
-                  <h1 className="text-2xl font-bold text-[#150B3D]">
-                    {currentRequirement.id.slice(0, 8).toUpperCase()}
-                  </h1>
-                  <p className="text-[#150B3D]/80">
-                    Submitted:{" "}
-                    {format(
-                      new Date(currentRequirement.createdAt),
-                      "dd MMM yyyy"
-                    )}
-                  </p>
-                </div>
-                <div className="flex gap-2 flex-wrap md:flex-nowrap">
-                  <Button
-                    onClick={handlePrevRequirement}
-                    disabled={currentRequirementIndex === 0}
-                    variant="outline"
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    onClick={handleNextRequirement}
-                    disabled={
-                      currentRequirementIndex === requirements.length - 1
-                    }
-                    variant="outline"
-                  >
-                    Next
-                  </Button>
-                  <span className="flex items-center text-sm text-[#150B3D]">
-                    {currentRequirementIndex + 1} of {requirements.length}
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {requirementSections.map((section, index) => (
-                  <RequirementSectionCard key={index} section={section} />
-                ))}
-              </div>
-
-              <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6 pt-4 border-t">
-                <Button
-                  onClick={() => handleForwardClick()}
-                  className="bg-[#150B3D] text-white py-2 px-6 rounded-md hover:bg-[#150B3D]/90 transition-colors"
-                >
-                  Forward Entire Requirement
-                </Button>
-                <Button
-                  onClick={() => handleReject(currentRequirement.id)}
-                  className="bg-red-600 text-white py-2 px-6 rounded-md hover:bg-red-700 transition-colors"
-                >
-                  Reject Entire Requirement
-                </Button>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="bg-[#EDDDF3]/50 rounded-xl p-6 shadow-sm flex items-center justify-center h-64">
-            <p className="text-[#150B3D]">
-              {requirements.length === 0
-                ? "No requirements found"
-                : "Select a requirement"}
+      <main className="w-full md:w-5/6 p-4 md:p-6 md:overflow-y-auto md:max-h-[calc(100vh-2rem)]">
+        {/* GLOBAL HEADER — always visible */}
+        <div className="bg-[#EDDDF3]/50 border border-[#EDDDF3] rounded-xl p-4 mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-semibold text-[#150B3D]">
+              Requirements
+            </h1>
+            <p className="text-sm text-[#150B3D]/70">
+              {selectedCompany
+                ? `Company: ${companies.find((c) => c.id === selectedCompany)?.companyName || selectedCompany.slice(0, 8).toUpperCase()}`
+                : "Select a company to view its requirements"}
             </p>
           </div>
-        )}
-      </div>
+          <div className="flex gap-2">
+            {/* Only show prev/next when we actually have requirements */}
+            {requirements.length > 0 && (
+              <>
+                <Button
+                  onClick={() =>
+                    setCurrentRequirementIndex((p) => Math.max(p - 1, 0))
+                  }
+                  disabled={currentRequirementIndex === 0}
+                  variant="outline"
+                >
+                  Previous
+                </Button>
+                <Button
+                  onClick={() =>
+                    setCurrentRequirementIndex((p) =>
+                      Math.min(p + 1, requirements.length - 1)
+                    )
+                  }
+                  disabled={currentRequirementIndex === requirements.length - 1}
+                  variant="outline"
+                >
+                  Next
+                </Button>
+                <span className="hidden sm:flex items-center text-sm text-[#150B3D] px-2">
+                  {currentRequirementIndex + 1} of {requirements.length}
+                </span>
+              </>
+            )}
 
+            {/* GLOBAL Manage Requirement Options */}
+            <Button
+              onClick={() => setIsOptionsModalOpen(true)}
+              className="bg-[#150B3D] text-white hover:bg-[#150B3D]/90"
+            >
+              <Settings2 className="w-4 h-4 mr-2" />
+              Manage Requirement Options
+            </Button>
+          </div>
+        </div>
+
+        {/* Body */}
+        {loadingRequirements ? (
+          <div className="bg-[#EDDDF3]/50 rounded-xl p-6 shadow-sm mb-6 animate-pulse h-64" />
+        ) : requirements.length > 0 && currentRequirement ? (
+          <div className="bg-[#EDDDF3]/50 rounded-xl p-4 md:p-6 shadow-sm mb-6">
+            <div className="flex flex-col gap-3 md:flex-row md:justify-between md:items-center mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-[#150B3D]">
+                  {currentRequirement.id.slice(0, 8).toUpperCase()}
+                </h2>
+                <p className="text-[#150B3D]/80">
+                  Submitted:{" "}
+                  {format(
+                    new Date(currentRequirement.createdAt),
+                    "dd MMM yyyy"
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              {requirementSections.map((section, index) => (
+                <RequirementSectionCard key={index} section={section} />
+              ))}
+            </div>
+
+            <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6 pt-4 border-t">
+              <Button
+                onClick={handleForwardClick}
+                className="bg-[#150B3D] text-white py-2 px-6 rounded-md hover:bg-[#150B3D]/90 transition-colors"
+              >
+                Forward Entire Requirement
+              </Button>
+              <Button
+                onClick={() => handleReject(currentRequirement.id)}
+                className="bg-red-600 text-white py-2 px-6 rounded-md hover:bg-red-700 transition-colors"
+              >
+                Reject Entire Requirement
+              </Button>
+            </div>
+          </div>
+        ) : (
+          // Friendly empty state but header (with Manage button) remains visible
+          <div className="bg-[#EDDDF3]/40 rounded-xl p-8 shadow-sm flex flex-col items-center justify-center h-64 text-center">
+            <div className="text-[#150B3D] font-medium">
+              {selectedCompany
+                ? "No SUBMITTED/UNDER_REVIEW requirements for this company."
+                : "Select a company on the left to view requirements."}
+            </div>
+            <div className="text-sm text-[#150B3D]/70 mt-2">
+              You can still manage the global requirement options using the
+              button above.
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Modals */}
       <ForwardRequirementModal
         isOpen={isForwardModalOpen}
-        onClose={() => {
-          setIsForwardModalOpen(false);
-        }}
+        onClose={() => setIsForwardModalOpen(false)}
         requirement={currentRequirement}
         agencies={agencies}
         onForward={forwardRequirementToAgencies}
+      />
+
+      <RequirementOptionsModal
+        isOpen={isOptionsModalOpen}
+        onClose={() => setIsOptionsModalOpen(false)}
       />
     </div>
   );
